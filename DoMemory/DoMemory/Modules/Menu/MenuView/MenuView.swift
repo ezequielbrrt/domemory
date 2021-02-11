@@ -18,61 +18,63 @@ struct MenuView: View {
                 
         UINavigationBar.appearance().titleTextAttributes = [ .foregroundColor: Color.secundaryColor.uiColor(), .font: UIFont.righteous(size: 19)]
         
+        UINavigationBar.appearance().backgroundColor = .clear
+        
     }
     
     var body: some View {
-       
-        NavigationView {
-            Group {
-                if viewModel.isLoading {
-                    LoadingView()
-                } else {
+        Group {
+            if viewModel.isLoading {
+                LoadingView().padding()
+            } else {
+                NavigationView {
                     VStack {
                         NavigationLink(
                                     destination: SettingsView(listener: viewModel),
-                                    isActive: $showNewView
-                                        
-                                ) {
+                                    isActive: $showNewView) {
                                     EmptyView()
                                 }.isDetailLink(false)
+                        
                         WaterfallGrid(viewModel.memoramaArray) { memorama in
                             NavigationLink(destination: MemorizeView(viewModel: MemorizeViewModel(memorama: memorama))
                                             .navigationBarTitle("")
-                                            .navigationBarHidden(true)
-                            ) {
+                                            .navigationBarHidden(true)) {
                                 MemoramaCard(memorama: memorama)
                             }.isDetailLink(true)
-                            
-
                         }
-                        
-                        HStack {
-                            Text(Strings.yourPoints +  ": " + viewModel.getUserPoints())
-                                .foregroundColor(.primaryColor)
-                                .font(.patrickHand(size: 25)).padding()
-                            Spacer()
-                            Image("tiendas")
-                                .resizable()
-                                .frame(width: 40, height: 40, alignment: .center).padding()
-                        }
-                        
                     }
-                 
+                    
+                    .background(Color.grayBackground)
+                    .navigationBarItems(leading:
+                                            Button(action: {
+                                                self.showNewView = true
+                                            }, label: { Image("settings")
+                                                .resizable()
+                                                .frame(width: 35, height: 35, alignment: .center) }))
+                    .navigationBarTitle(Text("DoMemory"))
                 }
+                
             }
-            .background(Color.grayBackground)
-            .navigationBarItems(leading:
-                                    Button(action: {
-                                        self.showNewView = true
-                                    }, label: { Image("configuraciones")
-                                        .resizable()
-                                        .frame(width: 40, height: 40, alignment: .center) }))
-            .navigationBarTitle(Text("DoMemory"))
-        }.onAppear {
-            print("appear")
         }
     }
 }
+
+//struct MemoramaCard: View {
+//    var memorama: Memorama
+//
+//    var body: some View {
+//        ZStack {
+//            RoundedRectangle(cornerRadius: 10)
+//                .stroke(lineWidth: 1)
+//                .fill(Color.blue)
+//            VStack(alignment: .leading) {
+//                Text(memorama.name).font(.patrickHand(size: 25))
+//                Text(memorama.name).font(.patrickHand(size: 16)).foregroundColor(.gray)
+//                Text(memorama.description).font(.patrickHand(size: 20)).foregroundColor(.white)
+//            }
+//        }.padding()
+//    }
+//}
 
 struct MemoramaCard: View {
     var memorama: Memorama
@@ -80,15 +82,20 @@ struct MemoramaCard: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
-                .stroke(lineWidth: 1)
-                .fill(Color.blue)
-            VStack(alignment: .leading) {
-                Text(memorama.name).font(.patrickHand(size: 25))
-                Text(memorama.name).font(.patrickHand(size: 16)).foregroundColor(.gray)
-                Text(memorama.description).font(.patrickHand(size: 20)).foregroundColor(.white)
+                .fill(LinearGradient(
+                    gradient: .init(colors: [Color.primaryColor, Color.secundaryColor]),
+                    startPoint: .init(x: 0.5, y: 0),
+                    endPoint: .init(x: 0.5, y: 0.6)
+                  ))
+                .frame(height: 95)
+
+            VStack(alignment: .center) {
+                Text(memorama.name)
+                    .font(.patrickHand(size: 75))
             }
+            
         }.padding()
-    }
+    }   
 }
 
 struct MenuView_Previews: PreviewProvider {

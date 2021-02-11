@@ -18,6 +18,7 @@ struct SettingsView: View {
     
     init(listener: SettingsListener?) {
         self.viewModel = SettingsViewModel(listener: listener)
+
     }
 
     var body: some View {

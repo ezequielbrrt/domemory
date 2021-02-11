@@ -35,14 +35,12 @@ class MenuViewModel: ObservableObject {
 
 extension MenuViewModel: SettingsListener {
     func onCloseView() {
-        let auxDifficulty = getDifficulty()
-        if auxDifficulty != self.difficulty {
-            self.memoramaArray = allGames.filter { memorama in
-                let difficultyEnum = Difficulty(rawValue: memorama.dificulty) ?? .medium
-                return difficultyEnum == self.difficulty
-            }
-            self.difficulty = auxDifficulty
-        }
+        if self.difficulty == getDifficulty() { return }
+        self.difficulty = getDifficulty()
+        self.isLoading = true
+        self.memoramaArray = []
+        self.allGames = []
+        getData()
     }
 }
 
@@ -64,12 +62,12 @@ extension MenuViewModel {
     private func getData() {
         Auth.auth().signInAnonymously() { [weak self] (authResult, error) in
             if let _ = authResult {
-                self?.ref.child("data-en").observeSingleEvent(of: .value) { [self] snapshot in
+                self?.ref.child("data").observeSingleEvent(of: .value) { [self] snapshot in
                     do {
                         let memoramaArrayAux = try FirebaseDecoder().decode([Memorama].self, from: snapshot.value ?? "")
                         self?.allGames = memoramaArrayAux
                         self?.memoramaArray = memoramaArrayAux.filter { memorama in
-                            let difficultyEnum = Difficulty(rawValue: memorama.dificulty) ?? .medium
+                            let difficultyEnum = Difficulty(rawValue: memorama.difficulty) ?? .medium
                             return difficultyEnum == self?.difficulty
                         }
                     } catch let error {

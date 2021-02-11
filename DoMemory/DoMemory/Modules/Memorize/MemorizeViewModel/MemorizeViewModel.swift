@@ -39,7 +39,7 @@ class MemorizeViewModel: ObservableObject {
     }
     
     func getRemainingTime() -> Int {
-        5
+        120
     }
     
     func getPieRemainingTime() -> Int {

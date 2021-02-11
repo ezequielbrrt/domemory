@@ -39,6 +39,7 @@ extension Color {
     static var primaryColor: Color { return Color.make(162, 204, 79) }
     static var secundaryColor: Color { return Color.make(39, 104, 228) }
     static var grayBackground: Color { return Color.make(42, 42, 42) }
+    static var darkGrayColor: Color { return Color.make(32, 32, 32) }
     
     static func make( _ red: Int, _ green: Int, _ blue: Int) -> Color {
         return Color(red: Double(red)/255.0,
