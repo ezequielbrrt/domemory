@@ -1,0 +1,4 @@
+category,description,difficulty,id,idsDoubleItem,itemType,items,name,publishedDate
+emoji,emoji1,easy,1,TRUE,String,"😀,😃,😄,😁,😆,😅",😁,10-02-2021
+emoji,emoji2,easy,2,TRUE,String,"🤣,😂,🥲,😊,😇,🙂",🤣,10-02-2021
+emoji,emoji3,easy,3,TRUE,String,"😉,😉,😌,😍,🥰,🥰",😍,10-02-2021

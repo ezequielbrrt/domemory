@@ -1,0 +1,9 @@
+before_install:
+  - gem install cocoapods
+install:
+  - brew update && brew upgrade swiftlint
+  - pod install
+language: swift
+osx_image: xcode12.4
+script:
+  - xcodebuild test -project DoMemory.xcodeproj -scheme DoMemory -destination "platform=iOS Simulator,name=iPhone 8" -sdk iphonesimulator14.0 CODE_SIGNING_REQUIRED=NO

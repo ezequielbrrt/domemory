@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		3707A41E25411A6C009FB72A /* PauseModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707A41D25411A6C009FB72A /* PauseModalViewModel.swift */; };
+		374673E725D608E600BD74AF /* QuitModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374673E625D608E600BD74AF /* QuitModalViewModel.swift */; };
+		374673EB25D6091900BD74AF /* Blur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374673EA25D6091900BD74AF /* Blur.swift */; };
 		375C96562524134500D29C74 /* UserManageObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C96552524134500D29C74 /* UserManageObject.swift */; };
 		37707902253E77F80061BC96 /* PauseModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37707901253E77F80061BC96 /* PauseModal.swift */; };
 		37707905253E78030061BC96 /* QuitModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37707904253E78030061BC96 /* QuitModal.swift */; };
@@ -55,6 +57,8 @@
 /* Begin PBXFileReference section */
 		136F644EFB409C8B88267C9B /* Pods-DoMemory.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DoMemory.release.xcconfig"; path = "Target Support Files/Pods-DoMemory/Pods-DoMemory.release.xcconfig"; sourceTree = "<group>"; };
 		3707A41D25411A6C009FB72A /* PauseModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PauseModalViewModel.swift; sourceTree = "<group>"; };
+		374673E625D608E600BD74AF /* QuitModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitModalViewModel.swift; sourceTree = "<group>"; };
+		374673EA25D6091900BD74AF /* Blur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Blur.swift; sourceTree = "<group>"; };
 		375C96552524134500D29C74 /* UserManageObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManageObject.swift; sourceTree = "<group>"; };
 		37707901253E77F80061BC96 /* PauseModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PauseModal.swift; sourceTree = "<group>"; };
 		37707904253E78030061BC96 /* QuitModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitModal.swift; sourceTree = "<group>"; };
@@ -132,6 +136,15 @@
 			path = Pause;
 			sourceTree = "<group>";
 		};
+		374673E525D608CC00BD74AF /* QuitModal */ = {
+			isa = PBXGroup;
+			children = (
+				37707904253E78030061BC96 /* QuitModal.swift */,
+				374673E625D608E600BD74AF /* QuitModalViewModel.swift */,
+			);
+			path = QuitModal;
+			sourceTree = "<group>";
+		};
 		375C96542524125C00D29C74 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -144,9 +157,9 @@
 		37707900253E76E50061BC96 /* Modals */ = {
 			isa = PBXGroup;
 			children = (
+				374673E525D608CC00BD74AF /* QuitModal */,
 				379B24B62554E8AF00B0B775 /* LoseModal */,
 				3707A41C25411A59009FB72A /* Pause */,
-				37707904253E78030061BC96 /* QuitModal.swift */,
 				3770790A253E789B0061BC96 /* WinModal.swift */,
 			);
 			path = Modals;
@@ -467,6 +480,7 @@
 			children = (
 				37BDA2C4251D50D300902240 /* ListWithoutSeparatorAndMargins.swift */,
 				37BDA2C8251D551500902240 /* LoaderView.swift */,
+				374673EA25D6091900BD74AF /* Blur.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -598,8 +612,10 @@
 				37BDA2CC251D6D5C00902240 /* MemoryDataType.swift in Sources */,
 				37BDA274251D270200902240 /* SettingsView.swift in Sources */,
 				3774AE22251C12FF00912385 /* Memorama.swift in Sources */,
+				374673E725D608E600BD74AF /* QuitModalViewModel.swift in Sources */,
 				37BDA2C5251D50D300902240 /* ListWithoutSeparatorAndMargins.swift in Sources */,
 				37AD1E5F251BC37F00216E7B /* AppConfiguration.swift in Sources */,
+				374673EB25D6091900BD74AF /* Blur.swift in Sources */,
 				3774ADDB251BE04C00912385 /* MenuView.swift in Sources */,
 				37AD1E4C251BC0EE00216E7B /* ContentView.swift in Sources */,
 				37BDA28F251D4B8300902240 /* Grid.swift in Sources */,

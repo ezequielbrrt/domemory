@@ -22,17 +22,19 @@ struct MemorizeView: View {
             ZStack {
                 VStack {
                     HStack {
-                        Image("fuera")
+                        Image("error")
                             .resizable()
                             .frame(width: 40, height: 40, alignment: .center).padding()
                             .gesture(TapGesture()
                                         .onEnded { _ in
-                                            self.presentation.wrappedValue.dismiss()
+                                            //self.presentation.wrappedValue.dismiss()
+                                            self.viewModel.showQuitView.toggle()
+                                            //viewModel.presentation?.wrappedValue.dismiss()
                                         }
                                     )
                             
                         Spacer()
-                        Text("Tiempo: \(self.viewModel.timeRemaining)")
+                        Text(Strings.time + " : \(self.viewModel.timeRemaining)")
                             .font(.patrickHand(size: 25))
                             .foregroundColor(.primaryColor)
                             .onReceive(self.viewModel.timer) { _ in
@@ -56,9 +58,9 @@ struct MemorizeView: View {
                         .padding()
                         .foregroundColor(Color.primaryColor)
                     HStack {
-                        Image("pausa")
+                        Image("cronografo")
                             .resizable()
-                            .frame(width: 40, height: 40, alignment: .center).padding()
+                            .frame(width: 45, height: 45, alignment: .center).padding()
                             .gesture(TapGesture()
                                         .onEnded { _ in
                                             self.viewModel.timer.upstream.connect().cancel()
@@ -79,7 +81,14 @@ struct MemorizeView: View {
                     LoseModal(listener: self.viewModel)
                 }
                 
-                
+                if viewModel.showQuitView {
+                    QuitModal(listener: self.viewModel)
+                        .onDisappear {
+                            if viewModel.closeView {
+                                self.presentation.wrappedValue.dismiss()
+                            }
+                    }
+                }
                 
             }
             .navigationBarTitle("", displayMode: .inline)

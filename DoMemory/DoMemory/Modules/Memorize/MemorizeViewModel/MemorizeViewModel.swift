@@ -11,9 +11,11 @@ class MemorizeViewModel: ObservableObject {
     @Published private(set) var model: MemoryGame<String> = MemorizeViewModel.createMemoryGame()
     @Published var showPauseView: Bool = false
     @Published var timeRemaining: Int = 0
+    @Published var showQuitView: Bool = false
     @Published var timer = Timer.publish (every: 1, on: .main, in: .common).autoconnect()
 
     var memorama: Memorama?
+    var closeView: Bool = false
     
     init(memorama: Memorama?) {
         self.memorama = memorama
@@ -95,5 +97,17 @@ extension MemorizeViewModel: PauseModalListener {
 extension MemorizeViewModel: LoseModalViewModelListener {
     func tapOnTryAgain() {
         restartGame()
+    }
+}
+
+extension MemorizeViewModel: QuitModalListener {
+    func tapOnCancel() {
+        self.showQuitView = false
+        self.closeView = false
+    }
+    
+    func tapOnExit() {
+        self.showQuitView = false
+        self.closeView = true
     }
 }

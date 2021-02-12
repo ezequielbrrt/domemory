@@ -7,37 +7,23 @@
 
 import SwiftUI
 
+
 struct PauseModal: View {
     
     var listener: PauseModalListener?
     
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 0.0)
+            Blur()
                 .frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .center)
-                .foregroundColor(.gray).opacity(0.8)
-            
             VStack {
                 Spacer()
-                Text("Pause")
+                Text(Strings.pause)
                     .foregroundColor(.secundaryColor)
-                    .font(.patrickHand(size: 45))
-                
-                Spacer()
-                HStack {
-                    Spacer()
-                    Spacer()
-                    Image("jugar")
-                        .resizable()
-                        .frame(width: 65, height: 65, alignment: .center)
-                        .gesture(TapGesture()
-                                    .onEnded { _ in
-                                        listener?.tapOnResumeGame()
-                                    }
-                                )
-                    
-                    Spacer()
-                    Image("recargar")
+                    .font(.patrickHand(size: 65))
+
+                VStack {
+                    Image("repetir")
                         .resizable()
                         .frame(width: 45, height: 45, alignment: .center)
                         .padding()
@@ -46,11 +32,17 @@ struct PauseModal: View {
                                         listener?.tapOnReloadGame()
                                     }
                                 )
+                    Image("play-fill")
+                        .resizable()
+                        .frame(width: 65, height: 65, alignment: .center)
+                        .gesture(TapGesture()
+                                    .onEnded { _ in
+                                        listener?.tapOnResumeGame()
+                                    }
+                                )
                 }.padding()
                 Spacer()
-            }.padding(EdgeInsets(top: 100, leading: 20, bottom: 100, trailing: 20))
-            
-            
+            }
         }
         
     }

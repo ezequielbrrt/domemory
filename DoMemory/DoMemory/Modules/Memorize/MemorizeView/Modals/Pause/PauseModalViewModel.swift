@@ -17,18 +17,3 @@ struct PauseModalViewModel {
     var listener: PauseModalListener?
 }
 
-
-// MARK: PUBLIC
-extension PauseModalViewModel {
-    func tapOnResumeGame() {
-        listener?.tapOnResumeGame()
-    }
-    
-    func tapOnGoHome() {
-        listener?.tapOnGoHome()
-    }
-    
-    func tapOnReloadGame() {
-        listener?.tapOnReloadGame()
-    }
-}
