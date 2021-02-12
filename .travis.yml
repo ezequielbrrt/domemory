@@ -1,9 +1,9 @@
 before_install:
   - gem install cocoapods
-  - pod repo update
+  - pod repo update --project-directory=DoMemory
 install:
   - brew update
-  - pod install
+  - pod install --project-directory=DoMemory
 language: swift
 osx_image: xcode12.4
 xcode_workspace: DoMemory/DoMemory.xcworkspace
