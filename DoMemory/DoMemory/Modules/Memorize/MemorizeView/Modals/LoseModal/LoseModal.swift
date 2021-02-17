@@ -12,20 +12,18 @@ struct LoseModal: View {
     
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 0.0)
+            Blur()
                 .frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .center)
-                .foregroundColor(.gray).opacity(0.9)
-            
             VStack {
                 Spacer()
-                Text("Sorry, you lose")
+                Text(Strings.youLose)
                     .foregroundColor(.secundaryColor)
                     .font(.patrickHand(size: 45))
                 
                 HStack {
                     Spacer()
     
-                    Image("recargar")
+                    Image("repetir")
                         .resizable()
                         .frame(width: 60, height: 60, alignment: .center)
                         .padding()
@@ -38,8 +36,6 @@ struct LoseModal: View {
                 }.padding()
                 Spacer()
             }.padding(EdgeInsets(top: 100, leading: 20, bottom: 100, trailing: 20))
-            
-            
         }
         
     }

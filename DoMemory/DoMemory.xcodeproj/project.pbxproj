@@ -34,6 +34,7 @@
 		37AD1E73251BCD2400216E7B /* Righteous-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 37AD1E72251BCD2400216E7B /* Righteous-Regular.ttf */; };
 		37AD1E77251BCDC300216E7B /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E76251BCDC300216E7B /* HomeViewModel.swift */; };
 		37AD1E7F251BCDFC00216E7B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E7E251BCDFC00216E7B /* HomeView.swift */; };
+		37AD7EF425DCA445005C31BD /* DoMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD7EF325DCA445005C31BD /* DoMemoryTests.swift */; };
 		37BDA270251D22C400902240 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA26F251D22C400902240 /* Color+Extensions.swift */; };
 		37BDA274251D270200902240 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA273251D270200902240 /* SettingsView.swift */; };
 		37BDA277251D271100902240 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA276251D271100902240 /* SettingsViewModel.swift */; };
@@ -53,6 +54,16 @@
 		37FB62A42524066400006E51 /* DoMemory.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 37FB62A22524066400006E51 /* DoMemory.xcdatamodeld */; };
 		4BC204382AE0151833CC0C03 /* Pods_DoMemory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B5F4BEE1F6BB967D37CB707 /* Pods_DoMemory.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		37AD7EF625DCA445005C31BD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 37AD1E3E251BC0EE00216E7B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37AD1E45251BC0EE00216E7B;
+			remoteInfo = DoMemory;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		136F644EFB409C8B88267C9B /* Pods-DoMemory.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DoMemory.release.xcconfig"; path = "Target Support Files/Pods-DoMemory/Pods-DoMemory.release.xcconfig"; sourceTree = "<group>"; };
@@ -85,6 +96,9 @@
 		37AD1E72251BCD2400216E7B /* Righteous-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Righteous-Regular.ttf"; path = "../../../../../../../../Downloads/Righteous/Righteous-Regular.ttf"; sourceTree = "<group>"; };
 		37AD1E76251BCDC300216E7B /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		37AD1E7E251BCDFC00216E7B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		37AD7EF125DCA445005C31BD /* DoMemoryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoMemoryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		37AD7EF325DCA445005C31BD /* DoMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoMemoryTests.swift; sourceTree = "<group>"; };
+		37AD7EF525DCA445005C31BD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		37BDA26F251D22C400902240 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
 		37BDA273251D270200902240 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		37BDA276251D271100902240 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
@@ -112,6 +126,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				4BC204382AE0151833CC0C03 /* Pods_DoMemory.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		37AD7EEE25DCA445005C31BD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +278,7 @@
 			isa = PBXGroup;
 			children = (
 				37AD1E48251BC0EE00216E7B /* DoMemory */,
+				37AD7EF225DCA445005C31BD /* DoMemoryTests */,
 				37AD1E47251BC0EE00216E7B /* Products */,
 				11A820DB5985571C34BEBE9B /* Pods */,
 				595698AFB6A9079E831E05ED /* Frameworks */,
@@ -267,6 +289,7 @@
 			isa = PBXGroup;
 			children = (
 				37AD1E46251BC0EE00216E7B /* DoMemory.app */,
+				37AD7EF125DCA445005C31BD /* DoMemoryTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -375,6 +398,15 @@
 				37AD1E7E251BCDFC00216E7B /* HomeView.swift */,
 			);
 			path = HomeView;
+			sourceTree = "<group>";
+		};
+		37AD7EF225DCA445005C31BD /* DoMemoryTests */ = {
+			isa = PBXGroup;
+			children = (
+				37AD7EF325DCA445005C31BD /* DoMemoryTests.swift */,
+				37AD7EF525DCA445005C31BD /* Info.plist */,
+			);
+			path = DoMemoryTests;
 			sourceTree = "<group>";
 		};
 		37BDA257251D1B9A00902240 /* Settings */ = {
@@ -515,17 +547,39 @@
 			productReference = 37AD1E46251BC0EE00216E7B /* DoMemory.app */;
 			productType = "com.apple.product-type.application";
 		};
+		37AD7EF025DCA445005C31BD /* DoMemoryTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 37AD7EFA25DCA445005C31BD /* Build configuration list for PBXNativeTarget "DoMemoryTests" */;
+			buildPhases = (
+				37AD7EED25DCA445005C31BD /* Sources */,
+				37AD7EEE25DCA445005C31BD /* Frameworks */,
+				37AD7EEF25DCA445005C31BD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				37AD7EF725DCA445005C31BD /* PBXTargetDependency */,
+			);
+			name = DoMemoryTests;
+			productName = DoMemoryTests;
+			productReference = 37AD7EF125DCA445005C31BD /* DoMemoryTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		37AD1E3E251BC0EE00216E7B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1200;
+				LastSwiftUpdateCheck = 1240;
 				LastUpgradeCheck = 1200;
 				TargetAttributes = {
 					37AD1E45251BC0EE00216E7B = {
 						CreatedOnToolsVersion = 12.0;
+					};
+					37AD7EF025DCA445005C31BD = {
+						CreatedOnToolsVersion = 12.4;
+						TestTargetID = 37AD1E45251BC0EE00216E7B;
 					};
 				};
 			};
@@ -543,6 +597,7 @@
 			projectRoot = "";
 			targets = (
 				37AD1E45251BC0EE00216E7B /* DoMemory */,
+				37AD7EF025DCA445005C31BD /* DoMemoryTests */,
 			);
 		};
 /* End PBXProject section */
@@ -557,6 +612,13 @@
 				3774AE0C251C08AE00912385 /* GoogleService-Info.plist in Resources */,
 				37AD1E73251BCD2400216E7B /* Righteous-Regular.ttf in Resources */,
 				37AD1E70251BCD1800216E7B /* PatrickHand-Regular.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		37AD7EEF25DCA445005C31BD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -651,7 +713,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		37AD7EED25DCA445005C31BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				37AD7EF425DCA445005C31BD /* DoMemoryTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		37AD7EF725DCA445005C31BD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37AD1E45251BC0EE00216E7B /* DoMemory */;
+			targetProxy = 37AD7EF625DCA445005C31BD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		37AD1E53251BC0F200216E7B /* Debug */ = {
@@ -711,6 +789,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_INCLUDE_PATHS = "HEADER_SEARCH_PATHS = \"${PODS_ROOT}/Firebase/CoreOnly/Sources\"";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -765,6 +844,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_INCLUDE_PATHS = "HEADER_SEARCH_PATHS = \"${PODS_ROOT}/Firebase/CoreOnly/Sources\"";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -816,6 +896,46 @@
 			};
 			name = Release;
 		};
+		37AD7EF825DCA445005C31BD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = DoMemoryTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ezequielbrrt.DoMemoryTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DoMemory.app/DoMemory";
+			};
+			name = Debug;
+		};
+		37AD7EF925DCA445005C31BD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = DoMemoryTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ezequielbrrt.DoMemoryTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DoMemory.app/DoMemory";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -833,6 +953,15 @@
 			buildConfigurations = (
 				37AD1E56251BC0F200216E7B /* Debug */,
 				37AD1E57251BC0F200216E7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		37AD7EFA25DCA445005C31BD /* Build configuration list for PBXNativeTarget "DoMemoryTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37AD7EF825DCA445005C31BD /* Debug */,
+				37AD7EF925DCA445005C31BD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

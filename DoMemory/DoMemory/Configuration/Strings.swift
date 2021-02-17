@@ -21,4 +21,5 @@ class Strings: NSObject {
     static var ok = NSLocalizedString("Ok", comment: "")
     static var cancel = NSLocalizedString("Cancel", comment: "")
     static var accept = NSLocalizedString("Accept", comment: "")
+    static var youLose = NSLocalizedString("Sorry, you lose", comment: "")
 }
