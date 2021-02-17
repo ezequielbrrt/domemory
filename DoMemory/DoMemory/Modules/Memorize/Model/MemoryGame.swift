@@ -75,6 +75,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         var content: CardContent
         var id: Int
         var itemId: Int
+        //var shouldShowPie: Bool
         
         // MARK: - Bonus
         var bonusTimeLimit: TimeInterval = 6

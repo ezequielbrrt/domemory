@@ -24,12 +24,12 @@ struct MemorizeView: View {
                     HStack {
                         Image("error")
                             .resizable()
-                            .frame(width: 40, height: 40, alignment: .center).padding()
+                            .frame(width: 40, height: 40, alignment: .center)
+                            .padding()
                             .gesture(TapGesture()
                                         .onEnded { _ in
-                                            //self.presentation.wrappedValue.dismiss()
                                             self.viewModel.showQuitView.toggle()
-                                            //viewModel.presentation?.wrappedValue.dismiss()
+                                            self.viewModel.timer.upstream.connect().cancel()
                                         }
                                     )
                             
@@ -48,9 +48,10 @@ struct MemorizeView: View {
                     }
                     
                     Grid(viewModel.cards) { card in
-                            CardView(card: card).onTapGesture {
+                        CardView(card: card, shouldShowPie: viewModel.shouldShowPie).onTapGesture {
                                 withAnimation(.linear(duration: 1)) {
                                     self.viewModel.choose(card: card)
+                                    self.viewModel.getIfAllAreMatched()
                                 }
                             }
                     .padding(5)
@@ -84,10 +85,12 @@ struct MemorizeView: View {
                 if viewModel.showQuitView {
                     QuitModal(listener: self.viewModel)
                         .onDisappear {
-                            if viewModel.closeView {
-                                self.presentation.wrappedValue.dismiss()
-                            }
+                            viewModel.closeView ? self.presentation.wrappedValue.dismiss() : self.viewModel.reconnectTime()
                     }
+                }
+                
+                if viewModel.showWinView {
+                    WinModal()
                 }
                 
             }

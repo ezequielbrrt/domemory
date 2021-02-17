@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CardView: View {
     var card: MemoryGame<String>.Card
+    var shouldShowPie: Bool
     
     var body: some View {
         GeometryReader(content: { geometry in
@@ -22,18 +23,20 @@ struct CardView: View {
         if card.isFaceUp || !card.isMatched {
             ZStack {
                 Group {
-                    if card.isConsumingBonusTime {
-                        Pie(startAngle: Angle.degrees(0-90),
-                            endAngle: Angle.degrees(-animatedBonusRemaining*360-90),
-                            clockwise: true)
-                            .onAppear {
-                                self.startBonusAnimation()
-                            }
-                    } else {
-                        Pie(startAngle: Angle.degrees(0-90),
-                            endAngle: Angle.degrees(-card.bonusRemaining*360-90),
-                            clockwise: true)
-                            
+                    if shouldShowPie {
+                        if card.isConsumingBonusTime {
+                            Pie(startAngle: Angle.degrees(0-90),
+                                endAngle: Angle.degrees(-animatedBonusRemaining*360-90),
+                                clockwise: true)
+                                .onAppear {
+                                    self.startBonusAnimation()
+                                }
+                        } else {
+                            Pie(startAngle: Angle.degrees(0-90),
+                                endAngle: Angle.degrees(-card.bonusRemaining*360-90),
+                                clockwise: true)
+                                
+                        }
                     }
                 }.padding(5).opacity(0.4).transition(.identity)
                 
@@ -51,7 +54,6 @@ struct CardView: View {
     // MARK: - Drawing constants
     
     private func fontSize(for size: CGSize) -> CGFloat {
-        print(min(size.width, size.height) * 0.7)
         if self.card.content.count > 1 {
             return 20
         }

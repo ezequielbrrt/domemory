@@ -178,10 +178,10 @@
 		37707900253E76E50061BC96 /* Modals */ = {
 			isa = PBXGroup;
 			children = (
+				37EA124A25DDAB7F001CF61D /* WinModal */,
 				374673E525D608CC00BD74AF /* QuitModal */,
 				379B24B62554E8AF00B0B775 /* LoseModal */,
 				3707A41C25411A59009FB72A /* Pause */,
-				3770790A253E789B0061BC96 /* WinModal.swift */,
 			);
 			path = Modals;
 			sourceTree = "<group>";
@@ -515,6 +515,14 @@
 				374673EA25D6091900BD74AF /* Blur.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		37EA124A25DDAB7F001CF61D /* WinModal */ = {
+			isa = PBXGroup;
+			children = (
+				3770790A253E789B0061BC96 /* WinModal.swift */,
+			);
+			path = WinModal;
 			sourceTree = "<group>";
 		};
 		595698AFB6A9079E831E05ED /* Frameworks */ = {
