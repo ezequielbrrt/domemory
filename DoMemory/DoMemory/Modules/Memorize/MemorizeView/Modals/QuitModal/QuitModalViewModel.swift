@@ -13,7 +13,6 @@ protocol QuitModalListener {
 }
 
 struct QuitModalViewModel {
-    var listener: QuitModalListener?
 }
 
     

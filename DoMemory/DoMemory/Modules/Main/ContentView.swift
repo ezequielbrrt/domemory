@@ -17,11 +17,19 @@ class ShowingView: ObservableObject {
 
 struct ContentView: View {
     @ObservedObject var showingView: ShowingView
-
     
     init(showingView: ShowingView) {
         self.showingView = showingView
-        FirebaseApp.configure()
+        //FirebaseApp.configure()
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { (allowed, error) in
+             //This callback does not trigger on main loop be careful
+            if allowed {
+              print("allowed")
+            } else {
+              print("error")
+            }
+        }
+        
         if UserManageObject().getUserSettings() != nil{
             showingView.viewId = .menuView
         }

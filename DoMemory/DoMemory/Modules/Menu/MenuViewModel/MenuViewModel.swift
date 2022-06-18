@@ -64,7 +64,8 @@ extension MenuViewModel {
             if let _ = authResult {
                 self?.ref.child("data").observeSingleEvent(of: .value) { [self] snapshot in
                     do {
-                        let memoramaArrayAux = try FirebaseDecoder().decode([Memorama].self, from: snapshot.value ?? "")
+                        var memoramaArrayAux = try FirebaseDecoder().decode([Memorama].self, from: snapshot.value ?? "")
+                        memoramaArrayAux.shuffle()
                         self?.allGames = memoramaArrayAux
                         self?.memoramaArray = memoramaArrayAux.filter { memorama in
                             let difficultyEnum = Difficulty(rawValue: memorama.difficulty) ?? .medium

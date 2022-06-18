@@ -13,18 +13,18 @@ struct LoadingView: View {
     
     var body: some View {
         Circle()
-            .fill(Color.blue)
-            .frame(width: 30, height: 30)
+            .fill(Color.primaryColor)
+            .frame(width: 50, height: 50)
             .overlay(
                 ZStack {
                     Circle()
-                        .stroke(Color.blue, lineWidth: 100)
+                        .stroke(Color.primaryColor, lineWidth: 100)
                         .scaleEffect(shouldAnimate ? 1 : 0)
                     Circle()
-                        .stroke(Color.blue, lineWidth: 100)
+                        .stroke(Color.primaryColor, lineWidth: 100)
                         .scaleEffect(shouldAnimate ? 1.5 : 0)
                     Circle()
-                        .stroke(Color.blue, lineWidth: 100)
+                        .stroke(Color.secundaryColor, lineWidth: 100)
                         .scaleEffect(shouldAnimate ? 2 : 0)
                 }
                 .opacity(shouldAnimate ? 0.0 : 0.2)

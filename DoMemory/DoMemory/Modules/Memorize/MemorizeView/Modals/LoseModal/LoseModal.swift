@@ -16,22 +16,27 @@ struct LoseModal: View {
                 .frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .center)
             VStack {
                 Spacer()
+                Text("😳").font(Font.system(size: 70))
+
                 Text(Strings.youLose)
                     .foregroundColor(.secundaryColor)
                     .font(.patrickHand(size: 45))
                 
                 HStack {
                     Spacer()
-    
-                    Image("repetir")
-                        .resizable()
-                        .frame(width: 60, height: 60, alignment: .center)
-                        .padding()
-                        .gesture(TapGesture()
-                                    .onEnded { _ in
-                                        listener?.tapOnTryAgain()
-                                    }
-                                )
+                    
+                    Button(action: {
+                        listener?.tapOnTryAgain()
+                    }) {
+                        Text(Strings.tryAgain)
+                            .fontWeight(.bold)
+                            .font(.righteous(size: 18))
+                            .padding()
+                            .background(Color.secundaryColor)
+                            .cornerRadius(40)
+                            .foregroundColor(.white)
+                    }.padding()
+                    
                     Spacer()
                 }.padding()
                 Spacer()

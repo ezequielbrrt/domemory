@@ -11,6 +11,7 @@ import WaterfallGrid
 struct MenuView: View {
     @ObservedObject var viewModel = MenuViewModel()
     @State var showNewView = false
+    @State var showBanner = false
 
     init() {
         UINavigationBar.appearance().largeTitleTextAttributes = [
@@ -42,6 +43,11 @@ struct MenuView: View {
                                 MemoramaCard(memorama: memorama)
                             }.isDetailLink(true)
                         }
+                        .padding()
+                        
+                        BannerH()
+                
+                        
                     }
                     
                     .background(Color.grayBackground)
@@ -52,29 +58,14 @@ struct MenuView: View {
                                                 .resizable()
                                                 .frame(width: 35, height: 35, alignment: .center) }))
                     .navigationBarTitle(Text("DoMemory"))
+                    
                 }
-                
+            
+            
             }
         }
     }
 }
-
-//struct MemoramaCard: View {
-//    var memorama: Memorama
-//
-//    var body: some View {
-//        ZStack {
-//            RoundedRectangle(cornerRadius: 10)
-//                .stroke(lineWidth: 1)
-//                .fill(Color.blue)
-//            VStack(alignment: .leading) {
-//                Text(memorama.name).font(.patrickHand(size: 25))
-//                Text(memorama.name).font(.patrickHand(size: 16)).foregroundColor(.gray)
-//                Text(memorama.description).font(.patrickHand(size: 20)).foregroundColor(.white)
-//            }
-//        }.padding()
-//    }
-//}
 
 struct MemoramaCard: View {
     var memorama: Memorama

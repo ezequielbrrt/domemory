@@ -22,23 +22,24 @@ struct CardView: View {
     private func body(for size: CGSize) -> some View {
         if card.isFaceUp || !card.isMatched {
             ZStack {
-                Group {
-                    if shouldShowPie {
-                        if card.isConsumingBonusTime {
-                            Pie(startAngle: Angle.degrees(0-90),
-                                endAngle: Angle.degrees(-animatedBonusRemaining*360-90),
-                                clockwise: true)
-                                .onAppear {
-                                    self.startBonusAnimation()
-                                }
-                        } else {
-                            Pie(startAngle: Angle.degrees(0-90),
-                                endAngle: Angle.degrees(-card.bonusRemaining*360-90),
-                                clockwise: true)
-                                
-                        }
-                    }
-                }.padding(5).opacity(0.4).transition(.identity)
+//                Group {
+//                    if shouldShowPie {
+//                       
+//                        if card.isConsumingBonusTime {
+//                            Pie(startAngle: Angle.degrees(0-90),
+//                                endAngle: Angle.degrees(-animatedBonusRemaining*360-90),
+//                                clockwise: true)
+//                                .onAppear {
+//                                    self.startBonusAnimation()
+//                                }
+//                        } else {
+//                            Pie(startAngle: Angle.degrees(0-90),
+//                                endAngle: Angle.degrees(-card.bonusRemaining*360-90),
+//                                clockwise: true)
+//
+//                        }
+//                    }
+//                }.padding(5).opacity(0.4).transition(.identity)
                 
                 Text(self.card.content)
                     .minimumScaleFactor(0.0001)
@@ -63,7 +64,7 @@ struct CardView: View {
     
     @State private var animatedBonusRemaining: Double = 0
     
-    private func startBonusAnimation() {
+    private func startBonusAnimation() {    
         animatedBonusRemaining = card.bonusRemaining
         withAnimation(.linear(duration: card.bonusTimeRemaining)) {
             animatedBonusRemaining = 0

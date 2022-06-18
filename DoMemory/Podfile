@@ -14,5 +14,7 @@ target 'DoMemory' do
   pod 'Firebase/Analytics'
   pod 'CodableFirebase'
   pod 'WaterfallGrid', '~> 0.4.0'
+  pod 'Google-Mobile-Ads-SDK'
+  pod 'Firebase/Messaging'
 
 end

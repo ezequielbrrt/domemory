@@ -9,28 +9,37 @@ import SwiftUI
 
 struct WinModal: View {
     
+    var listener: WinModalListener?
+
     var body: some View {
         ZStack {
             Blur()
                 .frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .center)
             VStack {
                 Spacer()
-                Text(Strings.youLose)
+                Text("😎").font(Font.system(size: 70))
+
+                Text(Strings.youWin)
                     .foregroundColor(.secundaryColor)
                     .font(.patrickHand(size: 45))
+                Text(Strings.youWinDescription)
+                    .foregroundColor(.secundaryColor)
+                    .font(.patrickHand(size: 25))
+                    .multilineTextAlignment(.center)
                 
                 HStack {
                     Spacer()
-    
-                    Image("repetir")
-                        .resizable()
-                        .frame(width: 60, height: 60, alignment: .center)
-                        .padding()
-                        .gesture(TapGesture()
-                                    .onEnded { _ in
-                                        //listener?.tapOnTryAgain()
-                                    }
-                                )
+                    Button(action: {
+                        listener?.tapOnContinue()
+                    }) {
+                        Text(Strings.goToMenu)
+                            .fontWeight(.bold)
+                            .font(.righteous(size: 20))
+                            .padding()
+                            .background(Color.secundaryColor)
+                            .cornerRadius(40)
+                            .foregroundColor(.white)
+                    }.padding()
                     Spacer()
                 }.padding()
                 Spacer()

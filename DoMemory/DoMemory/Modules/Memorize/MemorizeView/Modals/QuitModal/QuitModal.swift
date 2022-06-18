@@ -17,6 +17,8 @@ struct QuitModal: View {
                 .frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .center)
             VStack {
                 Spacer()
+                Text("🥺").font(Font.system(size: 70))
+
                 Text(Strings.quit)
                     .foregroundColor(.secundaryColor)
                     .font(.patrickHand(size: 25))

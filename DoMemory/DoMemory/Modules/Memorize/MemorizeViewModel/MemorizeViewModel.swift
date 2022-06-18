@@ -44,7 +44,13 @@ class MemorizeViewModel: ObservableObject {
     }
     
     func getRemainingTime() -> Int {
-        120
+        let difficulty = getDifficulty()
+        switch difficulty {
+        case .easy: return 110
+        case .medium: return 60
+        case .hard: return 60
+        case .veryHard: return 70
+        }
     }
     
     func getPieRemainingTime() -> Int {
@@ -130,5 +136,11 @@ extension MemorizeViewModel: QuitModalListener {
     func tapOnExit() {
         self.showQuitView = false
         self.closeView = true
+    }
+}
+
+extension MemorizeViewModel: WinModalListener {
+    func tapOnContinue() {
+        self.showWinView = false
     }
 }

@@ -9,7 +9,8 @@ import SwiftUI
 
 @main
 struct DoMemoryApp: App {
-    
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
     init() {
         
     }

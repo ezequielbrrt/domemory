@@ -13,7 +13,7 @@ with open('games.csv') as csv_file:
             data["category"] = row[0]
             data["description"] = row[1]
             data["difficulty"] = row[2]
-            data["id"] = row[3]
+            data["id"] = str(line_count)
             data["isDoubleItem"] = row[4] == 'TRUE'
             data["itemType"] = row[5]
             data["items"] = row[6].split(",")
@@ -21,7 +21,7 @@ with open('games.csv') as csv_file:
             data["publishedDate"] = row[8]
             allData["data"].append(data)
         line_count += 1
-    print(allData)
+    print(line_count)
     
     with open('data.json', 'w') as outfile:
         json.dump(allData, outfile)

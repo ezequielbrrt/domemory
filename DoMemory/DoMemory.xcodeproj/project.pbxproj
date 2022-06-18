@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3706A08F25E04C5C00712AB3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3706A08D25E04C5C00712AB3 /* Localizable.strings */; };
 		3707A41E25411A6C009FB72A /* PauseModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707A41D25411A6C009FB72A /* PauseModalViewModel.swift */; };
+		3712312325E55EAF007A177E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3712312225E55EAF007A177E /* AppDelegate.swift */; };
 		374673E725D608E600BD74AF /* QuitModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374673E625D608E600BD74AF /* QuitModalViewModel.swift */; };
 		374673EB25D6091900BD74AF /* Blur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374673EA25D6091900BD74AF /* Blur.swift */; };
 		375C96562524134500D29C74 /* UserManageObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C96552524134500D29C74 /* UserManageObject.swift */; };
@@ -35,6 +37,7 @@
 		37AD1E77251BCDC300216E7B /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E76251BCDC300216E7B /* HomeViewModel.swift */; };
 		37AD1E7F251BCDFC00216E7B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E7E251BCDFC00216E7B /* HomeView.swift */; };
 		37AD7EF425DCA445005C31BD /* DoMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD7EF325DCA445005C31BD /* DoMemoryTests.swift */; };
+		37B0896525DDCBE500941D5A /* WinModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B0896425DDCBE500941D5A /* WinModalViewModel.swift */; };
 		37BDA270251D22C400902240 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA26F251D22C400902240 /* Color+Extensions.swift */; };
 		37BDA274251D270200902240 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA273251D270200902240 /* SettingsView.swift */; };
 		37BDA277251D271100902240 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA276251D271100902240 /* SettingsViewModel.swift */; };
@@ -50,6 +53,8 @@
 		37BDA2C5251D50D300902240 /* ListWithoutSeparatorAndMargins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA2C4251D50D300902240 /* ListWithoutSeparatorAndMargins.swift */; };
 		37BDA2C9251D551500902240 /* LoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA2C8251D551500902240 /* LoaderView.swift */; };
 		37BDA2CC251D6D5C00902240 /* MemoryDataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA2CB251D6D5C00902240 /* MemoryDataType.swift */; };
+		37EFBD2F25DF351000D32CE6 /* BannerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37EFBD2E25DF351000D32CE6 /* BannerVC.swift */; };
+		37EFBD4925DF4A9A00D32CE6 /* FullAdd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37EFBD4825DF4A9A00D32CE6 /* FullAdd.swift */; };
 		37FB6299252405B900006E51 /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FB6298252405B900006E51 /* PersistenceManager.swift */; };
 		37FB62A42524066400006E51 /* DoMemory.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 37FB62A22524066400006E51 /* DoMemory.xcdatamodeld */; };
 		4BC204382AE0151833CC0C03 /* Pods_DoMemory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B5F4BEE1F6BB967D37CB707 /* Pods_DoMemory.framework */; };
@@ -67,7 +72,11 @@
 
 /* Begin PBXFileReference section */
 		136F644EFB409C8B88267C9B /* Pods-DoMemory.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DoMemory.release.xcconfig"; path = "Target Support Files/Pods-DoMemory/Pods-DoMemory.release.xcconfig"; sourceTree = "<group>"; };
+		3706A08E25E04C5C00712AB3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3707A41D25411A6C009FB72A /* PauseModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PauseModalViewModel.swift; sourceTree = "<group>"; };
+		3712312225E55EAF007A177E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		3712312625E564A5007A177E /* DoMemory.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DoMemory.entitlements; sourceTree = "<group>"; };
+		3730C32625E88FCA00D9196B /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		374673E625D608E600BD74AF /* QuitModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitModalViewModel.swift; sourceTree = "<group>"; };
 		374673EA25D6091900BD74AF /* Blur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Blur.swift; sourceTree = "<group>"; };
 		375C96552524134500D29C74 /* UserManageObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManageObject.swift; sourceTree = "<group>"; };
@@ -99,6 +108,7 @@
 		37AD7EF125DCA445005C31BD /* DoMemoryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoMemoryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		37AD7EF325DCA445005C31BD /* DoMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoMemoryTests.swift; sourceTree = "<group>"; };
 		37AD7EF525DCA445005C31BD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		37B0896425DDCBE500941D5A /* WinModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinModalViewModel.swift; sourceTree = "<group>"; };
 		37BDA26F251D22C400902240 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
 		37BDA273251D270200902240 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		37BDA276251D271100902240 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
@@ -114,6 +124,8 @@
 		37BDA2C4251D50D300902240 /* ListWithoutSeparatorAndMargins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListWithoutSeparatorAndMargins.swift; sourceTree = "<group>"; };
 		37BDA2C8251D551500902240 /* LoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoaderView.swift; sourceTree = "<group>"; };
 		37BDA2CB251D6D5C00902240 /* MemoryDataType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryDataType.swift; sourceTree = "<group>"; };
+		37EFBD2E25DF351000D32CE6 /* BannerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerVC.swift; sourceTree = "<group>"; };
+		37EFBD4825DF4A9A00D32CE6 /* FullAdd.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullAdd.swift; sourceTree = "<group>"; };
 		37FB6298252405B900006E51 /* PersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManager.swift; sourceTree = "<group>"; };
 		37FB62A32524066400006E51 /* DoMemory.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DoMemory.xcdatamodel; sourceTree = "<group>"; };
 		8B5F4BEE1F6BB967D37CB707 /* Pods_DoMemory.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DoMemory.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -253,6 +265,7 @@
 			children = (
 				37AD1E4B251BC0EE00216E7B /* ContentView.swift */,
 				37AD1E49251BC0EE00216E7B /* DoMemoryApp.swift */,
+				3712312225E55EAF007A177E /* AppDelegate.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -297,12 +310,14 @@
 		37AD1E48251BC0EE00216E7B /* DoMemory */ = {
 			isa = PBXGroup;
 			children = (
+				3712312625E564A5007A177E /* DoMemory.entitlements */,
 				37AD1E5D251BC36700216E7B /* Configuration */,
 				37AD1E5B251BC1BA00216E7B /* Services */,
 				37AD1E5A251BC1AF00216E7B /* Modules */,
 				37AD1E6D251BCCE000216E7B /* SupportingFiles */,
 				3774AE0B251C08AE00912385 /* GoogleService-Info.plist */,
 				37AD1E52251BC0F200216E7B /* Info.plist */,
+				3706A08D25E04C5C00712AB3 /* Localizable.strings */,
 				37AD1E4F251BC0F200216E7B /* Preview Content */,
 			);
 			path = DoMemory;
@@ -513,6 +528,8 @@
 				37BDA2C4251D50D300902240 /* ListWithoutSeparatorAndMargins.swift */,
 				37BDA2C8251D551500902240 /* LoaderView.swift */,
 				374673EA25D6091900BD74AF /* Blur.swift */,
+				37EFBD2E25DF351000D32CE6 /* BannerVC.swift */,
+				37EFBD4825DF4A9A00D32CE6 /* FullAdd.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -521,6 +538,7 @@
 			isa = PBXGroup;
 			children = (
 				3770790A253E789B0061BC96 /* WinModal.swift */,
+				37B0896425DDCBE500941D5A /* WinModalViewModel.swift */,
 			);
 			path = WinModal;
 			sourceTree = "<group>";
@@ -541,6 +559,7 @@
 			buildConfigurationList = 37AD1E55251BC0F200216E7B /* Build configuration list for PBXNativeTarget "DoMemory" */;
 			buildPhases = (
 				F363A1F522F9BC55AD8404B3 /* [CP] Check Pods Manifest.lock */,
+				A8FE7A15DD09AF546EDDCEB0 /* [CP] Prepare Artifacts */,
 				37AD1E42251BC0EE00216E7B /* Sources */,
 				37AD1E43251BC0EE00216E7B /* Frameworks */,
 				37AD1E44251BC0EE00216E7B /* Resources */,
@@ -598,6 +617,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"es-419",
 			);
 			mainGroup = 37AD1E3D251BC0EE00216E7B;
 			productRefGroup = 37AD1E47251BC0EE00216E7B /* Products */;
@@ -616,6 +636,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37AD1E51251BC0F200216E7B /* Preview Assets.xcassets in Resources */,
+				3706A08F25E04C5C00712AB3 /* Localizable.strings in Resources */,
 				37AD1E4E251BC0F200216E7B /* Assets.xcassets in Resources */,
 				3774AE0C251C08AE00912385 /* GoogleService-Info.plist in Resources */,
 				37AD1E73251BCD2400216E7B /* Righteous-Regular.ttf in Resources */,
@@ -650,6 +671,23 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		A8FE7A15DD09AF546EDDCEB0 /* [CP] Prepare Artifacts */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-artifacts-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Prepare Artifacts";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-artifacts-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-artifacts.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		F363A1F522F9BC55AD8404B3 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -681,6 +719,7 @@
 			files = (
 				37BDA2CC251D6D5C00902240 /* MemoryDataType.swift in Sources */,
 				37BDA274251D270200902240 /* SettingsView.swift in Sources */,
+				37EFBD4925DF4A9A00D32CE6 /* FullAdd.swift in Sources */,
 				3774AE22251C12FF00912385 /* Memorama.swift in Sources */,
 				374673E725D608E600BD74AF /* QuitModalViewModel.swift in Sources */,
 				37BDA2C5251D50D300902240 /* ListWithoutSeparatorAndMargins.swift in Sources */,
@@ -695,7 +734,9 @@
 				3770790B253E789B0061BC96 /* WinModal.swift in Sources */,
 				37BDA288251D4B3100902240 /* CardView.swift in Sources */,
 				3774ADE9251BFC6700912385 /* MenuViewModel.swift in Sources */,
+				37EFBD2F25DF351000D32CE6 /* BannerVC.swift in Sources */,
 				37AD1E63251BC38C00216E7B /* Strings.swift in Sources */,
+				37B0896525DDCBE500941D5A /* WinModalViewModel.swift in Sources */,
 				37AD1E7F251BCDFC00216E7B /* HomeView.swift in Sources */,
 				37BDA284251D4A8100902240 /* MemorizeViewModel.swift in Sources */,
 				3774ADE5251BF97D00912385 /* AppModules.swift in Sources */,
@@ -707,6 +748,7 @@
 				375C96562524134500D29C74 /* UserManageObject.swift in Sources */,
 				37707908253E78930061BC96 /* LoseModal.swift in Sources */,
 				37707902253E77F80061BC96 /* PauseModal.swift in Sources */,
+				3712312325E55EAF007A177E /* AppDelegate.swift in Sources */,
 				37FB6299252405B900006E51 /* PersistenceManager.swift in Sources */,
 				37BDA280251D4A7500902240 /* MemorizeView.swift in Sources */,
 				37FB62A42524066400006E51 /* DoMemory.xcdatamodeld in Sources */,
@@ -738,6 +780,18 @@
 			targetProxy = 37AD7EF625DCA445005C31BD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		3706A08D25E04C5C00712AB3 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3706A08E25E04C5C00712AB3 /* en */,
+				3730C32625E88FCA00D9196B /* es-419 */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		37AD1E53251BC0F200216E7B /* Debug */ = {
@@ -864,6 +918,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DoMemory/DoMemory.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"DoMemory/Preview Content\"";
 				DEVELOPMENT_TEAM = H5V33368QJ;
@@ -874,10 +929,11 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ezequielbrrt.domemory;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -887,6 +943,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DoMemory/DoMemory.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"DoMemory/Preview Content\"";
 				DEVELOPMENT_TEAM = H5V33368QJ;
@@ -897,10 +954,11 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ezequielbrrt.domemory;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

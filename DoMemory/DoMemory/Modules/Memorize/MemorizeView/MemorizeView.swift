@@ -43,22 +43,6 @@ struct MemorizeView: View {
                                     }
                                 }
                         Spacer()
-                        Spacer()
-                        
-                    }
-                    
-                    Grid(viewModel.cards) { card in
-                        CardView(card: card, shouldShowPie: viewModel.shouldShowPie).onTapGesture {
-                                withAnimation(.linear(duration: 1)) {
-                                    self.viewModel.choose(card: card)
-                                    self.viewModel.getIfAllAreMatched()
-                                }
-                            }
-                    .padding(5)
-                        }
-                        .padding()
-                        .foregroundColor(Color.primaryColor)
-                    HStack {
                         Image("cronografo")
                             .resizable()
                             .frame(width: 45, height: 45, alignment: .center).padding()
@@ -68,8 +52,20 @@ struct MemorizeView: View {
                                             viewModel.showPauseView.toggle()
                                         }
                                     )
+                        
                     }
                     
+                    Grid(viewModel.cards) { card in
+                        CardView(card: card, shouldShowPie: viewModel.shouldShowPie).onTapGesture {
+                                withAnimation(.linear(duration: 1)) {
+                                    self.viewModel.choose(card: card)
+                                    self.viewModel.getIfAllAreMatched()
+                                }
+                            }.padding(5)
+                        }
+                        .padding()
+                        .foregroundColor(Color.primaryColor)
+                    BannerG()
                 }
                 
                 
@@ -90,10 +86,18 @@ struct MemorizeView: View {
                 }
                 
                 if viewModel.showWinView {
-                    WinModal()
+                    WinModal(listener: self.viewModel)
+                        .onAppear {
+                            self.viewModel.timer.upstream.connect().cancel()
+                        }
+                        .onDisappear {
+                            self.presentation.wrappedValue.dismiss()
+                        }
                 }
                 
             }
+            .background(Color.grayBackground)
+
             .navigationBarTitle("", displayMode: .inline)
             .navigationBarHidden(true)
             .onAppear {
