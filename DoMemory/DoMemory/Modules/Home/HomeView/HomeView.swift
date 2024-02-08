@@ -21,26 +21,38 @@ struct HomeView: View {
             Color.grayBackground.ignoresSafeArea()
             VStack {
                 
-                Text("DoMemory").font(.righteous(size: 55)).foregroundColor(.secundaryColor)
+                Text("DoMemory")
+                    .font(.righteous(size: 55))
+                    .foregroundColor(.secundaryColor)
                     .padding()
                 Spacer()
-                Text(Strings.askDifficulty).font(.patrickHand(size: 35)).padding()
-                VStack {
-                    Button(Strings.easy) {
-                        viewModel.showMenuViewWithDifficulty(difficulty: .easy)
-                    }.foregroundColor(.primaryColor)
-                    Button(Strings.medium) {
-                        viewModel.showMenuViewWithDifficulty(difficulty: .medium)
-                    }.foregroundColor(.primaryColor)
-                    Button(Strings.hard) {
-                        viewModel.showMenuViewWithDifficulty(difficulty: .hard)
-                    }.foregroundColor(.primaryColor)
-                    Button(Strings.veryHard) {
-                        viewModel.showMenuViewWithDifficulty(difficulty: .veryHard)
-                    }.foregroundColor(.primaryColor)
-                }.font(.patrickHand(size: 35))
-                Spacer()
-                Spacer()
+                
+                ZStack {
+                    Color.darkGrayColor.ignoresSafeArea()
+                    VStack {
+                        Spacer()
+                        Text(Strings.askDifficulty)
+                            .font(.patrickHand(size: 28))
+                            .padding()
+                        VStack {
+                            Button(Strings.easy) {
+                                viewModel.showMenuViewWithDifficulty(difficulty: .easy)
+                            }.foregroundColor(.primaryColor)
+                            Button(Strings.medium) {
+                                viewModel.showMenuViewWithDifficulty(difficulty: .medium)
+                            }.foregroundColor(.primaryColor)
+                            Button(Strings.hard) {
+                                viewModel.showMenuViewWithDifficulty(difficulty: .hard)
+                            }.foregroundColor(.primaryColor)
+                            Button(Strings.veryHard) {
+                                viewModel.showMenuViewWithDifficulty(difficulty: .veryHard)
+                            }.foregroundColor(.primaryColor)
+                        }.font(.patrickHand(size: 24))
+                        Spacer()
+                        Spacer()
+                    }
+                }
+                
             }
         }
     }

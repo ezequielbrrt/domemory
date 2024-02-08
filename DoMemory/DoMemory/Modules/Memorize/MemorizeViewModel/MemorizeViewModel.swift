@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AppLovinSDK
 
 class MemorizeViewModel: ObservableObject {
     @Published private(set) var model: MemoryGame<String> = MemorizeViewModel.createMemoryGame()

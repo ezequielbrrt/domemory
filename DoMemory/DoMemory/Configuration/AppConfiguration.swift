@@ -8,8 +8,8 @@
 import SwiftUI
 
 class AppConfiguration: NSObject {
-    static var unitGame = "ca-app-pub-4297174845441653/5761017394"
-    static var unitHome = "ca-app-pub-4297174845441653/2000067481"
+    static var unitGame = "e362a87fcadb4afb"
+    static var unitHome = "a9ee7d214e9f5dab"
 }
 
 

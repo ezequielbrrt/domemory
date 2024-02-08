@@ -3,10 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F1CB0BF28BEC97E00EACCAD /* AppDelegate+AppLovin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1CB0BE28BEC97E00EACCAD /* AppDelegate+AppLovin.swift */; };
+		1F1CB0C528BECA8C00EACCAD /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1CB0C428BECA8C00EACCAD /* Notifications.swift */; };
+		1FBB910E2890DBB700F6AF65 /* PatrickHand-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1FBB910C2890DBB700F6AF65 /* PatrickHand-Regular.ttf */; };
+		1FBB910F2890DBB700F6AF65 /* Righteous-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1FBB910D2890DBB700F6AF65 /* Righteous-Regular.ttf */; };
 		3706A08F25E04C5C00712AB3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3706A08D25E04C5C00712AB3 /* Localizable.strings */; };
 		3707A41E25411A6C009FB72A /* PauseModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707A41D25411A6C009FB72A /* PauseModalViewModel.swift */; };
 		3712312325E55EAF007A177E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3712312225E55EAF007A177E /* AppDelegate.swift */; };
@@ -32,8 +36,6 @@
 		37AD1E51251BC0F200216E7B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37AD1E50251BC0F200216E7B /* Preview Assets.xcassets */; };
 		37AD1E5F251BC37F00216E7B /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E5E251BC37F00216E7B /* AppConfiguration.swift */; };
 		37AD1E63251BC38C00216E7B /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E62251BC38C00216E7B /* Strings.swift */; };
-		37AD1E70251BCD1800216E7B /* PatrickHand-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 37AD1E6F251BCD1800216E7B /* PatrickHand-Regular.ttf */; };
-		37AD1E73251BCD2400216E7B /* Righteous-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 37AD1E72251BCD2400216E7B /* Righteous-Regular.ttf */; };
 		37AD1E77251BCDC300216E7B /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E76251BCDC300216E7B /* HomeViewModel.swift */; };
 		37AD1E7F251BCDFC00216E7B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E7E251BCDFC00216E7B /* HomeView.swift */; };
 		37AD7EF425DCA445005C31BD /* DoMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD7EF325DCA445005C31BD /* DoMemoryTests.swift */; };
@@ -72,6 +74,10 @@
 
 /* Begin PBXFileReference section */
 		136F644EFB409C8B88267C9B /* Pods-DoMemory.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DoMemory.release.xcconfig"; path = "Target Support Files/Pods-DoMemory/Pods-DoMemory.release.xcconfig"; sourceTree = "<group>"; };
+		1F1CB0BE28BEC97E00EACCAD /* AppDelegate+AppLovin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+AppLovin.swift"; sourceTree = "<group>"; };
+		1F1CB0C428BECA8C00EACCAD /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
+		1FBB910C2890DBB700F6AF65 /* PatrickHand-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PatrickHand-Regular.ttf"; sourceTree = "<group>"; };
+		1FBB910D2890DBB700F6AF65 /* Righteous-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Righteous-Regular.ttf"; sourceTree = "<group>"; };
 		3706A08E25E04C5C00712AB3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3707A41D25411A6C009FB72A /* PauseModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PauseModalViewModel.swift; sourceTree = "<group>"; };
 		3712312225E55EAF007A177E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -101,8 +107,6 @@
 		37AD1E52251BC0F200216E7B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		37AD1E5E251BC37F00216E7B /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
 		37AD1E62251BC38C00216E7B /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
-		37AD1E6F251BCD1800216E7B /* PatrickHand-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "PatrickHand-Regular.ttf"; path = "../../../../../../../../Downloads/Patrick_Hand/PatrickHand-Regular.ttf"; sourceTree = "<group>"; };
-		37AD1E72251BCD2400216E7B /* Righteous-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Righteous-Regular.ttf"; path = "../../../../../../../../Downloads/Righteous/Righteous-Regular.ttf"; sourceTree = "<group>"; };
 		37AD1E76251BCDC300216E7B /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		37AD1E7E251BCDFC00216E7B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		37AD7EF125DCA445005C31BD /* DoMemoryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoMemoryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -158,6 +162,40 @@
 				136F644EFB409C8B88267C9B /* Pods-DoMemory.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		1F1CB0BD28BEC96400EACCAD /* AppDelegate */ = {
+			isa = PBXGroup;
+			children = (
+				3712312225E55EAF007A177E /* AppDelegate.swift */,
+				1F1CB0BE28BEC97E00EACCAD /* AppDelegate+AppLovin.swift */,
+			);
+			path = AppDelegate;
+			sourceTree = "<group>";
+		};
+		1F1CB0C228BECA7700EACCAD /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				1F1CB0C328BECA7700EACCAD /* Notifications */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		1F1CB0C328BECA7700EACCAD /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				1F1CB0C428BECA8C00EACCAD /* Notifications.swift */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		1FBB910B2890DBB700F6AF65 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				1FBB910C2890DBB700F6AF65 /* PatrickHand-Regular.ttf */,
+				1FBB910D2890DBB700F6AF65 /* Righteous-Regular.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 		3707A41C25411A59009FB72A /* Pause */ = {
@@ -263,9 +301,9 @@
 		3774ADE3251BF94800912385 /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				1F1CB0BD28BEC96400EACCAD /* AppDelegate */,
 				37AD1E4B251BC0EE00216E7B /* ContentView.swift */,
 				37AD1E49251BC0EE00216E7B /* DoMemoryApp.swift */,
-				3712312225E55EAF007A177E /* AppDelegate.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -312,7 +350,7 @@
 			children = (
 				3712312625E564A5007A177E /* DoMemory.entitlements */,
 				37AD1E5D251BC36700216E7B /* Configuration */,
-				37AD1E5B251BC1BA00216E7B /* Services */,
+				1F1CB0C228BECA7700EACCAD /* Services */,
 				37AD1E5A251BC1AF00216E7B /* Modules */,
 				37AD1E6D251BCCE000216E7B /* SupportingFiles */,
 				3774AE0B251C08AE00912385 /* GoogleService-Info.plist */,
@@ -344,13 +382,6 @@
 			path = Modules;
 			sourceTree = "<group>";
 		};
-		37AD1E5B251BC1BA00216E7B /* Services */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
 		37AD1E5D251BC36700216E7B /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
@@ -363,23 +394,14 @@
 		37AD1E6D251BCCE000216E7B /* SupportingFiles */ = {
 			isa = PBXGroup;
 			children = (
+				1FBB910B2890DBB700F6AF65 /* Fonts */,
 				37BDA297251D4C2C00902240 /* Array+Extensions */,
 				37BDA26E251D22B600902240 /* Color+Extensions */,
 				3774AE25251C13D100912385 /* Dictionary+Extensions */,
 				3774ADDE251BF88C00912385 /* UserDefaultsKeys */,
-				37AD1E6E251BCCF600216E7B /* Fonts */,
 				37AD1E4D251BC0F200216E7B /* Assets.xcassets */,
 			);
 			path = SupportingFiles;
-			sourceTree = "<group>";
-		};
-		37AD1E6E251BCCF600216E7B /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-				37AD1E72251BCD2400216E7B /* Righteous-Regular.ttf */,
-				37AD1E6F251BCD1800216E7B /* PatrickHand-Regular.ttf */,
-			);
-			path = Fonts;
 			sourceTree = "<group>";
 		};
 		37AD1E75251BCDB000216E7B /* Home */ = {
@@ -559,11 +581,11 @@
 			buildConfigurationList = 37AD1E55251BC0F200216E7B /* Build configuration list for PBXNativeTarget "DoMemory" */;
 			buildPhases = (
 				F363A1F522F9BC55AD8404B3 /* [CP] Check Pods Manifest.lock */,
-				A8FE7A15DD09AF546EDDCEB0 /* [CP] Prepare Artifacts */,
 				37AD1E42251BC0EE00216E7B /* Sources */,
 				37AD1E43251BC0EE00216E7B /* Frameworks */,
 				37AD1E44251BC0EE00216E7B /* Resources */,
 				6030EAFAA744DED1CDAB3986 /* [CP] Embed Pods Frameworks */,
+				BA74F57321F18FDF18D8E3F2 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -637,10 +659,10 @@
 			files = (
 				37AD1E51251BC0F200216E7B /* Preview Assets.xcassets in Resources */,
 				3706A08F25E04C5C00712AB3 /* Localizable.strings in Resources */,
+				1FBB910E2890DBB700F6AF65 /* PatrickHand-Regular.ttf in Resources */,
 				37AD1E4E251BC0F200216E7B /* Assets.xcassets in Resources */,
+				1FBB910F2890DBB700F6AF65 /* Righteous-Regular.ttf in Resources */,
 				3774AE0C251C08AE00912385 /* GoogleService-Info.plist in Resources */,
-				37AD1E73251BCD2400216E7B /* Righteous-Regular.ttf in Resources */,
-				37AD1E70251BCD1800216E7B /* PatrickHand-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -671,21 +693,21 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A8FE7A15DD09AF546EDDCEB0 /* [CP] Prepare Artifacts */ = {
+		BA74F57321F18FDF18D8E3F2 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-artifacts-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			name = "[CP] Prepare Artifacts";
+			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-artifacts-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-artifacts.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		F363A1F522F9BC55AD8404B3 /* [CP] Check Pods Manifest.lock */ = {
@@ -747,6 +769,7 @@
 				37AD1E77251BCDC300216E7B /* HomeViewModel.swift in Sources */,
 				375C96562524134500D29C74 /* UserManageObject.swift in Sources */,
 				37707908253E78930061BC96 /* LoseModal.swift in Sources */,
+				1F1CB0C528BECA8C00EACCAD /* Notifications.swift in Sources */,
 				37707902253E77F80061BC96 /* PauseModal.swift in Sources */,
 				3712312325E55EAF007A177E /* AppDelegate.swift in Sources */,
 				37FB6299252405B900006E51 /* PersistenceManager.swift in Sources */,
@@ -758,6 +781,7 @@
 				37707905253E78030061BC96 /* QuitModal.swift in Sources */,
 				379B24B82554E8C500B0B775 /* LoseModalViewModel.swift in Sources */,
 				37BDA29D251D4C8300902240 /* MemoryGame.swift in Sources */,
+				1F1CB0BF28BEC97E00EACCAD /* AppDelegate+AppLovin.swift in Sources */,
 				37BDA277251D271100902240 /* SettingsViewModel.swift in Sources */,
 				37BDA292251D4B9900902240 /* GridLayout.swift in Sources */,
 			);
@@ -845,7 +869,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -901,7 +925,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -920,20 +944,21 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = DoMemory/DoMemory.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"DoMemory/Preview Content\"";
 				DEVELOPMENT_TEAM = H5V33368QJ;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = DoMemory/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ezequielbrrt.domemory;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -945,20 +970,22 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = DoMemory/DoMemory.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"DoMemory/Preview Content\"";
 				DEVELOPMENT_TEAM = H5V33368QJ;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = DoMemory/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.1.1;
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ezequielbrrt.domemory;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

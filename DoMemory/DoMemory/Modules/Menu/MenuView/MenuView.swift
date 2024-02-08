@@ -19,7 +19,7 @@ struct MenuView: View {
                 
         UINavigationBar.appearance().titleTextAttributes = [ .foregroundColor: Color.secundaryColor.uiColor(), .font: UIFont.righteous(size: 19)]
         
-        UINavigationBar.appearance().backgroundColor = .clear
+        UINavigationBar.appearance().backgroundColor = Color.grayBackground.uiColor()
         
     }
     
@@ -49,17 +49,16 @@ struct MenuView: View {
                 
                         
                     }
-                    
-                    .background(Color.grayBackground)
+                    .background(Color.darkGrayColor)
                     .navigationBarItems(leading:
                                             Button(action: {
                                                 self.showNewView = true
                                             }, label: { Image("settings")
                                                 .resizable()
-                                                .frame(width: 35, height: 35, alignment: .center) }))
+                                                .frame(width: 25, height: 25, alignment: .center) }))
                     .navigationBarTitle(Text("DoMemory"))
                     
-                }
+                }.navigationViewStyle(.stack)
             
             
             }

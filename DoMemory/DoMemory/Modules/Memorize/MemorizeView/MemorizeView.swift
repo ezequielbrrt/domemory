@@ -104,7 +104,7 @@ struct MemorizeView: View {
                 self.viewModel.resetGame()
                 self.viewModel.timeRemaining = self.viewModel.getRemainingTime()
             }
-        }
+        }.navigationViewStyle(.stack)
         
     }
 }
