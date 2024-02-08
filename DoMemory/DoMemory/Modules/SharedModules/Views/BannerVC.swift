@@ -137,7 +137,7 @@ struct BannerG: View {
     var body: some View {
         HStack{
             Spacer()
-            BannerGame().frame(width: 320, height: (UIDevice.current.userInterfaceIdiom == .pad) ? 90 : 50, alignment: .center)
+           /* BannerGame().frame(width: 320, height: (UIDevice.current.userInterfaceIdiom == .pad) ? 90 : 50, alignment: .center)*/
             Spacer()
         }
     }
@@ -148,9 +148,9 @@ struct BannerH: View {
     var body: some View {
         HStack{
             Spacer()
-            BannerHome().frame(width: UIScreen.main.bounds.width,
+            /*BannerHome().frame(width: UIScreen.main.bounds.width,
                                height: (UIDevice.current.userInterfaceIdiom == .pad) ? 90 : 50,
-                               alignment: .center)
+                               alignment: .center)*/
             Spacer()
         }
     }
