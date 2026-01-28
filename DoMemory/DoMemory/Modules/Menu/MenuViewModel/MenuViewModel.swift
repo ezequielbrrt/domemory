@@ -8,7 +8,7 @@
 import SwiftUI
 import FirebaseDatabase
 import FirebaseAuth
-import CodableFirebase
+// import CodableFirebase
 
 class MenuViewModel: ObservableObject {
     @Published var memoramaArray: [Memorama] = []
@@ -64,7 +64,10 @@ extension MenuViewModel {
             if let _ = authResult {
                 self?.ref.child("data").observeSingleEvent(of: .value) { [self] snapshot in
                     do {
-                        var memoramaArrayAux = try FirebaseDecoder().decode([Memorama].self, from: snapshot.value ?? "")
+
+                        let array = snapshot.value as? [[String: Any]]
+                        let data = try JSONSerialization.data(withJSONObject: array, options: [])
+                        var memoramaArrayAux = try JSONDecoder().decode([Memorama].self, from: data)
                         memoramaArrayAux.shuffle()
                         self?.allGames = memoramaArrayAux
                         self?.memoramaArray = memoramaArrayAux.filter { memorama in

@@ -1,0 +1,8 @@
+  pod 'Firebase/Crashlytics'
+  pod 'Firebase/Database'
+  pod 'Firebase/Auth'
+  pod 'Firebase/Analytics'
+  pod 'CodableFirebase'
+  pod 'WaterfallGrid', '~> 0.4.0'
+  pod 'Firebase/Messaging'
+  pod 'AppLovinSDK'

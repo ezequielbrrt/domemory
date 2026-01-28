@@ -9,6 +9,14 @@
 /* Begin PBXBuildFile section */
 		1F1CB0BF28BEC97E00EACCAD /* AppDelegate+AppLovin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1CB0BE28BEC97E00EACCAD /* AppDelegate+AppLovin.swift */; };
 		1F1CB0C528BECA8C00EACCAD /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1CB0C428BECA8C00EACCAD /* Notifications.swift */; };
+		1F70619C2EF08F180039EC00 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1F70619B2EF08F180039EC00 /* FirebaseAnalytics */; };
+		1F70619E2EF08F180039EC00 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1F70619D2EF08F180039EC00 /* FirebaseAnalyticsCore */; };
+		1F7061A02EF08F180039EC00 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 1F70619F2EF08F180039EC00 /* FirebaseAuth */; };
+		1F7061A22EF08F180039EC00 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1F7061A12EF08F180039EC00 /* FirebaseCore */; };
+		1F7061A42EF08F180039EC00 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1F7061A32EF08F180039EC00 /* FirebaseCrashlytics */; };
+		1F7061A62EF08F180039EC00 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 1F7061A52EF08F180039EC00 /* FirebaseDatabase */; };
+		1F7061A92EF08F920039EC00 /* WaterfallGrid in Frameworks */ = {isa = PBXBuildFile; productRef = 1F7061A82EF08F920039EC00 /* WaterfallGrid */; };
+		1F7061AB2EF0913E0039EC00 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 1F7061AA2EF0913E0039EC00 /* FirebaseMessaging */; };
 		1FBB910E2890DBB700F6AF65 /* PatrickHand-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1FBB910C2890DBB700F6AF65 /* PatrickHand-Regular.ttf */; };
 		1FBB910F2890DBB700F6AF65 /* Righteous-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1FBB910D2890DBB700F6AF65 /* Righteous-Regular.ttf */; };
 		3706A08F25E04C5C00712AB3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3706A08D25E04C5C00712AB3 /* Localizable.strings */; };
@@ -55,11 +63,9 @@
 		37BDA2C5251D50D300902240 /* ListWithoutSeparatorAndMargins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA2C4251D50D300902240 /* ListWithoutSeparatorAndMargins.swift */; };
 		37BDA2C9251D551500902240 /* LoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA2C8251D551500902240 /* LoaderView.swift */; };
 		37BDA2CC251D6D5C00902240 /* MemoryDataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA2CB251D6D5C00902240 /* MemoryDataType.swift */; };
-		37EFBD2F25DF351000D32CE6 /* BannerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37EFBD2E25DF351000D32CE6 /* BannerVC.swift */; };
 		37EFBD4925DF4A9A00D32CE6 /* FullAdd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37EFBD4825DF4A9A00D32CE6 /* FullAdd.swift */; };
 		37FB6299252405B900006E51 /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FB6298252405B900006E51 /* PersistenceManager.swift */; };
 		37FB62A42524066400006E51 /* DoMemory.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 37FB62A22524066400006E51 /* DoMemory.xcdatamodeld */; };
-		4BC204382AE0151833CC0C03 /* Pods_DoMemory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B5F4BEE1F6BB967D37CB707 /* Pods_DoMemory.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,7 +79,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		136F644EFB409C8B88267C9B /* Pods-DoMemory.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DoMemory.release.xcconfig"; path = "Target Support Files/Pods-DoMemory/Pods-DoMemory.release.xcconfig"; sourceTree = "<group>"; };
 		1F1CB0BE28BEC97E00EACCAD /* AppDelegate+AppLovin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+AppLovin.swift"; sourceTree = "<group>"; };
 		1F1CB0C428BECA8C00EACCAD /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		1FBB910C2890DBB700F6AF65 /* PatrickHand-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PatrickHand-Regular.ttf"; sourceTree = "<group>"; };
@@ -128,12 +133,9 @@
 		37BDA2C4251D50D300902240 /* ListWithoutSeparatorAndMargins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListWithoutSeparatorAndMargins.swift; sourceTree = "<group>"; };
 		37BDA2C8251D551500902240 /* LoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoaderView.swift; sourceTree = "<group>"; };
 		37BDA2CB251D6D5C00902240 /* MemoryDataType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryDataType.swift; sourceTree = "<group>"; };
-		37EFBD2E25DF351000D32CE6 /* BannerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerVC.swift; sourceTree = "<group>"; };
 		37EFBD4825DF4A9A00D32CE6 /* FullAdd.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullAdd.swift; sourceTree = "<group>"; };
 		37FB6298252405B900006E51 /* PersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManager.swift; sourceTree = "<group>"; };
 		37FB62A32524066400006E51 /* DoMemory.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DoMemory.xcdatamodel; sourceTree = "<group>"; };
-		8B5F4BEE1F6BB967D37CB707 /* Pods_DoMemory.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DoMemory.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		EFF8E8F5741BAED23AFBEDDC /* Pods-DoMemory.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DoMemory.debug.xcconfig"; path = "Target Support Files/Pods-DoMemory/Pods-DoMemory.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,7 +143,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4BC204382AE0151833CC0C03 /* Pods_DoMemory.framework in Frameworks */,
+				1F7061AB2EF0913E0039EC00 /* FirebaseMessaging in Frameworks */,
+				1F70619C2EF08F180039EC00 /* FirebaseAnalytics in Frameworks */,
+				1F7061A22EF08F180039EC00 /* FirebaseCore in Frameworks */,
+				1F70619E2EF08F180039EC00 /* FirebaseAnalyticsCore in Frameworks */,
+				1F7061A42EF08F180039EC00 /* FirebaseCrashlytics in Frameworks */,
+				1F7061A92EF08F920039EC00 /* WaterfallGrid in Frameworks */,
+				1F7061A62EF08F180039EC00 /* FirebaseDatabase in Frameworks */,
+				1F7061A02EF08F180039EC00 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -155,15 +164,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		11A820DB5985571C34BEBE9B /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				EFF8E8F5741BAED23AFBEDDC /* Pods-DoMemory.debug.xcconfig */,
-				136F644EFB409C8B88267C9B /* Pods-DoMemory.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		1F1CB0BD28BEC96400EACCAD /* AppDelegate */ = {
 			isa = PBXGroup;
 			children = (
@@ -331,7 +331,6 @@
 				37AD1E48251BC0EE00216E7B /* DoMemory */,
 				37AD7EF225DCA445005C31BD /* DoMemoryTests */,
 				37AD1E47251BC0EE00216E7B /* Products */,
-				11A820DB5985571C34BEBE9B /* Pods */,
 				595698AFB6A9079E831E05ED /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -407,7 +406,6 @@
 		37AD1E75251BCDB000216E7B /* Home */ = {
 			isa = PBXGroup;
 			children = (
-				37AD1E7C251BCDCE00216E7B /* Model */,
 				37AD1E7D251BCDD400216E7B /* HomeView */,
 				37AD1E7A251BCDC700216E7B /* ViewModel */,
 			);
@@ -420,13 +418,6 @@
 				37AD1E76251BCDC300216E7B /* HomeViewModel.swift */,
 			);
 			path = ViewModel;
-			sourceTree = "<group>";
-		};
-		37AD1E7C251BCDCE00216E7B /* Model */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Model;
 			sourceTree = "<group>";
 		};
 		37AD1E7D251BCDD400216E7B /* HomeView */ = {
@@ -449,7 +440,6 @@
 		37BDA257251D1B9A00902240 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				37BDA259251D1BA900902240 /* Model */,
 				37BDA258251D1BA300902240 /* SettingsView */,
 				37BDA25A251D1BE400902240 /* SettingsViewModel */,
 			);
@@ -462,13 +452,6 @@
 				37BDA273251D270200902240 /* SettingsView.swift */,
 			);
 			path = SettingsView;
-			sourceTree = "<group>";
-		};
-		37BDA259251D1BA900902240 /* Model */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Model;
 			sourceTree = "<group>";
 		};
 		37BDA25A251D1BE400902240 /* SettingsViewModel */ = {
@@ -550,7 +533,6 @@
 				37BDA2C4251D50D300902240 /* ListWithoutSeparatorAndMargins.swift */,
 				37BDA2C8251D551500902240 /* LoaderView.swift */,
 				374673EA25D6091900BD74AF /* Blur.swift */,
-				37EFBD2E25DF351000D32CE6 /* BannerVC.swift */,
 				37EFBD4825DF4A9A00D32CE6 /* FullAdd.swift */,
 			);
 			path = Views;
@@ -568,7 +550,6 @@
 		595698AFB6A9079E831E05ED /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				8B5F4BEE1F6BB967D37CB707 /* Pods_DoMemory.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -580,12 +561,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 37AD1E55251BC0F200216E7B /* Build configuration list for PBXNativeTarget "DoMemory" */;
 			buildPhases = (
-				F363A1F522F9BC55AD8404B3 /* [CP] Check Pods Manifest.lock */,
 				37AD1E42251BC0EE00216E7B /* Sources */,
 				37AD1E43251BC0EE00216E7B /* Frameworks */,
 				37AD1E44251BC0EE00216E7B /* Resources */,
-				6030EAFAA744DED1CDAB3986 /* [CP] Embed Pods Frameworks */,
-				BA74F57321F18FDF18D8E3F2 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -642,6 +620,10 @@
 				"es-419",
 			);
 			mainGroup = 37AD1E3D251BC0EE00216E7B;
+			packageReferences = (
+				1F70619A2EF08F180039EC00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				1F7061A72EF08F920039EC00 /* XCRemoteSwiftPackageReference "WaterfallGrid" */,
+			);
 			productRefGroup = 37AD1E47251BC0EE00216E7B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -675,65 +657,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		6030EAFAA744DED1CDAB3986 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		BA74F57321F18FDF18D8E3F2 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DoMemory/Pods-DoMemory-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		F363A1F522F9BC55AD8404B3 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-DoMemory-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		37AD1E42251BC0EE00216E7B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -756,7 +679,6 @@
 				3770790B253E789B0061BC96 /* WinModal.swift in Sources */,
 				37BDA288251D4B3100902240 /* CardView.swift in Sources */,
 				3774ADE9251BFC6700912385 /* MenuViewModel.swift in Sources */,
-				37EFBD2F25DF351000D32CE6 /* BannerVC.swift in Sources */,
 				37AD1E63251BC38C00216E7B /* Strings.swift in Sources */,
 				37B0896525DDCBE500941D5A /* WinModalViewModel.swift in Sources */,
 				37AD1E7F251BCDFC00216E7B /* HomeView.swift in Sources */,
@@ -938,13 +860,12 @@
 		};
 		37AD1E56251BC0F200216E7B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EFF8E8F5741BAED23AFBEDDC /* Pods-DoMemory.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = DoMemory/DoMemory.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"DoMemory/Preview Content\"";
 				DEVELOPMENT_TEAM = H5V33368QJ;
 				ENABLE_PREVIEWS = YES;
@@ -954,7 +875,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ezequielbrrt.domemory;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -964,13 +885,12 @@
 		};
 		37AD1E57251BC0F200216E7B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 136F644EFB409C8B88267C9B /* Pods-DoMemory.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = DoMemory/DoMemory.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"DoMemory/Preview Content\"";
 				DEVELOPMENT_TEAM = H5V33368QJ;
 				ENABLE_PREVIEWS = YES;
@@ -980,7 +900,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.2.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ezequielbrrt.domemory;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1060,6 +980,68 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1F70619A2EF08F180039EC00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.7.0;
+			};
+		};
+		1F7061A72EF08F920039EC00 /* XCRemoteSwiftPackageReference "WaterfallGrid" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/paololeonardi/WaterfallGrid";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1F70619B2EF08F180039EC00 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F70619A2EF08F180039EC00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		1F70619D2EF08F180039EC00 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F70619A2EF08F180039EC00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		1F70619F2EF08F180039EC00 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F70619A2EF08F180039EC00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		1F7061A12EF08F180039EC00 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F70619A2EF08F180039EC00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		1F7061A32EF08F180039EC00 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F70619A2EF08F180039EC00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		1F7061A52EF08F180039EC00 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F70619A2EF08F180039EC00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		1F7061A82EF08F920039EC00 /* WaterfallGrid */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F7061A72EF08F920039EC00 /* XCRemoteSwiftPackageReference "WaterfallGrid" */;
+			productName = WaterfallGrid;
+		};
+		1F7061AA2EF0913E0039EC00 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F70619A2EF08F180039EC00 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		37FB62A22524066400006E51 /* DoMemory.xcdatamodeld */ = {

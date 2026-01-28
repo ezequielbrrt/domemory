@@ -65,7 +65,6 @@ struct MemorizeView: View {
                         }
                         .padding()
                         .foregroundColor(Color.primaryColor)
-                    BannerG()
                 }
                 
                 
