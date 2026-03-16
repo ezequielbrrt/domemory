@@ -42,6 +42,10 @@ class MemorizeViewModel: ObservableObject {
     var cards: Array<MemoryGame<String>.Card> {
         model.cards
     }
+
+    var failedTries: Int {
+        model.failedTries
+    }
     
     func getRemainingTime() -> Int {
         let difficulty = getDifficulty()

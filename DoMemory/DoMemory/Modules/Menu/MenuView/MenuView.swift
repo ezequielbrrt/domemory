@@ -89,14 +89,25 @@ struct MenuView: View {
                             // Grid
                             ScrollView {
                                 WaterfallGrid(viewModel.memoramaArray) { memorama in
-                                    NavigationLink(
-                                        destination: MemorizeView(viewModel: MemorizeViewModel(memorama: memorama))
-                                            .navigationBarTitle("")
-                                            .navigationBarHidden(true)
-                                    ) {
-                                        MemoramaCard(memorama: memorama)
+                                    ZStack(alignment: .topTrailing) {
+                                        NavigationLink(
+                                            destination: MemorizeView(viewModel: MemorizeViewModel(memorama: memorama))
+                                                .navigationBarTitle("")
+                                                .navigationBarHidden(true)
+                                        ) {
+                                            MemoramaCard(memorama: memorama)
+                                        }
+                                        .isDetailLink(true)
+
+                                        Button(action: { viewModel.toggleFavorite(id: memorama.id) }) {
+                                            Image(systemName: viewModel.isFavorite(id: memorama.id) ? "heart.fill" : "heart")
+                                                .font(.system(size: 16, weight: .semibold))
+                                                .foregroundColor(viewModel.isFavorite(id: memorama.id) ? .red : .white.opacity(0.7))
+                                                .padding(8)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .padding(.top, 4)
                                     }
-                                    .isDetailLink(true)
                                 }
                                 .gridStyle(
                                     columns: 2,
@@ -118,7 +129,7 @@ struct MenuView: View {
 
 struct MemoramaCard: View {
     var memorama: Memorama
-    
+
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
