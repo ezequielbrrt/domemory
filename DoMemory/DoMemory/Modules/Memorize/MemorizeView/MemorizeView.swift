@@ -32,7 +32,15 @@ struct MemorizeView: View {
                                             self.viewModel.timer.upstream.connect().cancel()
                                         }
                                     )
-                            
+
+                        Spacer()
+                        HStack(spacing: 4) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.red.opacity(0.8))
+                            Text("\(self.viewModel.failedTries)")
+                                .font(.patrickHand(size: 25))
+                                .foregroundColor(.primaryColor)
+                        }
                         Spacer()
                         Text(Strings.time + " : \(self.viewModel.timeRemaining)")
                             .font(.patrickHand(size: 25))
@@ -52,7 +60,7 @@ struct MemorizeView: View {
                                             viewModel.showPauseView.toggle()
                                         }
                                     )
-                        
+
                     }
                     
                     Grid(viewModel.cards) { card in
