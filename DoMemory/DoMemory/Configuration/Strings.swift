@@ -8,12 +8,16 @@
 import Foundation
 
 enum Strings {
-    static let easy = NSLocalizedString("Fácil", comment: "")
-    static let medium = NSLocalizedString("Normal", comment: "")
-    static let hard = NSLocalizedString("Difícil", comment: "")
-    static let difficulty = NSLocalizedString("Dificultad", comment: "")
-    static let askDifficulty = NSLocalizedString("Selecciona la dificultad", comment: "")
-    static let veryHard = NSLocalizedString("Muy difícil", comment: "")
+    static let easy = NSLocalizedString("Fácil", comment: "Easy difficulty level")
+    static let easySubtitle = NSLocalizedString("Inicio relajado", comment: "Subtitle for easy difficulty")
+    static let medium = NSLocalizedString("Normal", comment: "Medium difficulty level")
+    static let mediumSubtitle = NSLocalizedString("Un reto justo", comment: "Subtitle for medium difficulty")
+    static let hard = NSLocalizedString("Difícil", comment: "Hard difficulty level")
+    static let hardSubtitle = NSLocalizedString("Afila tu memoria", comment: "Subtitle for hard difficulty")
+    static let difficulty = NSLocalizedString("Dificultad", comment: "Difficulty section title")
+    static let askDifficulty = NSLocalizedString("Selecciona la dificultad", comment: "Prompt to select difficulty")
+    static let veryHard = NSLocalizedString("Muy difícil", comment: "Very hard difficulty level")
+    static let veryHardSubtitle = NSLocalizedString("Solo para expertos", comment: "Subtitle for very hard difficulty")
     static let yourPoints = NSLocalizedString("Puntos", comment: "")
     static let time = NSLocalizedString("Tiempo", comment: "")
     static let pause = NSLocalizedString("Pausa", comment: "")
