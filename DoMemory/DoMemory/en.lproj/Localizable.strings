@@ -1,54 +1,108 @@
-/* No comment provided by engineer. */
+/* Win modal title */
 "!Felicidades¡" = "!Awesome¡";
 
-/* No comment provided by engineer. */
-"¿Estás seguro que quieres salir?" = "¿Are you sure you want to exit?";
+/* Quit confirmation prompt */
+"¿Estás seguro que quieres salir?" = "Are you sure you want to exit?";
 
-/* No comment provided by engineer. */
+/* Generic accept button */
 "Aceptar" = "Accept";
 
-/* No comment provided by engineer. */
+/* Subtitle for easy difficulty */
+"Afila tu memoria" = "Sharpen your memory";
+
+/* Label prefix for emoji count */
+"Agregar" = "Add";
+
+/* Button to add an emoji */
+"Agregar emoji" = "Add emoji";
+
+/* Cancel button */
 "Cancelar" = "Cancel";
 
-/* No comment provided by engineer. */
+/* Continue game button */
 "Continuar" = "Continue";
 
-/* No comment provided by engineer. */
+/* Delete action */
+"Eliminar" = "Delete";
+
+/* Hint that at least 2 emojis are required */
+"Emojis" = "Emojis";
+
+/* Placeholder for memorama name field */
+"Ej: Frutas, Animales…" = "E.g.: Fruits, Animals…";
+
+/* Hard difficulty level */
 "Difícil" = "Hard";
 
-/* No comment provided by engineer. */
+/* Difficulty section title */
 "Dificultad" = "Difficulty";
 
-/* No comment provided by engineer. */
+/* Easy difficulty level */
 "Fácil" = "Easy";
 
-/* No comment provided by engineer. */
+/* Subtitle for easy difficulty */
+"Inicio relajado" = "Relaxed start";
+
+/* Try again button */
 "Intentar de nuevo" = "Try again";
 
-/* No comment provided by engineer. */
+/* Go to menu button */
 "Ir al menú" = "Menu";
 
-/* No comment provided by engineer. */
-"Lo siento se te acabo el tiempo" = "Sorry, you lose";
+/* Lose modal description */
+"Lo siento se te acabo el tiempo" = "Sorry, you ran out of time";
 
-/* No comment provided by engineer. */
-"Lograste terminar a tiempo esté memorama" = "You finish this game in time";
+/* Win modal description */
+"Lograste terminar a tiempo esté memorama" = "You finished this game in time";
 
-/* No comment provided by engineer. */
+/* Hint that at least 2 emojis are required */
+"Mínimo 2" = "Minimum 2";
+
+/* Very hard difficulty level */
 "Muy difícil" = "Very hard";
 
-/* No comment provided by engineer. */
+/* Sheet title for creating a new memorama */
+"Nuevo Memorama" = "New Memorama";
+
+/* Label for memorama name field */
+"Nombre" = "Name";
+
+/* Medium difficulty level */
 "Normal" = "Medium";
 
-/* No comment provided by engineer. */
+/* Ok button */
+"Ok" = "Ok";
+
+/* Pause label */
 "Pausa" = "Pause";
 
-/* No comment provided by engineer. */
+/* Points label */
 "Puntos" = "Points";
 
-/* No comment provided by engineer. */
+/* Prompt to select difficulty */
 "Selecciona la dificultad" = "Select difficulty";
 
-/* No comment provided by engineer. */
+/* Subtitle for very hard difficulty */
+"Solo para expertos" = "Only for experts";
+
+/* Tab showing all games */
+"Todos" = "All";
+
+/* Tab showing user-created games */
+"Mis memoramas" = "My memoramas";
+
+/* Empty state message for user-created games */
+"Aún no tienes memoramas propios" = "You don't have any memoramas yet";
+
+/* CTA button in empty state */
+"Crear uno" = "Create one";
+
+/* Save button in create memorama sheet */
+"Guardar" = "Save";
+
+/* Time label */
 "Tiempo" = "Time";
+
+/* Subtitle for medium difficulty */
+"Un reto justo" = "A fair challenge";
 

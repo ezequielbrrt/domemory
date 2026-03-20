@@ -62,7 +62,7 @@ struct SettingsView: View {
                 VStack(spacing: 14) {
                     SelectableDifficultyCard(
                         title: Strings.easy,
-                        subtitle: "Relaxed start",
+                        subtitle: Strings.easySubtitle,
                         color: .green.opacity(0.85),
                         systemImage: "leaf.fill",
                         isSelected: viewModel.difficulty == 0
@@ -73,7 +73,7 @@ struct SettingsView: View {
 
                     SelectableDifficultyCard(
                         title: Strings.medium,
-                        subtitle: "A fair challenge",
+                        subtitle: Strings.mediumSubtitle,
                         color: .blue.opacity(0.85),
                         systemImage: "circle.grid.2x2.fill",
                         isSelected: viewModel.difficulty == 1
@@ -84,7 +84,7 @@ struct SettingsView: View {
 
                     SelectableDifficultyCard(
                         title: Strings.hard,
-                        subtitle: "Sharpen your memory",
+                        subtitle: Strings.hardSubtitle,
                         color: .orange.opacity(0.9),
                         systemImage: "flame.fill",
                         isSelected: viewModel.difficulty == 2
@@ -95,7 +95,7 @@ struct SettingsView: View {
 
                     SelectableDifficultyCard(
                         title: Strings.veryHard,
-                        subtitle: "Only for experts",
+                        subtitle: Strings.veryHardSubtitle,
                         color: .red.opacity(0.9),
                         systemImage: "bolt.trianglebadge.exclamationmark.fill",
                         isSelected: viewModel.difficulty == 3

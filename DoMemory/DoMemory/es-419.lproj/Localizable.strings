@@ -1,6 +1,107 @@
-/* No comment provided by engineer. */
+/* Win modal title */
 "!Felicidades¡" = "!Felicidades¡";
 
-/* No comment provided by engineer. */
+/* Quit confirmation prompt */
+"¿Estás seguro que quieres salir?" = "¿Estás seguro que quieres salir?";
+
+/* Generic accept button */
 "Aceptar" = "Aceptar";
 
+/* Subtitle for hard difficulty */
+"Afila tu memoria" = "Afila tu memoria";
+
+/* Confirm adding an emoji */
+"Agregar" = "Agregar";
+
+/* Button to add an emoji */
+"Agregar emoji" = "Agregar emoji";
+
+/* Cancel button */
+"Cancelar" = "Cancelar";
+
+/* Continue game button */
+"Continuar" = "Continuar";
+
+/* Delete action */
+"Eliminar" = "Eliminar";
+
+/* Label prefix for emoji count */
+"Emojis" = "Emojis";
+
+/* Placeholder for memorama name field */
+"Ej: Frutas, Animales…" = "Ej: Frutas, Animales…";
+
+/* Hard difficulty level */
+"Difícil" = "Difícil";
+
+/* Difficulty section title */
+"Dificultad" = "Dificultad";
+
+/* Easy difficulty level */
+"Fácil" = "Fácil";
+
+/* Subtitle for easy difficulty */
+"Inicio relajado" = "Inicio relajado";
+
+/* Try again button */
+"Intentar de nuevo" = "Intentar de nuevo";
+
+/* Go to menu button */
+"Ir al menú" = "Ir al menú";
+
+/* Lose modal description */
+"Lo siento se te acabo el tiempo" = "Lo siento, se te acabó el tiempo";
+
+/* Win modal description */
+"Lograste terminar a tiempo esté memorama" = "Lograste terminar a tiempo este memorama";
+
+/* Hint that at least 2 emojis are required */
+"Mínimo 2" = "Mínimo 2";
+
+/* Very hard difficulty level */
+"Muy difícil" = "Muy difícil";
+
+/* Sheet title for creating a new memorama */
+"Nuevo Memorama" = "Nuevo Memorama";
+
+/* Label for memorama name field */
+"Nombre" = "Nombre";
+
+/* Medium difficulty level */
+"Normal" = "Normal";
+
+/* Ok button */
+"Ok" = "Ok";
+
+/* Pause label */
+"Pausa" = "Pausa";
+
+/* Points label */
+"Puntos" = "Puntos";
+
+/* Prompt to select difficulty */
+"Selecciona la dificultad" = "Selecciona la dificultad";
+
+/* Subtitle for very hard difficulty */
+"Solo para expertos" = "Solo para expertos";
+
+/* Tab showing all games */
+"Todos" = "Todos";
+
+/* Tab showing user-created games */
+"Mis memoramas" = "Mis memoramas";
+
+/* Empty state message for user-created games */
+"Aún no tienes memoramas propios" = "Aún no tienes memoramas propios";
+
+/* CTA button in empty state */
+"Crear uno" = "Crear uno";
+
+/* Save button in create memorama sheet */
+"Guardar" = "Guardar";
+
+/* Time label */
+"Tiempo" = "Tiempo";
+
+/* Subtitle for medium difficulty */
+"Un reto justo" = "Un reto justo";

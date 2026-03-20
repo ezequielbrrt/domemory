@@ -49,19 +49,19 @@ struct HomeView: View {
 
                 // Difficulty Cards Grid
                 VStack(spacing: 16) {
-                    DifficultyCard(title: Strings.easy, subtitle: "Relaxed start", color: .green.opacity(0.85), systemImage: "leaf.fill") {
+                    DifficultyCard(title: Strings.easy, subtitle: Strings.easySubtitle, color: .green.opacity(0.85), systemImage: "leaf.fill") {
                         selectDifficulty(.easy)
                     }
 
-                    DifficultyCard(title: Strings.medium, subtitle: "A fair challenge", color: .blue.opacity(0.85), systemImage: "circle.grid.2x2.fill") {
+                    DifficultyCard(title: Strings.medium, subtitle: Strings.mediumSubtitle, color: .blue.opacity(0.85), systemImage: "circle.grid.2x2.fill") {
                         selectDifficulty(.medium)
                     }
 
-                    DifficultyCard(title: Strings.hard, subtitle: "Sharpen your memory", color: .orange.opacity(0.9), systemImage: "flame.fill") {
+                    DifficultyCard(title: Strings.hard, subtitle: Strings.hardSubtitle, color: .orange.opacity(0.9), systemImage: "flame.fill") {
                         selectDifficulty(.hard)
                     }
 
-                    DifficultyCard(title: Strings.veryHard, subtitle: "Only for experts", color: .red.opacity(0.9), systemImage: "bolt.trianglebadge.exclamationmark.fill") {
+                    DifficultyCard(title: Strings.veryHard, subtitle: Strings.veryHardSubtitle, color: .red.opacity(0.9), systemImage: "bolt.trianglebadge.exclamationmark.fill") {
                         selectDifficulty(.veryHard)
                     }
                 }
