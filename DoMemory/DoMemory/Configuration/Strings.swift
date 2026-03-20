@@ -27,4 +27,25 @@ enum Strings {
     static let goToMenu = NSLocalizedString("Ir al menú", comment: "")
     static let youWin = NSLocalizedString("!Felicidades¡", comment: "")
     static let youWinDescription = NSLocalizedString("Lograste terminar a tiempo esté memorama", comment: "")
+
+    // Menu tabs
+    static let tabAll = NSLocalizedString("Todos", comment: "Tab showing all games")
+    static let tabMine = NSLocalizedString("Mis memoramas", comment: "Tab showing user-created games")
+
+    // Create memorama sheet
+    static let createTitle = NSLocalizedString("Nuevo Memorama", comment: "Sheet title for creating a new memorama")
+    static let createName = NSLocalizedString("Nombre", comment: "Label for memorama name field")
+    static let createNamePlaceholder = NSLocalizedString("Ej: Frutas, Animales…", comment: "Placeholder for memorama name field")
+    static let createEmojisCount = NSLocalizedString("Emojis", comment: "Label prefix for emoji count")
+    static let createMinimum = NSLocalizedString("Mínimo 2", comment: "Hint that at least 2 emojis are required")
+    static let createAddEmoji = NSLocalizedString("Agregar emoji", comment: "Button to add an emoji")
+    static let createAdd = NSLocalizedString("Agregar", comment: "Confirm adding an emoji")
+    static let createSave = NSLocalizedString("Guardar", comment: "Save button in create memorama sheet")
+
+    // My memoramas empty state
+    static let emptyMyGames = NSLocalizedString("Aún no tienes memoramas propios", comment: "Empty state message for user-created games")
+    static let emptyMyGamesAction = NSLocalizedString("Crear uno", comment: "CTA button in empty state")
+
+    // Delete action
+    static let delete = NSLocalizedString("Eliminar", comment: "Delete action in context menu")
 }
