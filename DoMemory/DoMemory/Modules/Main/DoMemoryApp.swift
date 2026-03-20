@@ -11,13 +11,9 @@ import SwiftUI
 struct DoMemoryApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
-    init() {
-        
-    }
-    
     var body: some Scene {
         WindowGroup {
-            ContentView(showingView: ShowingView(showingView: .mainAppView))
+            ContentView()
         }
     }
 }

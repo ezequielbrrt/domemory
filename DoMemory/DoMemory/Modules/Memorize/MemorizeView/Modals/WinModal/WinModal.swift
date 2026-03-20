@@ -13,20 +13,21 @@ struct WinModal: View {
 
     var body: some View {
         ZStack {
-            Blur()
-                .frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .center)
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
             VStack {
                 Spacer()
                 Text("😎").font(Font.system(size: 70))
 
                 Text(Strings.youWin)
-                    .foregroundColor(.secundaryColor)
+                    .foregroundStyle(Color.secundaryColor)
                     .font(.patrickHand(size: 45))
                 Text(Strings.youWinDescription)
-                    .foregroundColor(.secundaryColor)
+                    .foregroundStyle(Color.secundaryColor)
                     .font(.patrickHand(size: 25))
                     .multilineTextAlignment(.center)
-                
+
                 HStack {
                     Spacer()
                     Button(action: {
@@ -37,8 +38,8 @@ struct WinModal: View {
                             .font(.righteous(size: 20))
                             .padding()
                             .background(Color.secundaryColor)
-                            .cornerRadius(40)
-                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .foregroundStyle(.white)
                     }.padding()
                     Spacer()
                 }.padding()
@@ -49,8 +50,6 @@ struct WinModal: View {
     }
 }
 
-struct WinModal_Previews: PreviewProvider {
-    static var previews: some View {
-        WinModal()
-    }
+#Preview {
+    WinModal()
 }

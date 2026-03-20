@@ -6,51 +6,24 @@
 //
 
 import SwiftUI
-import Firebase
-
-class ShowingView: ObservableObject {
-    init(showingView: AppModules) {
-        self.viewId = showingView
-    }
-    @Published var viewId : AppModules
-}
 
 struct ContentView: View {
-    @ObservedObject var showingView: ShowingView
-    
-    init(showingView: ShowingView) {
-        self.showingView = showingView
-        //FirebaseApp.configure()
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { (allowed, error) in
-             //This callback does not trigger on main loop be careful
-            if allowed {
-              print("allowed")
-            } else {
-              print("error")
-            }
-        }
-        
-        if UserManageObject().getUserSettings() != nil{
-            showingView.viewId = .menuView
-        }
-    }
-    
+    @State private var hasOnboarded: Bool = UserManageObject().getUserSettings() != nil
+
     var body: some View {
         Group {
-            if showingView.viewId == .mainAppView  {
-                HomeView(showingView: showingView)
-            }
-            if showingView.viewId == .menuView {
+            if hasOnboarded {
                 MenuView()
+            } else {
+                HomeView(onDidComplete: { hasOnboarded = true })
             }
         }
-        
+        .task {
+            try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+        }
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView(showingView: ShowingView(showingView: .mainAppView))
-    }
+#Preview {
+    ContentView()
 }
- 

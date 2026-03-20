@@ -8,14 +8,8 @@
 import SwiftUI
 
 struct HomeView: View {
-    @ObservedObject var showingView: ShowingView
+    let onDidComplete: () -> Void
 
-    var viewModel: HomeViewModel
-    init(showingView: ShowingView) {
-        self.viewModel = HomeViewModel(showingView: showingView)
-        self.showingView = showingView
-    }
-    
     var body: some View {
         ZStack {
             // Background gradient
@@ -44,31 +38,31 @@ struct HomeView: View {
                 VStack(spacing: 8) {
                     Text("DoMemory")
                         .font(.righteous(size: 56))
-                        .foregroundColor(.secundaryColor)
+                        .foregroundStyle(Color.secundaryColor)
                         .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 4)
 
                     Text(Strings.askDifficulty)
                         .font(.patrickHand(size: 22))
-                        .foregroundColor(.primaryColor.opacity(0.9))
+                        .foregroundStyle(Color.primaryColor.opacity(0.9))
                 }
                 .padding(.top, 40)
 
                 // Difficulty Cards Grid
                 VStack(spacing: 16) {
                     DifficultyCard(title: Strings.easy, subtitle: "Relaxed start", color: .green.opacity(0.85), systemImage: "leaf.fill") {
-                        viewModel.showMenuViewWithDifficulty(difficulty: .easy)
+                        selectDifficulty(.easy)
                     }
 
                     DifficultyCard(title: Strings.medium, subtitle: "A fair challenge", color: .blue.opacity(0.85), systemImage: "circle.grid.2x2.fill") {
-                        viewModel.showMenuViewWithDifficulty(difficulty: .medium)
+                        selectDifficulty(.medium)
                     }
 
                     DifficultyCard(title: Strings.hard, subtitle: "Sharpen your memory", color: .orange.opacity(0.9), systemImage: "flame.fill") {
-                        viewModel.showMenuViewWithDifficulty(difficulty: .hard)
+                        selectDifficulty(.hard)
                     }
 
                     DifficultyCard(title: Strings.veryHard, subtitle: "Only for experts", color: .red.opacity(0.9), systemImage: "bolt.trianglebadge.exclamationmark.fill") {
-                        viewModel.showMenuViewWithDifficulty(difficulty: .veryHard)
+                        selectDifficulty(.veryHard)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -77,6 +71,11 @@ struct HomeView: View {
             }
             .padding(.bottom, 24)
         }
+    }
+
+    private func selectDifficulty(_ difficulty: Difficulty) {
+        UserManageObject().createUserSettings(withDifficulty: difficulty)
+        onDidComplete()
     }
 }
 
@@ -98,23 +97,23 @@ private struct DifficultyCard: View {
                         .frame(width: 52, height: 52)
                     Image(systemName: systemImage)
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(color)
+                        .foregroundStyle(color)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.patrickHand(size: 24))
-                        .foregroundColor(.primaryColor)
+                        .foregroundStyle(Color.primaryColor)
                     Text(subtitle)
                         .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(.primaryColor.opacity(0.7))
+                        .foregroundStyle(Color.primaryColor.opacity(0.7))
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.primaryColor.opacity(0.6))
+                    .foregroundStyle(Color.primaryColor.opacity(0.6))
             }
             .padding(16)
             .background(
@@ -144,8 +143,6 @@ private struct DifficultyCard: View {
     }
 }
 
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeView(showingView: ShowingView(showingView: .mainAppView))
-    }
+#Preview {
+    HomeView(onDidComplete: {})
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @ObservedObject var viewModel: SettingsViewModel
+    @State private var viewModel: SettingsViewModel
     
     @State private var isToggle : Bool = false
     @State private var selectedStrength: Int = 0
@@ -49,12 +49,12 @@ struct SettingsView: View {
                 VStack(spacing: 8) {
                     Text(Strings.difficulty)
                         .font(.righteous(size: 40))
-                        .foregroundColor(.secundaryColor)
+                        .foregroundStyle(Color.secundaryColor)
                         .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 4)
 
                     Text(Strings.askDifficulty)
                         .font(.patrickHand(size: 20))
-                        .foregroundColor(.primaryColor.opacity(0.9))
+                        .foregroundStyle(Color.primaryColor.opacity(0.9))
                 }
                 .padding(.top, 20)
 
@@ -138,29 +138,29 @@ private struct SelectableDifficultyCard: View {
                         .frame(width: 52, height: 52)
                     Image(systemName: systemImage)
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(color)
+                        .foregroundStyle(color)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.patrickHand(size: 24))
-                        .foregroundColor(.primaryColor)
+                        .foregroundStyle(Color.primaryColor)
                     Text(subtitle)
                         .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(.primaryColor.opacity(0.7))
+                        .foregroundStyle(Color.primaryColor.opacity(0.7))
                 }
 
                 Spacer()
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(color)
+                        .foregroundStyle(color)
                         .font(.system(size: 20, weight: .semibold))
                         .transition(.scale)
                 } else {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primaryColor.opacity(0.6))
+                        .foregroundStyle(Color.primaryColor.opacity(0.6))
                 }
             }
             .padding(16)
@@ -191,8 +191,6 @@ private struct SelectableDifficultyCard: View {
     }
 }
 
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView(listener: nil)
-    }
+#Preview {
+    SettingsView(listener: nil)
 }
