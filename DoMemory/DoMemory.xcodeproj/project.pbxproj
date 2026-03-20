@@ -23,7 +23,6 @@
 		3707A41E25411A6C009FB72A /* PauseModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707A41D25411A6C009FB72A /* PauseModalViewModel.swift */; };
 		3712312325E55EAF007A177E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3712312225E55EAF007A177E /* AppDelegate.swift */; };
 		374673E725D608E600BD74AF /* QuitModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374673E625D608E600BD74AF /* QuitModalViewModel.swift */; };
-		374673EB25D6091900BD74AF /* Blur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374673EA25D6091900BD74AF /* Blur.swift */; };
 		375C96562524134500D29C74 /* UserManageObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C96552524134500D29C74 /* UserManageObject.swift */; };
 		37707902253E77F80061BC96 /* PauseModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37707901253E77F80061BC96 /* PauseModal.swift */; };
 		37707905253E78030061BC96 /* QuitModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37707904253E78030061BC96 /* QuitModal.swift */; };
@@ -32,7 +31,6 @@
 		3774ADD4251BD9BC00912385 /* Difficulty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3774ADD3251BD9BC00912385 /* Difficulty.swift */; };
 		3774ADDB251BE04C00912385 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3774ADDA251BE04C00912385 /* MenuView.swift */; };
 		3774ADE0251BF89F00912385 /* UserDefaultsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3774ADDF251BF89F00912385 /* UserDefaultsKeys.swift */; };
-		3774ADE5251BF97D00912385 /* AppModules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3774ADE4251BF97D00912385 /* AppModules.swift */; };
 		3774ADE9251BFC6700912385 /* MenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3774ADE8251BFC6700912385 /* MenuViewModel.swift */; };
 		3774AE0C251C08AE00912385 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3774AE0B251C08AE00912385 /* GoogleService-Info.plist */; };
 		3774AE22251C12FF00912385 /* Memorama.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3774AE21251C12FF00912385 /* Memorama.swift */; };
@@ -44,7 +42,6 @@
 		37AD1E51251BC0F200216E7B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37AD1E50251BC0F200216E7B /* Preview Assets.xcassets */; };
 		37AD1E5F251BC37F00216E7B /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E5E251BC37F00216E7B /* AppConfiguration.swift */; };
 		37AD1E63251BC38C00216E7B /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E62251BC38C00216E7B /* Strings.swift */; };
-		37AD1E77251BCDC300216E7B /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E76251BCDC300216E7B /* HomeViewModel.swift */; };
 		37AD1E7F251BCDFC00216E7B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD1E7E251BCDFC00216E7B /* HomeView.swift */; };
 		37AD7EF425DCA445005C31BD /* DoMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AD7EF325DCA445005C31BD /* DoMemoryTests.swift */; };
 		37B0896525DDCBE500941D5A /* WinModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B0896425DDCBE500941D5A /* WinModalViewModel.swift */; };
@@ -55,8 +52,6 @@
 		37BDA284251D4A8100902240 /* MemorizeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA283251D4A8100902240 /* MemorizeViewModel.swift */; };
 		37BDA288251D4B3100902240 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA287251D4B3100902240 /* CardView.swift */; };
 		37BDA28C251D4B6B00902240 /* Cardify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA28B251D4B6B00902240 /* Cardify.swift */; };
-		37BDA28F251D4B8300902240 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA28E251D4B8300902240 /* Grid.swift */; };
-		37BDA292251D4B9900902240 /* GridLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA291251D4B9900902240 /* GridLayout.swift */; };
 		37BDA295251D4C1900902240 /* Pie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA294251D4C1900902240 /* Pie.swift */; };
 		37BDA299251D4C3D00902240 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA298251D4C3D00902240 /* Array+Extensions.swift */; };
 		37BDA29D251D4C8300902240 /* MemoryGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BDA29C251D4C8300902240 /* MemoryGame.swift */; };
@@ -89,7 +84,6 @@
 		3712312625E564A5007A177E /* DoMemory.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DoMemory.entitlements; sourceTree = "<group>"; };
 		3730C32625E88FCA00D9196B /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		374673E625D608E600BD74AF /* QuitModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitModalViewModel.swift; sourceTree = "<group>"; };
-		374673EA25D6091900BD74AF /* Blur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Blur.swift; sourceTree = "<group>"; };
 		375C96552524134500D29C74 /* UserManageObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManageObject.swift; sourceTree = "<group>"; };
 		37707901253E77F80061BC96 /* PauseModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PauseModal.swift; sourceTree = "<group>"; };
 		37707904253E78030061BC96 /* QuitModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitModal.swift; sourceTree = "<group>"; };
@@ -98,7 +92,6 @@
 		3774ADD3251BD9BC00912385 /* Difficulty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Difficulty.swift; sourceTree = "<group>"; };
 		3774ADDA251BE04C00912385 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		3774ADDF251BF89F00912385 /* UserDefaultsKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsKeys.swift; sourceTree = "<group>"; };
-		3774ADE4251BF97D00912385 /* AppModules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModules.swift; sourceTree = "<group>"; };
 		3774ADE8251BFC6700912385 /* MenuViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewModel.swift; sourceTree = "<group>"; };
 		3774AE0B251C08AE00912385 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3774AE21251C12FF00912385 /* Memorama.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Memorama.swift; sourceTree = "<group>"; };
@@ -112,7 +105,6 @@
 		37AD1E52251BC0F200216E7B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		37AD1E5E251BC37F00216E7B /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
 		37AD1E62251BC38C00216E7B /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
-		37AD1E76251BCDC300216E7B /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		37AD1E7E251BCDFC00216E7B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		37AD7EF125DCA445005C31BD /* DoMemoryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoMemoryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		37AD7EF325DCA445005C31BD /* DoMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoMemoryTests.swift; sourceTree = "<group>"; };
@@ -125,8 +117,6 @@
 		37BDA283251D4A8100902240 /* MemorizeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorizeViewModel.swift; sourceTree = "<group>"; };
 		37BDA287251D4B3100902240 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
 		37BDA28B251D4B6B00902240 /* Cardify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cardify.swift; sourceTree = "<group>"; };
-		37BDA28E251D4B8300902240 /* Grid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
-		37BDA291251D4B9900902240 /* GridLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridLayout.swift; sourceTree = "<group>"; };
 		37BDA294251D4C1900902240 /* Pie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pie.swift; sourceTree = "<group>"; };
 		37BDA298251D4C3D00902240 /* Array+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
 		37BDA29C251D4C8300902240 /* MemoryGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGame.swift; sourceTree = "<group>"; };
@@ -250,7 +240,6 @@
 			isa = PBXGroup;
 			children = (
 				3774ADD3251BD9BC00912385 /* Difficulty.swift */,
-				3774ADE4251BF97D00912385 /* AppModules.swift */,
 				37FB62A22524066400006E51 /* DoMemory.xcdatamodeld */,
 			);
 			path = Models;
@@ -407,17 +396,8 @@
 			isa = PBXGroup;
 			children = (
 				37AD1E7D251BCDD400216E7B /* HomeView */,
-				37AD1E7A251BCDC700216E7B /* ViewModel */,
 			);
 			path = Home;
-			sourceTree = "<group>";
-		};
-		37AD1E7A251BCDC700216E7B /* ViewModel */ = {
-			isa = PBXGroup;
-			children = (
-				37AD1E76251BCDC300216E7B /* HomeViewModel.swift */,
-			);
-			path = ViewModel;
 			sourceTree = "<group>";
 		};
 		37AD1E7D251BCDD400216E7B /* HomeView */ = {
@@ -512,8 +492,6 @@
 			children = (
 				37BDA287251D4B3100902240 /* CardView.swift */,
 				37BDA28B251D4B6B00902240 /* Cardify.swift */,
-				37BDA28E251D4B8300902240 /* Grid.swift */,
-				37BDA291251D4B9900902240 /* GridLayout.swift */,
 				37BDA294251D4C1900902240 /* Pie.swift */,
 			);
 			path = Views;
@@ -532,7 +510,6 @@
 			children = (
 				37BDA2C4251D50D300902240 /* ListWithoutSeparatorAndMargins.swift */,
 				37BDA2C8251D551500902240 /* LoaderView.swift */,
-				374673EA25D6091900BD74AF /* Blur.swift */,
 				37EFBD4825DF4A9A00D32CE6 /* FullAdd.swift */,
 			);
 			path = Views;
@@ -669,10 +646,8 @@
 				374673E725D608E600BD74AF /* QuitModalViewModel.swift in Sources */,
 				37BDA2C5251D50D300902240 /* ListWithoutSeparatorAndMargins.swift in Sources */,
 				37AD1E5F251BC37F00216E7B /* AppConfiguration.swift in Sources */,
-				374673EB25D6091900BD74AF /* Blur.swift in Sources */,
 				3774ADDB251BE04C00912385 /* MenuView.swift in Sources */,
 				37AD1E4C251BC0EE00216E7B /* ContentView.swift in Sources */,
-				37BDA28F251D4B8300902240 /* Grid.swift in Sources */,
 				3774ADD4251BD9BC00912385 /* Difficulty.swift in Sources */,
 				37BDA295251D4C1900902240 /* Pie.swift in Sources */,
 				3774ADE0251BF89F00912385 /* UserDefaultsKeys.swift in Sources */,
@@ -683,12 +658,10 @@
 				37B0896525DDCBE500941D5A /* WinModalViewModel.swift in Sources */,
 				37AD1E7F251BCDFC00216E7B /* HomeView.swift in Sources */,
 				37BDA284251D4A8100902240 /* MemorizeViewModel.swift in Sources */,
-				3774ADE5251BF97D00912385 /* AppModules.swift in Sources */,
 				3774AE27251C13E100912385 /* Dictionary+Extensions.swift in Sources */,
 				3707A41E25411A6C009FB72A /* PauseModalViewModel.swift in Sources */,
 				37BDA2C9251D551500902240 /* LoaderView.swift in Sources */,
 				37BDA270251D22C400902240 /* Color+Extensions.swift in Sources */,
-				37AD1E77251BCDC300216E7B /* HomeViewModel.swift in Sources */,
 				375C96562524134500D29C74 /* UserManageObject.swift in Sources */,
 				37707908253E78930061BC96 /* LoseModal.swift in Sources */,
 				1F1CB0C528BECA8C00EACCAD /* Notifications.swift in Sources */,
@@ -705,7 +678,6 @@
 				37BDA29D251D4C8300902240 /* MemoryGame.swift in Sources */,
 				1F1CB0BF28BEC97E00EACCAD /* AppDelegate+AppLovin.swift in Sources */,
 				37BDA277251D271100902240 /* SettingsViewModel.swift in Sources */,
-				37BDA292251D4B9900902240 /* GridLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -870,7 +842,7 @@
 				DEVELOPMENT_TEAM = H5V33368QJ;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = DoMemory/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -895,7 +867,7 @@
 				DEVELOPMENT_TEAM = H5V33368QJ;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = DoMemory/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

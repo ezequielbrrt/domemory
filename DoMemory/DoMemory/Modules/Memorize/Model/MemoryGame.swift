@@ -20,6 +20,12 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         }
     }
     
+    mutating func flipBackUnmatchedCards() {
+        for index in cards.indices where cards[index].isFaceUp && !cards[index].isMatched {
+            cards[index].isFaceUp = false
+        }
+    }
+
     mutating func choose(card: Card) {
         if let chosenIndex = cards.firstIndex(matching: card), !cards[chosenIndex].isFaceUp, !cards[chosenIndex].isMatched {
             if let potencialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {

@@ -9,20 +9,10 @@ import SwiftUI
 import WaterfallGrid
 
 struct MenuView: View {
-    @ObservedObject var viewModel = MenuViewModel()
+    @State private var viewModel = MenuViewModel()
     @State var showNewView = false
     @State var showBanner = false
 
-    init() {
-        UINavigationBar.appearance().largeTitleTextAttributes = [
-            .foregroundColor: Color.secundaryColor.uiColor(), .font: UIFont.righteous(size: 35)]
-                
-        UINavigationBar.appearance().titleTextAttributes = [ .foregroundColor: Color.secundaryColor.uiColor(), .font: UIFont.righteous(size: 19)]
-        
-        UINavigationBar.appearance().backgroundColor = Color.grayBackground.uiColor()
-        
-    }
-    
     var body: some View {
         Group {
             if viewModel.isLoading {
@@ -36,7 +26,7 @@ struct MenuView: View {
                     LoadingView().padding()
                 }
             } else {
-                NavigationView {
+                NavigationStack {
                     ZStack {
                         // Background gradient + decoration
                         LinearGradient(
@@ -63,13 +53,13 @@ struct MenuView: View {
                             HStack {
                                 Text("DoMemory")
                                     .font(.righteous(size: 34))
-                                    .foregroundColor(.secundaryColor)
+                                    .foregroundStyle(Color.secundaryColor)
                                     .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 4)
                                 Spacer()
                                 Button(action: { self.showNewView = true }) {
                                     Image(systemName: "gearshape.fill")
                                         .font(.system(size: 18, weight: .semibold))
-                                        .foregroundColor(.primaryColor)
+                                        .foregroundStyle(Color.primaryColor)
                                         .padding(10)
                                         .background(
                                             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -81,38 +71,19 @@ struct MenuView: View {
                             .padding(.horizontal)
                             .padding(.top, 8)
 
-                            NavigationLink(
-                                destination: SettingsView(listener: viewModel),
-                                isActive: $showNewView
-                            ) { EmptyView() }.isDetailLink(false)
-
                             // Grid
                             ScrollView {
-                                WaterfallGrid(viewModel.memoramaArray) { memorama in
-                                    ZStack(alignment: .topTrailing) {
-                                        NavigationLink(
-                                            destination: MemorizeView(viewModel: MemorizeViewModel(memorama: memorama))
-                                                .navigationBarTitle("")
-                                                .navigationBarHidden(true)
-                                        ) {
-                                            MemoramaCard(memorama: memorama)
-                                        }
-                                        .isDetailLink(true)
-
-                                        Button(action: { viewModel.toggleFavorite(id: memorama.id) }) {
-                                            Image(systemName: viewModel.isFavorite(id: memorama.id) ? "heart.fill" : "heart")
-                                                .font(.system(size: 16, weight: .semibold))
-                                                .foregroundColor(viewModel.isFavorite(id: memorama.id) ? .red : .white.opacity(0.7))
-                                                .padding(8)
-                                        }
-                                        .buttonStyle(.plain)
-                                        .padding(.top, 4)
-                                    }
+                                WaterfallGrid(viewModel.memoramaArray) { (memorama: Memorama) in
+                                    MemoramaGridCell(
+                                        memorama: memorama,
+                                        isFavorite: viewModel.isFavorite(id: memorama.id),
+                                        onToggleFavorite: { viewModel.toggleFavorite(id: memorama.id) }
+                                    )
                                 }
                                 .gridStyle(
                                     columns: 2,
                                     spacing: 14,
-                                    animation: .spring(response: 0.35, dampingFraction: 0.85)
+                                    animation: Animation.spring(response: 0.35, dampingFraction: 0.85)
                                 )
                                 .padding(.horizontal)
                                 .padding(.bottom, 16)
@@ -120,9 +91,36 @@ struct MenuView: View {
                         }
                     }
                     .navigationBarHidden(true)
+                    .navigationDestination(isPresented: $showNewView) {
+                        SettingsView(listener: viewModel)
+                    }
                 }
-                .navigationViewStyle(.stack)
             }
+        }
+    }
+}
+
+private struct MemoramaGridCell: View {
+    let memorama: Memorama
+    let isFavorite: Bool
+    let onToggleFavorite: () -> Void
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            NavigationLink {
+                MemorizeView(viewModel: MemorizeViewModel(memorama: memorama))
+            } label: {
+                MemoramaCard(memorama: memorama)
+            }
+
+            Button(action: onToggleFavorite) {
+                Image(systemName: isFavorite ? "heart.fill" : "heart")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(isFavorite ? Color.red : Color.white.opacity(0.7))
+                    .padding(8)
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 4)
         }
     }
 }
@@ -150,7 +148,7 @@ struct MemoramaCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(memorama.name)
                     .font(.patrickHand(size: 28))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)
 
@@ -158,10 +156,10 @@ struct MemoramaCard: View {
                     let difficultyEnum = Difficulty(rawValue: memorama.difficulty) ?? .medium
                     Image(systemName: "brain.head.profile")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundStyle(.white.opacity(0.9))
                     Text(difficultyEnum.rawValue.capitalized)
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundStyle(.white.opacity(0.9))
                         .padding(.vertical, 4)
                         .padding(.horizontal, 8)
                         .background(Color.black.opacity(0.18))
@@ -182,8 +180,6 @@ private struct ScaleCardButtonStyle: ButtonStyle {
     }
 }
 
-struct MenuView_Previews: PreviewProvider {
-    static var previews: some View {
-        MenuView()
-    }
+#Preview {
+    MenuView()
 }

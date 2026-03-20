@@ -6,14 +6,16 @@
 //
 
 import SwiftUI
+import Observation
 
-protocol SettingsListener: class {
+protocol SettingsListener: AnyObject {
     func onCloseView()
 }
 
-class SettingsViewModel: ObservableObject {
-    var listener: SettingsListener?
-    @Published var difficulty: Int = 0
+@Observable
+class SettingsViewModel {
+    weak var listener: SettingsListener?
+    var difficulty: Int = 0
 
     init(listener: SettingsListener?) {
         self.listener = listener
@@ -25,18 +27,17 @@ extension SettingsViewModel {
     func viewWillDissapear() {
         listener?.onCloseView()
     }
-    
+
     func getCurrentDifficulty() -> Int {
         let userSettings = UserManageObject().getUserSettings()
         guard let difficulty = userSettings?.dificulty else { return 0 }
         guard let currentDifficulty = Difficulty(rawValue: difficulty) else { return 0 }
-
         return currentDifficulty.id
     }
-    
+
     func saveDifficulty(difficultyIndex: Int) {
         var difficulty: Difficulty?
-        
+
         switch difficultyIndex {
         case 0:
             difficulty = .easy
@@ -49,7 +50,7 @@ extension SettingsViewModel {
         default:
             difficulty = .easy
         }
-        
+
         self.difficulty = difficultyIndex
         UserManageObject().updateDifficulty(withDifficulty: difficulty ?? .easy)
     }

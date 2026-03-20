@@ -13,14 +13,15 @@ struct QuitModal: View {
 
     var body: some View {
         ZStack {
-            Blur()
-                .frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .center)
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
             VStack {
                 Spacer()
                 Text("🥺").font(Font.system(size: 70))
 
                 Text(Strings.quit)
-                    .foregroundColor(.secundaryColor)
+                    .foregroundStyle(Color.secundaryColor)
                     .font(.patrickHand(size: 25))
                     .padding()
 
@@ -33,10 +34,10 @@ struct QuitModal: View {
                             .font(.righteous(size: 18))
                             .padding()
                             .background(Color.secundaryColor)
-                            .cornerRadius(40)
-                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .foregroundStyle(.white)
                     }.padding()
-                    
+
                     Button(action: {
                         listener?.tapOnCancel()
                     }) {
@@ -45,9 +46,8 @@ struct QuitModal: View {
                             .font(.righteous(size: 18))
                             .padding()
                             .background(Color.red)
-                            .cornerRadius(40)
-                            .foregroundColor(.white)
-                            
+                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .foregroundStyle(.white)
                     }.padding()
                 }.padding()
                 Spacer()
@@ -56,8 +56,6 @@ struct QuitModal: View {
     }
 }
 
-struct QuitModal_Previews: PreviewProvider {
-    static var previews: some View {
-        QuitModal()
-    }
+#Preview {
+    QuitModal()
 }

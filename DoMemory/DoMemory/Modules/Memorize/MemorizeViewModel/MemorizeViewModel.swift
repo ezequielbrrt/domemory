@@ -6,19 +6,23 @@
 //
 
 import SwiftUI
+import Observation
 
-class MemorizeViewModel: ObservableObject {
-    @Published private(set) var model: MemoryGame<String> = MemorizeViewModel.createMemoryGame()
-    @Published var showPauseView: Bool = false
-    @Published var timeRemaining: Int = 0
-    @Published var showQuitView: Bool = false
-    @Published var showWinView: Bool = false
-    @Published var timer = Timer.publish (every: 1, on: .main, in: .common).autoconnect()
+@Observable
+class MemorizeViewModel {
+    private(set) var model: MemoryGame<String> = MemorizeViewModel.createMemoryGame()
+    var showPauseView: Bool = false
+    var timeRemaining: Int = 0
+    var showQuitView: Bool = false
+    var showWinView: Bool = false
 
     var memorama: Memorama?
     var closeView: Bool = false
     var shouldShowPie: Bool!
-    
+
+    private var timerTask: Task<Void, Never>?
+    private var flipBackTask: Task<Void, Never>?
+
     init(memorama: Memorama?) {
         self.memorama = memorama
         guard let auxMemorama = memorama else { return }
@@ -33,11 +37,11 @@ class MemorizeViewModel: ObservableObject {
         }
         self.shouldShowPie = shouldShowPieByDifficulty()
     }
-        
+
     private static func createMemoryGame() -> MemoryGame<String> {
         return MemoryGame<String>()
     }
-    
+
     // MARK: - Access the model
     var cards: Array<MemoryGame<String>.Card> {
         model.cards
@@ -46,7 +50,7 @@ class MemorizeViewModel: ObservableObject {
     var failedTries: Int {
         model.failedTries
     }
-    
+
     func getRemainingTime() -> Int {
         let difficulty = getDifficulty()
         switch difficulty {
@@ -56,32 +60,67 @@ class MemorizeViewModel: ObservableObject {
         case .veryHard: return 70
         }
     }
-    
+
     func getPieRemainingTime() -> Int {
         0
     }
-    
+
     func getIfAllAreMatched() {
         let count = model.cards.count
         let matchedCount = self.model.cards.filter { $0.isMatched }
         showWinView = count == matchedCount.count
     }
-    
+
     // MARK: - Intent(s)
     func choose(card: MemoryGame<String>.Card) {
+        flipBackTask?.cancel()
+        flipBackTask = nil
         model.choose(card: card)
+        scheduleFlipBackIfNeeded()
     }
-    
+
+    private func scheduleFlipBackIfNeeded() {
+        let faceUpUnmatched = model.cards.filter { $0.isFaceUp && !$0.isMatched }
+        guard faceUpUnmatched.count == 2 else { return }
+        flipBackTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.5)) {
+                self?.model.flipBackUnmatchedCards()
+            }
+        }
+    }
+
     func resetGame() {
         guard let auxMemorama = memorama else { return }
         model = MemoryGame<String>(numbersOfPairsOfCards: auxMemorama.items.count) { partIndex in
             return auxMemorama.items[partIndex]
         }
-
     }
-    
+
+    // MARK: - Timer
+    func startTimer() {
+        stopTimer()
+        timerTask = Task { @MainActor [weak self] in
+            while let self, !Task.isCancelled, self.timeRemaining > 0 {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { break }
+                if self.timeRemaining > 0 {
+                    self.timeRemaining -= 1
+                }
+            }
+        }
+    }
+
+    func stopTimer() {
+        timerTask?.cancel()
+        timerTask = nil
+        flipBackTask?.cancel()
+        flipBackTask = nil
+    }
+
     func reconnectTime() {
-        self.timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+        startTimer()
     }
 }
 
@@ -90,14 +129,14 @@ extension MemorizeViewModel {
         self.showPauseView = false
         self.resetGame()
         self.timeRemaining = getRemainingTime()
-        self.timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+        startTimer()
     }
-    
+
     private func getDifficulty() -> Difficulty {
         guard let userSettings = UserManageObject().getUserSettings() else { return .medium }
         return Difficulty(rawValue: userSettings.dificulty ?? "medium") ?? .medium
     }
-    
+
     private func shouldShowPieByDifficulty() -> Bool {
         let difficulty = getDifficulty()
         switch difficulty {
@@ -112,14 +151,14 @@ extension MemorizeViewModel {
 // MARK: LISTENERS
 extension MemorizeViewModel: PauseModalListener {
     func tapOnGoHome() {
-        
+
     }
-    
+
     func tapOnResumeGame() {
         self.showPauseView = false
-        reconnectTime()
+        startTimer()
     }
-    
+
     func tapOnReloadGame() {
         restartGame()
     }
@@ -136,7 +175,7 @@ extension MemorizeViewModel: QuitModalListener {
         self.showQuitView = false
         self.closeView = false
     }
-    
+
     func tapOnExit() {
         self.showQuitView = false
         self.closeView = true

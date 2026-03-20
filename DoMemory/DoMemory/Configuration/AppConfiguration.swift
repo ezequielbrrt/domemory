@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-class AppConfiguration: NSObject {
-    static var unitGame = "e362a87fcadb4afb"
-    static var unitHome = "a9ee7d214e9f5dab"
+enum AppConfiguration {
+    static let unitGame = "e362a87fcadb4afb"
+    static let unitHome = "a9ee7d214e9f5dab"
 }
 
 

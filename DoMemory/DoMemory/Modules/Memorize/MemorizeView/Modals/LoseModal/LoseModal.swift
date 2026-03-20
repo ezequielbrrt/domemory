@@ -12,19 +12,19 @@ struct LoseModal: View {
     
     var body: some View {
         ZStack {
-            Blur()
-                .frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .center)
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
             VStack {
                 Spacer()
                 Text("😳").font(Font.system(size: 70))
 
                 Text(Strings.youLose)
-                    .foregroundColor(.secundaryColor)
+                    .foregroundStyle(Color.secundaryColor)
                     .font(.patrickHand(size: 45))
-                
+
                 HStack {
                     Spacer()
-                    
                     Button(action: {
                         listener?.tapOnTryAgain()
                     }) {
@@ -33,10 +33,9 @@ struct LoseModal: View {
                             .font(.righteous(size: 18))
                             .padding()
                             .background(Color.secundaryColor)
-                            .cornerRadius(40)
-                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .foregroundStyle(.white)
                     }.padding()
-                    
                     Spacer()
                 }.padding()
                 Spacer()
@@ -46,8 +45,6 @@ struct LoseModal: View {
     }
 }
 
-struct LoseModal_Previews: PreviewProvider {
-    static var previews: some View {
-        LoseModal()
-    }
+#Preview {
+    LoseModal()
 }

@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+import Observation
 import FirebaseDatabase
 import FirebaseAuth
-// import CodableFirebase
 
-class MenuViewModel: ObservableObject {
-    @Published var memoramaArray: [Memorama] = []
-    @Published var isLoading: Bool = false
+@Observable
+class MenuViewModel {
+    var memoramaArray: [Memorama] = []
+    var isLoading: Bool = false
     private(set) var favoriteIDs: Set<String> = []
 
     init() {
@@ -83,7 +84,7 @@ extension MenuViewModel {
         guard let userSettings = UserManageObject().getUserSettings() else { return  }
         points = Int(userSettings.points)
     }
-    
+
     private func getDifficulty() -> Difficulty {
         guard let userSettings = UserManageObject().getUserSettings() else { return .medium }
         return Difficulty(rawValue: userSettings.dificulty ?? "medium") ?? .medium
@@ -97,7 +98,6 @@ extension MenuViewModel {
             if let _ = authResult {
                 self?.ref.child("data").observeSingleEvent(of: .value) { [self] snapshot in
                     do {
-
                         let array = snapshot.value as? [[String: Any]]
                         let data = try JSONSerialization.data(withJSONObject: array, options: [])
                         var memoramaArrayAux = try JSONDecoder().decode([Memorama].self, from: data)
@@ -114,12 +114,9 @@ extension MenuViewModel {
                     }
                     self?.isLoading = false
                 }
-            }
-            else {
+            } else {
                 self?.isLoading = false
             }
-            // Error do something
         }
     }
 }
-

@@ -14,18 +14,17 @@ struct PauseModal: View {
     
     var body: some View {
         ZStack {
-        
-            Blur()
-                .frame(minWidth: 0, idealWidth: .infinity, maxWidth: .infinity, minHeight: 0, idealHeight: .infinity, maxHeight: .infinity, alignment: .center)
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
             VStack {
                 Spacer()
                 Text("🧐").font(Font.system(size: 70))
                 Text(Strings.pause)
-                    .foregroundColor(.secundaryColor)
+                    .foregroundStyle(Color.secundaryColor)
                     .font(.patrickHand(size: 65))
-            
+
                 VStack {
-                    
                     Button(action: {
                         listener?.tapOnReloadGame()
                     }) {
@@ -34,11 +33,10 @@ struct PauseModal: View {
                             .font(.righteous(size: 17))
                             .padding()
                             .background(Color.red)
-                            .cornerRadius(40)
-                            .foregroundColor(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .foregroundStyle(.white)
                     }.padding()
-                    
-                    
+
                     Button(action: {
                         listener?.tapOnResumeGame()
                     }) {
@@ -47,10 +45,9 @@ struct PauseModal: View {
                             .font(.righteous(size: 20))
                             .padding()
                             .background(Color.secundaryColor)
-                            .cornerRadius(40)
-                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .foregroundStyle(.white)
                     }.padding()
-                    
                 }.padding()
                 Spacer()
             }
@@ -59,8 +56,6 @@ struct PauseModal: View {
     }
 }
 
-struct PauseModal_Previews: PreviewProvider {
-    static var previews: some View {
-        PauseModal(listener: nil)
-    }
+#Preview {
+    PauseModal(listener: nil)
 }

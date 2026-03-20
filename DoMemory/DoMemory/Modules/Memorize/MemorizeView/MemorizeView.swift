@@ -8,117 +8,122 @@
 import SwiftUI
 
 struct MemorizeView: View {
-    @State private var showSheet = false
-    @State private var showLoseView = false
-    @Environment(\.presentationMode) var presentation
-    @ObservedObject var viewModel: MemorizeViewModel
-    
-    init(viewModel: MemorizeViewModel) {
-        self.viewModel = viewModel
-    }
-    
-    var body: some View {
-        NavigationView {
-            ZStack {
-                VStack {
-                    HStack {
-                        Image("error")
-                            .resizable()
-                            .frame(width: 40, height: 40, alignment: .center)
-                            .padding()
-                            .gesture(TapGesture()
-                                        .onEnded { _ in
-                                            self.viewModel.showQuitView.toggle()
-                                            self.viewModel.timer.upstream.connect().cancel()
-                                        }
-                                    )
+    @State var viewModel: MemorizeViewModel
+    @Environment(\.dismiss) private var dismiss
 
-                        Spacer()
-                        HStack(spacing: 4) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.red.opacity(0.8))
-                            Text("\(self.viewModel.failedTries)")
-                                .font(.patrickHand(size: 25))
-                                .foregroundColor(.primaryColor)
+    init(viewModel: MemorizeViewModel) {
+        self._viewModel = State(initialValue: viewModel)
+    }
+
+    private var gridColumns: Int {
+        max(1, Int(ceil(sqrt(Double(viewModel.cards.count)))))
+    }
+
+    var body: some View {
+        ZStack {
+            VStack {
+                HStack {
+                    Image("error")
+                        .resizable()
+                        .frame(width: 40, height: 40, alignment: .center)
+                        .padding()
+                        .onTapGesture {
+                            viewModel.stopTimer()
+                            viewModel.showQuitView.toggle()
                         }
-                        Spacer()
-                        Text(Strings.time + " : \(self.viewModel.timeRemaining)")
+
+                    Spacer()
+                    HStack(spacing: 4) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.red.opacity(0.8))
+                        Text("\(viewModel.failedTries)")
                             .font(.patrickHand(size: 25))
-                            .foregroundColor(.primaryColor)
-                            .onReceive(self.viewModel.timer) { _ in
-                                    if self.viewModel.timeRemaining > 0 {
-                                        self.viewModel.timeRemaining -= 1
+                            .foregroundStyle(Color.primaryColor)
+                    }
+                    Spacer()
+                    Text(Strings.time + " : \(viewModel.timeRemaining)")
+                        .font(.patrickHand(size: 25))
+                        .foregroundStyle(Color.primaryColor)
+                    Spacer()
+                    Image("cronografo")
+                        .resizable()
+                        .frame(width: 45, height: 45, alignment: .center).padding()
+                        .onTapGesture {
+                            viewModel.stopTimer()
+                            viewModel.showPauseView.toggle()
+                        }
+                }
+
+                GeometryReader { geo in
+                    let cols = gridColumns
+                    let rows = max(1, Int(ceil(Double(viewModel.cards.count) / Double(cols))))
+                    let spacing: CGFloat = 8
+                    let padding: CGFloat = 16
+                    let cardWidth  = (geo.size.width  - padding * 2 - spacing * CGFloat(cols - 1)) / CGFloat(cols)
+                    let cardHeight = (geo.size.height - padding * 2 - spacing * CGFloat(rows - 1)) / CGFloat(rows)
+                    LazyVGrid(
+                        columns: Array(repeating: GridItem(.fixed(cardWidth)), count: cols),
+                        spacing: spacing
+                    ) {
+                        ForEach(viewModel.cards) { card in
+                            CardView(card: card, shouldShowPie: viewModel.shouldShowPie)
+                                .frame(width: cardWidth, height: cardHeight)
+                                .onTapGesture {
+                                    withAnimation(.linear(duration: 1)) {
+                                        viewModel.choose(card: card)
+                                        viewModel.getIfAllAreMatched()
                                     }
                                 }
-                        Spacer()
-                        Image("cronografo")
-                            .resizable()
-                            .frame(width: 45, height: 45, alignment: .center).padding()
-                            .gesture(TapGesture()
-                                        .onEnded { _ in
-                                            self.viewModel.timer.upstream.connect().cancel()
-                                            viewModel.showPauseView.toggle()
-                                        }
-                                    )
-
+                        }
                     }
-                    
-                    Grid(viewModel.cards) { card in
-                        CardView(card: card, shouldShowPie: viewModel.shouldShowPie).onTapGesture {
-                                withAnimation(.linear(duration: 1)) {
-                                    self.viewModel.choose(card: card)
-                                    self.viewModel.getIfAllAreMatched()
-                                }
-                            }.padding(5)
-                        }
-                        .padding()
-                        .foregroundColor(Color.primaryColor)
+                    .padding(padding)
                 }
-                
-                
-                // MODALS
-                if viewModel.showPauseView {
-                    PauseModal(listener: self.viewModel)
-                }
-                
-                if viewModel.timeRemaining == 0 {
-                    LoseModal(listener: self.viewModel)
-                }
-                
-                if viewModel.showQuitView {
-                    QuitModal(listener: self.viewModel)
-                        .onDisappear {
-                            viewModel.closeView ? self.presentation.wrappedValue.dismiss() : self.viewModel.reconnectTime()
-                    }
-                }
-                
-                if viewModel.showWinView {
-                    WinModal(listener: self.viewModel)
-                        .onAppear {
-                            self.viewModel.timer.upstream.connect().cancel()
-                        }
-                        .onDisappear {
-                            self.presentation.wrappedValue.dismiss()
-                        }
-                }
-                
+                .foregroundStyle(Color.primaryColor)
             }
-            .background(Color.grayBackground)
 
-            .navigationBarTitle("", displayMode: .inline)
-            .navigationBarHidden(true)
-            .onAppear {
-                self.viewModel.resetGame()
-                self.viewModel.timeRemaining = self.viewModel.getRemainingTime()
+            // MODALS
+            if viewModel.showPauseView {
+                PauseModal(listener: viewModel)
             }
-        }.navigationViewStyle(.stack)
-        
+
+            if viewModel.timeRemaining == 0 {
+                LoseModal(listener: viewModel)
+            }
+
+            if viewModel.showQuitView {
+                QuitModal(listener: viewModel)
+                    .onDisappear {
+                        if viewModel.closeView {
+                            dismiss()
+                        } else {
+                            viewModel.startTimer()
+                        }
+                    }
+            }
+
+            if viewModel.showWinView {
+                WinModal(listener: viewModel)
+                    .onAppear {
+                        viewModel.stopTimer()
+                    }
+                    .onDisappear {
+                        dismiss()
+                    }
+            }
+        }
+        .background(Color.grayBackground)
+        .navigationBarHidden(true)
+        .onAppear {
+            viewModel.resetGame()
+            viewModel.timeRemaining = viewModel.getRemainingTime()
+            viewModel.startTimer()
+        }
+        .onDisappear {
+            viewModel.stopTimer()
+        }
     }
 }
 
-
-struct MemorizeView_Previews: PreviewProvider {
-    static var previews: some View {
-        MemorizeView(viewModel: MemorizeViewModel(memorama: nil))
-    }
+#Preview {
+    MemorizeView(viewModel: MemorizeViewModel(memorama: nil))
 }

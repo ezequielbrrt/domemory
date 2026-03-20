@@ -28,7 +28,7 @@ struct LoadingView: View {
                         .scaleEffect(shouldAnimate ? 2 : 0)
                 }
                 .opacity(shouldAnimate ? 0.0 : 0.2)
-                .animation(Animation.easeInOut(duration: 1).repeatForever(autoreverses: false))
+                .animation(Animation.easeInOut(duration: 1).repeatForever(autoreverses: false), value: shouldAnimate)
         )
         .onAppear {
             self.shouldAnimate = true
