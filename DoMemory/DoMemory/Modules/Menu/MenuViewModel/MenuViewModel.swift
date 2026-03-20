@@ -15,6 +15,7 @@ class MenuViewModel {
     var memoramaArray: [Memorama] = []
     var isLoading: Bool = false
     private(set) var favoriteIDs: Set<String> = []
+    private var customMemoramas: [Memorama] = []
 
     init() {
         ref = Database.database().reference()
@@ -22,11 +23,16 @@ class MenuViewModel {
         getPoints()
         difficulty = getDifficulty()
         loadFavorites()
+        loadCustomMemoramas()
         getData()
     }
 
     public func getUserPoints() -> String {
         return String(points)
+    }
+
+    var currentDifficulty: String {
+        difficulty?.rawValue ?? Difficulty.medium.rawValue
     }
 
     func isFavorite(id: String) -> Bool {
@@ -48,6 +54,45 @@ class MenuViewModel {
     private var difficulty: Difficulty!
     private var points: Int!
     private var allGames: [Memorama] = []
+}
+
+// MARK: Custom Memoramas
+extension MenuViewModel {
+    func addCustomMemorama(_ memorama: Memorama) {
+        customMemoramas.append(memorama)
+        saveCustomMemoramas()
+        rebuildMemoramaArray()
+    }
+
+    func deleteCustomMemorama(id: String) {
+        customMemoramas.removeAll { $0.id == id }
+        saveCustomMemoramas()
+        rebuildMemoramaArray()
+    }
+
+    private func loadCustomMemoramas() {
+        guard let data = UserDefaults.standard.data(forKey: UserDefaultsKeys.customMemoramas),
+              let memoramas = try? JSONDecoder().decode([Memorama].self, from: data) else { return }
+        customMemoramas = memoramas
+    }
+
+    private func saveCustomMemoramas() {
+        guard let data = try? JSONEncoder().encode(customMemoramas) else { return }
+        UserDefaults.standard.set(data, forKey: UserDefaultsKeys.customMemoramas)
+    }
+
+    private func rebuildMemoramaArray() {
+        let filteredFirebase = allGames.filter { memorama in
+            let difficultyEnum = Difficulty(rawValue: memorama.difficulty) ?? .medium
+            return difficultyEnum == difficulty
+        }
+        let filteredCustom = customMemoramas.filter { memorama in
+            let difficultyEnum = Difficulty(rawValue: memorama.difficulty) ?? .medium
+            return difficultyEnum == difficulty
+        }
+        memoramaArray = filteredFirebase + filteredCustom
+        applySort()
+    }
 }
 
 // MARK: Favorites
@@ -103,11 +148,7 @@ extension MenuViewModel {
                         var memoramaArrayAux = try JSONDecoder().decode([Memorama].self, from: data)
                         memoramaArrayAux.shuffle()
                         self?.allGames = memoramaArrayAux
-                        self?.memoramaArray = memoramaArrayAux.filter { memorama in
-                            let difficultyEnum = Difficulty(rawValue: memorama.difficulty) ?? .medium
-                            return difficultyEnum == self?.difficulty
-                        }
-                        self?.applySort()
+                        self?.rebuildMemoramaArray()
                     } catch let error {
                         print("error firebas")
                         print(error)
