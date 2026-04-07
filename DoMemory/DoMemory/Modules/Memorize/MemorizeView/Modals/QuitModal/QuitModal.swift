@@ -8,50 +8,65 @@
 import SwiftUI
 
 struct QuitModal: View {
-    
     var listener: QuitModalListener?
 
     var body: some View {
         ZStack {
-            Rectangle()
-                .fill(.ultraThinMaterial)
+            Color.grayBackground.opacity(0.88)
                 .ignoresSafeArea()
-            VStack {
-                Spacer()
-                Text("🥺").font(Font.system(size: 70))
+                .background(.ultraThinMaterial)
+
+            VStack(spacing: 0) {
+                Text("🥺")
+                    .font(.system(size: 56))
+                    .padding(.bottom, 12)
 
                 Text(Strings.quit)
-                    .foregroundStyle(Color.secundaryColor)
-                    .font(.patrickHand(size: 25))
-                    .padding()
+                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .padding(.bottom, 6)
 
-                HStack {
-                    Button(action: {
-                        listener?.tapOnExit()
-                    }) {
-                        Text(Strings.accept)
-                            .fontWeight(.bold)
-                            .font(.righteous(size: 18))
-                            .padding()
-                            .background(Color.secundaryColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 40))
-                            .foregroundStyle(.white)
-                    }.padding()
+                Text(Strings.youWinDescription)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(Color.textMuted)
+                    .multilineTextAlignment(.center)
+                    .padding(.bottom, 28)
 
-                    Button(action: {
-                        listener?.tapOnCancel()
-                    }) {
+                HStack(spacing: 12) {
+                    Button(action: { listener?.tapOnCancel() }) {
                         Text(Strings.cancel)
-                            .fontWeight(.bold)
-                            .font(.righteous(size: 18))
-                            .padding()
-                            .background(Color.red)
-                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.secundaryColor)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                Capsule()
+                                    .fill(Color.secundaryColor.opacity(0.1))
+                            )
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: { listener?.tapOnExit() }) {
+                        Text(Strings.accept)
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
-                    }.padding()
-                }.padding()
-                Spacer()
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                Capsule().fill(Color.primaryColor)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+            .padding(28)
+            .background(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(Color.darkGrayColor)
+                    .shadow(color: Color.textPrimary.opacity(0.12), radius: 24, x: 0, y: 8)
+            )
+            .padding(.horizontal, 32)
         }
     }
 }

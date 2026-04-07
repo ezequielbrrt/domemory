@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MemorizeView: View {
     @State var viewModel: MemorizeViewModel
+    @State private var purchaseService = PurchaseService.shared
     @Environment(\.dismiss) private var dismiss
 
     init(viewModel: MemorizeViewModel) {
@@ -21,43 +22,89 @@ struct MemorizeView: View {
 
     var body: some View {
         ZStack {
-            VStack {
-                HStack {
-                    Image("error")
-                        .resizable()
-                        .frame(width: 40, height: 40, alignment: .center)
-                        .padding()
-                        .onTapGesture {
-                            viewModel.stopTimer()
-                            viewModel.showQuitView.toggle()
-                        }
+            Color.grayBackground.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // HUD bar
+                HStack(spacing: 12) {
+                    // Quit button
+                    Button {
+                        viewModel.tapOnQuitPrompt()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color.textPrimary.opacity(0.6))
+                            .frame(width: 40, height: 40)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(Color.darkGrayColor)
+                                    .shadow(color: Color.textPrimary.opacity(0.08), radius: 6, x: 0, y: 3)
+                            )
+                    }
+                    .buttonStyle(.plain)
 
                     Spacer()
-                    HStack(spacing: 4) {
+
+                    // Fails chip
+                    HStack(spacing: 5) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.red.opacity(0.8))
+                            .foregroundStyle(Color.secundaryColor)
+                            .font(.system(size: 14))
                         Text("\(viewModel.failedTries)")
-                            .font(.patrickHand(size: 25))
-                            .foregroundStyle(Color.primaryColor)
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.textPrimary)
                     }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(
+                        Capsule()
+                            .fill(Color.darkGrayColor)
+                            .shadow(color: Color.textPrimary.opacity(0.08), radius: 6, x: 0, y: 3)
+                    )
+
+                    // Timer chip
+                    HStack(spacing: 5) {
+                        Image(systemName: "timer")
+                            .foregroundStyle(Color.primaryColor)
+                            .font(.system(size: 14))
+                        Text("\(viewModel.timeRemaining)")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.textPrimary)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(
+                        Capsule()
+                            .fill(Color.darkGrayColor)
+                            .shadow(color: Color.textPrimary.opacity(0.08), radius: 6, x: 0, y: 3)
+                    )
+
                     Spacer()
-                    Text(Strings.time + " : \(viewModel.timeRemaining)")
-                        .font(.patrickHand(size: 25))
-                        .foregroundStyle(Color.primaryColor)
-                    Spacer()
-                    Image("cronografo")
-                        .resizable()
-                        .frame(width: 45, height: 45, alignment: .center).padding()
-                        .onTapGesture {
-                            viewModel.stopTimer()
-                            viewModel.showPauseView.toggle()
-                        }
+
+                    // Pause button
+                    Button {
+                        viewModel.tapOnPause()
+                    } label: {
+                        Image(systemName: "pause.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color.primaryColor)
+                            .frame(width: 40, height: 40)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(Color.darkGrayColor)
+                                    .shadow(color: Color.textPrimary.opacity(0.08), radius: 6, x: 0, y: 3)
+                            )
+                    }
+                    .buttonStyle(.plain)
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
 
                 GeometryReader { geo in
                     let cols = gridColumns
                     let rows = max(1, Int(ceil(Double(viewModel.cards.count) / Double(cols))))
-                    let spacing: CGFloat = 8
+                    let spacing: CGFloat = 10
                     let padding: CGFloat = 16
                     let cardWidth  = (geo.size.width  - padding * 2 - spacing * CGFloat(cols - 1)) / CGFloat(cols)
                     let cardHeight = (geo.size.height - padding * 2 - spacing * CGFloat(rows - 1)) / CGFloat(rows)
@@ -78,7 +125,13 @@ struct MemorizeView: View {
                     }
                     .padding(padding)
                 }
-                .foregroundStyle(Color.primaryColor)
+
+                if !purchaseService.hasRemovedAds,
+                   AdsService.shared.isBannerConfigured(for: .gameBanner) {
+                    AdMobBannerView(placement: .gameBanner)
+                        .frame(height: 50)
+                        .padding(.bottom, 8)
+                }
             }
 
             // MODALS
@@ -102,7 +155,12 @@ struct MemorizeView: View {
             }
 
             if viewModel.showWinView {
-                WinModal(listener: viewModel)
+                WinModal(
+                    listener: viewModel,
+                    pairsCount: viewModel.cards.count / 2,
+                    timeRemaining: viewModel.timeRemaining,
+                    failedTries: viewModel.failedTries
+                )
                     .onAppear {
                         viewModel.stopTimer()
                     }
@@ -111,12 +169,13 @@ struct MemorizeView: View {
                     }
             }
         }
-        .background(Color.grayBackground)
         .navigationBarHidden(true)
         .onAppear {
+            AnalyticsService.log(.screenView(name: "gameplay", screenClass: "MemorizeView"))
             viewModel.resetGame()
             viewModel.timeRemaining = viewModel.getRemainingTime()
             viewModel.startTimer()
+            viewModel.trackGameStarted(source: "initial")
         }
         .onDisappear {
             viewModel.stopTimer()

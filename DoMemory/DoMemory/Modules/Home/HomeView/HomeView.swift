@@ -12,120 +12,120 @@ struct HomeView: View {
 
     var body: some View {
         ZStack {
-            // Background gradient
-            LinearGradient(
-                gradient: Gradient(colors: [Color.grayBackground, Color.darkGrayColor]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            Color.grayBackground.ignoresSafeArea()
 
-            // Decorative circles
-            ZStack {
-                Circle()
-                    .fill(Color.secundaryColor.opacity(0.08))
-                    .frame(width: 280, height: 280)
-                    .offset(x: -140, y: -260)
-                Circle()
-                    .fill(Color.primaryColor.opacity(0.06))
-                    .frame(width: 220, height: 220)
-                    .offset(x: 160, y: 220)
-            }
-            .allowsHitTesting(false)
-
-            VStack(spacing: 24) {
+            VStack(spacing: 0) {
                 // Header
-                VStack(spacing: 8) {
-                    Text("DoMemory")
-                        .font(.righteous(size: 56))
-                        .foregroundStyle(Color.secundaryColor)
-                        .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 4)
+                VStack(spacing: 4) {
+                    Text(Strings.appName)
+                        .font(.righteous(size: 44))
+                        .foregroundStyle(Color.primaryColor)
 
                     Text(Strings.askDifficulty)
-                        .font(.patrickHand(size: 22))
-                        .foregroundStyle(Color.primaryColor.opacity(0.9))
+                        .font(.patrickHand(size: 17))
+                        .foregroundStyle(Color.textMuted)
                 }
-                .padding(.top, 40)
+                .padding(.top, 48)
+                .padding(.bottom, 28)
 
-                // Difficulty Cards Grid
-                VStack(spacing: 16) {
-                    DifficultyCard(title: Strings.easy, subtitle: Strings.easySubtitle, color: .green.opacity(0.85), systemImage: "leaf.fill") {
-                        selectDifficulty(.easy)
+                // 2×2 tile grid
+                VStack(spacing: 14) {
+                    HStack(spacing: 14) {
+                        DifficultyTile(
+                            title: Strings.easy,
+                            subtitle: Strings.easySubtitle,
+                            accentColor: Color.easyGreen,
+                            bgColor: Color.make(230, 249, 241),
+                            systemImage: "leaf.fill"
+                        ) { selectDifficulty(.easy) }
+
+                        DifficultyTile(
+                            title: Strings.medium,
+                            subtitle: Strings.mediumSubtitle,
+                            accentColor: Color.primaryColor,
+                            bgColor: Color.make(235, 233, 252),
+                            systemImage: "circle.grid.2x2.fill"
+                        ) { selectDifficulty(.medium) }
                     }
 
-                    DifficultyCard(title: Strings.medium, subtitle: Strings.mediumSubtitle, color: .blue.opacity(0.85), systemImage: "circle.grid.2x2.fill") {
-                        selectDifficulty(.medium)
-                    }
+                    HStack(spacing: 14) {
+                        DifficultyTile(
+                            title: Strings.hard,
+                            subtitle: Strings.hardSubtitle,
+                            accentColor: Color.hardAmber,
+                            bgColor: Color.make(254, 245, 228),
+                            systemImage: "flame.fill"
+                        ) { selectDifficulty(.hard) }
 
-                    DifficultyCard(title: Strings.hard, subtitle: Strings.hardSubtitle, color: .orange.opacity(0.9), systemImage: "flame.fill") {
-                        selectDifficulty(.hard)
-                    }
-
-                    DifficultyCard(title: Strings.veryHard, subtitle: Strings.veryHardSubtitle, color: .red.opacity(0.9), systemImage: "bolt.trianglebadge.exclamationmark.fill") {
-                        selectDifficulty(.veryHard)
+                        DifficultyTile(
+                            title: Strings.veryHard,
+                            subtitle: Strings.veryHardSubtitle,
+                            accentColor: Color.secundaryColor,
+                            bgColor: Color.make(254, 240, 236),
+                            systemImage: "bolt.trianglebadge.exclamationmark.fill"
+                        ) { selectDifficulty(.veryHard) }
                     }
                 }
                 .padding(.horizontal, 20)
 
-                Spacer(minLength: 20)
+                Spacer()
             }
-            .padding(.bottom, 24)
+        }
+        .onAppear {
+            AnalyticsService.log(.screenView(name: "home", screenClass: "HomeView"))
         }
     }
 
     private func selectDifficulty(_ difficulty: Difficulty) {
+        AnalyticsService.log(.difficultySelected(difficulty: difficulty.rawValue))
         UserManageObject().createUserSettings(withDifficulty: difficulty)
         onDidComplete()
     }
 }
 
-private struct DifficultyCard: View {
+private struct DifficultyTile: View {
     let title: String
     let subtitle: String
-    let color: Color
+    let accentColor: Color
+    let bgColor: Color
     let systemImage: String
     let action: () -> Void
 
-    @State private var isPressed: Bool = false
+    @State private var isPressed = false
 
     var body: some View {
         Button(action: trigger) {
-            HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(color.opacity(0.2))
-                        .frame(width: 52, height: 52)
+                        .fill(accentColor.opacity(0.15))
+                        .frame(width: 48, height: 48)
                     Image(systemName: systemImage)
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(color)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.patrickHand(size: 24))
-                        .foregroundStyle(Color.primaryColor)
-                    Text(subtitle)
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundStyle(Color.primaryColor.opacity(0.7))
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(accentColor)
                 }
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(Color.primaryColor.opacity(0.6))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color.textPrimary)
+                    Text(subtitle)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(Color.textMuted)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
-            .padding(16)
+            .padding(18)
+            .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
             .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.darkGrayColor.opacity(0.6))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .strokeBorder(color.opacity(0.25), lineWidth: 1)
-                    )
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(bgColor)
             )
-            .shadow(color: .black.opacity(isPressed ? 0.1 : 0.25), radius: isPressed ? 2 : 6, x: 0, y: isPressed ? 1 : 4)
-            .scaleEffect(isPressed ? 0.98 : 1.0)
+            .shadow(color: accentColor.opacity(0.12), radius: 12, x: 0, y: 6)
+            .scaleEffect(isPressed ? 0.97 : 1.0)
             .animation(.spring(response: 0.28, dampingFraction: 0.8), value: isPressed)
         }
         .buttonStyle(.plain)
@@ -136,8 +136,7 @@ private struct DifficultyCard: View {
 
     private func trigger() {
         #if os(iOS)
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
         #endif
         action()
     }

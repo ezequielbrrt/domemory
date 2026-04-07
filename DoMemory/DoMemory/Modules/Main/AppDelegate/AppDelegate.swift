@@ -6,7 +6,9 @@
 //
 
 import Firebase
+import FirebaseAnalytics
 import FirebaseMessaging
+import GoogleMobileAds
 import UserNotifications
 import Foundation
 import UIKit
@@ -16,6 +18,7 @@ class AppDelegate: NSObject {
 
     private func setupFirebase(application: UIApplication) {
         FirebaseApp.configure()
+        Analytics.setAnalyticsCollectionEnabled(true)
 
         if #available(iOS 10.0, *) {
           // For iOS 10 display notification (sent via APNS)
@@ -34,6 +37,10 @@ class AppDelegate: NSObject {
 
         application.registerForRemoteNotifications()
     }
+
+    private func setupAdMob() {
+        MobileAds.shared.start()
+    }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
@@ -45,8 +52,8 @@ extension AppDelegate: UIApplicationDelegate {
     
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        setupAppLovin()
         setupFirebase(application: application)
+        setupAdMob()
         return true
     }
     

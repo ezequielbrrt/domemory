@@ -1,107 +1,57 @@
-/* Win modal title */
-"!Felicidades¡" = "!Felicidades¡";
-
-/* Quit confirmation prompt */
-"¿Estás seguro que quieres salir?" = "¿Estás seguro que quieres salir?";
-
-/* Generic accept button */
-"Aceptar" = "Aceptar";
-
-/* Subtitle for hard difficulty */
-"Afila tu memoria" = "Afila tu memoria";
-
-/* Confirm adding an emoji */
-"Agregar" = "Agregar";
-
-/* Button to add an emoji */
-"Agregar emoji" = "Agregar emoji";
-
-/* Cancel button */
-"Cancelar" = "Cancelar";
-
-/* Continue game button */
-"Continuar" = "Continuar";
-
-/* Delete action */
-"Eliminar" = "Eliminar";
-
-/* Label prefix for emoji count */
-"Emojis" = "Emojis";
-
-/* Placeholder for memorama name field */
-"Ej: Frutas, Animales…" = "Ej: Frutas, Animales…";
-
-/* Hard difficulty level */
-"Difícil" = "Difícil";
-
-/* Difficulty section title */
-"Dificultad" = "Dificultad";
-
-/* Easy difficulty level */
-"Fácil" = "Fácil";
-
-/* Subtitle for easy difficulty */
-"Inicio relajado" = "Inicio relajado";
-
-/* Try again button */
-"Intentar de nuevo" = "Intentar de nuevo";
-
-/* Go to menu button */
-"Ir al menú" = "Ir al menú";
-
-/* Lose modal description */
-"Lo siento se te acabo el tiempo" = "Lo siento, se te acabó el tiempo";
-
-/* Win modal description */
-"Lograste terminar a tiempo esté memorama" = "Lograste terminar a tiempo este memorama";
-
-/* Hint that at least 2 emojis are required */
-"Mínimo 2" = "Mínimo 2";
-
-/* Very hard difficulty level */
-"Muy difícil" = "Muy difícil";
-
-/* Sheet title for creating a new memorama */
-"Nuevo Memorama" = "Nuevo Memorama";
-
-/* Label for memorama name field */
-"Nombre" = "Nombre";
-
-/* Medium difficulty level */
-"Normal" = "Normal";
-
-/* Ok button */
-"Ok" = "Ok";
-
-/* Pause label */
-"Pausa" = "Pausa";
-
-/* Points label */
-"Puntos" = "Puntos";
-
-/* Prompt to select difficulty */
-"Selecciona la dificultad" = "Selecciona la dificultad";
-
-/* Subtitle for very hard difficulty */
-"Solo para expertos" = "Solo para expertos";
-
-/* Tab showing all games */
-"Todos" = "Todos";
-
-/* Tab showing user-created games */
-"Mis memoramas" = "Mis memoramas";
-
-/* Empty state message for user-created games */
-"Aún no tienes memoramas propios" = "Aún no tienes memoramas propios";
-
-/* CTA button in empty state */
-"Crear uno" = "Crear uno";
-
-/* Save button in create memorama sheet */
-"Guardar" = "Guardar";
-
-/* Time label */
-"Tiempo" = "Tiempo";
-
-/* Subtitle for medium difficulty */
-"Un reto justo" = "Un reto justo";
+"common_accept" = "Aceptar";
+"common_app_name" = "DoMemory";
+"common_cancel" = "Cancelar";
+"common_delete" = "Eliminar";
+"common_ok" = "OK";
+"difficulty_easy" = "Fácil";
+"difficulty_easy_subtitle" = "Inicio relajado";
+"difficulty_hard" = "Difícil";
+"difficulty_hard_subtitle" = "Afila tu memoria";
+"difficulty_medium" = "Normal";
+"difficulty_medium_subtitle" = "Un reto justo";
+"difficulty_very_hard" = "Muy difícil";
+"difficulty_very_hard_subtitle" = "Solo para expertos";
+"game_continue" = "Continuar";
+"game_go_to_menu" = "Ir al menú";
+"game_lose_message" = "Lo siento, se te acabó el tiempo";
+"game_pause_title" = "Pausa";
+"game_pairs_label" = "pares";
+"game_points_label" = "Puntos";
+"game_quit_confirmation" = "¿Estás seguro de que quieres salir?";
+"game_remaining_label" = "restantes";
+"game_errors_label" = "errores";
+"game_time_label" = "Tiempo";
+"game_try_again" = "Intentar de nuevo";
+"game_win_description" = "Lograste terminar este memorama a tiempo";
+"game_win_title" = "¡Felicidades!";
+"home_difficulty_title" = "Dificultad";
+"home_select_difficulty_prompt" = "Selecciona la dificultad";
+"menu_create_add" = "Agregar";
+"menu_create_add_emoji" = "Agregar emoji";
+"menu_create_emojis_label" = "Emojis";
+"menu_create_minimum_hint" = "Mínimo 2";
+"menu_create_name_label" = "Nombre";
+"menu_create_name_placeholder" = "Ej. Frutas, Animales...";
+"menu_create_save" = "Guardar";
+"menu_create_title" = "Nuevo Memorama";
+"menu_empty_mine_action" = "Crear uno";
+"menu_empty_mine_message" = "Aún no tienes memoramas propios";
+"menu_tab_all" = "Todos";
+"menu_tab_mine" = "Mis memoramas";
+"settings_description" = "Ajusta tus preferencias de juego";
+"settings_select_difficulty" = "Seleccionar";
+"settings_title" = "Configuración";
+"settings_remove_ads_action_format" = "Comprar %@";
+"settings_remove_ads_description" = "Quita banners e intersticiales";
+"settings_remove_ads_loading" = "Cargando";
+"settings_remove_ads_no_restore" = "No se encontró una compra para quitar anuncios";
+"settings_remove_ads_pending" = "Compra pendiente de aprobación";
+"settings_remove_ads_purchased" = "Comprado";
+"settings_remove_ads_purchased_description" = "Los anuncios están desactivados en este dispositivo";
+"settings_remove_ads_title" = "Quitar anuncios";
+"settings_remove_ads_unavailable" = "Quitar anuncios no está disponible por ahora";
+"settings_restore_purchases_action" = "Restaurar";
+"settings_restore_purchases_description" = "Recupera una compra anterior";
+"settings_restore_purchases_title" = "Restaurar compras";
+"stats_played_label" = "jugadas";
+"stats_won_label" = "ganadas";
