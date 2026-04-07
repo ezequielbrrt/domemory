@@ -24,6 +24,7 @@ class MenuViewModel {
         difficulty = getDifficulty()
         loadFavorites()
         loadCustomMemoramas()
+        AnalyticsService.log(.menuLoaded(difficulty: currentDifficulty))
         getData()
     }
 
@@ -46,7 +47,12 @@ class MenuViewModel {
             favoriteIDs.insert(id)
         }
         UserDefaults.standard.set(Array(favoriteIDs), forKey: UserDefaultsKeys.favoriteIDs)
+        AnalyticsService.log(.favoriteToggled(gameID: id, isFavorite: favoriteIDs.contains(id)))
         applySort()
+    }
+
+    func stats(for memoramaID: String) -> GameStats {
+        GameStatsService.shared.stats(for: memoramaID)
     }
 
     // MARK: Private
@@ -62,12 +68,21 @@ extension MenuViewModel {
         customMemoramas.append(memorama)
         saveCustomMemoramas()
         rebuildMemoramaArray()
+        AnalyticsService.log(
+            .customMemoramaCreated(
+                gameID: memorama.id,
+                difficulty: memorama.difficulty,
+                cardsCount: memorama.items.count
+            )
+        )
     }
 
     func deleteCustomMemorama(id: String) {
         customMemoramas.removeAll { $0.id == id }
+        GameStatsService.shared.resetStats(for: id)
         saveCustomMemoramas()
         rebuildMemoramaArray()
+        AnalyticsService.log(.customMemoramaDeleted(gameID: id))
     }
 
     private func loadCustomMemoramas() {
@@ -149,6 +164,15 @@ extension MenuViewModel {
                         memoramaArrayAux.shuffle()
                         self?.allGames = memoramaArrayAux
                         self?.rebuildMemoramaArray()
+                        if let self {
+                            AnalyticsService.log(
+                                .gameListLoaded(
+                                    difficulty: self.currentDifficulty,
+                                    gameCount: self.memoramaArray.count,
+                                    customCount: self.customMemoramas.count
+                                )
+                            )
+                        }
                     } catch let error {
                         print("error firebas")
                         print(error)

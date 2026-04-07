@@ -2,15 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>AppLovinConsentFlowInfo</key>
-	<dict>
-		<key>AppLovinConsentFlowEnabled</key>
-		<integer>1</integer>
-		<key>AppLovinConsentFlowPrivacyPolicy</key>
-		<string>https://ezequielbrrt.github.io/spacegram/export.pdf</string>
-	</dict>
-	<key>AppLovinSdkKey</key>
-	<string>lzaT3SArkMfg_R2u-tJGPgQwkJTcb9r8m0LC_wkNGPN9TZRin4JO7RnN8T838cx77B9DodyMPJTIg4rEhs-QF6</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

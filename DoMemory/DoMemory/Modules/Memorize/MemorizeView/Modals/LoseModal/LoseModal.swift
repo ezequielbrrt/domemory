@@ -9,39 +9,68 @@ import SwiftUI
 
 struct LoseModal: View {
     var listener: LoseModalViewModelListener?
-    
+
     var body: some View {
         ZStack {
-            Rectangle()
-                .fill(.ultraThinMaterial)
+            Color.grayBackground.opacity(0.88)
                 .ignoresSafeArea()
-            VStack {
-                Spacer()
-                Text("😳").font(Font.system(size: 70))
+                .background(.ultraThinMaterial)
 
-                Text(Strings.youLose)
-                    .foregroundStyle(Color.secundaryColor)
-                    .font(.patrickHand(size: 45))
+            VStack(spacing: 0) {
+                Text("😳")
+                    .font(.system(size: 64))
+                    .padding(.bottom, 12)
 
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        listener?.tapOnTryAgain()
-                    }) {
+                // "Time's up" pill chip
+                HStack(spacing: 6) {
+                    Image(systemName: "timer")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text(Strings.youLose)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                }
+                .foregroundStyle(Color.secundaryColor)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule().fill(Color.secundaryColor.opacity(0.1))
+                )
+                .padding(.bottom, 28)
+
+                VStack(spacing: 12) {
+                    Button(action: { listener?.tapOnTryAgain() }) {
                         Text(Strings.tryAgain)
-                            .fontWeight(.bold)
-                            .font(.righteous(size: 18))
-                            .padding()
-                            .background(Color.secundaryColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
-                    }.padding()
-                    Spacer()
-                }.padding()
-                Spacer()
-            }.padding(EdgeInsets(top: 100, leading: 20, bottom: 100, trailing: 20))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(
+                                Capsule().fill(Color.secundaryColor)
+                            )
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: { listener?.tapOnTryAgain() }) {
+                        Text(Strings.goToMenu)
+                            .font(.system(size: 17, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.primaryColor)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(
+                                Capsule()
+                                    .strokeBorder(Color.primaryColor.opacity(0.4), lineWidth: 1.5)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(28)
+            .background(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(Color.darkGrayColor)
+                    .shadow(color: Color.textPrimary.opacity(0.12), radius: 24, x: 0, y: 8)
+            )
+            .padding(.horizontal, 32)
         }
-        
     }
 }
 

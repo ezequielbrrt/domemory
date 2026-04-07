@@ -22,6 +22,7 @@ class MemorizeViewModel {
 
     private var timerTask: Task<Void, Never>?
     private var flipBackTask: Task<Void, Never>?
+    private var hasLoggedGameFinished = false
 
     init(memorama: Memorama?) {
         self.memorama = memorama
@@ -69,6 +70,9 @@ class MemorizeViewModel {
         let count = model.cards.count
         let matchedCount = self.model.cards.filter { $0.isMatched }
         showWinView = count == matchedCount.count
+        if showWinView {
+            logGameFinishedIfNeeded(result: "win")
+        }
     }
 
     // MARK: - Intent(s)
@@ -76,6 +80,15 @@ class MemorizeViewModel {
         flipBackTask?.cancel()
         flipBackTask = nil
         model.choose(card: card)
+        if AnalyticsService.shouldSample(AnalyticsService.cardTapSampleRate) {
+            AnalyticsService.log(
+                .cardTapped(
+                    difficulty: gameDifficulty().rawValue,
+                    cardsCount: model.cards.count,
+                    failedTries: model.failedTries
+                )
+            )
+        }
         scheduleFlipBackIfNeeded()
     }
 
@@ -107,6 +120,9 @@ class MemorizeViewModel {
                 guard !Task.isCancelled else { break }
                 if self.timeRemaining > 0 {
                     self.timeRemaining -= 1
+                    if self.timeRemaining == 0 {
+                        self.logGameFinishedIfNeeded(result: "lose")
+                    }
                 }
             }
         }
@@ -122,6 +138,58 @@ class MemorizeViewModel {
     func reconnectTime() {
         startTimer()
     }
+
+    func trackGameStarted(source: String) {
+        hasLoggedGameFinished = false
+        Task { @MainActor in
+            AdsService.shared.loadInterstitial(for: .gameFinishedInterstitial)
+        }
+        AnalyticsService.log(
+            .gameStarted(
+                source: source,
+                difficulty: gameDifficulty().rawValue,
+                cardsCount: model.cards.count,
+                isCustom: memorama?.id.hasPrefix("custom_") ?? false
+            )
+        )
+    }
+
+    func tapOnPause() {
+        stopTimer()
+        showPauseView.toggle()
+        AnalyticsService.log(
+            .pauseOpened(
+                difficulty: gameDifficulty().rawValue,
+                timeRemaining: timeRemaining
+            )
+        )
+    }
+
+    func tapOnQuitPrompt() {
+        stopTimer()
+        showQuitView.toggle()
+    }
+
+    private func logGameFinishedIfNeeded(result: String) {
+        guard !hasLoggedGameFinished else { return }
+        hasLoggedGameFinished = true
+        if let memoramaID = memorama?.id {
+            GameStatsService.shared.recordGameFinished(memoramaID: memoramaID, didWin: result == "win")
+        }
+        AnalyticsService.log(
+            .gameFinished(
+                result: result,
+                difficulty: gameDifficulty().rawValue,
+                cardsCount: model.cards.count,
+                failedTries: model.failedTries,
+                timeRemaining: timeRemaining,
+                isCustom: memorama?.id.hasPrefix("custom_") ?? false
+            )
+        )
+        Task { @MainActor in
+            AdsService.shared.presentInterstitialEvery(3, for: .gameFinishedInterstitial)
+        }
+    }
 }
 
 extension MemorizeViewModel {
@@ -130,11 +198,19 @@ extension MemorizeViewModel {
         self.resetGame()
         self.timeRemaining = getRemainingTime()
         startTimer()
+        trackGameStarted(source: "retry")
     }
 
     private func getDifficulty() -> Difficulty {
         guard let userSettings = UserManageObject().getUserSettings() else { return .medium }
         return Difficulty(rawValue: userSettings.dificulty ?? "medium") ?? .medium
+    }
+
+    private func gameDifficulty() -> Difficulty {
+        if let memoramaDifficulty = memorama?.difficulty, let parsed = Difficulty(rawValue: memoramaDifficulty) {
+            return parsed
+        }
+        return getDifficulty()
     }
 
     private func shouldShowPieByDifficulty() -> Bool {
@@ -156,16 +232,36 @@ extension MemorizeViewModel: PauseModalListener {
 
     func tapOnResumeGame() {
         self.showPauseView = false
+        AnalyticsService.log(
+            .resumeTapped(
+                difficulty: gameDifficulty().rawValue,
+                timeRemaining: timeRemaining
+            )
+        )
         startTimer()
     }
 
     func tapOnReloadGame() {
+        AnalyticsService.log(
+            .retryTapped(
+                difficulty: gameDifficulty().rawValue,
+                cardsCount: model.cards.count,
+                source: "pause_modal"
+            )
+        )
         restartGame()
     }
 }
 
 extension MemorizeViewModel: LoseModalViewModelListener {
     func tapOnTryAgain() {
+        AnalyticsService.log(
+            .retryTapped(
+                difficulty: gameDifficulty().rawValue,
+                cardsCount: model.cards.count,
+                source: "lose_modal"
+            )
+        )
         restartGame()
     }
 }
@@ -179,6 +275,13 @@ extension MemorizeViewModel: QuitModalListener {
     func tapOnExit() {
         self.showQuitView = false
         self.closeView = true
+        AnalyticsService.log(
+            .quitConfirmed(
+                difficulty: gameDifficulty().rawValue,
+                timeRemaining: timeRemaining,
+                failedTries: model.failedTries
+            )
+        )
     }
 }
 

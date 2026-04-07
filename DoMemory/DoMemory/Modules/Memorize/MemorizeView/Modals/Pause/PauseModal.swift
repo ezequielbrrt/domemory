@@ -7,52 +7,59 @@
 
 import SwiftUI
 
-
 struct PauseModal: View {
-    
     var listener: PauseModalListener?
-    
+
     var body: some View {
         ZStack {
-            Rectangle()
-                .fill(.ultraThinMaterial)
+            Color.grayBackground.opacity(0.88)
                 .ignoresSafeArea()
-            VStack {
-                Spacer()
-                Text("🧐").font(Font.system(size: 70))
+                .background(.ultraThinMaterial)
+
+            VStack(spacing: 0) {
+                Text("🧐")
+                    .font(.system(size: 64))
+                    .padding(.bottom, 12)
+
                 Text(Strings.pause)
-                    .foregroundStyle(Color.secundaryColor)
-                    .font(.patrickHand(size: 65))
+                    .font(.system(size: 36, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color.primaryColor)
+                    .padding(.bottom, 28)
 
-                VStack {
-                    Button(action: {
-                        listener?.tapOnReloadGame()
-                    }) {
+                VStack(spacing: 12) {
+                    Button(action: { listener?.tapOnReloadGame() }) {
                         Text(Strings.tryAgain)
-                            .fontWeight(.bold)
-                            .font(.righteous(size: 17))
-                            .padding()
-                            .background(Color.red)
-                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
-                    }.padding()
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(
+                                Capsule().fill(Color.secundaryColor)
+                            )
+                    }
+                    .buttonStyle(.plain)
 
-                    Button(action: {
-                        listener?.tapOnResumeGame()
-                    }) {
+                    Button(action: { listener?.tapOnResumeGame() }) {
                         Text(Strings.continueGame)
-                            .fontWeight(.bold)
-                            .font(.righteous(size: 20))
-                            .padding()
-                            .background(Color.secundaryColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 40))
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
-                    }.padding()
-                }.padding()
-                Spacer()
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(
+                                Capsule().fill(Color.primaryColor)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+            .padding(28)
+            .background(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(Color.darkGrayColor)
+                    .shadow(color: Color.textPrimary.opacity(0.12), radius: 24, x: 0, y: 8)
+            )
+            .padding(.horizontal, 32)
         }
-        
     }
 }
 
