@@ -94,3 +94,8 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+# Claude Code local settings
+.claude/settings.local.json
+DoMemory/.claude/settings.local.json
+**/.claude/settings.local.json
