@@ -1,0 +1,61 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Build & Run
+
+Open `DoMemory/DoMemory.xcodeproj` in Xcode. There is no SPM-only build; Xcode is required.
+
+**Fastlane release lane** (from `DoMemory/`):
+```
+bundle exec fastlane release
+```
+This builds the app, increments the build number, and uploads to App Store Connect.
+
+## Architecture
+
+The app is a SwiftUI memory-card (memorama) game targeting iOS.
+
+### Module structure (`DoMemory/DoMemory/Modules/`)
+
+| Module | Role |
+|--------|------|
+| `Main` | App entry point (`DoMemoryApp`), `AppDelegate` (Firebase + AdMob init), `ContentView` (onboarding gate) |
+| `Home` | Onboarding / difficulty selection shown on first launch |
+| `Menu` | Game list screen; fetches games from Firebase Realtime Database |
+| `Memorize` | Active game screen; owns the timer and card-flip logic |
+| `Settings` | Difficulty change + "Remove Ads" IAP |
+| `SharedModules` | Reusable views and helpers used across modules |
+
+### Data flow
+
+- `ContentView` checks `UserManageObject` (CoreData) for an existing `UserSettings` record. If none exists it shows `HomeView` (onboarding); otherwise it shows `MenuView`.
+- `MenuViewModel` signs in anonymously with Firebase Auth, reads game data from Firebase Realtime Database (`/data`), merges with locally stored custom memoramas (`UserDefaults`), and filters by the selected `Difficulty`.
+- `MemorizeViewModel` owns a `MemoryGame<String>` value-type model. All game state mutations go through `MemorizeViewModel`; the view is read-only.
+
+### Services (singletons, `DoMemory/DoMemory/Services/`)
+
+- **`PurchaseService`** – StoreKit 2; handles the single "Remove Ads" non-consumable IAP (`com.ezequielbrrt.domemory.removeads`). Persists entitlement to `UserDefaults`.
+- **`AdsService`** – Google Mobile Ads; serves banner and interstitial ads. All ad calls are gated on `PurchaseService.shared.hasRemovedAds`.
+- **`GameStatsService`** – Lightweight `UserDefaults`-backed played/won counter per memorama ID.
+- **`AnalyticsService`** (`AppConfiguration.swift`) – Thin wrapper over Firebase Analytics; all events are typed via `AnalyticsEvent` enum.
+
+### Persistence
+
+| Store | What |
+|-------|------|
+| CoreData (`DoMemory.xcdatamodeld`) | `UserSettings` (difficulty, points); accessed via `UserManageObject` |
+| `UserDefaults` | Custom memoramas (JSON), favorite IDs, per-game stats, purchase state, ad frequency counter |
+| Firebase Realtime Database | Canonical game list (read-only by the app) |
+
+### Localization
+
+All user-facing strings go through `Strings.swift` (typed `NSLocalizedString` wrappers). Supported locales: `en`, `es-419`, `de`, `fr`, `hi`, `it`, `ja`, `ko`, `pt-BR`, `zh-Hans`. Add new keys to **all** `Localizable.strings` files when adding UI text.
+
+### Screenshot automation
+
+`export_screenshots.py` / `export_ipad_screenshots.py` — export artboards from a Paper MCP server (running on `localhost:29979`) and resize them for App Store Connect (6.5" and iPad sizes).
+
+`upload_screenshots.sh` / `upload_ipad_screenshots.sh` — upload the exported images via `asc`.
+
+`Scripts/gamesToJson.py` — converts `games.csv` to `data.json` for seeding Firebase.

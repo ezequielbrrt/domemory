@@ -18,9 +18,6 @@ struct ContentView: View {
                 HomeView(onDidComplete: { hasOnboarded = true })
             }
         }
-        .task {
-            try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
-        }
     }
 }
 

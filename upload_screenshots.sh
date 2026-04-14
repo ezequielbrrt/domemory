@@ -1,72 +1,130 @@
 #!/bin/bash
-# Upload iPhone 6.5" screenshots to App Store Connect for each locale
+# Upload iPhone screenshots to App Store Connect for each locale.
 
-APP_ID="1533115091"
-VERSION_STRING="2.0.1"
+set -euo pipefail
 
-echo "🔍 Resolving VERSION_ID for version $VERSION_STRING..."
-VERSION_ID=$(asc versions list \
-    --app "$APP_ID" \
-    --output json | jq -r \
-    ".data[] | select(.attributes.versionString==\"$VERSION_STRING\") | .id" | head -1)
+APP_ID="${APP_ID:-1533115091}"
+VERSION_STRING="${VERSION_STRING:-2.1.0}"
+SCREENSHOTS_DIR="${SCREENSHOTS_DIR:-./screenshots/6.5}"
+# ASC still treats the phone screenshot set as IPHONE_65.
+DEVICE_TYPE="${DEVICE_TYPE:-IPHONE_65}"
+
+resolve_version_id() {
+    asc versions list \
+        --app "$APP_ID" \
+        --output json | jq -r \
+        ".data[] | select(.attributes.versionString==\"$VERSION_STRING\") | .id" | head -1
+}
+
+resolve_locales() {
+    find "$SCREENSHOTS_DIR" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort
+}
+
+read_lines_into_array() {
+    local target_array_name="$1"
+    local line
+    local -a values=()
+
+    while IFS= read -r line; do
+        values+=("$line")
+    done
+
+    eval "$target_array_name=(\"\${values[@]}\")"
+}
+
+is_valid_size() {
+    case "$1" in
+        1242x2688|1284x2778|2688x1242|2778x1284)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+echo "Resolving VERSION_ID for version $VERSION_STRING..."
+VERSION_ID="$(resolve_version_id)"
 
 if [ -z "$VERSION_ID" ]; then
-    echo "❌ Could not resolve VERSION_ID for version $VERSION_STRING. Check that the version exists in App Store Connect."
+    echo "Could not resolve VERSION_ID for version $VERSION_STRING. Check that the version exists in App Store Connect."
     exit 1
 fi
 
-echo "✅ VERSION_ID: $VERSION_ID"
-echo ""
+if [ ! -d "$SCREENSHOTS_DIR" ]; then
+    echo "Screenshot directory not found: $SCREENSHOTS_DIR"
+    exit 1
+fi
 
-LOCALES=("en-US" "es-MX" "de-DE" "fr-FR" "hi" "it" "ja" "ko" "pt-BR" "zh-Hans")
+read_lines_into_array LOCALES < <(resolve_locales)
 
-echo "📱 Uploading iPhone screenshots to App Store Connect"
+if [ "${#LOCALES[@]}" -eq 0 ]; then
+    echo "No locale directories found under $SCREENSHOTS_DIR"
+    exit 1
+fi
+
+echo "VERSION_ID: $VERSION_ID"
+echo "Uploading iPhone screenshots to App Store Connect"
+echo "Device type: $DEVICE_TYPE"
+echo "Expected sizes: 1242x2688 or 1284x2778"
 echo ""
 
 for locale in "${LOCALES[@]}"; do
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "----------------------------------------"
     echo "Processing locale: $locale"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "----------------------------------------"
 
-    # Get version localization ID for this locale
     loc_id=$(asc localizations list \
         --version "$VERSION_ID" \
         --app "$APP_ID" \
         --locale "$locale" \
         --output json | jq -r '.data[0].id')
 
-    if [ -z "$loc_id" ]; then
-        echo "❌ No localization ID found for $locale, skipping..."
+    if [ -z "$loc_id" ] || [ "$loc_id" = "null" ]; then
+        echo "No localization ID found for $locale, skipping..."
         echo ""
         continue
     fi
 
-    echo "🔍 Version Localization ID: $loc_id"
+    echo "Version Localization ID: $loc_id"
 
-    # Check if screenshots directory exists
-    if [ ! -d "./screenshots/6.5/$locale" ]; then
-        echo "⚠️  No screenshots found for $locale, skipping..."
+    locale_dir="$SCREENSHOTS_DIR/$locale"
+    read_lines_into_array screenshot_files < <(find "$locale_dir" -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) | sort)
+
+    if [ "${#screenshot_files[@]}" -eq 0 ]; then
+        echo "No screenshot files found at $locale_dir, skipping..."
         echo ""
         continue
     fi
 
-    # Upload screenshots
-    echo "📤 Uploading..."
+    bad_dims=0
+    for screenshot in "${screenshot_files[@]}"; do
+        width=$(/usr/bin/sips -g pixelWidth "$screenshot" 2>/dev/null | awk '/pixelWidth/ {print $2}')
+        height=$(/usr/bin/sips -g pixelHeight "$screenshot" 2>/dev/null | awk '/pixelHeight/ {print $2}')
+        size="${width}x${height}"
+
+        if ! is_valid_size "$size"; then
+            echo "Invalid iPhone size for $screenshot: $size"
+            bad_dims=1
+        fi
+    done
+
+    if [ "$bad_dims" -ne 0 ]; then
+        echo "Skipping $locale until screenshot dimensions are fixed."
+        echo ""
+        continue
+    fi
+
+    echo "Uploading with --replace..."
     asc screenshots upload \
         --version-localization "$loc_id" \
-        --path "./screenshots/6.5/$locale" \
-        --device-type "IPHONE_65" \
+        --path "$locale_dir" \
+        --device-type "$DEVICE_TYPE" \
         --replace
 
-    upload_result=$?
-
-    if [ $upload_result -eq 0 ]; then
-        echo "✅ Successfully uploaded iPhone screenshots for $locale"
-    else
-        echo "❌ Failed to upload iPhone screenshots for $locale"
-    fi
+    echo "Successfully uploaded iPhone screenshots for $locale"
     echo ""
 done
 
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🎉 Upload process complete!"
+echo "----------------------------------------"
+echo "Upload process complete."

@@ -79,6 +79,7 @@ struct SettingsView: View {
                             .foregroundStyle(Color.textMuted)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
+
                 }
                 .padding(.horizontal, 20)
 

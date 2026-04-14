@@ -7,6 +7,8 @@
 
 import SwiftUI
 import WaterfallGrid
+import AppTrackingTransparency
+import GoogleMobileAds
 
 private enum GameTab { case all, mine }
 
@@ -170,6 +172,16 @@ struct MenuView: View {
                     }
                 }
             }
+        }
+        .task {
+            if UIApplication.shared.applicationState != .active {
+                for await _ in NotificationCenter.default
+                    .notifications(named: UIApplication.didBecomeActiveNotification)
+                    .prefix(1) {}
+            }
+            await ATTrackingManager.requestTrackingAuthorization()
+            await MobileAds.shared.start()
+            try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
         }
         .onAppear {
             statsRefreshID = UUID()

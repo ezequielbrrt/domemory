@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export all 40 Paper artboards and save as JPEG files for App Store Connect."""
+"""Export Paper artboards and save App Store Connect phone screenshots."""
 
 import base64
 import json
@@ -9,50 +9,26 @@ import urllib.request
 
 MCP_URL = "http://127.0.0.1:29979/mcp"
 OUT_DIR = os.path.join(os.path.dirname(__file__), "screenshots", "6.5")
+ASC_IPHONE_WIDTH = 1242
+ASC_IPHONE_HEIGHT = 2688
 
-ARTBOARDS = [
-    # (nodeId, locale, filename)
-    ("1SL-0", "en-US",   "01_menu.jpg"),
-    ("1UI-0", "en-US",   "02_gameplay.jpg"),
-    ("1VZ-0", "en-US",   "03_win.jpg"),
-    ("1X2-0", "en-US",   "04_difficulty.jpg"),
-    ("1YE-0", "es-MX",   "01_menu.jpg"),
-    ("20B-0", "es-MX",   "02_gameplay.jpg"),
-    ("21S-0", "es-MX",   "03_win.jpg"),
-    ("22V-0", "es-MX",   "04_difficulty.jpg"),
-    ("247-0", "de-DE",   "01_menu.jpg"),
-    ("264-0", "de-DE",   "02_gameplay.jpg"),
-    ("27L-0", "de-DE",   "03_win.jpg"),
-    ("28O-0", "de-DE",   "04_difficulty.jpg"),
-    ("2A0-0", "fr-FR",   "01_menu.jpg"),
-    ("2BX-0", "fr-FR",   "02_gameplay.jpg"),
-    ("2DE-0", "fr-FR",   "03_win.jpg"),
-    ("2EH-0", "fr-FR",   "04_difficulty.jpg"),
-    ("2FT-0", "hi",      "01_menu.jpg"),
-    ("2HQ-0", "hi",      "02_gameplay.jpg"),
-    ("2J7-0", "hi",      "03_win.jpg"),
-    ("2KA-0", "hi",      "04_difficulty.jpg"),
-    ("2LM-0", "it",      "01_menu.jpg"),
-    ("2NJ-0", "it",      "02_gameplay.jpg"),
-    ("2P0-0", "it",      "03_win.jpg"),
-    ("2Q3-0", "it",      "04_difficulty.jpg"),
-    ("2RF-0", "ja",      "01_menu.jpg"),
-    ("2TC-0", "ja",      "02_gameplay.jpg"),
-    ("2UT-0", "ja",      "03_win.jpg"),
-    ("2VW-0", "ja",      "04_difficulty.jpg"),
-    ("2X8-0", "ko",      "01_menu.jpg"),
-    ("2Z5-0", "ko",      "02_gameplay.jpg"),
-    ("30M-0", "ko",      "03_win.jpg"),
-    ("31P-0", "ko",      "04_difficulty.jpg"),
-    ("331-0", "pt-BR",   "01_menu.jpg"),
-    ("34Y-0", "pt-BR",   "02_gameplay.jpg"),
-    ("36F-0", "pt-BR",   "03_win.jpg"),
-    ("37I-0", "pt-BR",   "04_difficulty.jpg"),
-    ("38U-0", "zh-Hans", "01_menu.jpg"),
-    ("3AR-0", "zh-Hans", "02_gameplay.jpg"),
-    ("3C8-0", "zh-Hans", "03_win.jpg"),
-    ("3DB-0", "zh-Hans", "04_difficulty.jpg"),
+# Base artboard name → output filename.
+# Localized artboards must follow the pattern: "{base_name} — {app_locale}"
+# e.g. "01 Flip & Match — de", "02 Play Dozens — ja"
+SCREEN_SPECS = [
+    ("01 Flip & Match",    "01_flip_and_match.jpg"),
+    ("02 Play Dozens",     "02_play_dozens.jpg"),
+    ("03 Choose Challenge","03_choose_challenge.jpg"),
 ]
+
+# Maps Paper/app locale codes → App Store Connect locale codes.
+# Locales not listed here are passed through unchanged.
+LOCALE_MAP = {
+    "en":     "en-US",
+    "de":     "de-DE",
+    "es-419": "es-MX",
+    "fr":     "fr-FR",
+}
 
 
 def mcp_call(method, params, req_id):
@@ -103,6 +79,50 @@ def screenshot(node_id, req_id):
     raise RuntimeError(f"No image content in response for {node_id}")
 
 
+def discover_artboards():
+    """Return [(node_id, locale, filename)] discovered from the Paper canvas."""
+    result = mcp_call("tools/call", {"name": "get_basic_info", "arguments": {}}, 1)
+    if "error" in result:
+        raise RuntimeError(f"MCP error: {result['error']}")
+
+    content = result["result"]["content"]
+    payload = None
+    for item in content:
+        if item.get("type") == "text":
+            payload = json.loads(item["text"])
+            break
+
+    if payload is None:
+        raise RuntimeError("Paper get_basic_info returned no text payload")
+
+    artboards_by_name = {artboard["name"]: artboard["id"] for artboard in payload["artboards"]}
+
+    discovered = []
+
+    # Collect all app locale codes that have at least one matching artboard.
+    # Artboard naming convention: "{base_name} — {app_locale}"
+    # e.g. "01 Flip & Match — de", "02 Play Dozens — ja"
+    app_locales = set()
+    for name in artboards_by_name:
+        for base_name, _ in SCREEN_SPECS:
+            prefix = f"{base_name} — "
+            if name.startswith(prefix):
+                app_locales.add(name[len(prefix):])
+
+    for app_locale in sorted(app_locales):
+        asc_locale = LOCALE_MAP.get(app_locale, app_locale)
+        for base_name, filename in SCREEN_SPECS:
+            localized_name = f"{base_name} — {app_locale}"
+            node_id = artboards_by_name.get(localized_name)
+            if node_id:
+                discovered.append((node_id, asc_locale, filename))
+
+    if not discovered:
+        raise RuntimeError("No screenshot artboards found on the Paper canvas")
+
+    return discovered
+
+
 def main():
     # Initialize session
     mcp_call(
@@ -115,21 +135,22 @@ def main():
         0,
     )
 
+    artboards = discover_artboards()
     files_written = []
 
-    for i, (node_id, locale, filename) in enumerate(ARTBOARDS, start=1):
+    for i, (node_id, locale, filename) in enumerate(artboards, start=1):
         dest_dir = os.path.join(OUT_DIR, locale)
         os.makedirs(dest_dir, exist_ok=True)
         dest = os.path.join(dest_dir, filename)
 
-        print(f"[{i:2d}/40] {locale}/{filename} ← {node_id}", end="  ", flush=True)
+        print(f"[{i:2d}/{len(artboards)}] {locale}/{filename} ← {node_id}", end="  ", flush=True)
         img_bytes = screenshot(node_id, i)
         with open(dest, "wb") as f:
             f.write(img_bytes)
 
-        # Resize to ASC 6.5" dimensions: 1242 × 2688
+        # Export the App Store phone screenshots in the 6.5-inch size.
         subprocess.run(
-            ["/usr/bin/sips", "-z", "2688", "1242", dest],
+            ["/usr/bin/sips", "-z", str(ASC_IPHONE_HEIGHT), str(ASC_IPHONE_WIDTH), dest],
             check=True, capture_output=True,
         )
 
@@ -147,7 +168,10 @@ def main():
         print(f"{w}×{h}")
         files_written.append(dest)
 
-    print(f"\n✓ {len(files_written)} screenshots saved and resized to 1242×2688")
+    print(
+        f"\n✓ {len(files_written)} screenshots saved and resized to "
+        f"{ASC_IPHONE_WIDTH}×{ASC_IPHONE_HEIGHT} in {OUT_DIR}"
+    )
 
 
 if __name__ == "__main__":
