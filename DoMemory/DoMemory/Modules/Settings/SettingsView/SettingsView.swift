@@ -47,6 +47,39 @@ struct SettingsView: View {
                         showDifficultyPicker = true
                     }
 
+                    SettingsOptionRow(
+                        title: Strings.settingsRemoveAdsTitle,
+                        subtitle: removeAdsSubtitle,
+                        actionTitle: removeAdsActionTitle,
+                        systemImage: "nosign",
+                        isDisabled: purchaseService.hasRemovedAds || purchaseService.isLoading
+                    ) {
+                        impactMed.impactOccurred()
+                        Task {
+                            await purchaseService.purchaseRemoveAds()
+                        }
+                    }
+
+                    SettingsOptionRow(
+                        title: Strings.settingsRestorePurchasesTitle,
+                        subtitle: Strings.settingsRestorePurchasesDescription,
+                        actionTitle: Strings.settingsRestorePurchasesAction,
+                        systemImage: "arrow.clockwise",
+                        isDisabled: purchaseService.isLoading
+                    ) {
+                        impactMed.impactOccurred()
+                        Task {
+                            await purchaseService.restorePurchases()
+                        }
+                    }
+
+                    if let purchaseMessage = purchaseService.purchaseMessage {
+                        Text(purchaseMessage)
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.textMuted)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
                 }
                 .padding(.horizontal, 20)
 
