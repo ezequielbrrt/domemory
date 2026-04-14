@@ -20,27 +20,19 @@ class AppDelegate: NSObject {
         FirebaseApp.configure()
         Analytics.setAnalyticsCollectionEnabled(true)
 
-        if #available(iOS 10.0, *) {
-          // For iOS 10 display notification (sent via APNS)
-          UNUserNotificationCenter.current().delegate = self
-
-          let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-          UNUserNotificationCenter.current().requestAuthorization(
-            options: authOptions,
-            completionHandler: {_, _ in })
-        } else {
-          let settings: UIUserNotificationSettings =
-          UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
-          application.registerUserNotificationSettings(settings)
-        }
+        // Notification authorization is requested in ContentView after ATT is resolved.
+        // Requesting it here (during didFinishLaunching) causes the push-notification
+        // dialog to appear while ContentView's .task is already waiting to show the ATT
+        // dialog — iOS silently drops whichever comes second.
+        UNUserNotificationCenter.current().delegate = self
         Messaging.messaging().delegate = self
 
         application.registerForRemoteNotifications()
     }
 
-    private func setupAdMob() {
-        MobileAds.shared.start()
-    }
+    // MobileAds is started in ContentView after ATT authorization is resolved.
+    // Starting it here (before ATT) causes Google to mark the request as non-personalized
+    // even when the user later grants tracking permission.
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
@@ -53,7 +45,6 @@ extension AppDelegate: UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         setupFirebase(application: application)
-        setupAdMob()
         return true
     }
     
