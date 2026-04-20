@@ -53,5 +53,9 @@
 "settings_restore_purchases_action" = "恢复";
 "settings_restore_purchases_description" = "恢复之前的购买";
 "settings_restore_purchases_title" = "恢复购买";
+"settings_purchase_success_title" = "购买成功";
+"settings_purchase_success_message" = "广告已移除。祝您游戏愉快！";
+"settings_restore_success_title" = "购买已恢复";
+"settings_restore_success_message" = "您之前的购买已恢复。";
 "stats_played_label" = "已玩";
 "stats_won_label" = "获胜";
