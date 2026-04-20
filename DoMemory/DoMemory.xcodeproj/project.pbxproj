@@ -81,6 +81,7 @@
 		1F1CB0C428BECA8C00EACCAD /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		1FBB910C2890DBB700F6AF65 /* PatrickHand-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PatrickHand-Regular.ttf"; sourceTree = "<group>"; };
 		1FBB910D2890DBB700F6AF65 /* Righteous-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Righteous-Regular.ttf"; sourceTree = "<group>"; };
+		1FE10C892F96C78400E4A916 /* DoMemory.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = DoMemory.storekit; sourceTree = "<group>"; };
 		3706A08E25E04C5C00712AB3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3707A41D25411A6C009FB72A /* PauseModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PauseModalViewModel.swift; sourceTree = "<group>"; };
 		3712312225E55EAF007A177E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -344,6 +345,7 @@
 		37AD1E3D251BC0EE00216E7B = {
 			isa = PBXGroup;
 			children = (
+				1FE10C892F96C78400E4A916 /* DoMemory.storekit */,
 				37AD1E48251BC0EE00216E7B /* DoMemory */,
 				37AD7EF225DCA445005C31BD /* DoMemoryTests */,
 				37AD1E47251BC0EE00216E7B /* Products */,

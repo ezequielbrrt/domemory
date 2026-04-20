@@ -53,5 +53,9 @@
 "settings_restore_purchases_action" = "रीस्टोर";
 "settings_restore_purchases_description" = "पिछली खरीद वापस पाएं";
 "settings_restore_purchases_title" = "खरीदारी रीस्टोर करें";
+"settings_purchase_success_title" = "खरीदारी सफल रही";
+"settings_purchase_success_message" = "विज्ञापन हटा दिए गए हैं। खेल का आनंद लें!";
+"settings_restore_success_title" = "खरीदारी पुनर्स्थापित";
+"settings_restore_success_message" = "आपकी पिछली खरीदारी पुनर्स्थापित की गई है।";
 "stats_played_label" = "खेले";
 "stats_won_label" = "जीते";

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
-    @State private var purchaseService = PurchaseService.shared
+    @Bindable private var purchaseService = PurchaseService.shared
     @State private var showDifficultyPicker = false
 
     let impactMed = UIImpactFeedbackGenerator(style: .medium)
@@ -87,6 +87,13 @@ struct SettingsView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .alert(item: $purchaseService.purchaseAlert) { alert in
+            Alert(
+                title: Text(alert.title),
+                message: Text(alert.message),
+                dismissButton: .default(Text(Strings.ok))
+            )
+        }
         .onAppear {
             viewModel.difficulty = viewModel.getCurrentDifficulty()
             Task {

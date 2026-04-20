@@ -53,5 +53,9 @@
 "settings_restore_purchases_action" = "Restore";
 "settings_restore_purchases_description" = "Recover a previous purchase";
 "settings_restore_purchases_title" = "Restore purchases";
+"settings_purchase_success_title" = "Purchase Successful";
+"settings_purchase_success_message" = "Ads have been removed. Enjoy the game!";
+"settings_restore_success_title" = "Purchases Restored";
+"settings_restore_success_message" = "Your previous purchase has been restored.";
 "stats_played_label" = "played";
 "stats_won_label" = "won";

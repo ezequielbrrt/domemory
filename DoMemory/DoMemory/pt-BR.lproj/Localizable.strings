@@ -53,5 +53,9 @@
 "settings_restore_purchases_action" = "Restaurar";
 "settings_restore_purchases_description" = "Recupere uma compra anterior";
 "settings_restore_purchases_title" = "Restaurar compras";
+"settings_purchase_success_title" = "Compra realizada";
+"settings_purchase_success_message" = "Os anúncios foram removidos. Aproveite o jogo!";
+"settings_restore_success_title" = "Compras restauradas";
+"settings_restore_success_message" = "Sua compra anterior foi restaurada.";
 "stats_played_label" = "jogadas";
 "stats_won_label" = "vencidas";

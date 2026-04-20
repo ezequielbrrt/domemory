@@ -53,5 +53,9 @@
 "settings_restore_purchases_action" = "復元";
 "settings_restore_purchases_description" = "以前の購入を復元";
 "settings_restore_purchases_title" = "購入を復元";
+"settings_purchase_success_title" = "購入完了";
+"settings_purchase_success_message" = "広告が削除されました。ゲームをお楽しみください！";
+"settings_restore_success_title" = "購入を復元しました";
+"settings_restore_success_message" = "以前のご購入が復元されました。";
 "stats_played_label" = "プレイ";
 "stats_won_label" = "勝利";

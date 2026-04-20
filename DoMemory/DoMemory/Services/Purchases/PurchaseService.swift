@@ -9,6 +9,12 @@ import Foundation
 import Observation
 import StoreKit
 
+struct PurchaseAlert: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
+}
+
 @MainActor
 @Observable
 final class PurchaseService {
@@ -23,6 +29,7 @@ final class PurchaseService {
     private(set) var removeAdsProduct: Product?
     private(set) var isLoading = false
     private(set) var purchaseMessage: String?
+    var purchaseAlert: PurchaseAlert?
     private(set) var hasRemovedAds: Bool {
         didSet {
             UserDefaults.standard.set(hasRemovedAds, forKey: StorageKey.hasRemovedAds)
@@ -101,8 +108,17 @@ final class PurchaseService {
         do {
             try await AppStore.sync()
             await refreshPurchasedProducts()
-            if !hasRemovedAds {
+            if hasRemovedAds {
+                purchaseAlert = PurchaseAlert(
+                    title: Strings.settingsRestoreSuccessTitle,
+                    message: Strings.settingsRestoreSuccessMessage
+                )
+            } else {
                 purchaseMessage = Strings.settingsRemoveAdsNoRestore
+                purchaseAlert = PurchaseAlert(
+                    title: Strings.settingsRestorePurchasesTitle,
+                    message: Strings.settingsRemoveAdsNoRestore
+                )
             }
         } catch {
             purchaseMessage = error.localizedDescription
@@ -143,6 +159,12 @@ final class PurchaseService {
         if transaction.productID == Self.removeAdsProductID {
             hasRemovedAds = transaction.revocationDate == nil
             purchaseMessage = hasRemovedAds ? Strings.settingsRemoveAdsPurchased : nil
+            if hasRemovedAds {
+                purchaseAlert = PurchaseAlert(
+                    title: Strings.settingsPurchaseSuccessTitle,
+                    message: Strings.settingsPurchaseSuccessMessage
+                )
+            }
         }
 
         await transaction.finish()

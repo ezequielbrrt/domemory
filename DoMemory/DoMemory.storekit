@@ -1,0 +1,33 @@
+{
+  "identifier" : "D6A9B3CF-16BA-47A6-9BF3-4EF10380AB3A",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "00745947-13BD-44E6-9D60-8DD88A1B2DCE",
+      "localizations" : [
+        {
+          "description" : "Remove all ads from the app",
+          "displayName" : "Remove Ads",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.ezequielbrrt.domemory.removeads",
+      "referenceName" : "Remove Ads",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 2,
+    "minor" : 0
+  }
+}
