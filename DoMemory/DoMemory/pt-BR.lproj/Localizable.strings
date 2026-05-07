@@ -59,3 +59,9 @@
 "settings_restore_success_message" = "Sua compra anterior foi restaurada.";
 "stats_played_label" = "jogadas";
 "stats_won_label" = "vencidas";
+"settings_select_theme" = "Selecionar";
+"settings_theme_prompt" = "Escolha a aparência que você prefere";
+"settings_theme_title" = "Tema";
+"theme_dark" = "Escuro";
+"theme_light" = "Claro";
+"theme_system" = "Sistema";

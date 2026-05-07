@@ -59,3 +59,9 @@
 "settings_restore_success_message" = "आपकी पिछली खरीदारी पुनर्स्थापित की गई है।";
 "stats_played_label" = "खेले";
 "stats_won_label" = "जीते";
+"settings_select_theme" = "चुनें";
+"settings_theme_prompt" = "अपनी पसंद का रूप चुनें";
+"settings_theme_title" = "थीम";
+"theme_dark" = "डार्क";
+"theme_light" = "लाइट";
+"theme_system" = "सिस्टम";

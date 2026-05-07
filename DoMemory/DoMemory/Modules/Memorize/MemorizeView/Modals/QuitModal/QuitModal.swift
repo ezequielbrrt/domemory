@@ -12,7 +12,7 @@ struct QuitModal: View {
 
     var body: some View {
         ZStack {
-            Color.grayBackground.opacity(0.88)
+            Color.overlayBackdrop
                 .ignoresSafeArea()
                 .background(.ultraThinMaterial)
 
@@ -63,8 +63,12 @@ struct QuitModal: View {
             .padding(28)
             .background(
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(Color.darkGrayColor)
-                    .shadow(color: Color.textPrimary.opacity(0.12), radius: 24, x: 0, y: 8)
+                    .fill(Color.surfacePrimary)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 28, style: .continuous)
+                            .stroke(Color.surfaceBorder, lineWidth: 1)
+                    )
+                    .shadow(color: Color.shadowColor, radius: 24, x: 0, y: 8)
             )
             .padding(.horizontal, 32)
         }

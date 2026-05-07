@@ -149,6 +149,30 @@ enum AnalyticsService {
     }
 }
 
+enum AppTheme: String, CaseIterable, Identifiable {
+    case system
+    case light
+    case dark
+
+    var id: String { rawValue }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .system: return Strings.themeSystem
+        case .light: return Strings.themeLight
+        case .dark: return Strings.themeDark
+        }
+    }
+}
+
 
 // MARK:- FONTS
 extension UIFont {
@@ -173,21 +197,48 @@ extension Font {
 
 // MARK:- COLORS
 extension Color {
-    // Warm Light palette
-    static var primaryColor: Color    { Color.make(75, 63, 200) }   // Indigo #4B3FC8
-    static var secundaryColor: Color  { Color.make(255, 99, 64) }   // Coral  #FF6340
-    static var grayBackground: Color  { Color.make(247, 243, 237) } // Cream  #F7F3ED
-    static var darkGrayColor: Color   { .white }                    // Surface
+    static var primaryColor: Color    { dynamicColor(light: (75, 63, 200), dark: (142, 129, 255)) }
+    static var secundaryColor: Color  { dynamicColor(light: (255, 99, 64), dark: (255, 134, 109)) }
+    static var easyGreen: Color       { dynamicColor(light: (40, 182, 126), dark: (73, 214, 151)) }
+    static var hardAmber: Color       { dynamicColor(light: (245, 166, 35), dark: (255, 193, 87)) }
 
-    // Additional semantic tokens
-    static var textPrimary: Color     { Color.make(28, 24, 48) }    // #1C1830
-    static var textMuted: Color       { Color.make(28, 24, 48).opacity(0.45) }
-    static var easyGreen: Color       { Color.make(40, 182, 126) }  // #28B67E
-    static var hardAmber: Color       { Color.make(245, 166, 35) }  // #F5A623
+    static var appBackground: Color   { dynamicColor(light: (247, 243, 237), dark: (17, 19, 31)) }
+    static var surfacePrimary: Color  { dynamicColor(light: (255, 255, 255), dark: (30, 34, 52)) }
+    static var surfaceSecondary: Color { dynamicColor(light: (239, 233, 227), dark: (40, 46, 69)) }
+    static var textPrimary: Color     { dynamicColor(light: (28, 24, 48), dark: (244, 240, 255)) }
+    static var textSecondary: Color   { dynamicColor(light: (122, 114, 145), dark: (164, 171, 196)) }
+    static var surfaceBorder: Color   { dynamicColor(light: (225, 219, 235), dark: (65, 72, 98)) }
+    static var shadowColor: Color     { dynamicColor(light: (28, 24, 48), dark: (0, 0, 0), lightOpacity: 0.08, darkOpacity: 0.32) }
+    static var overlayBackdrop: Color { dynamicColor(light: (247, 243, 237), dark: (9, 11, 18), lightOpacity: 0.88, darkOpacity: 0.74) }
+
+    // Backward-compatible aliases for existing call sites.
+    static var grayBackground: Color  { appBackground }
+    static var darkGrayColor: Color   { surfacePrimary }
+    static var textMuted: Color       { textSecondary }
 
     static func make(_ red: Int, _ green: Int, _ blue: Int) -> Color {
         return Color(red: Double(red) / 255.0,
                      green: Double(green) / 255.0,
                      blue: Double(blue) / 255.0)
+    }
+
+    private static func dynamicColor(
+        light: (Int, Int, Int),
+        dark: (Int, Int, Int),
+        lightOpacity: Double = 1,
+        darkOpacity: Double = 1
+    ) -> Color {
+        Color(
+            uiColor: UIColor { traitCollection in
+                let palette = traitCollection.userInterfaceStyle == .dark ? dark : light
+                let alpha = traitCollection.userInterfaceStyle == .dark ? darkOpacity : lightOpacity
+                return UIColor(
+                    red: CGFloat(palette.0) / 255.0,
+                    green: CGFloat(palette.1) / 255.0,
+                    blue: CGFloat(palette.2) / 255.0,
+                    alpha: alpha
+                )
+            }
+        )
     }
 }

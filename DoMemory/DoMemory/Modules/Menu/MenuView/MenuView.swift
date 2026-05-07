@@ -32,13 +32,13 @@ struct MenuView: View {
         Group {
             if viewModel.isLoading {
                 ZStack {
-                    Color.grayBackground.ignoresSafeArea()
+                    Color.appBackground.ignoresSafeArea()
                     LoadingView().padding()
                 }
             } else {
                 NavigationStack {
                     ZStack {
-                        Color.grayBackground.ignoresSafeArea()
+                        Color.appBackground.ignoresSafeArea()
 
                         VStack(spacing: 0) {
                             // Header
@@ -56,8 +56,12 @@ struct MenuView: View {
                                         .frame(width: 38, height: 38)
                                         .background(
                                             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                                .fill(Color.darkGrayColor)
-                                                .shadow(color: Color.textPrimary.opacity(0.08), radius: 6, x: 0, y: 3)
+                                                .fill(Color.surfacePrimary)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                                                )
+                                                .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                                         )
                                 }
                                 .buttonStyle(.plain)
@@ -69,8 +73,12 @@ struct MenuView: View {
                                         .frame(width: 38, height: 38)
                                         .background(
                                             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                                .fill(Color.darkGrayColor)
-                                                .shadow(color: Color.textPrimary.opacity(0.08), radius: 6, x: 0, y: 3)
+                                                .fill(Color.surfacePrimary)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                                                )
+                                                .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                                         )
                                 }
                                 .buttonStyle(.plain)
@@ -201,7 +209,11 @@ private struct GameTabPicker: View {
         .padding(4)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.textPrimary.opacity(0.07))
+                .fill(Color.surfaceSecondary)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                )
         )
     }
 
@@ -217,8 +229,12 @@ private struct GameTabPicker: View {
                     Group {
                         if isSelected {
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color.darkGrayColor)
-                                .shadow(color: Color.textPrimary.opacity(0.08), radius: 4, x: 0, y: 2)
+                                .fill(Color.surfacePrimary)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                                )
+                                .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
                         }
                     }
                 )
@@ -274,8 +290,12 @@ struct MemoramaCard: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color.darkGrayColor)
-                .shadow(color: Color.textPrimary.opacity(0.08), radius: 10, x: 0, y: 4)
+                .fill(Color.surfacePrimary)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                )
+                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 4)
                 .frame(height: 156)
 
             VStack(spacing: 10) {
@@ -346,7 +366,7 @@ private struct CreateMemoramaView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.grayBackground.ignoresSafeArea()
+                Color.appBackground.ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
@@ -356,14 +376,23 @@ private struct CreateMemoramaView: View {
                                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .foregroundStyle(Color.textMuted)
 
-                            TextField(Strings.createNamePlaceholder, text: $name)
+                            TextField(
+                                "",
+                                text: $name,
+                                prompt: Text(Strings.createNamePlaceholder)
+                                    .foregroundStyle(Color.textMuted)
+                            )
                                 .font(.system(size: 17, weight: .semibold, design: .rounded))
                                 .foregroundStyle(Color.textPrimary)
                                 .padding(14)
                                 .background(
                                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                        .fill(Color.darkGrayColor)
-                                        .shadow(color: Color.textPrimary.opacity(0.06), radius: 6, x: 0, y: 2)
+                                        .fill(Color.surfacePrimary)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                                .stroke(Color.surfaceBorder, lineWidth: 1)
+                                        )
+                                        .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 2)
                                 )
                         }
 
@@ -403,7 +432,11 @@ private struct CreateMemoramaView: View {
                                         .padding(.vertical, 10)
                                         .background(
                                             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                                .fill(Color.darkGrayColor)
+                                                .fill(Color.surfacePrimary)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                                                )
                                         )
                                     }
                                 }
@@ -411,8 +444,14 @@ private struct CreateMemoramaView: View {
 
                             if isAddingEmoji {
                                 HStack(spacing: 10) {
-                                    TextField("😀", text: $newEmoji)
+                                    TextField(
+                                        "",
+                                        text: $newEmoji,
+                                        prompt: Text("😀")
+                                            .foregroundStyle(Color.textMuted)
+                                    )
                                         .font(.system(size: 32))
+                                        .foregroundStyle(Color.textPrimary)
                                         .frame(width: 50)
                                         .multilineTextAlignment(.center)
                                         .onChange(of: newEmoji) { _, value in
@@ -442,10 +481,10 @@ private struct CreateMemoramaView: View {
                                 .padding(14)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                        .fill(Color.darkGrayColor)
+                                        .fill(Color.surfacePrimary)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                                .strokeBorder(Color.primaryColor.opacity(0.3), lineWidth: 1)
+                                                .strokeBorder(Color.surfaceBorder, lineWidth: 1)
                                         )
                                 )
                             }
@@ -464,7 +503,7 @@ private struct CreateMemoramaView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(
                                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                            .fill(Color.primaryColor.opacity(0.08))
+                                            .fill(Color.primaryColor.opacity(0.12))
                                     )
                                 }
                                 .buttonStyle(.plain)
