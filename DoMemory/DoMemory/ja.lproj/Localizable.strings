@@ -59,3 +59,9 @@
 "settings_restore_success_message" = "以前のご購入が復元されました。";
 "stats_played_label" = "プレイ";
 "stats_won_label" = "勝利";
+"settings_select_theme" = "選択";
+"settings_theme_prompt" = "お好みの表示テーマを選択";
+"settings_theme_title" = "テーマ";
+"theme_dark" = "ダーク";
+"theme_light" = "ライト";
+"theme_system" = "システム";

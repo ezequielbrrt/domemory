@@ -11,6 +11,8 @@ struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
     @Bindable private var purchaseService = PurchaseService.shared
     @State private var showDifficultyPicker = false
+    @State private var showThemePicker = false
+    @AppStorage(UserDefaultsKeys.themePreference) private var themePreference = AppTheme.system.rawValue
 
     let impactMed = UIImpactFeedbackGenerator(style: .medium)
 
@@ -20,7 +22,7 @@ struct SettingsView: View {
 
     var body: some View {
         ZStack {
-            Color.grayBackground.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // Header
@@ -37,6 +39,16 @@ struct SettingsView: View {
                 .padding(.bottom, 28)
 
                 VStack(spacing: 12) {
+                    SettingsOptionRow(
+                        title: Strings.settingsThemeTitle,
+                        subtitle: selectedThemeTitle,
+                        actionTitle: Strings.settingsSelectTheme,
+                        systemImage: "circle.lefthalf.filled"
+                    ) {
+                        impactMed.impactOccurred()
+                        showThemePicker = true
+                    }
+
                     SettingsOptionRow(
                         title: Strings.difficulty,
                         subtitle: selectedDifficultyTitle,
@@ -116,6 +128,18 @@ struct SettingsView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showThemePicker) {
+            ThemePickerSheet(
+                selectedTheme: AppTheme(rawValue: themePreference) ?? .system,
+                onSelect: { theme in
+                    impactMed.impactOccurred()
+                    themePreference = theme.rawValue
+                    showThemePicker = false
+                }
+            )
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
     }
 
     private var selectedDifficultyTitle: String {
@@ -147,6 +171,10 @@ struct SettingsView: View {
 
         return String(format: Strings.settingsRemoveAdsActionFormat, purchaseService.removeAdsPriceText)
     }
+
+    private var selectedThemeTitle: String {
+        AppTheme(rawValue: themePreference)?.title ?? Strings.themeSystem
+    }
 }
 
 private struct SettingsOptionRow: View {
@@ -161,7 +189,7 @@ private struct SettingsOptionRow: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color.primaryColor.opacity(0.12))
+                    .fill(Color.primaryColor.opacity(0.14))
                     .frame(width: 44, height: 44)
 
                 Image(systemName: systemImage)
@@ -187,7 +215,7 @@ private struct SettingsOptionRow: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 9)
-                    .background(Capsule().fill(isDisabled ? Color.textMuted.opacity(0.45) : Color.primaryColor))
+                    .background(Capsule().fill(isDisabled ? Color.surfaceSecondary : Color.primaryColor))
             }
             .buttonStyle(.plain)
             .disabled(isDisabled)
@@ -195,8 +223,12 @@ private struct SettingsOptionRow: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color.darkGrayColor)
-                .shadow(color: Color.textPrimary.opacity(0.08), radius: 10, x: 0, y: 4)
+                .fill(Color.surfacePrimary)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                )
+                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 4)
         )
     }
 }
@@ -207,7 +239,7 @@ private struct DifficultyPickerSheet: View {
 
     var body: some View {
         ZStack {
-            Color.grayBackground.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
 
             VStack(spacing: 18) {
                 VStack(spacing: 4) {
@@ -225,7 +257,7 @@ private struct DifficultyPickerSheet: View {
                         title: Strings.easy,
                         subtitle: Strings.easySubtitle,
                         accentColor: Color.easyGreen,
-                        bgColor: Color.make(230, 249, 241),
+                        bgColor: Color.easyGreen.opacity(0.14),
                         systemImage: "leaf.fill",
                         isSelected: selectedDifficulty == 0,
                         isLast: false
@@ -237,7 +269,7 @@ private struct DifficultyPickerSheet: View {
                         title: Strings.medium,
                         subtitle: Strings.mediumSubtitle,
                         accentColor: Color.primaryColor,
-                        bgColor: Color.make(235, 233, 252),
+                        bgColor: Color.primaryColor.opacity(0.14),
                         systemImage: "circle.grid.2x2.fill",
                         isSelected: selectedDifficulty == 1,
                         isLast: false
@@ -249,7 +281,7 @@ private struct DifficultyPickerSheet: View {
                         title: Strings.hard,
                         subtitle: Strings.hardSubtitle,
                         accentColor: Color.hardAmber,
-                        bgColor: Color.make(254, 245, 228),
+                        bgColor: Color.hardAmber.opacity(0.14),
                         systemImage: "flame.fill",
                         isSelected: selectedDifficulty == 2,
                         isLast: false
@@ -261,7 +293,7 @@ private struct DifficultyPickerSheet: View {
                         title: Strings.veryHard,
                         subtitle: Strings.veryHardSubtitle,
                         accentColor: Color.secundaryColor,
-                        bgColor: Color.make(254, 240, 236),
+                        bgColor: Color.secundaryColor.opacity(0.14),
                         systemImage: "bolt.trianglebadge.exclamationmark.fill",
                         isSelected: selectedDifficulty == 3,
                         isLast: true
@@ -270,7 +302,74 @@ private struct DifficultyPickerSheet: View {
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 4)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                )
+                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 4)
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+}
+
+private struct ThemePickerSheet: View {
+    let selectedTheme: AppTheme
+    let onSelect: (AppTheme) -> Void
+
+    var body: some View {
+        ZStack {
+            Color.appBackground.ignoresSafeArea()
+
+            VStack(spacing: 18) {
+                VStack(spacing: 4) {
+                    Text(Strings.settingsThemeTitle)
+                        .font(.righteous(size: 32))
+                        .foregroundStyle(Color.primaryColor)
+
+                    Text(Strings.settingsThemePrompt)
+                        .font(.patrickHand(size: 17))
+                        .foregroundStyle(Color.textMuted)
+                }
+
+                VStack(spacing: 0) {
+                    ThemeOptionRow(
+                        title: Strings.themeSystem,
+                        icon: "gearshape.2.fill",
+                        accentColor: Color.primaryColor,
+                        isSelected: selectedTheme == .system,
+                        isLast: false
+                    ) {
+                        onSelect(.system)
+                    }
+
+                    ThemeOptionRow(
+                        title: Strings.themeLight,
+                        icon: "sun.max.fill",
+                        accentColor: Color.hardAmber,
+                        isSelected: selectedTheme == .light,
+                        isLast: false
+                    ) {
+                        onSelect(.light)
+                    }
+
+                    ThemeOptionRow(
+                        title: Strings.themeDark,
+                        icon: "moon.fill",
+                        accentColor: Color.secundaryColor,
+                        isSelected: selectedTheme == .dark,
+                        isLast: true
+                    ) {
+                        onSelect(.dark)
+                    }
+                }
+                .background(Color.surfacePrimary)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                )
+                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 4)
             }
             .padding(.horizontal, 20)
         }
@@ -323,6 +422,72 @@ private struct SelectableRow: View {
             .padding(.vertical, 14)
             .frame(maxWidth: .infinity)
             .background(bgColor)
+            .overlay(alignment: .bottom) {
+                if !isLast {
+                    Divider().padding(.leading, 66)
+                }
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 0)
+                    .strokeBorder(isSelected ? accentColor.opacity(0.3) : .clear, lineWidth: isSelected ? 1 : 0)
+            )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
+            .animation(.spring(response: 0.28, dampingFraction: 0.8), value: isPressed)
+            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isSelected)
+        }
+        .buttonStyle(.plain)
+        .onLongPressGesture(minimumDuration: .infinity, pressing: { pressing in
+            withAnimation { isPressed = pressing }
+        }, perform: {})
+    }
+
+    private func trigger() {
+        #if os(iOS)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        #endif
+        action()
+    }
+}
+
+private struct ThemeOptionRow: View {
+    let title: String
+    let icon: String
+    let accentColor: Color
+    let isSelected: Bool
+    let isLast: Bool
+    let action: () -> Void
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Button(action: trigger) {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(accentColor.opacity(0.15))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: icon)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(accentColor)
+                }
+
+                Text(title)
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.textPrimary)
+
+                Spacer()
+
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(accentColor)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity)
+            .background(Color.surfacePrimary)
             .overlay(alignment: .bottom) {
                 if !isLast {
                     Divider().padding(.leading, 66)

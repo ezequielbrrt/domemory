@@ -15,7 +15,7 @@ struct WinModal: View {
 
     var body: some View {
         ZStack {
-            Color.grayBackground.opacity(0.88)
+            Color.overlayBackdrop
                 .ignoresSafeArea()
                 .background(.ultraThinMaterial)
 
@@ -104,8 +104,12 @@ struct WinModal: View {
             .padding(.bottom, 32)
             .background(
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(Color.darkGrayColor)
-                    .shadow(color: Color.textPrimary.opacity(0.14), radius: 60, x: 0, y: 20)
+                    .fill(Color.surfacePrimary)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 28, style: .continuous)
+                            .stroke(Color.surfaceBorder, lineWidth: 1)
+                    )
+                    .shadow(color: Color.shadowColor.opacity(1.2), radius: 60, x: 0, y: 20)
             )
             .padding(.horizontal, 32)
         }

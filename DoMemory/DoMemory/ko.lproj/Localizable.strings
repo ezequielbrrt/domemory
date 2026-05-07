@@ -59,3 +59,9 @@
 "settings_restore_success_message" = "이전 구매가 복원되었습니다.";
 "stats_played_label" = "플레이";
 "stats_won_label" = "승리";
+"settings_select_theme" = "선택";
+"settings_theme_prompt" = "원하는 화면 테마를 선택하세요";
+"settings_theme_title" = "테마";
+"theme_dark" = "다크";
+"theme_light" = "라이트";
+"theme_system" = "시스템";

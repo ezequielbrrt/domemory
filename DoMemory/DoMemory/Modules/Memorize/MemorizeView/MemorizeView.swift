@@ -22,7 +22,7 @@ struct MemorizeView: View {
 
     var body: some View {
         ZStack {
-            Color.grayBackground.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // HUD bar
@@ -37,8 +37,12 @@ struct MemorizeView: View {
                             .frame(width: 40, height: 40)
                             .background(
                                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(Color.darkGrayColor)
-                                    .shadow(color: Color.textPrimary.opacity(0.08), radius: 6, x: 0, y: 3)
+                                    .fill(Color.surfacePrimary)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                            .stroke(Color.surfaceBorder, lineWidth: 1)
+                                    )
+                                    .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                             )
                     }
                     .buttonStyle(.plain)
@@ -58,8 +62,12 @@ struct MemorizeView: View {
                     .padding(.vertical, 8)
                     .background(
                         Capsule()
-                            .fill(Color.darkGrayColor)
-                            .shadow(color: Color.textPrimary.opacity(0.08), radius: 6, x: 0, y: 3)
+                            .fill(Color.surfacePrimary)
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.surfaceBorder, lineWidth: 1)
+                            )
+                            .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                     )
 
                     // Timer chip
@@ -75,8 +83,12 @@ struct MemorizeView: View {
                     .padding(.vertical, 8)
                     .background(
                         Capsule()
-                            .fill(Color.darkGrayColor)
-                            .shadow(color: Color.textPrimary.opacity(0.08), radius: 6, x: 0, y: 3)
+                            .fill(Color.surfacePrimary)
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.surfaceBorder, lineWidth: 1)
+                            )
+                            .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                     )
 
                     Spacer()
@@ -91,8 +103,12 @@ struct MemorizeView: View {
                             .frame(width: 40, height: 40)
                             .background(
                                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(Color.darkGrayColor)
-                                    .shadow(color: Color.textPrimary.opacity(0.08), radius: 6, x: 0, y: 3)
+                                    .fill(Color.surfacePrimary)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                            .stroke(Color.surfaceBorder, lineWidth: 1)
+                                    )
+                                    .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                             )
                     }
                     .buttonStyle(.plain)

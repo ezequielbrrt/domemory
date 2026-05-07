@@ -11,4 +11,5 @@ class UserDefaultsKeys: NSObject {
     static var dificulty: String = "dificulty"
     static var favoriteIDs: String = "favoriteIDs"
     static var customMemoramas: String = "customMemoramas"
+    static var themePreference: String = "themePreference"
 }

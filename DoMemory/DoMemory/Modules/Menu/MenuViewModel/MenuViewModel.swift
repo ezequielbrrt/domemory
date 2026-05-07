@@ -101,11 +101,7 @@ extension MenuViewModel {
             let difficultyEnum = Difficulty(rawValue: memorama.difficulty) ?? .medium
             return difficultyEnum == difficulty
         }
-        let filteredCustom = customMemoramas.filter { memorama in
-            let difficultyEnum = Difficulty(rawValue: memorama.difficulty) ?? .medium
-            return difficultyEnum == difficulty
-        }
-        memoramaArray = filteredFirebase + filteredCustom
+        memoramaArray = filteredFirebase + customMemoramas
         applySort()
     }
 }

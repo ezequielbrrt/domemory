@@ -59,3 +59,9 @@
 "settings_restore_success_message" = "Your previous purchase has been restored.";
 "stats_played_label" = "played";
 "stats_won_label" = "won";
+"settings_select_theme" = "Select";
+"settings_theme_prompt" = "Choose your preferred appearance";
+"settings_theme_title" = "Theme";
+"theme_dark" = "Dark";
+"theme_light" = "Light";
+"theme_system" = "System";

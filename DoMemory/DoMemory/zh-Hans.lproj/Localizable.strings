@@ -59,3 +59,9 @@
 "settings_restore_success_message" = "您之前的购买已恢复。";
 "stats_played_label" = "已玩";
 "stats_won_label" = "获胜";
+"settings_select_theme" = "选择";
+"settings_theme_prompt" = "选择你偏好的外观";
+"settings_theme_title" = "主题";
+"theme_dark" = "深色";
+"theme_light" = "浅色";
+"theme_system" = "跟随系统";

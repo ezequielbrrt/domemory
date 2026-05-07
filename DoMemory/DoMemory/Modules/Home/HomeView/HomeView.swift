@@ -12,7 +12,7 @@ struct HomeView: View {
 
     var body: some View {
         ZStack {
-            Color.grayBackground.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // Header
@@ -35,7 +35,7 @@ struct HomeView: View {
                             title: Strings.easy,
                             subtitle: Strings.easySubtitle,
                             accentColor: Color.easyGreen,
-                            bgColor: Color.make(230, 249, 241),
+                            bgColor: Color.easyGreen.opacity(0.14),
                             systemImage: "leaf.fill"
                         ) { selectDifficulty(.easy) }
 
@@ -43,7 +43,7 @@ struct HomeView: View {
                             title: Strings.medium,
                             subtitle: Strings.mediumSubtitle,
                             accentColor: Color.primaryColor,
-                            bgColor: Color.make(235, 233, 252),
+                            bgColor: Color.primaryColor.opacity(0.14),
                             systemImage: "circle.grid.2x2.fill"
                         ) { selectDifficulty(.medium) }
                     }
@@ -53,7 +53,7 @@ struct HomeView: View {
                             title: Strings.hard,
                             subtitle: Strings.hardSubtitle,
                             accentColor: Color.hardAmber,
-                            bgColor: Color.make(254, 245, 228),
+                            bgColor: Color.hardAmber.opacity(0.14),
                             systemImage: "flame.fill"
                         ) { selectDifficulty(.hard) }
 
@@ -61,7 +61,7 @@ struct HomeView: View {
                             title: Strings.veryHard,
                             subtitle: Strings.veryHardSubtitle,
                             accentColor: Color.secundaryColor,
-                            bgColor: Color.make(254, 240, 236),
+                            bgColor: Color.secundaryColor.opacity(0.14),
                             systemImage: "bolt.trianglebadge.exclamationmark.fill"
                         ) { selectDifficulty(.veryHard) }
                     }
@@ -124,7 +124,11 @@ private struct DifficultyTile: View {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .fill(bgColor)
             )
-            .shadow(color: accentColor.opacity(0.12), radius: 12, x: 0, y: 6)
+            .overlay(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .stroke(Color.surfaceBorder, lineWidth: 1)
+            )
+            .shadow(color: Color.shadowColor.opacity(0.9), radius: 12, x: 0, y: 6)
             .scaleEffect(isPressed ? 0.97 : 1.0)
             .animation(.spring(response: 0.28, dampingFraction: 0.8), value: isPressed)
         }
