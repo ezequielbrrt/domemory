@@ -12,4 +12,7 @@ class UserDefaultsKeys: NSObject {
     static var favoriteIDs: String = "favoriteIDs"
     static var customMemoramas: String = "customMemoramas"
     static var themePreference: String = "themePreference"
+    static var reviewSuccessfulWins: String = "reviewSuccessfulWins"
+    static var reviewLastPromptedVersion: String = "reviewLastPromptedVersion"
+    static var reviewLastPromptedDate: String = "reviewLastPromptedDate"
 }

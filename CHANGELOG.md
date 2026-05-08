@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Added full light and dark appearance support across the app while preserving the existing brand palette.
 - Added a theme selector in Settings with `System`, `Light`, and `Dark` options.
 - Added persisted theme preference storage and app-wide appearance application at launch.
+- Added a conservative in-app review prompt flow that can request an App Store review after repeated successful wins.
 
 ### Changed
 - Removed the forced dark-only app appearance so the app can follow the system theme by default.
