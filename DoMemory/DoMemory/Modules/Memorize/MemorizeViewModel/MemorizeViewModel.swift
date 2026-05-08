@@ -288,5 +288,8 @@ extension MemorizeViewModel: QuitModalListener {
 extension MemorizeViewModel: WinModalListener {
     func tapOnContinue() {
         self.showWinView = false
+        Task { @MainActor in
+            ReviewRequestService.shared.registerSuccessfulGameWin()
+        }
     }
 }
