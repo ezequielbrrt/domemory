@@ -7,13 +7,17 @@
 
 import Foundation
 
+@MainActor
 protocol PauseModalListener {
+    var canOfferRewardedAds: Bool { get }
+    var isRewardedAdInProgress: Bool { get }
+
     func tapOnResumeGame()
     func tapOnGoHome()
     func tapOnReloadGame()
+    func tapOnRewardedHint()
 }
 
 struct PauseModalViewModel {
     var listener: PauseModalListener?
 }
-

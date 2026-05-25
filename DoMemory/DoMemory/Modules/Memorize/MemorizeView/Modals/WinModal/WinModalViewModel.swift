@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 protocol WinModalListener {
     func tapOnContinue()
 }
@@ -14,5 +15,4 @@ protocol WinModalListener {
 struct WinModalViewModel {
     var listener: WinModalListener?
 }
-
 

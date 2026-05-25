@@ -26,6 +26,25 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         }
     }
 
+    mutating func hideMatchedFaceUpCards() {
+        for index in cards.indices where cards[index].isFaceUp && cards[index].isMatched {
+            cards[index].isFaceUp = false
+        }
+    }
+
+    mutating func revealUnmatchedPairForHint() -> Bool {
+        guard let itemID = cards.first(where: { !$0.isMatched })?.itemId else { return false }
+        var revealedCount = 0
+        for index in cards.indices {
+            let shouldReveal = cards[index].itemId == itemID && !cards[index].isMatched
+            cards[index].isFaceUp = shouldReveal
+            if shouldReveal {
+                revealedCount += 1
+            }
+        }
+        return revealedCount >= 2
+    }
+
     mutating func choose(card: Card) {
         if let chosenIndex = cards.firstIndex(matching: card), !cards[chosenIndex].isFaceUp, !cards[chosenIndex].isMatched {
             if let potencialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {

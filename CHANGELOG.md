@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ### Added
+- Added real-time multiplayer mode powered by Firebase Realtime Database; players can create or join a room via a 6-character code or QR scan, take turns flipping cards, and see live scores.
+- Added multiplayer lobby screens (create room, join room, waiting room) and end-of-game flow with rematch support.
+- Added local notification reminders that fire at 7 PM two days after the last completed game.
+- Added a Notifications toggle in Settings to enable or disable inactivity reminders.
+- Added permission-denied alert in Settings that deep-links to iOS notification settings when access has been revoked.
+- Added `NotificationService` singleton managing scheduling, cancellation, and authorization-status sync.
+- Added matched-card hide animation: matched pairs fade off the board one second after being revealed.
+- Added rewarded-ad hint feature in the pause modal that reveals one unmatched pair.
+- Added App Store "05 Features" screenshot artboard for all 10 supported locales (en, es-419, de, fr, hi, it, ja, ko, pt-BR, zh-Hans).
 - Added full light and dark appearance support across the app while preserving the existing brand palette.
 - Added a theme selector in Settings with `System`, `Light`, and `Dark` options.
 - Added persisted theme preference storage and app-wide appearance application at launch.

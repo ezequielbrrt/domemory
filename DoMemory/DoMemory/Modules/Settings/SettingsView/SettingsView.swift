@@ -6,13 +6,17 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
     @Bindable private var purchaseService = PurchaseService.shared
     @State private var showDifficultyPicker = false
     @State private var showThemePicker = false
+    @State private var isRewardedAdInProgress = false
+    @State private var showNotificationsDeniedAlert = false
     @AppStorage(UserDefaultsKeys.themePreference) private var themePreference = AppTheme.system.rawValue
+    @AppStorage(UserDefaultsKeys.notificationsEnabled) private var notificationsEnabled = false
 
     let impactMed = UIImpactFeedbackGenerator(style: .medium)
 
@@ -60,6 +64,25 @@ struct SettingsView: View {
                     }
 
                     SettingsOptionRow(
+                        title: Strings.settingsNotificationsTitle,
+                        subtitle: notificationsEnabled
+                            ? Strings.settingsNotificationsDescriptionOn
+                            : Strings.settingsNotificationsDescriptionOff,
+                        actionTitle: notificationsEnabled
+                            ? Strings.settingsNotificationsDisable
+                            : Strings.settingsNotificationsEnable,
+                        systemImage: "bell.fill"
+                    ) {
+                        impactMed.impactOccurred()
+                        if notificationsEnabled {
+                            notificationsEnabled = false
+                            NotificationService.shared.cancelAll()
+                        } else {
+                            Task { await handleEnableNotifications() }
+                        }
+                    }
+
+                    SettingsOptionRow(
                         title: Strings.settingsRemoveAdsTitle,
                         subtitle: removeAdsSubtitle,
                         actionTitle: removeAdsActionTitle,
@@ -69,6 +92,20 @@ struct SettingsView: View {
                         impactMed.impactOccurred()
                         Task {
                             await purchaseService.purchaseRemoveAds()
+                        }
+                    }
+
+                    if AdsService.shared.isRewardedConfigured(for: .settingsRewardedRemoveAds)
+                        || purchaseService.hasActiveRewardedRemoveAds {
+                        SettingsOptionRow(
+                            title: Strings.settingsRewardedRemoveAdsTitle,
+                            subtitle: rewardedRemoveAdsSubtitle,
+                            actionTitle: rewardedRemoveAdsActionTitle,
+                            systemImage: "play.rectangle.fill",
+                            isDisabled: purchaseService.hasRemovedAds || isRewardedAdInProgress
+                        ) {
+                            impactMed.impactOccurred()
+                            presentRewardedRemoveAds()
                         }
                     }
 
@@ -111,7 +148,19 @@ struct SettingsView: View {
             Task {
                 await purchaseService.refreshPurchasedProducts()
                 await purchaseService.loadProducts()
+                AdsService.shared.loadRewardedAd(for: .settingsRewardedRemoveAds)
+                await NotificationService.shared.syncAuthorizationStatus()
             }
+        }
+        .alert(Strings.settingsNotificationsDeniedTitle, isPresented: $showNotificationsDeniedAlert) {
+            Button(Strings.settingsNotificationsOpenSettings) {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button(Strings.cancel, role: .cancel) {}
+        } message: {
+            Text(Strings.settingsNotificationsDeniedMessage)
         }
         .onDisappear {
             viewModel.viewWillDissapear()
@@ -142,6 +191,25 @@ struct SettingsView: View {
         }
     }
 
+    private func handleEnableNotifications() async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        switch settings.authorizationStatus {
+        case .denied:
+            showNotificationsDeniedAlert = true
+        case .notDetermined:
+            let granted = await NotificationService.shared.requestPermission()
+            if granted {
+                notificationsEnabled = true
+                NotificationService.shared.scheduleInactivityReminder()
+            }
+        case .authorized, .provisional, .ephemeral:
+            notificationsEnabled = true
+            NotificationService.shared.scheduleInactivityReminder()
+        @unknown default:
+            break
+        }
+    }
+
     private var selectedDifficultyTitle: String {
         switch viewModel.difficulty {
         case 0: return Strings.easy
@@ -153,7 +221,7 @@ struct SettingsView: View {
     }
 
     private var removeAdsSubtitle: String {
-        if purchaseService.hasRemovedAds {
+        if purchaseService.hasPurchasedRemoveAds {
             return Strings.settingsRemoveAdsPurchasedDescription
         }
 
@@ -161,7 +229,7 @@ struct SettingsView: View {
     }
 
     private var removeAdsActionTitle: String {
-        if purchaseService.hasRemovedAds {
+        if purchaseService.hasPurchasedRemoveAds {
             return Strings.settingsRemoveAdsPurchased
         }
 
@@ -172,8 +240,48 @@ struct SettingsView: View {
         return String(format: Strings.settingsRemoveAdsActionFormat, purchaseService.removeAdsPriceText)
     }
 
+    private var rewardedRemoveAdsSubtitle: String {
+        if purchaseService.hasActiveRewardedRemoveAds {
+            return String(
+                format: Strings.settingsRewardedRemoveAdsActiveFormat,
+                purchaseService.rewardedRemoveAdsExpirationText
+            )
+        }
+
+        return Strings.settingsRewardedRemoveAdsDescription
+    }
+
+    private var rewardedRemoveAdsActionTitle: String {
+        if purchaseService.hasActiveRewardedRemoveAds {
+            return Strings.settingsRewardedRemoveAdsActive
+        }
+
+        if isRewardedAdInProgress {
+            return Strings.adLoading
+        }
+
+        return Strings.settingsRewardedRemoveAdsAction
+    }
+
     private var selectedThemeTitle: String {
         AppTheme(rawValue: themePreference)?.title ?? Strings.themeSystem
+    }
+
+    private func presentRewardedRemoveAds() {
+        guard !isRewardedAdInProgress else { return }
+        isRewardedAdInProgress = true
+        AnalyticsService.log(.adLifecycle(placement: AdPlacement.settingsRewardedRemoveAds.rawValue, action: "requested"))
+        AdsService.shared.presentRewardedAd(
+            for: .settingsRewardedRemoveAds,
+            rewardHandler: {
+                purchaseService.grantRewardedRemoveAds()
+                AnalyticsService.log(.adLifecycle(placement: AdPlacement.settingsRewardedRemoveAds.rawValue, action: "reward_earned"))
+            },
+            completion: { didEarnReward in
+                isRewardedAdInProgress = false
+                AnalyticsService.log(.adLifecycle(placement: AdPlacement.settingsRewardedRemoveAds.rawValue, action: didEarnReward ? "dismissed_rewarded" : "dismissed_unrewarded"))
+            }
+        )
     }
 }
 

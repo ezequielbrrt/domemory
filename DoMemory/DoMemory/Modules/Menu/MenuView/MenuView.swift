@@ -17,7 +17,9 @@ struct MenuView: View {
     @State var showNewView = false
     @State var showBanner = false
     @State private var showCreateSheet = false
+    @State private var showJoinMultiplayerSheet = false
     @State private var selectedTab: GameTab = .all
+    @State private var randomMemorama: Memorama?
     @State private var statsRefreshID = UUID()
     @State private var purchaseService = PurchaseService.shared
 
@@ -26,6 +28,10 @@ struct MenuView: View {
         case .all:  return viewModel.memoramaArray.filter { !$0.id.hasPrefix("custom_") }
         case .mine: return viewModel.memoramaArray.filter {  $0.id.hasPrefix("custom_") }
         }
+    }
+
+    private var multiplayerAvailableGames: [Memorama] {
+        viewModel.memoramaArray
     }
 
     var body: some View {
@@ -48,6 +54,24 @@ struct MenuView: View {
                                     .foregroundStyle(Color.primaryColor)
 
                                 Spacer()
+
+                                Button(action: { self.showJoinMultiplayerSheet = true }) {
+                                    Image(systemName: "person.2.fill")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundStyle(Color.primaryColor)
+                                        .frame(width: 38, height: 38)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                                .fill(Color.surfacePrimary)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                                                )
+                                                .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel(Strings.multiplayerJoinRoom)
 
                                 Button(action: { self.showCreateSheet = true }) {
                                     Image(systemName: "plus")
@@ -111,6 +135,30 @@ struct MenuView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
 
+                            if !displayedGames.isEmpty {
+                                Button {
+                                    randomMemorama = viewModel.randomGame(for: selectedVisibleTab)
+                                } label: {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "shuffle")
+                                            .font(.system(size: 15, weight: .bold))
+                                        Text(Strings.menuRandomGame)
+                                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    }
+                                    .foregroundStyle(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .fill(Color.primaryColor)
+                                            .shadow(color: Color.primaryColor.opacity(0.25), radius: 12, x: 0, y: 4)
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 12)
+                            }
+
                             // Grid or empty state
                             if displayedGames.isEmpty && selectedTab == .mine {
                                 Spacer()
@@ -141,8 +189,10 @@ struct MenuView: View {
                                     WaterfallGrid(displayedGames) { (memorama: Memorama) in
                                         MemoramaGridCell(
                                             memorama: memorama,
+                                            availableMemoramas: multiplayerAvailableGames,
                                             stats: viewModel.stats(for: memorama.id),
                                             isFavorite: viewModel.isFavorite(id: memorama.id),
+                                            onStatsChanged: { statsRefreshID = UUID() },
                                             onToggleFavorite: { viewModel.toggleFavorite(id: memorama.id) },
                                             onDelete: memorama.id.hasPrefix("custom_")
                                                 ? { viewModel.deleteCustomMemorama(id: memorama.id) }
@@ -172,11 +222,23 @@ struct MenuView: View {
                     .navigationDestination(isPresented: $showNewView) {
                         SettingsView(listener: viewModel)
                     }
+                    .navigationDestination(item: $randomMemorama) { memorama in
+                        MemorizeView(
+                            viewModel: MemorizeViewModel(memorama: memorama),
+                            gameStartSource: "random_menu_button"
+                        )
+                        .onDisappear {
+                            statsRefreshID = UUID()
+                        }
+                    }
                     .sheet(isPresented: $showCreateSheet) {
                         CreateMemoramaView(
                             currentDifficulty: viewModel.currentDifficulty,
                             onSave: { viewModel.addCustomMemorama($0) }
                         )
+                    }
+                    .sheet(isPresented: $showJoinMultiplayerSheet) {
+                        JoinMultiplayerRoomView()
                     }
                 }
             }
@@ -189,11 +251,24 @@ struct MenuView: View {
             }
             await ATTrackingManager.requestTrackingAuthorization()
             await MobileAds.shared.start()
-            try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+            _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
         }
         .onAppear {
             statsRefreshID = UUID()
+            AdsService.shared.registerMenuReadyForAppOpenAds()
             AnalyticsService.log(.screenView(name: "menu", screenClass: "MenuView"))
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            AdsService.shared.presentAppOpenAdIfAvailable()
+        }
+    }
+
+    private var selectedVisibleTab: MenuViewModel.VisibleTab {
+        switch selectedTab {
+        case .all:
+            return .all
+        case .mine:
+            return .mine
         }
     }
 }
@@ -245,12 +320,15 @@ private struct GameTabPicker: View {
 
 private struct MemoramaGridCell: View {
     let memorama: Memorama
+    let availableMemoramas: [Memorama]
     let stats: GameStats
     let isFavorite: Bool
+    let onStatsChanged: () -> Void
     let onToggleFavorite: () -> Void
     let onDelete: (() -> Void)?
 
     @State private var isNavigating = false
+    @State private var isStartingMultiplayer = false
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -261,9 +339,19 @@ private struct MemoramaGridCell: View {
             }
             .buttonStyle(.plain)
             .navigationDestination(isPresented: $isNavigating) {
-                MemorizeView(viewModel: MemorizeViewModel(memorama: memorama))
+                MemorizeView(
+                    viewModel: MemorizeViewModel(memorama: memorama),
+                    gameStartSource: "menu_card"
+                )
+                    .onDisappear(perform: onStatsChanged)
             }
             .contextMenu {
+                Button {
+                    isStartingMultiplayer = true
+                } label: {
+                    Label(Strings.multiplayerCreateRoom, systemImage: "person.2.fill")
+                }
+
                 if let onDelete {
                     Button(role: .destructive, action: onDelete) {
                         Label(Strings.delete, systemImage: "trash")
@@ -271,14 +359,30 @@ private struct MemoramaGridCell: View {
                 }
             }
 
-            Button(action: onToggleFavorite) {
-                Image(systemName: isFavorite ? "heart.fill" : "heart")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(isFavorite ? Color.secundaryColor : Color.textMuted)
-                    .padding(8)
+            VStack(spacing: 4) {
+                Button(action: onToggleFavorite) {
+                    Image(systemName: isFavorite ? "heart.fill" : "heart")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(isFavorite ? Color.secundaryColor : Color.textMuted)
+                        .padding(8)
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    isStartingMultiplayer = true
+                } label: {
+                    Image(systemName: "person.2.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.primaryColor)
+                        .padding(8)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Strings.multiplayerCreateRoom)
             }
-            .buttonStyle(.plain)
             .padding(.top, 4)
+        }
+        .navigationDestination(isPresented: $isStartingMultiplayer) {
+            MultiplayerRoomView(entryMode: .create(memorama), availableMemoramas: availableMemoramas)
         }
     }
 }

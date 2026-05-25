@@ -7,11 +7,17 @@
 
 import SwiftUI
 import Observation
+import FirebaseCore
 import FirebaseDatabase
 import FirebaseAuth
 
 @Observable
 class MenuViewModel {
+    enum VisibleTab {
+        case all
+        case mine
+    }
+
     var memoramaArray: [Memorama] = []
     var isLoading: Bool = false
     private(set) var favoriteIDs: Set<String> = []
@@ -53,6 +59,15 @@ class MenuViewModel {
 
     func stats(for memoramaID: String) -> GameStats {
         GameStatsService.shared.stats(for: memoramaID)
+    }
+
+    func randomGame(for tab: VisibleTab) -> Memorama? {
+        switch tab {
+        case .all:
+            return memoramaArray.filter { !$0.id.hasPrefix("custom_") }.randomElement()
+        case .mine:
+            return memoramaArray.filter { $0.id.hasPrefix("custom_") }.randomElement()
+        }
     }
 
     // MARK: Private
@@ -150,33 +165,55 @@ extension MenuViewModel {
 // MARK: External Data
 extension MenuViewModel {
     private func getData() {
+        guard FirebaseApp.app() != nil else {
+            isLoading = false
+            rebuildMemoramaArray()
+            print("Firebase is not configured. Skipping remote memorama fetch.")
+            return
+        }
+
         Auth.auth().signInAnonymously() { [weak self] (authResult, error) in
-            if let _ = authResult {
-                self?.ref.child("data").observeSingleEvent(of: .value) { [self] snapshot in
+            guard let self else { return }
+
+            if let error {
+                print("Firebase anonymous sign-in failed")
+                print(error)
+                self.isLoading = false
+                return
+            }
+
+            if authResult != nil {
+                self.ref.child("data").observeSingleEvent(of: .value) { [weak self] snapshot in
+                    guard let self else { return }
+
                     do {
-                        let array = snapshot.value as? [[String: Any]]
+                        guard let array = snapshot.value as? [[String: Any]] else {
+                            self.allGames = []
+                            self.rebuildMemoramaArray()
+                            self.isLoading = false
+                            return
+                        }
+
                         let data = try JSONSerialization.data(withJSONObject: array, options: [])
                         var memoramaArrayAux = try JSONDecoder().decode([Memorama].self, from: data)
                         memoramaArrayAux.shuffle()
-                        self?.allGames = memoramaArrayAux
-                        self?.rebuildMemoramaArray()
-                        if let self {
-                            AnalyticsService.log(
-                                .gameListLoaded(
-                                    difficulty: self.currentDifficulty,
-                                    gameCount: self.memoramaArray.count,
-                                    customCount: self.customMemoramas.count
-                                )
+                        self.allGames = memoramaArrayAux
+                        self.rebuildMemoramaArray()
+                        AnalyticsService.log(
+                            .gameListLoaded(
+                                difficulty: self.currentDifficulty,
+                                gameCount: self.memoramaArray.count,
+                                customCount: self.customMemoramas.count
                             )
-                        }
+                        )
                     } catch let error {
                         print("error firebas")
                         print(error)
                     }
-                    self?.isLoading = false
+                    self.isLoading = false
                 }
             } else {
-                self?.isLoading = false
+                self.isLoading = false
             }
         }
     }

@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 protocol QuitModalListener {
     func tapOnExit()
     func tapOnCancel()
@@ -16,4 +17,3 @@ struct QuitModalViewModel {
 }
 
     
-

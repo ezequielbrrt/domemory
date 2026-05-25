@@ -9,11 +9,14 @@ import SwiftUI
 
 struct MemorizeView: View {
     @State var viewModel: MemorizeViewModel
+    let gameStartSource: String
+    @State private var hasPreparedGame = false
     @State private var purchaseService = PurchaseService.shared
     @Environment(\.dismiss) private var dismiss
 
-    init(viewModel: MemorizeViewModel) {
+    init(viewModel: MemorizeViewModel, gameStartSource: String = "initial") {
         self._viewModel = State(initialValue: viewModel)
+        self.gameStartSource = gameStartSource
     }
 
     private var gridColumns: Int {
@@ -188,13 +191,20 @@ struct MemorizeView: View {
         .navigationBarHidden(true)
         .onAppear {
             AnalyticsService.log(.screenView(name: "gameplay", screenClass: "MemorizeView"))
+            guard !hasPreparedGame else { return }
+            hasPreparedGame = true
             viewModel.resetGame()
             viewModel.timeRemaining = viewModel.getRemainingTime()
             viewModel.startTimer()
-            viewModel.trackGameStarted(source: "initial")
+            viewModel.trackGameStarted(source: gameStartSource)
         }
         .onDisappear {
             viewModel.stopTimer()
+        }
+        .onChange(of: viewModel.closeView) {
+            if viewModel.closeView {
+                dismiss()
+            }
         }
     }
 }

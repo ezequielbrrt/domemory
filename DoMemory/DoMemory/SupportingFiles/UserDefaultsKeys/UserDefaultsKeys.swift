@@ -15,4 +15,5 @@ class UserDefaultsKeys: NSObject {
     static var reviewSuccessfulWins: String = "reviewSuccessfulWins"
     static var reviewLastPromptedVersion: String = "reviewLastPromptedVersion"
     static var reviewLastPromptedDate: String = "reviewLastPromptedDate"
+    static var notificationsEnabled: String = "notificationsEnabled"
 }
