@@ -122,3 +122,13 @@
 "settings_notifications_open_settings" = "설정 열기";
 "notification_reminder_title" = "게임 시간!";
 "notification_reminder_body" = "한동안 DoMemory를 플레이하지 않았습니다. 뇌를 계속 훈련하세요!";
+"whats_new_title" = "DoMemory 새 기능";
+"whats_new_button" = "플레이하기";
+"whats_new_multiplayer_title" = "멀티플레이어";
+"whats_new_multiplayer_description" = "친구와 실시간으로 대결 — 방을 만들고 6자리 코드나 QR코드를 공유해 더 많은 쌍을 찾으세요.";
+"whats_new_reminders_title" = "플레이 리마인더";
+"whats_new_reminders_description" = "며칠 동안 플레이하지 않으면 알림을 보내드려 뇌 운동을 놓치지 않게 도와줍니다.";
+"whats_new_theme_title" = "라이트 & 다크 모드";
+"whats_new_theme_description" = "설정에서 시스템, 라이트, 다크 중 원하는 외관을 선택하세요.";
+"whats_new_hint_title" = "힌트";
+"whats_new_hint_description" = "막혔나요? 게임을 일시 정지하고 짧은 광고를 보면 숨겨진 카드 한 쌍이 공개됩니다.";

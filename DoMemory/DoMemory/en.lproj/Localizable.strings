@@ -122,3 +122,13 @@
 "settings_notifications_open_settings" = "Open Settings";
 "notification_reminder_title" = "Time to play!";
 "notification_reminder_body" = "You haven't played DoMemory in a while. Keep your mind sharp!";
+"whats_new_title" = "What's New in DoMemory";
+"whats_new_button" = "Let's Play";
+"whats_new_multiplayer_title" = "Multiplayer";
+"whats_new_multiplayer_description" = "Challenge a friend in real-time — create a room, share a 6-digit code or QR scan, and race to find the most matching pairs.";
+"whats_new_reminders_title" = "Play Reminders";
+"whats_new_reminders_description" = "Get a nudge if you haven't played in a couple of days so your brain stays sharp.";
+"whats_new_theme_title" = "Light & Dark Mode";
+"whats_new_theme_description" = "Choose System, Light, or Dark in Settings to match your style.";
+"whats_new_hint_title" = "Hint";
+"whats_new_hint_description" = "Stuck? Pause the game and watch a short ad to reveal one hidden pair of cards.";

@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - Added matched-card hide animation: matched pairs fade off the board one second after being revealed.
 - Added rewarded-ad hint feature in the pause modal that reveals one unmatched pair.
 - Added App Store "05 Features" screenshot artboard for all 10 supported locales (en, es-419, de, fr, hi, it, ja, ko, pt-BR, zh-Hans).
+- Added What's New modal sheet powered by WhatsNewKit that surfaces v3.0.0 highlights (multiplayer, reminders, themes, hints) to returning users on first launch after an update.
 - Added full light and dark appearance support across the app while preserving the existing brand palette.
 - Added a theme selector in Settings with `System`, `Light`, and `Dark` options.
 - Added persisted theme preference storage and app-wide appearance application at launch.
