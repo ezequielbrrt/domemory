@@ -24,23 +24,36 @@ final class PurchaseService {
 
     private enum StorageKey {
         static let hasRemovedAds = "purchases.has_removed_ads"
+        static let rewardedRemoveAdsExpirationDate = "purchases.rewarded_remove_ads_expiration_date"
     }
 
     private(set) var removeAdsProduct: Product?
     private(set) var isLoading = false
     private(set) var purchaseMessage: String?
     var purchaseAlert: PurchaseAlert?
-    private(set) var hasRemovedAds: Bool {
+    private(set) var hasPurchasedRemoveAds: Bool {
         didSet {
-            UserDefaults.standard.set(hasRemovedAds, forKey: StorageKey.hasRemovedAds)
+            UserDefaults.standard.set(hasPurchasedRemoveAds, forKey: StorageKey.hasRemovedAds)
+        }
+    }
+    private(set) var rewardedRemoveAdsExpirationDate: Date? {
+        didSet {
+            if let rewardedRemoveAdsExpirationDate {
+                UserDefaults.standard.set(rewardedRemoveAdsExpirationDate.timeIntervalSince1970, forKey: StorageKey.rewardedRemoveAdsExpirationDate)
+            } else {
+                UserDefaults.standard.removeObject(forKey: StorageKey.rewardedRemoveAdsExpirationDate)
+            }
         }
     }
 
     private var transactionUpdatesTask: Task<Void, Never>?
 
     private init() {
-        hasRemovedAds = UserDefaults.standard.bool(forKey: StorageKey.hasRemovedAds)
+        hasPurchasedRemoveAds = UserDefaults.standard.bool(forKey: StorageKey.hasRemovedAds)
+        let temporaryExpirationTimestamp = UserDefaults.standard.double(forKey: StorageKey.rewardedRemoveAdsExpirationDate)
+        rewardedRemoveAdsExpirationDate = temporaryExpirationTimestamp > 0 ? Date(timeIntervalSince1970: temporaryExpirationTimestamp) : nil
         transactionUpdatesTask = listenForTransactionUpdates()
+        clearExpiredRewardedRemoveAdsIfNeeded()
 
         Task {
             await refreshPurchasedProducts()
@@ -50,6 +63,20 @@ final class PurchaseService {
 
     var removeAdsPriceText: String {
         removeAdsProduct?.displayPrice ?? "$0.99"
+    }
+
+    var hasRemovedAds: Bool {
+        hasPurchasedRemoveAds || hasActiveRewardedRemoveAds
+    }
+
+    var hasActiveRewardedRemoveAds: Bool {
+        guard let rewardedRemoveAdsExpirationDate else { return false }
+        return rewardedRemoveAdsExpirationDate > Date()
+    }
+
+    var rewardedRemoveAdsExpirationText: String {
+        guard let rewardedRemoveAdsExpirationDate, hasActiveRewardedRemoveAds else { return "" }
+        return rewardedRemoveAdsExpirationDate.formatted(date: .omitted, time: .shortened)
     }
 
     func loadProducts() async {
@@ -67,7 +94,7 @@ final class PurchaseService {
     }
 
     func purchaseRemoveAds() async {
-        guard !hasRemovedAds else { return }
+        guard !hasPurchasedRemoveAds else { return }
 
         isLoading = true
         purchaseMessage = nil
@@ -138,7 +165,17 @@ final class PurchaseService {
             }
         }
 
-        hasRemovedAds = hasValidRemoveAdsEntitlement
+        hasPurchasedRemoveAds = hasValidRemoveAdsEntitlement
+        clearExpiredRewardedRemoveAdsIfNeeded()
+    }
+
+    func grantRewardedRemoveAds(duration: TimeInterval = 24 * 60 * 60) {
+        let currentExpiration = hasActiveRewardedRemoveAds ? rewardedRemoveAdsExpirationDate ?? Date() : Date()
+        rewardedRemoveAdsExpirationDate = currentExpiration.addingTimeInterval(duration)
+        purchaseAlert = PurchaseAlert(
+            title: Strings.settingsRewardedRemoveAdsSuccessTitle,
+            message: Strings.settingsRewardedRemoveAdsSuccessMessage
+        )
     }
 
     private func listenForTransactionUpdates() -> Task<Void, Never> {
@@ -157,9 +194,9 @@ final class PurchaseService {
         }
 
         if transaction.productID == Self.removeAdsProductID {
-            hasRemovedAds = transaction.revocationDate == nil
+            hasPurchasedRemoveAds = transaction.revocationDate == nil
             purchaseMessage = hasRemovedAds ? Strings.settingsRemoveAdsPurchased : nil
-            if hasRemovedAds {
+            if hasPurchasedRemoveAds {
                 purchaseAlert = PurchaseAlert(
                     title: Strings.settingsPurchaseSuccessTitle,
                     message: Strings.settingsPurchaseSuccessMessage
@@ -168,5 +205,12 @@ final class PurchaseService {
         }
 
         await transaction.finish()
+    }
+
+    private func clearExpiredRewardedRemoveAdsIfNeeded() {
+        guard let rewardedRemoveAdsExpirationDate else { return }
+        if rewardedRemoveAdsExpirationDate <= Date() {
+            self.rewardedRemoveAdsExpirationDate = nil
+        }
     }
 }

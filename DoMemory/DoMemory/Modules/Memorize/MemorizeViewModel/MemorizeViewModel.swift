@@ -9,12 +9,14 @@ import SwiftUI
 import Observation
 
 @Observable
+@MainActor
 class MemorizeViewModel {
     private(set) var model: MemoryGame<String> = MemorizeViewModel.createMemoryGame()
     var showPauseView: Bool = false
     var timeRemaining: Int = 0
     var showQuitView: Bool = false
     var showWinView: Bool = false
+    var isRewardedAdInProgress: Bool = false
 
     var memorama: Memorama?
     var closeView: Bool = false
@@ -22,7 +24,15 @@ class MemorizeViewModel {
 
     private var timerTask: Task<Void, Never>?
     private var flipBackTask: Task<Void, Never>?
+    private var hideMatchedTask: Task<Void, Never>?
     private var hasLoggedGameFinished = false
+    private var gameStartedAt: Date?
+    private var lastRewardedAdDate: Date?
+
+    var canOfferRewardedAds: Bool {
+        AdsService.shared.isRewardedConfigured(for: .gameRewardedExtraTime)
+            || AdsService.shared.isRewardedConfigured(for: .gameRewardedHint)
+    }
 
     init(memorama: Memorama?) {
         self.memorama = memorama
@@ -90,6 +100,7 @@ class MemorizeViewModel {
             )
         }
         scheduleFlipBackIfNeeded()
+        scheduleMatchedHideIfNeeded()
     }
 
     private func scheduleFlipBackIfNeeded() {
@@ -101,6 +112,20 @@ class MemorizeViewModel {
             withAnimation(.easeInOut(duration: 0.5)) {
                 self?.model.flipBackUnmatchedCards()
             }
+        }
+    }
+
+    private func scheduleMatchedHideIfNeeded() {
+        let faceUpMatched = model.cards.filter { $0.isFaceUp && $0.isMatched }
+        guard !faceUpMatched.isEmpty else { return }
+        hideMatchedTask?.cancel()
+        hideMatchedTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.35)) {
+                self?.model.hideMatchedFaceUpCards()
+            }
+            self?.getIfAllAreMatched()
         }
     }
 
@@ -120,9 +145,6 @@ class MemorizeViewModel {
                 guard !Task.isCancelled else { break }
                 if self.timeRemaining > 0 {
                     self.timeRemaining -= 1
-                    if self.timeRemaining == 0 {
-                        self.logGameFinishedIfNeeded(result: "lose")
-                    }
                 }
             }
         }
@@ -133,6 +155,8 @@ class MemorizeViewModel {
         timerTask = nil
         flipBackTask?.cancel()
         flipBackTask = nil
+        hideMatchedTask?.cancel()
+        hideMatchedTask = nil
     }
 
     func reconnectTime() {
@@ -141,8 +165,11 @@ class MemorizeViewModel {
 
     func trackGameStarted(source: String) {
         hasLoggedGameFinished = false
+        gameStartedAt = Date()
         Task { @MainActor in
             AdsService.shared.loadInterstitial(for: .gameFinishedInterstitial)
+            AdsService.shared.loadRewardedAd(for: .gameRewardedExtraTime)
+            AdsService.shared.loadRewardedAd(for: .gameRewardedHint)
         }
         AnalyticsService.log(
             .gameStarted(
@@ -176,6 +203,7 @@ class MemorizeViewModel {
         if let memoramaID = memorama?.id {
             GameStatsService.shared.recordGameFinished(memoramaID: memoramaID, didWin: result == "win")
         }
+        NotificationService.shared.scheduleInactivityReminder()
         AnalyticsService.log(
             .gameFinished(
                 result: result,
@@ -186,8 +214,11 @@ class MemorizeViewModel {
                 isCustom: memorama?.id.hasPrefix("custom_") ?? false
             )
         )
-        Task { @MainActor in
-            AdsService.shared.presentInterstitialEvery(3, for: .gameFinishedInterstitial)
+        if shouldPresentCompletionInterstitial {
+            let frequency = interstitialFrequency()
+            Task { @MainActor in
+                AdsService.shared.presentInterstitialEvery(frequency, for: .gameFinishedInterstitial)
+            }
         }
     }
 }
@@ -222,6 +253,48 @@ extension MemorizeViewModel {
         case .veryHard: return true
         }
     }
+
+    private var shouldPresentCompletionInterstitial: Bool {
+        guard let gameStartedAt else { return false }
+        guard Date().timeIntervalSince(gameStartedAt) >= 20 else { return false }
+        if let lastRewardedAdDate,
+           Date().timeIntervalSince(lastRewardedAdDate) < 60 {
+            return false
+        }
+        return true
+    }
+
+    private func interstitialFrequency() -> Int {
+        switch gameDifficulty() {
+        case .easy, .medium: return 3
+        case .hard, .veryHard: return 2
+        }
+    }
+
+    private func presentRewardedAd(for placement: AdPlacement, reward: @escaping () -> Void) {
+        guard !isRewardedAdInProgress else { return }
+        isRewardedAdInProgress = true
+        AnalyticsService.log(.adLifecycle(placement: placement.rawValue, action: "requested"))
+        AdsService.shared.presentRewardedAd(
+            for: placement,
+            rewardHandler: { [weak self] in
+                guard let self else { return }
+                self.lastRewardedAdDate = Date()
+                AnalyticsService.log(.adLifecycle(placement: placement.rawValue, action: "reward_earned"))
+                reward()
+            },
+            completion: { [weak self] didEarnReward in
+                guard let self else { return }
+                self.isRewardedAdInProgress = false
+                AnalyticsService.log(.adLifecycle(placement: placement.rawValue, action: didEarnReward ? "dismissed_rewarded" : "dismissed_unrewarded"))
+            }
+        )
+    }
+
+    private func revealHintPair() {
+        guard model.revealUnmatchedPairForHint() else { return }
+        scheduleFlipBackIfNeeded()
+    }
 }
 
 // MARK: LISTENERS
@@ -251,10 +324,20 @@ extension MemorizeViewModel: PauseModalListener {
         )
         restartGame()
     }
+
+    func tapOnRewardedHint() {
+        presentRewardedAd(for: .gameRewardedHint) { [weak self] in
+            guard let self else { return }
+            self.showPauseView = false
+            self.revealHintPair()
+            self.startTimer()
+        }
+    }
 }
 
 extension MemorizeViewModel: LoseModalViewModelListener {
     func tapOnTryAgain() {
+        logGameFinishedIfNeeded(result: "lose")
         AnalyticsService.log(
             .retryTapped(
                 difficulty: gameDifficulty().rawValue,
@@ -263,6 +346,19 @@ extension MemorizeViewModel: LoseModalViewModelListener {
             )
         )
         restartGame()
+    }
+
+    func tapOnGoToMenuAfterLose() {
+        logGameFinishedIfNeeded(result: "lose")
+        closeView = true
+    }
+
+    func tapOnRewardedExtraTime() {
+        presentRewardedAd(for: .gameRewardedExtraTime) { [weak self] in
+            guard let self else { return }
+            self.timeRemaining = max(self.timeRemaining, 0) + 30
+            self.startTimer()
+        }
     }
 }
 

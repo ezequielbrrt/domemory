@@ -28,6 +28,11 @@ enum AnalyticsEvent {
     case favoriteToggled(gameID: String, isFavorite: Bool)
     case customMemoramaCreated(gameID: String, difficulty: String, cardsCount: Int)
     case customMemoramaDeleted(gameID: String)
+    case multiplayerRoomCreated(gameID: String, isCustom: Bool)
+    case multiplayerRoomJoined
+    case multiplayerGameStarted(gameID: String)
+    case multiplayerGameFinished(result: String)
+    case adLifecycle(placement: String, action: String)
 
     var name: String {
         switch self {
@@ -45,6 +50,11 @@ enum AnalyticsEvent {
         case .favoriteToggled: return "favorite_toggled"
         case .customMemoramaCreated: return "custom_memorama_created"
         case .customMemoramaDeleted: return "custom_memorama_deleted"
+        case .multiplayerRoomCreated: return "multiplayer_room_created"
+        case .multiplayerRoomJoined: return "multiplayer_room_joined"
+        case .multiplayerGameStarted: return "multiplayer_game_started"
+        case .multiplayerGameFinished: return "multiplayer_game_finished"
+        case .adLifecycle: return "ad_lifecycle"
         }
     }
 
@@ -122,6 +132,22 @@ enum AnalyticsEvent {
             ]
         case .customMemoramaDeleted(let gameID):
             return ["game_id": gameID]
+        case .multiplayerRoomCreated(let gameID, let isCustom):
+            return [
+                "game_id": gameID,
+                "is_custom": isCustom ? 1 : 0
+            ]
+        case .multiplayerRoomJoined:
+            return [:]
+        case .multiplayerGameStarted(let gameID):
+            return ["game_id": gameID]
+        case .multiplayerGameFinished(let result):
+            return ["result": result]
+        case .adLifecycle(let placement, let action):
+            return [
+                "placement": placement,
+                "action": action
+            ]
         }
     }
 }

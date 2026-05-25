@@ -16,6 +16,14 @@ struct DoMemoryApp: App {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(AppTheme(rawValue: themePreference)?.colorScheme)
+                .task {
+                    await NotificationService.shared.syncAuthorizationStatus()
+                    guard UserDefaults.standard.bool(forKey: UserDefaultsKeys.notificationsEnabled) else { return }
+                    let hasPending = await NotificationService.shared.hasPendingReminder()
+                    if !hasPending {
+                        NotificationService.shared.scheduleInactivityReminder()
+                    }
+                }
         }
     }
 }

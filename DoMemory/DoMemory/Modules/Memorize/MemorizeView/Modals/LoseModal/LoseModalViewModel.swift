@@ -7,8 +7,14 @@
 
 import SwiftUI
 
+@MainActor
 protocol LoseModalViewModelListener {
+    var canOfferRewardedAds: Bool { get }
+    var isRewardedAdInProgress: Bool { get }
+
     func tapOnTryAgain()
+    func tapOnGoToMenuAfterLose()
+    func tapOnRewardedExtraTime()
 }
 
 struct LoseModalViewModel {
@@ -18,6 +24,7 @@ struct LoseModalViewModel {
 
 // MARK: PUBLIC
 extension LoseModalViewModel {
+    @MainActor
     func tapOnTryAgain() {
         listener?.tapOnTryAgain()
     }

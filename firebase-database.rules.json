@@ -1,0 +1,20 @@
+{
+  "rules": {
+    "data": {
+      ".read": true,
+      ".write": false
+    },
+    "multiplayerRooms": {
+      "$roomId": {
+        ".read": "auth != null && (data.child('hostId').val() === auth.uid || data.child('guestId').val() === auth.uid || !data.exists())",
+        ".write": "auth != null && (!data.exists() || data.child('hostId').val() === auth.uid || data.child('guestId').val() === auth.uid || (!data.child('guestId').exists() && newData.child('guestId').val() === auth.uid))"
+      }
+    },
+    "multiplayerRoomCodes": {
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    }
+  }
+}

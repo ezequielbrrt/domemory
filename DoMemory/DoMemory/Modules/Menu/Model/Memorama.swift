@@ -5,7 +5,7 @@
 //  Created by Ezequiel Barreto on 23/09/20.
 //
 
-struct Memorama: Codable, Identifiable {
+struct Memorama: Codable, Identifiable, Hashable {
     var id: String
     var name: String
     var category: String

@@ -20,7 +20,7 @@ struct CardView: View {
     
     @ViewBuilder
     private func body(for size: CGSize) -> some View {
-        if !card.isMatched {
+        if !card.isMatched || card.isFaceUp {
             ZStack {
 //                Group {
 //                    if shouldShowPie {
@@ -44,8 +44,6 @@ struct CardView: View {
                 Text(self.card.content)
                     .minimumScaleFactor(0.0001)
                     .font(Font.system(size: fontSize(for: size)))
-                .rotationEffect(Angle(degrees: card.isMatched ? 360 : 0))
-                    .animation(card.isMatched ? Animation.linear(duration: 1).repeatForever(autoreverses: false) : .default, value: card.isMatched)
             }.cardify(isFaceUp: card.isFaceUp)
                 .transition(.scale)
         }

@@ -37,6 +37,21 @@ struct LoseModal: View {
                 .padding(.bottom, 28)
 
                 VStack(spacing: 12) {
+                    if listener?.canOfferRewardedAds == true {
+                        Button(action: { listener?.tapOnRewardedExtraTime() }) {
+                            Text(listener?.isRewardedAdInProgress == true ? Strings.adLoading : Strings.rewardedExtraTime)
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(
+                                    Capsule().fill(Color.hardAmber)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(listener?.isRewardedAdInProgress == true)
+                    }
+
                     Button(action: { listener?.tapOnTryAgain() }) {
                         Text(Strings.tryAgain)
                             .font(.system(size: 17, weight: .bold, design: .rounded))
@@ -49,7 +64,7 @@ struct LoseModal: View {
                     }
                     .buttonStyle(.plain)
 
-                    Button(action: { listener?.tapOnTryAgain() }) {
+                    Button(action: { listener?.tapOnGoToMenuAfterLose() }) {
                         Text(Strings.goToMenu)
                             .font(.system(size: 17, weight: .semibold, design: .rounded))
                             .foregroundStyle(Color.primaryColor)

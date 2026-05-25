@@ -27,6 +27,21 @@ struct PauseModal: View {
                     .padding(.bottom, 28)
 
                 VStack(spacing: 12) {
+                    if listener?.canOfferRewardedAds == true {
+                        Button(action: { listener?.tapOnRewardedHint() }) {
+                            Text(listener?.isRewardedAdInProgress == true ? Strings.adLoading : Strings.rewardedHint)
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(
+                                    Capsule().fill(Color.hardAmber)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(listener?.isRewardedAdInProgress == true)
+                    }
+
                     Button(action: { listener?.tapOnReloadGame() }) {
                         Text(Strings.tryAgain)
                             .font(.system(size: 17, weight: .bold, design: .rounded))
