@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+[3.0.0] 24-05-2026
 
 ### Added
 - Added real-time multiplayer mode powered by Firebase Realtime Database; players can create or join a room via a 6-character code or QR scan, take turns flipping cards, and see live scores.
