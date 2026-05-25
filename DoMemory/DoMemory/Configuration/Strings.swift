@@ -144,4 +144,16 @@ enum Strings {
     static let settingsNotificationsDeniedTitle = NSLocalizedString("settings_notifications_denied_title", comment: "Alert title when notification permission denied")
     static let settingsNotificationsDeniedMessage = NSLocalizedString("settings_notifications_denied_message", comment: "Alert message when notification permission denied")
     static let settingsNotificationsOpenSettings = NSLocalizedString("settings_notifications_open_settings", comment: "Button to open iOS Settings")
+
+    // What's New sheet (v3.0.0)
+    static let whatsNewTitle = NSLocalizedString("whats_new_title", comment: "What's New sheet headline")
+    static let whatsNewButton = NSLocalizedString("whats_new_button", comment: "What's New dismiss button")
+    static let whatsNewMultiplayerTitle = NSLocalizedString("whats_new_multiplayer_title", comment: "Multiplayer feature title in What's New")
+    static let whatsNewMultiplayerDescription = NSLocalizedString("whats_new_multiplayer_description", comment: "Multiplayer feature description in What's New")
+    static let whatsNewRemindersTitle = NSLocalizedString("whats_new_reminders_title", comment: "Reminders feature title in What's New")
+    static let whatsNewRemindersDescription = NSLocalizedString("whats_new_reminders_description", comment: "Reminders feature description in What's New")
+    static let whatsNewThemeTitle = NSLocalizedString("whats_new_theme_title", comment: "Theme feature title in What's New")
+    static let whatsNewThemeDescription = NSLocalizedString("whats_new_theme_description", comment: "Theme feature description in What's New")
+    static let whatsNewHintTitle = NSLocalizedString("whats_new_hint_title", comment: "Hint feature title in What's New")
+    static let whatsNewHintDescription = NSLocalizedString("whats_new_hint_description", comment: "Hint feature description in What's New")
 }

@@ -122,3 +122,13 @@
 "settings_notifications_open_settings" = "Abrir Configurações";
 "notification_reminder_title" = "Hora de jogar!";
 "notification_reminder_body" = "Você não joga DoMemory há um tempo. Mantenha sua mente afiada!";
+"whats_new_title" = "Novidades no DoMemory";
+"whats_new_button" = "Vamos jogar!";
+"whats_new_multiplayer_title" = "Multijogador";
+"whats_new_multiplayer_description" = "Desafie um amigo em tempo real — crie uma sala, compartilhe o código de 6 dígitos ou escaneie o QR e encontre mais pares.";
+"whats_new_reminders_title" = "Lembretes";
+"whats_new_reminders_description" = "Receba uma notificação se não jogar por alguns dias para manter seu cérebro em forma.";
+"whats_new_theme_title" = "Modo claro e escuro";
+"whats_new_theme_description" = "Escolha Sistema, Claro ou Escuro nas Configurações para personalizar sua experiência.";
+"whats_new_hint_title" = "Dica";
+"whats_new_hint_description" = "Travado? Pause o jogo e assista a um breve anúncio para revelar um par de cartas escondido.";

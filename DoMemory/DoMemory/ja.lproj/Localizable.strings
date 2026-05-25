@@ -122,3 +122,13 @@
 "settings_notifications_open_settings" = "設定を開く";
 "notification_reminder_title" = "プレイしよう！";
 "notification_reminder_body" = "しばらくDoMemoryをプレイしていません。脳を鍛え続けましょう！";
+"whats_new_title" = "DoMemoryの新機能";
+"whats_new_button" = "プレイする";
+"whats_new_multiplayer_title" = "マルチプレイヤー";
+"whats_new_multiplayer_description" = "友達とリアルタイムで対戦 — ルームを作成して6桁のコードかQRコードを共有し、より多くのペアを見つけよう。";
+"whats_new_reminders_title" = "プレイリマインダー";
+"whats_new_reminders_description" = "数日間プレイしていないと通知が届き、脳トレを継続できます。";
+"whats_new_theme_title" = "ライト＆ダークモード";
+"whats_new_theme_description" = "設定からシステム・ライト・ダークを選んでお好みの外観にカスタマイズできます。";
+"whats_new_hint_title" = "ヒント";
+"whats_new_hint_description" = "行き詰まったら？一時停止して短い広告を見ると、隠れたカードのペアが1組明かされます。";

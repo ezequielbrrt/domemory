@@ -122,3 +122,13 @@
 "settings_notifications_open_settings" = "सेटिंग्स खोलें";
 "notification_reminder_title" = "खेलने का समय!";
 "notification_reminder_body" = "आपने कुछ समय से DoMemory नहीं खेला है। अपने दिमाग को तेज़ रखें!";
+"whats_new_title" = "DoMemory में नया क्या है";
+"whats_new_button" = "खेलते हैं!";
+"whats_new_multiplayer_title" = "मल्टीप्लेयर";
+"whats_new_multiplayer_description" = "दोस्त को रियल-टाइम में चुनौती दें — कमरा बनाएं, 6-अंकीय कोड या QR साझा करें और अधिक जोड़े खोजें।";
+"whats_new_reminders_title" = "खेल अनुस्मारक";
+"whats_new_reminders_description" = "कुछ दिन न खेलने पर सूचना मिलेगी ताकि आपका दिमाग तेज़ बना रहे।";
+"whats_new_theme_title" = "लाइट और डार्क मोड";
+"whats_new_theme_description" = "सेटिंग्स में सिस्टम, लाइट या डार्क चुनकर अपनी पसंद के अनुसार ऐप का रूप बदलें।";
+"whats_new_hint_title" = "संकेत";
+"whats_new_hint_description" = "अटक गए? गेम रोकें और छोटा विज्ञापन देखें — एक छुपा हुआ जोड़ा सामने आ जाएगा।";

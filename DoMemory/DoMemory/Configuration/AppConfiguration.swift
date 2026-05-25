@@ -33,6 +33,8 @@ enum AnalyticsEvent {
     case multiplayerGameStarted(gameID: String)
     case multiplayerGameFinished(result: String)
     case adLifecycle(placement: String, action: String)
+    case whatsNewShown(version: String)
+    case whatsNewDismissed(version: String)
 
     var name: String {
         switch self {
@@ -55,6 +57,8 @@ enum AnalyticsEvent {
         case .multiplayerGameStarted: return "multiplayer_game_started"
         case .multiplayerGameFinished: return "multiplayer_game_finished"
         case .adLifecycle: return "ad_lifecycle"
+        case .whatsNewShown: return "whats_new_shown"
+        case .whatsNewDismissed: return "whats_new_dismissed"
         }
     }
 
@@ -148,6 +152,10 @@ enum AnalyticsEvent {
                 "placement": placement,
                 "action": action
             ]
+        case .whatsNewShown(let version):
+            return ["version": version]
+        case .whatsNewDismissed(let version):
+            return ["version": version]
         }
     }
 }

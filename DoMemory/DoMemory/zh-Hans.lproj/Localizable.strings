@@ -122,3 +122,13 @@
 "settings_notifications_open_settings" = "打开设置";
 "notification_reminder_title" = "该玩游戏了！";
 "notification_reminder_body" = "您已经有一段时间没有玩 DoMemory 了，保持大脑活跃吧！";
+"whats_new_title" = "DoMemory 新功能";
+"whats_new_button" = "开始游戏";
+"whats_new_multiplayer_title" = "多人游戏";
+"whats_new_multiplayer_description" = "与朋友实时对战 — 创建房间，分享6位代码或扫描二维码，看谁找到更多对。";
+"whats_new_reminders_title" = "游戏提醒";
+"whats_new_reminders_description" = "如果您几天没玩，系统会发送提醒通知，让大脑保持活跃。";
+"whats_new_theme_title" = "浅色与深色模式";
+"whats_new_theme_description" = "在设置中选择系统、浅色或深色模式，打造专属外观。";
+"whats_new_hint_title" = "提示";
+"whats_new_hint_description" = "卡关了？暂停游戏并观看短视频广告，即可揭示一对隐藏的牌。";

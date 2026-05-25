@@ -143,6 +143,15 @@
         "revision" : "c7c08652c3540adf8e48409c351879b4caea7e89",
         "version" : "1.1.0"
       }
+    },
+    {
+      "identity" : "whats-new-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ezequielbrrt/whats-new-ios.git",
+      "state" : {
+        "revision" : "fef3ec8f870729b26547bf5ca2b11a41654186b0",
+        "version" : "1.0.0"
+      }
     }
   ],
   "version" : 2
