@@ -132,3 +132,53 @@
 "whats_new_theme_description" = "설정에서 시스템, 라이트, 다크 중 원하는 외관을 선택하세요.";
 "whats_new_hint_title" = "힌트";
 "whats_new_hint_description" = "막혔나요? 게임을 일시 정지하고 짧은 광고를 보면 숨겨진 카드 한 쌍이 공개됩니다.";
+
+/* Daily Challenge */
+"daily_challenge_title" = "일일 챌린지";
+"daily_challenge_subtitle" = "매일 새로운 보드";
+"daily_challenge_completed" = "오늘 완료!";
+"daily_challenge_streak_format" = "🔥 %d일 연속";
+
+/* Streak at risk */
+"notification_streak_risk_title" = "연속 기록을 지키세요!";
+"notification_streak_risk_body" = "%d일 연속 기록이 오늘 밤 끊깁니다. 오늘의 챌린지를 플레이하세요! 🔥";
+
+/* Multiplayer invite */
+"multiplayer_invite_friend" = "친구에게 도전";
+"multiplayer_invite_message" = "DoMemory에서 기억력 대결에 도전하세요! 코드 %@ 로 제 방에 참여하세요:";
+
+/* Achievements */
+"achievements_title" = "업적";
+"achievements_subtitle" = "진행 상황과 배지를 확인하세요";
+"achievements_view" = "보기";
+"achievements_stats_section" = "내 통계";
+"achievements_badges_section" = "배지";
+"stat_total_games" = "플레이한 게임";
+"stat_total_wins" = "승리";
+"stat_win_rate" = "승률";
+"stat_perfect_games" = "퍼펙트 게임";
+"stat_longest_streak" = "최장 연속 기록";
+"stat_multiplayer_wins" = "멀티플레이어 승리";
+"ach_wins_title_format" = "%d승";
+"ach_wins_detail_format" = "%d게임 승리하기";
+"ach_streak_title_format" = "%d일 연속";
+"ach_streak_detail_format" = "%d일 연속 기록 달성하기";
+"ach_perfect_title" = "완벽";
+"ach_perfect_detail" = "실수 없이 승리하기";
+"ach_multiplayer_title" = "챔피언";
+"ach_multiplayer_detail" = "첫 멀티플레이어 경기에서 승리하기";
+
+/* Share result */
+"share_result" = "결과 공유";
+"share_result_caption" = "DoMemory에서 %d쌍을 맞췄어요! 이길 수 있나요?";
+
+/* Onboarding intro */
+"intro_multiplayer_title" = "친구와 플레이";
+"intro_multiplayer_subtitle" = "실시간 멀티플레이 방에서 누구와도 대결하세요 — 6자리 코드나 QR만 공유하면 끝.";
+"intro_custom_title" = "나만의 게임";
+"intro_custom_subtitle" = "나만의 이모지 카드 세트를 만들고 좋아하는 게임을 즐기세요.";
+"intro_daily_title" = "매일 다시 오기";
+"intro_daily_subtitle" = "매일 새로운 보드. 연속 기록을 만들고 이어가세요!";
+"intro_skip" = "건너뛰기";
+"intro_next" = "다음";
+"intro_get_started" = "시작하기";

@@ -52,17 +52,19 @@ struct LoseModal: View {
                         .disabled(listener?.isRewardedAdInProgress == true)
                     }
 
-                    Button(action: { listener?.tapOnTryAgain() }) {
-                        Text(Strings.tryAgain)
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(
-                                Capsule().fill(Color.secundaryColor)
-                            )
+                    if listener?.isDailyChallenge != true {
+                        Button(action: { listener?.tapOnTryAgain() }) {
+                            Text(Strings.tryAgain)
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(
+                                    Capsule().fill(Color.secundaryColor)
+                                )
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
 
                     Button(action: { listener?.tapOnGoToMenuAfterLose() }) {
                         Text(Strings.goToMenu)

@@ -466,6 +466,19 @@
 			<string>w9q455wk68.skadnetwork</string>
 		</dict>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.ezequielbrrt.domemory.invite</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>domemory</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Righteous-Regular.ttf</string>

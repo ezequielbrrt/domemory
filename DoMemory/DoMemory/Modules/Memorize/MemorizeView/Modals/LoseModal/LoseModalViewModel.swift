@@ -11,6 +11,7 @@ import SwiftUI
 protocol LoseModalViewModelListener {
     var canOfferRewardedAds: Bool { get }
     var isRewardedAdInProgress: Bool { get }
+    var isDailyChallenge: Bool { get }
 
     func tapOnTryAgain()
     func tapOnGoToMenuAfterLose()

@@ -132,3 +132,53 @@
 "whats_new_theme_description" = "設定からシステム・ライト・ダークを選んでお好みの外観にカスタマイズできます。";
 "whats_new_hint_title" = "ヒント";
 "whats_new_hint_description" = "行き詰まったら？一時停止して短い広告を見ると、隠れたカードのペアが1組明かされます。";
+
+/* Daily Challenge */
+"daily_challenge_title" = "デイリーチャレンジ";
+"daily_challenge_subtitle" = "毎日新しいボード";
+"daily_challenge_completed" = "今日は完了！";
+"daily_challenge_streak_format" = "🔥 %d日連続";
+
+/* Streak at risk */
+"notification_streak_risk_title" = "連続記録を途切れさせないで！";
+"notification_streak_risk_body" = "%d日連続記録が今夜途切れます。今日のチャレンジをプレイして記録を守ろう！🔥";
+
+/* Multiplayer invite */
+"multiplayer_invite_friend" = "友達に挑戦";
+"multiplayer_invite_message" = "DoMemoryで記憶力対決だ！コード %@ で僕のルームに参加してね:";
+
+/* Achievements */
+"achievements_title" = "実績";
+"achievements_subtitle" = "進捗とバッジを確認";
+"achievements_view" = "表示";
+"achievements_stats_section" = "あなたの統計";
+"achievements_badges_section" = "バッジ";
+"stat_total_games" = "プレイ回数";
+"stat_total_wins" = "勝利数";
+"stat_win_rate" = "勝率";
+"stat_perfect_games" = "パーフェクト";
+"stat_longest_streak" = "最長連続記録";
+"stat_multiplayer_wins" = "マルチプレイ勝利";
+"ach_wins_title_format" = "%d勝";
+"ach_wins_detail_format" = "%d回勝利する";
+"ach_streak_title_format" = "%d日連続";
+"ach_streak_detail_format" = "%d日連続記録を達成する";
+"ach_perfect_title" = "ノーミス";
+"ach_perfect_detail" = "ミスなしで勝利する";
+"ach_multiplayer_title" = "チャンピオン";
+"ach_multiplayer_detail" = "初めてのマルチプレイ対戦に勝つ";
+
+/* Share result */
+"share_result" = "結果をシェア";
+"share_result_caption" = "DoMemoryで%dペアそろえたよ！勝てるかな？";
+
+/* Onboarding intro */
+"intro_multiplayer_title" = "友達と対戦";
+"intro_multiplayer_subtitle" = "リアルタイムのマルチプレイで誰とでも対戦。6桁のコードかQRを共有するだけ。";
+"intro_custom_title" = "自分だけの一品に";
+"intro_custom_subtitle" = "オリジナルの絵文字カードを作って、好きな神経衰弱で遊ぼう。";
+"intro_daily_title" = "毎日プレイ";
+"intro_daily_subtitle" = "毎日新しいボード。連続記録を作って続けよう！";
+"intro_skip" = "スキップ";
+"intro_next" = "次へ";
+"intro_get_started" = "はじめる";

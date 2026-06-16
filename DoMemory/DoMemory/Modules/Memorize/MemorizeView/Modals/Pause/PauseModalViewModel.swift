@@ -11,6 +11,7 @@ import Foundation
 protocol PauseModalListener {
     var canOfferRewardedAds: Bool { get }
     var isRewardedAdInProgress: Bool { get }
+    var isDailyChallenge: Bool { get }
 
     func tapOnResumeGame()
     func tapOnGoHome()

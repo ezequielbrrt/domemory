@@ -132,3 +132,53 @@
 "whats_new_theme_description" = "Wähle System, Hell oder Dunkel in den Einstellungen nach deinem Geschmack.";
 "whats_new_hint_title" = "Hinweis";
 "whats_new_hint_description" = "Nicht weitergekommen? Pausiere das Spiel und sieh dir eine kurze Werbung an, um ein verstecktes Paar aufzudecken.";
+
+/* Daily Challenge */
+"daily_challenge_title" = "Tägliche Challenge";
+"daily_challenge_subtitle" = "Jeden Tag ein neues Spielfeld";
+"daily_challenge_completed" = "Heute geschafft!";
+"daily_challenge_streak_format" = "🔥 %d-Tage-Serie";
+
+/* Streak at risk */
+"notification_streak_risk_title" = "Halte deine Serie am Leben!";
+"notification_streak_risk_body" = "Deine %d-Tage-Serie endet heute Abend. Spiele die heutige Challenge! 🔥";
+
+/* Multiplayer invite */
+"multiplayer_invite_friend" = "Fordere einen Freund heraus";
+"multiplayer_invite_message" = "Ich fordere dich zu einem Memory-Duell in DoMemory heraus! Tritt meinem Raum mit Code %@ bei:";
+
+/* Achievements */
+"achievements_title" = "Erfolge";
+"achievements_subtitle" = "Verfolge deinen Fortschritt und Abzeichen";
+"achievements_view" = "Ansehen";
+"achievements_stats_section" = "Deine Statistiken";
+"achievements_badges_section" = "Abzeichen";
+"stat_total_games" = "Gespielte Spiele";
+"stat_total_wins" = "Siege";
+"stat_win_rate" = "Siegquote";
+"stat_perfect_games" = "Perfekte Spiele";
+"stat_longest_streak" = "Längste Serie";
+"stat_multiplayer_wins" = "Mehrspieler-Siege";
+"ach_wins_title_format" = "%d Siege";
+"ach_wins_detail_format" = "Gewinne %d Spiele";
+"ach_streak_title_format" = "%d-Tage-Serie";
+"ach_streak_detail_format" = "Erreiche eine %d-Tage-Serie";
+"ach_perfect_title" = "Makellos";
+"ach_perfect_detail" = "Gewinne ein Spiel ohne Fehler";
+"ach_multiplayer_title" = "Champion";
+"ach_multiplayer_detail" = "Gewinne dein erstes Mehrspieler-Match";
+
+/* Share result */
+"share_result" = "Ergebnis teilen";
+"share_result_caption" = "Ich habe %d Paare in DoMemory gefunden! Schaffst du mehr?";
+
+/* Onboarding intro */
+"intro_multiplayer_title" = "Spiele mit Freunden";
+"intro_multiplayer_subtitle" = "Fordere jeden in Echtzeit-Mehrspielerräumen heraus – teile einfach einen 6-stelligen Code oder QR.";
+"intro_custom_title" = "Mach es zu deinem";
+"intro_custom_subtitle" = "Erstelle eigene Emoji-Kartensets und spiele deine Lieblings-Memoramas.";
+"intro_daily_title" = "Komm täglich wieder";
+"intro_daily_subtitle" = "Jeden Tag ein neues Spielfeld. Baue eine Serie auf und halte sie!";
+"intro_skip" = "Überspringen";
+"intro_next" = "Weiter";
+"intro_get_started" = "Los geht's";

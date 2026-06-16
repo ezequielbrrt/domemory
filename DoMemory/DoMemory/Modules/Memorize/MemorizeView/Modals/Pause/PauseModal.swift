@@ -42,17 +42,19 @@ struct PauseModal: View {
                         .disabled(listener?.isRewardedAdInProgress == true)
                     }
 
-                    Button(action: { listener?.tapOnReloadGame() }) {
-                        Text(Strings.tryAgain)
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(
-                                Capsule().fill(Color.secundaryColor)
-                            )
+                    if listener?.isDailyChallenge != true {
+                        Button(action: { listener?.tapOnReloadGame() }) {
+                            Text(Strings.tryAgain)
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(
+                                    Capsule().fill(Color.secundaryColor)
+                                )
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
 
                     Button(action: { listener?.tapOnResumeGame() }) {
                         Text(Strings.continueGame)

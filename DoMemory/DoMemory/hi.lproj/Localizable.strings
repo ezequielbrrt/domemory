@@ -132,3 +132,53 @@
 "whats_new_theme_description" = "सेटिंग्स में सिस्टम, लाइट या डार्क चुनकर अपनी पसंद के अनुसार ऐप का रूप बदलें।";
 "whats_new_hint_title" = "संकेत";
 "whats_new_hint_description" = "अटक गए? गेम रोकें और छोटा विज्ञापन देखें — एक छुपा हुआ जोड़ा सामने आ जाएगा।";
+
+/* Daily Challenge */
+"daily_challenge_title" = "दैनिक चुनौती";
+"daily_challenge_subtitle" = "हर दिन नया बोर्ड";
+"daily_challenge_completed" = "आज के लिए पूरा!";
+"daily_challenge_streak_format" = "🔥 %d-दिन की लकीर";
+
+/* Streak at risk */
+"notification_streak_risk_title" = "अपनी लकीर मत तोड़ो!";
+"notification_streak_risk_body" = "आपकी %d-दिन की लकीर आज रात खत्म हो जाएगी। इसे बनाए रखने के लिए आज की चुनौती खेलें! 🔥";
+
+/* Multiplayer invite */
+"multiplayer_invite_friend" = "किसी मित्र को चुनौती दें";
+"multiplayer_invite_message" = "मैं तुम्हें DoMemory में मेमोरी मैच की चुनौती देता हूँ! कोड %@ से मेरे रूम में शामिल हो:";
+
+/* Achievements */
+"achievements_title" = "उपलब्धियाँ";
+"achievements_subtitle" = "अपनी प्रगति और बैज देखें";
+"achievements_view" = "देखें";
+"achievements_stats_section" = "आपके आँकड़े";
+"achievements_badges_section" = "बैज";
+"stat_total_games" = "खेली गई बाज़ियाँ";
+"stat_total_wins" = "जीत";
+"stat_win_rate" = "जीत दर";
+"stat_perfect_games" = "परफेक्ट गेम";
+"stat_longest_streak" = "सबसे लंबी लकीर";
+"stat_multiplayer_wins" = "मल्टीप्लेयर जीत";
+"ach_wins_title_format" = "%d जीत";
+"ach_wins_detail_format" = "%d बाज़ियाँ जीतें";
+"ach_streak_title_format" = "%d-दिन की लकीर";
+"ach_streak_detail_format" = "%d-दिन की दैनिक लकीर तक पहुँचें";
+"ach_perfect_title" = "निर्दोष";
+"ach_perfect_detail" = "बिना गलती के गेम जीतें";
+"ach_multiplayer_title" = "चैंपियन";
+"ach_multiplayer_detail" = "अपना पहला मल्टीप्लेयर मैच जीतें";
+
+/* Share result */
+"share_result" = "परिणाम साझा करें";
+"share_result_caption" = "मैंने DoMemory में %d जोड़े मिलाए! क्या तुम मुझे हरा सकते हो?";
+
+/* Onboarding intro */
+"intro_multiplayer_title" = "दोस्तों के साथ खेलें";
+"intro_multiplayer_subtitle" = "रियल-टाइम मल्टीप्लेयर रूम में किसी को भी चुनौती दें — बस 6-अंकों का कोड या QR साझा करें।";
+"intro_custom_title" = "इसे अपना बनाएं";
+"intro_custom_subtitle" = "अपने खुद के इमोजी कार्ड सेट बनाएं और पसंदीदा मेमोरमा खेलें।";
+"intro_daily_title" = "रोज़ वापस आएं";
+"intro_daily_subtitle" = "हर दिन एक नया बोर्ड। लकीर बनाएं और बनाए रखें!";
+"intro_skip" = "छोड़ें";
+"intro_next" = "आगे";
+"intro_get_started" = "शुरू करें";

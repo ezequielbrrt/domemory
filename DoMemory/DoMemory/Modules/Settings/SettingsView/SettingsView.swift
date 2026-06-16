@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var showThemePicker = false
     @State private var isRewardedAdInProgress = false
     @State private var showNotificationsDeniedAlert = false
+    @State private var showAchievements = false
     @AppStorage(UserDefaultsKeys.themePreference) private var themePreference = AppTheme.system.rawValue
     @AppStorage(UserDefaultsKeys.notificationsEnabled) private var notificationsEnabled = false
 
@@ -43,6 +44,16 @@ struct SettingsView: View {
                 .padding(.bottom, 28)
 
                 VStack(spacing: 12) {
+                    SettingsOptionRow(
+                        title: Strings.achievementsTitle,
+                        subtitle: Strings.achievementsSubtitle,
+                        actionTitle: Strings.achievementsView,
+                        systemImage: "trophy.fill"
+                    ) {
+                        impactMed.impactOccurred()
+                        showAchievements = true
+                    }
+
                     SettingsOptionRow(
                         title: Strings.settingsThemeTitle,
                         subtitle: selectedThemeTitle,
@@ -136,6 +147,9 @@ struct SettingsView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $showAchievements) {
+            AchievementsView()
+        }
         .alert(item: $purchaseService.purchaseAlert) { alert in
             Alert(
                 title: Text(alert.title),
@@ -201,10 +215,12 @@ struct SettingsView: View {
             if granted {
                 notificationsEnabled = true
                 NotificationService.shared.scheduleInactivityReminder()
+                NotificationService.shared.refreshStreakAtRiskReminder()
             }
         case .authorized, .provisional, .ephemeral:
             notificationsEnabled = true
             NotificationService.shared.scheduleInactivityReminder()
+            NotificationService.shared.refreshStreakAtRiskReminder()
         @unknown default:
             break
         }

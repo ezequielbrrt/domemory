@@ -132,3 +132,53 @@
 "whats_new_theme_description" = "在设置中选择系统、浅色或深色模式，打造专属外观。";
 "whats_new_hint_title" = "提示";
 "whats_new_hint_description" = "卡关了？暂停游戏并观看短视频广告，即可揭示一对隐藏的牌。";
+
+/* Daily Challenge */
+"daily_challenge_title" = "每日挑战";
+"daily_challenge_subtitle" = "每天全新棋盘";
+"daily_challenge_completed" = "今日已完成！";
+"daily_challenge_streak_format" = "🔥 连续 %d 天";
+
+/* Streak at risk */
+"notification_streak_risk_title" = "别中断你的连胜！";
+"notification_streak_risk_body" = "你连续 %d 天的纪录今晚就要中断了。来玩今天的挑战保持纪录吧！🔥";
+
+/* Multiplayer invite */
+"multiplayer_invite_friend" = "挑战好友";
+"multiplayer_invite_message" = "我要在 DoMemory 和你来一场记忆对决！用代码 %@ 加入我的房间:";
+
+/* Achievements */
+"achievements_title" = "成就";
+"achievements_subtitle" = "查看你的进度和徽章";
+"achievements_view" = "查看";
+"achievements_stats_section" = "你的统计";
+"achievements_badges_section" = "徽章";
+"stat_total_games" = "已玩局数";
+"stat_total_wins" = "胜利";
+"stat_win_rate" = "胜率";
+"stat_perfect_games" = "完美对局";
+"stat_longest_streak" = "最长连胜";
+"stat_multiplayer_wins" = "多人对战胜利";
+"ach_wins_title_format" = "%d 次胜利";
+"ach_wins_detail_format" = "赢得 %d 局";
+"ach_streak_title_format" = "连续 %d 天";
+"ach_streak_detail_format" = "达成连续 %d 天的纪录";
+"ach_perfect_title" = "完美无瑕";
+"ach_perfect_detail" = "零失误赢得一局";
+"ach_multiplayer_title" = "冠军";
+"ach_multiplayer_detail" = "赢得你的第一场多人对战";
+
+/* Share result */
+"share_result" = "分享结果";
+"share_result_caption" = "我在 DoMemory 里配对了 %d 对！你能赢我吗？";
+
+/* Onboarding intro */
+"intro_multiplayer_title" = "和朋友一起玩";
+"intro_multiplayer_subtitle" = "在实时多人房间里挑战任何人——只需分享 6 位代码或二维码。";
+"intro_custom_title" = "打造专属";
+"intro_custom_subtitle" = "创建你自己的表情卡牌，畅玩你喜爱的记忆游戏。";
+"intro_daily_title" = "每天回来";
+"intro_daily_subtitle" = "每天都有新棋盘。建立连胜并保持下去！";
+"intro_skip" = "跳过";
+"intro_next" = "下一步";
+"intro_get_started" = "开始";

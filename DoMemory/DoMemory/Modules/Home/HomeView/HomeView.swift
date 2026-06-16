@@ -10,7 +10,17 @@ import SwiftUI
 struct HomeView: View {
     let onDidComplete: () -> Void
 
+    @State private var showingIntro = !UserDefaults.standard.bool(forKey: UserDefaultsKeys.onboardingIntroShown)
+
     var body: some View {
+        if showingIntro {
+            FeatureIntroView { withAnimation { showingIntro = false } }
+        } else {
+            difficultyPicker
+        }
+    }
+
+    private var difficultyPicker: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
 

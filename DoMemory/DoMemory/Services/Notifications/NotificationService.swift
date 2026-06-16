@@ -10,8 +10,25 @@ final class NotificationService {
     static let shared = NotificationService()
 
     private let center = UNUserNotificationCenter.current()
-    private let requestID = "com.ezequielbrrt.domemory.inactivity_reminder"
-    private let inactivityDays = 2
+
+    // Inactivity reminders, scheduled in tiers so a user who ignores the first
+    // nudge still gets a later one.
+    private let inactivityDay2ID = "com.ezequielbrrt.domemory.inactivity_reminder"
+    private let inactivityDay7ID = "com.ezequielbrrt.domemory.inactivity_reminder.day7"
+    private let streakRiskID = "com.ezequielbrrt.domemory.streak_at_risk"
+    private let streakRiskHour = 20
+
+    private var inactivityTiers: [(id: String, days: Int)] {
+        [(inactivityDay2ID, 2), (inactivityDay7ID, 7)]
+    }
+
+    private var allReminderIDs: [String] {
+        [inactivityDay2ID, inactivityDay7ID, streakRiskID]
+    }
+
+    private var notificationsEnabled: Bool {
+        UserDefaults.standard.bool(forKey: UserDefaultsKeys.notificationsEnabled)
+    }
 
     private init() {}
 
@@ -24,33 +41,63 @@ final class NotificationService {
     }
 
     func scheduleInactivityReminder() {
-        center.removePendingNotificationRequests(withIdentifiers: [requestID])
+        center.removePendingNotificationRequests(withIdentifiers: [inactivityDay2ID, inactivityDay7ID])
 
-        guard UserDefaults.standard.bool(forKey: UserDefaultsKeys.notificationsEnabled) else { return }
+        guard notificationsEnabled else { return }
 
-        let content = UNMutableNotificationContent()
-        content.title = NSLocalizedString("notification_reminder_title", comment: "Reminder notification title")
-        content.body = NSLocalizedString("notification_reminder_body", comment: "Reminder notification body")
-        content.sound = .default
+        for tier in inactivityTiers {
+            let content = UNMutableNotificationContent()
+            content.title = NSLocalizedString("notification_reminder_title", comment: "Reminder notification title")
+            content.body = NSLocalizedString("notification_reminder_body", comment: "Reminder notification body")
+            content.sound = .default
+
+            guard
+                let fireDate = Calendar.current.date(byAdding: .day, value: tier.days, to: Date()),
+                let fireAt7pm = Calendar.current.date(bySettingHour: 19, minute: 0, second: 0, of: fireDate)
+            else { continue }
+
+            let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireAt7pm)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            center.add(UNNotificationRequest(identifier: tier.id, content: content, trigger: trigger))
+        }
+    }
+
+    /// Schedules (or cancels) an end-of-day nudge when the user has an active
+    /// daily-challenge streak they haven't kept alive today. Re-arm on launch /
+    /// foreground and after every daily completion.
+    func refreshStreakAtRiskReminder() {
+        center.removePendingNotificationRequests(withIdentifiers: [streakRiskID])
+
+        guard notificationsEnabled else { return }
+
+        let streak = DailyChallengeService.shared.currentStreak
+        guard streak > 0, !DailyChallengeService.shared.isCompletedToday() else { return }
 
         guard
-            let fireDate = Calendar.current.date(byAdding: .day, value: inactivityDays, to: Date()),
-            let fireAt7pm = Calendar.current.date(bySettingHour: 19, minute: 0, second: 0, of: fireDate)
+            let fireDate = Calendar.current.date(bySettingHour: streakRiskHour, minute: 0, second: 0, of: Date()),
+            fireDate > Date()
         else { return }
 
-        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireAt7pm)
+        let content = UNMutableNotificationContent()
+        content.title = NSLocalizedString("notification_streak_risk_title", comment: "Streak-at-risk notification title")
+        content.body = String(
+            format: NSLocalizedString("notification_streak_risk_body", comment: "Streak-at-risk notification body, %d = streak days"),
+            streak
+        )
+        content.sound = .default
+
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        let request = UNNotificationRequest(identifier: requestID, content: content, trigger: trigger)
-        center.add(request)
+        center.add(UNNotificationRequest(identifier: streakRiskID, content: content, trigger: trigger))
     }
 
     func cancelAll() {
-        center.removePendingNotificationRequests(withIdentifiers: [requestID])
+        center.removePendingNotificationRequests(withIdentifiers: allReminderIDs)
     }
 
     func hasPendingReminder() async -> Bool {
         let pending = await center.pendingNotificationRequests()
-        return pending.contains { $0.identifier == requestID }
+        return pending.contains { $0.identifier == inactivityDay2ID }
     }
 
     @MainActor
