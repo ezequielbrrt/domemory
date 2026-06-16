@@ -12,6 +12,22 @@ struct WinModal: View {
     var pairsCount: Int = 12
     var timeRemaining: Int = 42
     var failedTries: Int = 2
+    var difficultyTitle: String = ""
+    var isDailyChallenge: Bool = false
+    var streak: Int = 0
+
+    @State private var showShareSheet = false
+
+    private var shareData: ResultShareData {
+        ResultShareData(
+            pairs: pairsCount,
+            timeRemaining: timeRemaining,
+            failedTries: failedTries,
+            difficultyTitle: difficultyTitle,
+            isDailyChallenge: isDailyChallenge,
+            streak: streak
+        )
+    }
 
     var body: some View {
         ZStack {
@@ -86,6 +102,19 @@ struct WinModal: View {
                 .padding(.top, 8)
                 .padding(.bottom, 16)
 
+                Button(action: { showShareSheet = true }) {
+                    Label(Strings.shareResult, systemImage: "square.and.arrow.up")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.primaryColor)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(
+                            Capsule().strokeBorder(Color.primaryColor.opacity(0.45), lineWidth: 1.5)
+                        )
+                }
+                .buttonStyle(.plain)
+                .padding(.bottom, 10)
+
                 Button(action: { listener?.tapOnContinue() }) {
                     Text(Strings.goToMenu)
                         .font(.system(size: 17, weight: .bold, design: .rounded))
@@ -98,6 +127,11 @@ struct WinModal: View {
                         .shadow(color: Color.primaryColor.opacity(0.35), radius: 16, x: 0, y: 4)
                 }
                 .buttonStyle(.plain)
+            }
+            .sheet(isPresented: $showShareSheet) {
+                ResultActivityView(data: shareData) {
+                    AnalyticsService.log(.resultShared(source: isDailyChallenge ? "daily_challenge" : "win"))
+                }
             }
             .padding(.top, 40)
             .padding(.horizontal, 28)

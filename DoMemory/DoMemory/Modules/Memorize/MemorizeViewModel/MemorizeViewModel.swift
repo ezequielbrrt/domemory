@@ -19,6 +19,7 @@ class MemorizeViewModel {
     var isRewardedAdInProgress: Bool = false
 
     var memorama: Memorama?
+    let isDailyChallenge: Bool
     var closeView: Bool = false
     var shouldShowPie: Bool!
 
@@ -34,8 +35,9 @@ class MemorizeViewModel {
             || AdsService.shared.isRewardedConfigured(for: .gameRewardedHint)
     }
 
-    init(memorama: Memorama?) {
+    init(memorama: Memorama?, isDailyChallenge: Bool = false) {
         self.memorama = memorama
+        self.isDailyChallenge = isDailyChallenge
         guard let auxMemorama = memorama else { return }
         if auxMemorama.isDoubleItem {
             self.model = MemoryGame<String>(numbersOfPairsOfCards: auxMemorama.items.count) { partIndex in
@@ -60,6 +62,19 @@ class MemorizeViewModel {
 
     var failedTries: Int {
         model.failedTries
+    }
+
+    var difficultyDisplayTitle: String {
+        switch gameDifficulty() {
+        case .easy: return Strings.easy
+        case .medium: return Strings.medium
+        case .hard: return Strings.hard
+        case .veryHard: return Strings.veryHard
+        }
+    }
+
+    var dailyChallengeStreak: Int {
+        isDailyChallenge ? DailyChallengeService.shared.currentStreak : 0
     }
 
     func getRemainingTime() -> Int {
@@ -179,6 +194,9 @@ class MemorizeViewModel {
                 isCustom: memorama?.id.hasPrefix("custom_") ?? false
             )
         )
+        if isDailyChallenge {
+            AnalyticsService.log(.dailyChallengeStarted(streak: DailyChallengeService.shared.currentStreak))
+        }
     }
 
     func tapOnPause() {
@@ -200,8 +218,23 @@ class MemorizeViewModel {
     private func logGameFinishedIfNeeded(result: String) {
         guard !hasLoggedGameFinished else { return }
         hasLoggedGameFinished = true
+        let didWin = result == "win"
         if let memoramaID = memorama?.id {
-            GameStatsService.shared.recordGameFinished(memoramaID: memoramaID, didWin: result == "win")
+            GameStatsService.shared.recordGameFinished(memoramaID: memoramaID, didWin: didWin)
+        }
+        ProfileStatsService.shared.recordGameFinished(
+            didWin: didWin,
+            isPerfect: didWin && model.failedTries == 0,
+            difficulty: gameDifficulty(),
+            timeRemaining: timeRemaining
+        )
+        if isDailyChallenge {
+            let streak = DailyChallengeService.shared.recordCompletion(didWin: didWin)
+            AnalyticsService.log(.dailyChallengeFinished(result: result, streak: streak))
+            if didWin, [3, 7, 14, 30, 100].contains(streak) {
+                AnalyticsService.log(.streakMilestone(days: streak))
+            }
+            NotificationService.shared.refreshStreakAtRiskReminder()
         }
         NotificationService.shared.scheduleInactivityReminder()
         AnalyticsService.log(

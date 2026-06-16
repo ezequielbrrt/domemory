@@ -30,6 +30,7 @@ final class MultiplayerRoomViewModel {
     var errorMessage: String?
     var closeView = false
     var hasStarted = false
+    private var hasRecordedMultiplayerWin = false
 
     init(entryMode: EntryMode, availableMemoramas: [Memorama] = [], service: MultiplayerService = .shared) {
         self.entryMode = entryMode
@@ -221,6 +222,13 @@ private extension MultiplayerRoomViewModel {
     }
 
     func handleRoomUpdate(_ room: MultiplayerRoom) {
+        if room.status == .finished,
+           room.winnerId == MultiplayerService.currentUserID,
+           !hasRecordedMultiplayerWin {
+            hasRecordedMultiplayerWin = true
+            ProfileStatsService.shared.recordMultiplayerWin()
+        }
+
         if room.status == .playing, room.selectedCardIds.count == 2 {
             scheduleFlipBack(room: room)
         } else {

@@ -65,7 +65,7 @@ struct MultiplayerRoomView: View {
                     .multilineTextAlignment(.center)
 
                 if !viewModel.roomCode.isEmpty {
-                    QRCodeView(code: viewModel.roomCode)
+                    QRCodeView(code: InviteLink.schemeURL(code: viewModel.roomCode).absoluteString)
                         .frame(width: 190, height: 190)
                         .padding(18)
                         .background(
@@ -88,6 +88,21 @@ struct MultiplayerRoomView: View {
                                 .fill(Color.primaryColor.opacity(0.12))
                         )
                         .textSelection(.enabled)
+
+                    ShareLink(item: InviteLink.shareMessage(code: viewModel.roomCode)) {
+                        Label(Strings.multiplayerInviteFriend, systemImage: "square.and.arrow.up")
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.primaryColor)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 12)
+                            .background(
+                                Capsule()
+                                    .strokeBorder(Color.primaryColor.opacity(0.4), lineWidth: 1.5)
+                            )
+                    }
+                    .simultaneousGesture(TapGesture().onEnded {
+                        AnalyticsService.log(.multiplayerInviteSent(source: "lobby"))
+                    })
                 }
 
                 playerScoreRow

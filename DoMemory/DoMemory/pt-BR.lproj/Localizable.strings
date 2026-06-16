@@ -132,3 +132,53 @@
 "whats_new_theme_description" = "Escolha Sistema, Claro ou Escuro nas Configurações para personalizar sua experiência.";
 "whats_new_hint_title" = "Dica";
 "whats_new_hint_description" = "Travado? Pause o jogo e assista a um breve anúncio para revelar um par de cartas escondido.";
+
+/* Daily Challenge */
+"daily_challenge_title" = "Desafio diário";
+"daily_challenge_subtitle" = "Um novo tabuleiro todo dia";
+"daily_challenge_completed" = "Concluído hoje!";
+"daily_challenge_streak_format" = "🔥 Sequência de %d dias";
+
+/* Streak at risk */
+"notification_streak_risk_title" = "Não perca sua sequência!";
+"notification_streak_risk_body" = "Sua sequência de %d dias termina hoje à noite. Jogue o desafio de hoje para mantê-la! 🔥";
+
+/* Multiplayer invite */
+"multiplayer_invite_friend" = "Desafie um amigo";
+"multiplayer_invite_message" = "Desafio você para um duelo de memória no DoMemory! Entre na minha sala com o código %@:";
+
+/* Achievements */
+"achievements_title" = "Conquistas";
+"achievements_subtitle" = "Acompanhe seu progresso e medalhas";
+"achievements_view" = "Ver";
+"achievements_stats_section" = "Suas estatísticas";
+"achievements_badges_section" = "Medalhas";
+"stat_total_games" = "Jogos jogados";
+"stat_total_wins" = "Vitórias";
+"stat_win_rate" = "Taxa de vitória";
+"stat_perfect_games" = "Jogos perfeitos";
+"stat_longest_streak" = "Maior sequência";
+"stat_multiplayer_wins" = "Vitórias multijogador";
+"ach_wins_title_format" = "%d vitórias";
+"ach_wins_detail_format" = "Vença %d jogos";
+"ach_streak_title_format" = "Sequência de %d dias";
+"ach_streak_detail_format" = "Alcance uma sequência de %d dias";
+"ach_perfect_title" = "Impecável";
+"ach_perfect_detail" = "Vença um jogo sem erros";
+"ach_multiplayer_title" = "Campeão";
+"ach_multiplayer_detail" = "Vença sua primeira partida multijogador";
+
+/* Share result */
+"share_result" = "Compartilhar resultado";
+"share_result_caption" = "Combinei %d pares no DoMemory! Consegue me superar?";
+
+/* Onboarding intro */
+"intro_multiplayer_title" = "Jogue com amigos";
+"intro_multiplayer_subtitle" = "Desafie qualquer um em salas multijogador em tempo real — basta compartilhar um código de 6 dígitos ou QR.";
+"intro_custom_title" = "Deixe do seu jeito";
+"intro_custom_subtitle" = "Crie seus próprios conjuntos de cartas com emojis e jogue os memoramas que você ama.";
+"intro_daily_title" = "Volte todos os dias";
+"intro_daily_subtitle" = "Um tabuleiro novo a cada dia. Crie uma sequência e mantenha-a!";
+"intro_skip" = "Pular";
+"intro_next" = "Próximo";
+"intro_get_started" = "Começar";

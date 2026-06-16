@@ -35,6 +35,14 @@ enum AnalyticsEvent {
     case adLifecycle(placement: String, action: String)
     case whatsNewShown(version: String)
     case whatsNewDismissed(version: String)
+    case dailyChallengeStarted(streak: Int)
+    case dailyChallengeFinished(result: String, streak: Int)
+    case streakMilestone(days: Int)
+    case multiplayerInviteSent(source: String)
+    case multiplayerInviteOpened
+    case resultShared(source: String)
+    case onboardingIntroCompleted
+    case onboardingIntroSkipped
 
     var name: String {
         switch self {
@@ -59,6 +67,14 @@ enum AnalyticsEvent {
         case .adLifecycle: return "ad_lifecycle"
         case .whatsNewShown: return "whats_new_shown"
         case .whatsNewDismissed: return "whats_new_dismissed"
+        case .dailyChallengeStarted: return "daily_challenge_started"
+        case .dailyChallengeFinished: return "daily_challenge_finished"
+        case .streakMilestone: return "streak_milestone"
+        case .multiplayerInviteSent: return "multiplayer_invite_sent"
+        case .multiplayerInviteOpened: return "multiplayer_invite_opened"
+        case .resultShared: return "result_shared"
+        case .onboardingIntroCompleted: return "onboarding_intro_completed"
+        case .onboardingIntroSkipped: return "onboarding_intro_skipped"
         }
     }
 
@@ -156,6 +172,23 @@ enum AnalyticsEvent {
             return ["version": version]
         case .whatsNewDismissed(let version):
             return ["version": version]
+        case .dailyChallengeStarted(let streak):
+            return ["streak": streak]
+        case .dailyChallengeFinished(let result, let streak):
+            return [
+                "result": result,
+                "streak": streak
+            ]
+        case .streakMilestone(let days):
+            return ["days": days]
+        case .multiplayerInviteSent(let source):
+            return ["source": source]
+        case .multiplayerInviteOpened:
+            return [:]
+        case .resultShared(let source):
+            return ["source": source]
+        case .onboardingIntroCompleted, .onboardingIntroSkipped:
+            return [:]
         }
     }
 }

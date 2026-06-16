@@ -132,3 +132,53 @@
 "whats_new_theme_description" = "Scegli Sistema, Chiaro o Scuro nelle Impostazioni in base ai tuoi gusti.";
 "whats_new_hint_title" = "Suggerimento";
 "whats_new_hint_description" = "Bloccato? Metti in pausa il gioco e guarda un breve annuncio per rivelare una coppia di carte nascosta.";
+
+/* Daily Challenge */
+"daily_challenge_title" = "Sfida giornaliera";
+"daily_challenge_subtitle" = "Una nuova griglia ogni giorno";
+"daily_challenge_completed" = "Completata per oggi!";
+"daily_challenge_streak_format" = "🔥 Serie di %d giorni";
+
+/* Streak at risk */
+"notification_streak_risk_title" = "Non perdere la tua serie!";
+"notification_streak_risk_body" = "La tua serie di %d giorni finisce stasera. Gioca la sfida di oggi per mantenerla! 🔥";
+
+/* Multiplayer invite */
+"multiplayer_invite_friend" = "Sfida un amico";
+"multiplayer_invite_message" = "Ti sfido a una partita di memoria su DoMemory! Entra nella mia stanza con il codice %@:";
+
+/* Achievements */
+"achievements_title" = "Obiettivi";
+"achievements_subtitle" = "Tieni traccia dei tuoi progressi e distintivi";
+"achievements_view" = "Vedi";
+"achievements_stats_section" = "Le tue statistiche";
+"achievements_badges_section" = "Distintivi";
+"stat_total_games" = "Partite giocate";
+"stat_total_wins" = "Vittorie";
+"stat_win_rate" = "Percentuale di vittorie";
+"stat_perfect_games" = "Partite perfette";
+"stat_longest_streak" = "Serie più lunga";
+"stat_multiplayer_wins" = "Vittorie multigiocatore";
+"ach_wins_title_format" = "%d vittorie";
+"ach_wins_detail_format" = "Vinci %d partite";
+"ach_streak_title_format" = "Serie di %d giorni";
+"ach_streak_detail_format" = "Raggiungi una serie di %d giorni";
+"ach_perfect_title" = "Impeccabile";
+"ach_perfect_detail" = "Vinci una partita senza errori";
+"ach_multiplayer_title" = "Campione";
+"ach_multiplayer_detail" = "Vinci la tua prima partita multigiocatore";
+
+/* Share result */
+"share_result" = "Condividi risultato";
+"share_result_caption" = "Ho abbinato %d coppie su DoMemory! Riesci a battermi?";
+
+/* Onboarding intro */
+"intro_multiplayer_title" = "Gioca con gli amici";
+"intro_multiplayer_subtitle" = "Sfida chiunque in stanze multigiocatore in tempo reale: condividi un codice a 6 cifre o un QR.";
+"intro_custom_title" = "Rendilo tuo";
+"intro_custom_subtitle" = "Crea i tuoi set di carte emoji e gioca i memorama che ami.";
+"intro_daily_title" = "Torna ogni giorno";
+"intro_daily_subtitle" = "Un tabellone nuovo ogni giorno. Crea una serie e mantienila!";
+"intro_skip" = "Salta";
+"intro_next" = "Avanti";
+"intro_get_started" = "Inizia";

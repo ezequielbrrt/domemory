@@ -17,4 +17,6 @@ class UserDefaultsKeys: NSObject {
     static var reviewLastPromptedDate: String = "reviewLastPromptedDate"
     static var notificationsEnabled: String = "notificationsEnabled"
     static var whatsNewLastSeenVersion: String = "whatsNewLastSeenVersion"
+    static var onboardingIntroShown: String = "onboardingIntroShown"
+    // Daily-challenge keys live in DailyChallengeKeys (shared with the widget target).
 }

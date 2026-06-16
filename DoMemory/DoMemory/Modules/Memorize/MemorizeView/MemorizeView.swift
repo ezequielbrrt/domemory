@@ -178,7 +178,10 @@ struct MemorizeView: View {
                     listener: viewModel,
                     pairsCount: viewModel.cards.count / 2,
                     timeRemaining: viewModel.timeRemaining,
-                    failedTries: viewModel.failedTries
+                    failedTries: viewModel.failedTries,
+                    difficultyTitle: viewModel.difficultyDisplayTitle,
+                    isDailyChallenge: viewModel.isDailyChallenge,
+                    streak: viewModel.dailyChallengeStreak
                 )
                     .onAppear {
                         viewModel.stopTimer()

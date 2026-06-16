@@ -132,3 +132,53 @@
 "whats_new_theme_description" = "Choose System, Light, or Dark in Settings to match your style.";
 "whats_new_hint_title" = "Hint";
 "whats_new_hint_description" = "Stuck? Pause the game and watch a short ad to reveal one hidden pair of cards.";
+
+/* Daily Challenge */
+"daily_challenge_title" = "Daily Challenge";
+"daily_challenge_subtitle" = "New board every day";
+"daily_challenge_completed" = "Done for today!";
+"daily_challenge_streak_format" = "🔥 %d-day streak";
+
+/* Streak at risk */
+"notification_streak_risk_title" = "Don't break your streak!";
+"notification_streak_risk_body" = "Your %d-day streak ends tonight. Play today's challenge to keep it alive! 🔥";
+
+/* Multiplayer invite */
+"multiplayer_invite_friend" = "Challenge a friend";
+"multiplayer_invite_message" = "I challenge you to a memory match in DoMemory! Join my room with code %@:";
+
+/* Achievements */
+"achievements_title" = "Achievements";
+"achievements_subtitle" = "Track your progress and badges";
+"achievements_view" = "View";
+"achievements_stats_section" = "Your Stats";
+"achievements_badges_section" = "Badges";
+"stat_total_games" = "Games Played";
+"stat_total_wins" = "Wins";
+"stat_win_rate" = "Win Rate";
+"stat_perfect_games" = "Perfect Games";
+"stat_longest_streak" = "Longest Streak";
+"stat_multiplayer_wins" = "Multiplayer Wins";
+"ach_wins_title_format" = "%d Wins";
+"ach_wins_detail_format" = "Win %d games";
+"ach_streak_title_format" = "%d-Day Streak";
+"ach_streak_detail_format" = "Reach a %d-day daily streak";
+"ach_perfect_title" = "Flawless";
+"ach_perfect_detail" = "Win a game with no mistakes";
+"ach_multiplayer_title" = "Champion";
+"ach_multiplayer_detail" = "Win your first multiplayer match";
+
+/* Share result */
+"share_result" = "Share Result";
+"share_result_caption" = "I matched %d pairs in DoMemory! Can you beat me?";
+
+/* Onboarding intro */
+"intro_multiplayer_title" = "Play with Friends";
+"intro_multiplayer_subtitle" = "Challenge anyone in real-time multiplayer rooms — just share a 6-digit code or QR.";
+"intro_custom_title" = "Make It Yours";
+"intro_custom_subtitle" = "Create your own emoji card sets and play the memoramas you love.";
+"intro_daily_title" = "Come Back Daily";
+"intro_daily_subtitle" = "A fresh board every day. Build a streak and keep it alive!";
+"intro_skip" = "Skip";
+"intro_next" = "Next";
+"intro_get_started" = "Get Started";

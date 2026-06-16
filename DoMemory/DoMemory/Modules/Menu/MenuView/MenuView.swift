@@ -20,8 +20,11 @@ struct MenuView: View {
     @State private var showJoinMultiplayerSheet = false
     @State private var selectedTab: GameTab = .all
     @State private var randomMemorama: Memorama?
+    @State private var dailyChallengeBoard: Memorama?
     @State private var statsRefreshID = UUID()
     @State private var purchaseService = PurchaseService.shared
+    @ObservedObject private var deepLinkRouter = DeepLinkRouter.shared
+    @State private var joinDeepLink: JoinDeepLink?
 
     private var displayedGames: [Memorama] {
         switch selectedTab {
@@ -109,6 +112,16 @@ struct MenuView: View {
                             }
                             .padding(.horizontal, 16)
                             .padding(.top, 12)
+                            .padding(.bottom, 8)
+
+                            // Daily challenge
+                            DailyChallengeCard(
+                                streak: DailyChallengeService.shared.currentStreak,
+                                isCompleted: DailyChallengeService.shared.isCompletedToday(),
+                                onPlay: { dailyChallengeBoard = DailyChallengeService.shared.boardForToday() }
+                            )
+                            .id(statsRefreshID)
+                            .padding(.horizontal, 16)
                             .padding(.bottom, 8)
 
                             // Tab selector
@@ -231,6 +244,18 @@ struct MenuView: View {
                             statsRefreshID = UUID()
                         }
                     }
+                    .navigationDestination(item: $dailyChallengeBoard) { memorama in
+                        MemorizeView(
+                            viewModel: MemorizeViewModel(memorama: memorama, isDailyChallenge: true),
+                            gameStartSource: "daily_challenge"
+                        )
+                        .onDisappear {
+                            statsRefreshID = UUID()
+                        }
+                    }
+                    .navigationDestination(item: $joinDeepLink) { link in
+                        MultiplayerRoomView(entryMode: .join(link.code))
+                    }
                     .sheet(isPresented: $showCreateSheet) {
                         CreateMemoramaView(
                             currentDifficulty: viewModel.currentDifficulty,
@@ -260,7 +285,23 @@ struct MenuView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             AdsService.shared.presentAppOpenAdIfAvailable()
+            NotificationService.shared.refreshStreakAtRiskReminder()
         }
+        .onReceive(deepLinkRouter.$pendingJoinCode.compactMap { $0 }) { code in
+            joinDeepLink = JoinDeepLink(code: code)
+            deepLinkRouter.pendingJoinCode = nil
+        }
+        .onReceive(deepLinkRouter.$shouldOpenDailyChallenge.filter { $0 }) { _ in
+            if !DailyChallengeService.shared.isCompletedToday() {
+                dailyChallengeBoard = DailyChallengeService.shared.boardForToday()
+            }
+            deepLinkRouter.shouldOpenDailyChallenge = false
+        }
+    }
+
+    private struct JoinDeepLink: Identifiable, Hashable {
+        let id = UUID()
+        let code: String
     }
 
     private var selectedVisibleTab: MenuViewModel.VisibleTab {
@@ -384,6 +425,61 @@ private struct MemoramaGridCell: View {
         .navigationDestination(isPresented: $isStartingMultiplayer) {
             MultiplayerRoomView(entryMode: .create(memorama), availableMemoramas: availableMemoramas)
         }
+    }
+}
+
+private struct DailyChallengeCard: View {
+    let streak: Int
+    let isCompleted: Bool
+    let onPlay: () -> Void
+
+    var body: some View {
+        Button(action: { if !isCompleted { onPlay() } }) {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.18))
+                        .frame(width: 48, height: 48)
+                    Image(systemName: isCompleted ? "checkmark" : "calendar")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(Strings.dailyChallengeTitle)
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text(isCompleted ? Strings.dailyChallengeCompleted : Strings.dailyChallengeSubtitle)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+
+                Spacer()
+
+                if streak > 0 {
+                    Text(Strings.dailyChallengeStreak(streak))
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Color.white.opacity(0.2)))
+                } else if !isCompleted {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color.primaryColor)
+                    .shadow(color: Color.primaryColor.opacity(0.3), radius: 12, x: 0, y: 4)
+            )
+            .opacity(isCompleted ? 0.85 : 1)
+        }
+        .buttonStyle(.plain)
+        .disabled(isCompleted)
     }
 }
 

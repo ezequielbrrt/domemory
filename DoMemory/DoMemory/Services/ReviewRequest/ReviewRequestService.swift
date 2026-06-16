@@ -13,7 +13,7 @@ import UIKit
 final class ReviewRequestService {
     static let shared = ReviewRequestService()
 
-    private let minimumSuccessfulWins = 5
+    private let minimumSuccessfulWins = 3
     private let cooldownDays = 120
     private let calendar = Calendar.current
     private let defaults = UserDefaults.standard
