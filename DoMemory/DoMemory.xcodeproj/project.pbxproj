@@ -10,6 +10,7 @@
 		0211176CB11755BBCD29C19D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BA471F3ACC4F3F29066AFA /* AppDelegate.swift */; };
 		03E56A6C3DC55EB3B4ED6BEA /* FirebaseDatabase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E72E135C04E414919D3E2CC7 /* FirebaseDatabase.framework */; };
 		055E2043B60E0A890A1A7721 /* nanopb_nanopb.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 78B9EF60C17A9425ACF036E0 /* nanopb_nanopb.bundle */; };
+		06CB9DD02FF93310A1852E00 /* LaunchScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C64BFD29E269A9ABDB1312FA /* LaunchScreenView.swift */; };
 		0706C14227955FFB2B5218F6 /* MultiplayerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F3EE1134F4B1BBDBD2D6E5 /* MultiplayerModels.swift */; };
 		07F4FA0022C819302F3BB1F4 /* FirebaseAnalyticsCoreWrapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4D8B11D7D219F16ED27A5AF /* FirebaseAnalyticsCoreWrapper.framework */; };
 		0EDD5F6FF6847F7B0F8228AA /* WatchKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3117DD37A128BD5876BEE67 /* WatchKit.framework */; platformFilters = (watchos, ); };
@@ -376,6 +377,7 @@
 		C3117DD37A128BD5876BEE67 /* WatchKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/WatchKit.framework; sourceTree = DEVELOPER_DIR; };
 		C49A16BA60A33A5D4DD667B8 /* FirebaseSessionsObjC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseSessionsObjC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4D8B11D7D219F16ED27A5AF /* FirebaseAnalyticsCoreWrapper.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseAnalyticsCoreWrapper.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C64BFD29E269A9ABDB1312FA /* LaunchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenView.swift; sourceTree = "<group>"; };
 		C7DD4AB72F4C6D8A6F6143B8 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		C9DB0469469912E53D48368A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/SystemConfiguration.framework; sourceTree = DEVELOPER_DIR; };
 		C9F64375C9249CFD343F2D5B /* GTMSessionFetcher_GTMSessionFetcherCore.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GTMSessionFetcher_GTMSessionFetcherCore.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -683,6 +685,7 @@
 				6B770F4AA77597EC9BB2EDD4 /* AppDelegate */,
 				B5B9BE8D38345F0B3C9FEE8C /* ContentView.swift */,
 				215041780AB9270878E1DCB1 /* DoMemoryApp.swift */,
+				C64BFD29E269A9ABDB1312FA /* LaunchScreenView.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -1233,6 +1236,7 @@
 				0211176CB11755BBCD29C19D /* AppDelegate.swift in Sources */,
 				AF10449BFBBD6B25A02B5673 /* ContentView.swift in Sources */,
 				2AB6561C702FEA4BDC29D64F /* DoMemoryApp.swift in Sources */,
+				06CB9DD02FF93310A1852E00 /* LaunchScreenView.swift in Sources */,
 				3457BFB1A6803435CB2D54A9 /* MemorizeView.swift in Sources */,
 				BFA403DE51ED6C28CCF73A9C /* LoseModal.swift in Sources */,
 				26B9822B16831B8F1906743E /* LoseModalViewModel.swift in Sources */,

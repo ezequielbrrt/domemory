@@ -19,6 +19,7 @@ SCREEN_SPECS = [
     ("01 Flip & Match",    "01_flip_and_match.jpg"),
     ("02 Play Dozens",     "02_play_dozens.jpg"),
     ("03 Choose Challenge","03_choose_challenge.jpg"),
+    ("05 Features",        "05_features.jpg"),
 ]
 
 # Maps Paper/app locale codes → App Store Connect locale codes.

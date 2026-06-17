@@ -11,18 +11,30 @@ import WhatsNewKit
 struct ContentView: View {
     @State private var hasOnboarded: Bool = UserManageObject().getUserSettings() != nil
     @StateObject private var whatsNewManager = WhatsNewManager()
+    @State private var showLaunch = true
 
     var body: some View {
-        Group {
-            if hasOnboarded {
-                MenuView()
-                    .sheet(isPresented: $whatsNewManager.shouldShow) {
-                        WhatsNewView(whatsNew: .current, theme: .doMemory) {
-                            whatsNewManager.markSeen()
+        ZStack {
+            Group {
+                if hasOnboarded {
+                    MenuView()
+                        .sheet(isPresented: $whatsNewManager.shouldShow) {
+                            WhatsNewView(whatsNew: .current, theme: .doMemory) {
+                                whatsNewManager.markSeen()
+                            }
                         }
+                } else {
+                    HomeView(onDidComplete: { hasOnboarded = true })
+                }
+            }
+
+            if showLaunch {
+                LaunchScreenView()
+                    .transition(.opacity)
+                    .task {
+                        try? await Task.sleep(for: .seconds(1.2))
+                        withAnimation(.easeOut(duration: 0.4)) { showLaunch = false }
                     }
-            } else {
-                HomeView(onDidComplete: { hasOnboarded = true })
             }
         }
     }
