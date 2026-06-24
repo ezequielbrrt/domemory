@@ -132,6 +132,8 @@
 "whats_new_theme_description" = "Escolha Sistema, Claro ou Escuro nas Configurações para personalizar sua experiência.";
 "whats_new_hint_title" = "Dica";
 "whats_new_hint_description" = "Travado? Pause o jogo e assista a um breve anúncio para revelar um par de cartas escondido.";
+"whats_new_games_title" = "Mais jogos para jogar";
+"whats_new_games_description" = "Dezenas de novos conjuntos de cartas com emojis em todas as dificuldades — mais de 130 memoramas para dominar.";
 
 /* Daily Challenge */
 "daily_challenge_title" = "Desafio diário";

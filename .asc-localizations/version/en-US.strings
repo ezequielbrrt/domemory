@@ -1,4 +1,7 @@
 "description" = "DoMemory is a classic brain-training memory card game with the emojis you use every day.\n\nChoose your challenge and play at your own pace:\n- Easy\n- Medium\n- Hard\n- Very hard\n\nEach game has a timer, so find every matching pair before time runs out. Challenge a friend in real-time multiplayer, create your own emoji memoramas, favorite the sets you play most, and restart whenever you want.";
 "keywords" = "memory,cards,emoji,pairs,matching,concentration,multiplayer,friends,family,kids,offline,memorama";
 "supportUrl" = "https://github.com/ezequielbrrt/domemory";
-"whatsNew" = "• Create your own memoramas with custom emoji card sets.\n• Mark favorite memoramas so they stay at the top of the list.\n• Track failed tries and completed game stats.\n• Enjoy improved full-screen cards and clearer game flow.\n• Added more languages and a Remove Ads purchase option.";
+"whatsNew" = "• 30 brand-new emoji memoramas across every difficulty — now over 130 games to play!
+• Fresh themes: animals, fruits, sea life, space, sports, and more.
+• Fixed a couple of card sets that showed broken or duplicate emoji.
+Thanks for playing DoMemory!";

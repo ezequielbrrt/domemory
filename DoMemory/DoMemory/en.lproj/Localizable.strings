@@ -132,6 +132,8 @@
 "whats_new_theme_description" = "Choose System, Light, or Dark in Settings to match your style.";
 "whats_new_hint_title" = "Hint";
 "whats_new_hint_description" = "Stuck? Pause the game and watch a short ad to reveal one hidden pair of cards.";
+"whats_new_games_title" = "More Games to Play";
+"whats_new_games_description" = "Dozens of new emoji card sets across every difficulty — over 130 memoramas to master.";
 
 /* Daily Challenge */
 "daily_challenge_title" = "Daily Challenge";

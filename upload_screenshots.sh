@@ -4,10 +4,11 @@
 set -euo pipefail
 
 APP_ID="${APP_ID:-1533115091}"
-VERSION_STRING="${VERSION_STRING:-2.1.0}"
-SCREENSHOTS_DIR="${SCREENSHOTS_DIR:-./screenshots/6.5}"
-# ASC still treats the phone screenshot set as IPHONE_65.
-DEVICE_TYPE="${DEVICE_TYPE:-IPHONE_65}"
+VERSION_STRING="${VERSION_STRING:-3.1.0}"
+SCREENSHOTS_DIR="${SCREENSHOTS_DIR:-./screenshots/6.9}"
+# 6.9-inch display (iPhone 16 Pro Max). asc maps IPHONE_67/IPHONE_69 to the
+# APP_IPHONE_67 slot, which accepts 1290x2796 (and 1320x2868).
+DEVICE_TYPE="${DEVICE_TYPE:-IPHONE_67}"
 
 resolve_version_id() {
     asc versions list \
@@ -34,7 +35,7 @@ read_lines_into_array() {
 
 is_valid_size() {
     case "$1" in
-        1242x2688|1284x2778|2688x1242|2778x1284)
+        1290x2796|1320x2868|2796x1290|2868x1320)
             return 0
             ;;
         *)
@@ -66,7 +67,7 @@ fi
 echo "VERSION_ID: $VERSION_ID"
 echo "Uploading iPhone screenshots to App Store Connect"
 echo "Device type: $DEVICE_TYPE"
-echo "Expected sizes: 1242x2688 or 1284x2778"
+echo "Expected sizes: 1290x2796 or 1320x2868"
 echo ""
 
 for locale in "${LOCALES[@]}"; do

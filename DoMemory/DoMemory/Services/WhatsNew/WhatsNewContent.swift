@@ -26,6 +26,11 @@ extension WhatsNew {
             title: Strings.whatsNewTitle,
             items: [
                 .init(
+                    symbol: "square.grid.3x3.fill",
+                    title: Strings.whatsNewGamesTitle,
+                    description: Strings.whatsNewGamesDescription
+                ),
+                .init(
                     symbol: "person.2.fill",
                     title: Strings.whatsNewMultiplayerTitle,
                     description: Strings.whatsNewMultiplayerDescription

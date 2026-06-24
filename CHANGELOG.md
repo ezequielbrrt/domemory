@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+[3.1.0] 23-06-2026
+
+### Added
+- Added 30 new emoji memoramas across all four difficulties (easy, medium, hard, very hard), expanding the catalog to 134 games — new themes include fruits, animals, sea life, plants, food, vehicles, sports, space, and hand gestures.
+
+### Fixed
+- Fixed a malformed card set (id 57) whose items contained an empty value and two glued-together emoji.
+- Fixed a duplicated card in an emoji set (id 3) that showed the same emoji twice.
+
+### Changed
+- Added `upload_games.py`, a validating CSV-to-Firebase pipeline for building and publishing the game catalog.
+
 [3.0.0] 24-05-2026
 
 ### Added
