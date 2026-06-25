@@ -132,6 +132,8 @@
 "whats_new_theme_description" = "設定からシステム・ライト・ダークを選んでお好みの外観にカスタマイズできます。";
 "whats_new_hint_title" = "ヒント";
 "whats_new_hint_description" = "行き詰まったら？一時停止して短い広告を見ると、隠れたカードのペアが1組明かされます。";
+"whats_new_games_title" = "遊べるゲームが増えました";
+"whats_new_games_description" = "あらゆる難易度に数十種類の新しい絵文字カードセットを追加。マスターすべきメモラマは130以上。";
 
 /* Daily Challenge */
 "daily_challenge_title" = "デイリーチャレンジ";

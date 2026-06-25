@@ -132,6 +132,8 @@
 "whats_new_theme_description" = "Choisissez Système, Clair ou Sombre dans les Réglages selon vos préférences.";
 "whats_new_hint_title" = "Indice";
 "whats_new_hint_description" = "Bloqué ? Mettez en pause et regardez une courte publicité pour révéler une paire de cartes cachée.";
+"whats_new_games_title" = "Plus de jeux à découvrir";
+"whats_new_games_description" = "Des dizaines de nouveaux jeux de cartes emoji dans toutes les difficultés — plus de 130 memoramas à maîtriser.";
 
 /* Daily Challenge */
 "daily_challenge_title" = "Défi quotidien";

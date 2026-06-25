@@ -8,18 +8,22 @@ import subprocess
 import urllib.request
 
 MCP_URL = "http://127.0.0.1:29979/mcp"
-OUT_DIR = os.path.join(os.path.dirname(__file__), "screenshots", "6.5")
-ASC_IPHONE_WIDTH = 1242
-ASC_IPHONE_HEIGHT = 2688
+OUT_DIR = os.path.join(os.path.dirname(__file__), "screenshots", "6.9")
+# 6.9-inch display (iPhone 16 Pro Max). Artboards on the
+# "ScreenshotsV4 — Proposal" page are authored natively at this size.
+ASC_IPHONE_WIDTH = 1290
+ASC_IPHONE_HEIGHT = 2796
 
 # Base artboard name → output filename.
-# Localized artboards must follow the pattern: "{base_name} — {app_locale}"
-# e.g. "01 Flip & Match — de", "02 Play Dozens — ja"
+# An artboard may be either the bare base name (treated as English) or
+# localized as "{base_name} — {app_locale}" e.g. "Proposal 1 — Hero Gameplay — de".
 SCREEN_SPECS = [
-    ("01 Flip & Match",    "01_flip_and_match.jpg"),
-    ("02 Play Dozens",     "02_play_dozens.jpg"),
-    ("03 Choose Challenge","03_choose_challenge.jpg"),
-    ("05 Features",        "05_features.jpg"),
+    ("Proposal 1 — Hero Gameplay",         "01_hero_gameplay.jpg"),
+    ("Proposal 2 — Play.Create.Challenge", "02_play_create_challenge.jpg"),
+    ("Proposal 3 — Multiplayer (NEW)",     "03_multiplayer.jpg"),
+    ("Proposal 4 — Play Dozens",           "04_play_dozens.jpg"),
+    ("Proposal 5 — Create Your Own (NEW)", "05_create_your_own.jpg"),
+    ("Proposal 6 — Choose Challenge",      "06_choose_challenge.jpg"),
 ]
 
 # Maps Paper/app locale codes → App Store Connect locale codes.
@@ -101,20 +105,24 @@ def discover_artboards():
     discovered = []
 
     # Collect all app locale codes that have at least one matching artboard.
-    # Artboard naming convention: "{base_name} — {app_locale}"
-    # e.g. "01 Flip & Match — de", "02 Play Dozens — ja"
+    # An artboard is matched as either the bare base name (English) or
+    # "{base_name} — {app_locale}" e.g. "Proposal 1 — Hero Gameplay — de".
     app_locales = set()
     for name in artboards_by_name:
         for base_name, _ in SCREEN_SPECS:
-            prefix = f"{base_name} — "
-            if name.startswith(prefix):
-                app_locales.add(name[len(prefix):])
+            if name == base_name:
+                app_locales.add("en")
+            elif name.startswith(f"{base_name} — "):
+                app_locales.add(name[len(f"{base_name} — "):])
 
     for app_locale in sorted(app_locales):
         asc_locale = LOCALE_MAP.get(app_locale, app_locale)
         for base_name, filename in SCREEN_SPECS:
-            localized_name = f"{base_name} — {app_locale}"
-            node_id = artboards_by_name.get(localized_name)
+            if app_locale == "en":
+                node_id = (artboards_by_name.get(base_name)
+                           or artboards_by_name.get(f"{base_name} — en"))
+            else:
+                node_id = artboards_by_name.get(f"{base_name} — {app_locale}")
             if node_id:
                 discovered.append((node_id, asc_locale, filename))
 

@@ -132,6 +132,8 @@
 "whats_new_theme_description" = "在设置中选择系统、浅色或深色模式，打造专属外观。";
 "whats_new_hint_title" = "提示";
 "whats_new_hint_description" = "卡关了？暂停游戏并观看短视频广告，即可揭示一对隐藏的牌。";
+"whats_new_games_title" = "更多游戏可玩";
+"whats_new_games_description" = "各个难度新增数十套表情卡牌——超过 130 个记忆卡牌等你挑战。";
 
 /* Daily Challenge */
 "daily_challenge_title" = "每日挑战";

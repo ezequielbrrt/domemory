@@ -1,12 +1,21 @@
 #!/bin/bash
 # Upload iPad 12.9" screenshots to App Store Connect for each locale.
 
-set -u
+set -euo pipefail
 
 APP_ID="${APP_ID:-1533115091}"
-VERSION_STRING="${VERSION_STRING:-3.0.0}"
+VERSION_STRING="${VERSION_STRING:-3.1.0}"
 SCREENSHOTS_DIR="${SCREENSHOTS_DIR:-./screenshots/ipad-12.9}"
 DEVICE_TYPE="${DEVICE_TYPE:-IPAD_PRO_3GEN_129}"
+EXPECTED_COUNT_PER_LOCALE="${EXPECTED_COUNT_PER_LOCALE:-6}"
+ALLOW_PARTIAL_LOCALE="${ALLOW_PARTIAL_LOCALE:-0}"
+
+for tool in asc jq /usr/bin/sips; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "Missing required tool: $tool"
+        exit 1
+    fi
+done
 
 echo "Resolving VERSION_ID for version $VERSION_STRING..."
 VERSION_ID=$(asc versions list \
@@ -27,6 +36,7 @@ LOCALES=("en-US" "es-MX" "de-DE" "fr-FR" "hi" "it" "ja" "ko" "pt-BR" "zh-Hans")
 echo "Uploading iPad screenshots to App Store Connect"
 echo "Device type: $DEVICE_TYPE"
 echo "Expected portrait size: 2048x2732"
+echo "Expected files per locale: $EXPECTED_COUNT_PER_LOCALE"
 echo ""
 
 for locale in "${LOCALES[@]}"; do
@@ -71,6 +81,14 @@ for locale in "${LOCALES[@]}"; do
 
     if [ "$screenshot_count" -eq 0 ]; then
         echo "No screenshot files found at $locale_dir, skipping..."
+        echo ""
+        continue
+    fi
+
+    if [ "$ALLOW_PARTIAL_LOCALE" != "1" ] && [ "$screenshot_count" -ne "$EXPECTED_COUNT_PER_LOCALE" ]; then
+        echo "Found $screenshot_count files in $locale_dir; expected $EXPECTED_COUNT_PER_LOCALE."
+        echo "Skipping $locale to avoid replacing App Store screenshots with a partial set."
+        echo "Set ALLOW_PARTIAL_LOCALE=1 to override."
         echo ""
         continue
     fi
