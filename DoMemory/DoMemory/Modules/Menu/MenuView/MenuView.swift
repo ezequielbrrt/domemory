@@ -28,9 +28,17 @@ struct MenuView: View {
 
     private var displayedGames: [Memorama] {
         switch selectedTab {
-        case .all:  return viewModel.memoramaArray.filter { !$0.id.hasPrefix("custom_") }
-        case .mine: return viewModel.memoramaArray.filter {  $0.id.hasPrefix("custom_") }
+        case .all:  return allGames
+        case .mine: return myGames
         }
+    }
+
+    private var allGames: [Memorama] {
+        viewModel.memoramaArray.filter { !$0.id.hasPrefix("custom_") }
+    }
+
+    private var myGames: [Memorama] {
+        viewModel.memoramaArray.filter { $0.id.hasPrefix("custom_") }
     }
 
     private var multiplayerAvailableGames: [Memorama] {
@@ -124,11 +132,6 @@ struct MenuView: View {
                             .padding(.horizontal, 16)
                             .padding(.bottom, 8)
 
-                            // Tab selector
-                            GameTabPicker(selected: $selectedTab)
-                                .padding(.horizontal, 16)
-                                .padding(.bottom, 8)
-
                             // Difficulty badge (All tab only)
                             if selectedTab == .all,
                                let first = displayedGames.first {
@@ -172,62 +175,26 @@ struct MenuView: View {
                                 .padding(.bottom, 12)
                             }
 
-                            // Grid or empty state
-                            if displayedGames.isEmpty && selectedTab == .mine {
-                                Spacer()
-                                VStack(spacing: 16) {
-                                    Image(systemName: "plus.square.dashed")
-                                        .font(.system(size: 52))
-                                        .foregroundStyle(Color.primaryColor.opacity(0.4))
-                                    Text(Strings.emptyMyGames)
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                        .foregroundStyle(Color.textMuted)
-                                        .multilineTextAlignment(.center)
-                                    Button(action: { showCreateSheet = true }) {
-                                        Text(Strings.emptyMyGamesAction)
-                                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                                            .foregroundStyle(.white)
-                                            .padding(.horizontal, 24)
-                                            .padding(.vertical, 12)
-                                            .background(
-                                                Capsule().fill(Color.primaryColor)
-                                            )
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                                .padding(.horizontal, 40)
-                                Spacer()
-                            } else {
-                                ScrollView {
-                                    WaterfallGrid(displayedGames) { (memorama: Memorama) in
-                                        MemoramaGridCell(
-                                            memorama: memorama,
-                                            availableMemoramas: multiplayerAvailableGames,
-                                            stats: viewModel.stats(for: memorama.id),
-                                            isFavorite: viewModel.isFavorite(id: memorama.id),
-                                            onStatsChanged: { statsRefreshID = UUID() },
-                                            onToggleFavorite: { viewModel.toggleFavorite(id: memorama.id) },
-                                            onDelete: memorama.id.hasPrefix("custom_")
-                                                ? { viewModel.deleteCustomMemorama(id: memorama.id) }
-                                                : nil
-                                        )
-                                    }
-                                    .gridStyle(
-                                        columns: 2,
-                                        spacing: 14,
-                                        animation: Animation.spring(response: 0.35, dampingFraction: 0.85)
-                                    )
-                                    .id(statsRefreshID)
-                                    .padding(.horizontal, 16)
-                                    .padding(.bottom, 16)
-                                }
-                            }
-
                             if !purchaseService.hasRemovedAds,
                                AdsService.shared.isBannerConfigured(for: .homeBanner) {
                                 AdMobBannerView(placement: .homeBanner)
                                     .frame(height: 50)
                                     .padding(.bottom, 8)
+                            }
+
+                            // Tab bar with per-tab content
+                            TabView(selection: $selectedTab) {
+                                gamesTabContent(for: .all, games: allGames)
+                                    .tabItem {
+                                        Label(Strings.tabAll, systemImage: "square.grid.2x2.fill")
+                                    }
+                                    .tag(GameTab.all)
+
+                                gamesTabContent(for: .mine, games: myGames)
+                                    .tabItem {
+                                        Label(Strings.tabMine, systemImage: "square.and.pencil")
+                                    }
+                                    .tag(GameTab.mine)
                             }
                         }
                     }
@@ -312,50 +279,61 @@ struct MenuView: View {
             return .mine
         }
     }
-}
 
-private struct GameTabPicker: View {
-    @Binding var selected: GameTab
-
-    var body: some View {
-        HStack(spacing: 0) {
-            tabButton(label: Strings.tabAll, tab: .all)
-            tabButton(label: Strings.tabMine, tab: .mine)
-        }
-        .padding(4)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.surfaceSecondary)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Color.surfaceBorder, lineWidth: 1)
+    @ViewBuilder
+    private func gamesTabContent(for tab: GameTab, games: [Memorama]) -> some View {
+        if games.isEmpty && tab == .mine {
+            VStack(spacing: 16) {
+                Spacer()
+                Image(systemName: "plus.square.dashed")
+                    .font(.system(size: 52))
+                    .foregroundStyle(Color.primaryColor.opacity(0.4))
+                Text(Strings.emptyMyGames)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color.textMuted)
+                    .multilineTextAlignment(.center)
+                Button(action: { showCreateSheet = true }) {
+                    Text(Strings.emptyMyGamesAction)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule().fill(Color.primaryColor)
+                        )
+                }
+                .buttonStyle(.plain)
+                Spacer()
+            }
+            .padding(.horizontal, 40)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.appBackground)
+        } else {
+            ScrollView {
+                WaterfallGrid(games) { (memorama: Memorama) in
+                    MemoramaGridCell(
+                        memorama: memorama,
+                        availableMemoramas: multiplayerAvailableGames,
+                        stats: viewModel.stats(for: memorama.id),
+                        isFavorite: viewModel.isFavorite(id: memorama.id),
+                        onStatsChanged: { statsRefreshID = UUID() },
+                        onToggleFavorite: { viewModel.toggleFavorite(id: memorama.id) },
+                        onDelete: memorama.id.hasPrefix("custom_")
+                            ? { viewModel.deleteCustomMemorama(id: memorama.id) }
+                            : nil
+                    )
+                }
+                .gridStyle(
+                    columns: 2,
+                    spacing: 14,
+                    animation: Animation.spring(response: 0.35, dampingFraction: 0.85)
                 )
-        )
-    }
-
-    private func tabButton(label: String, tab: GameTab) -> some View {
-        let isSelected = selected == tab
-        return Button(action: { withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { selected = tab } }) {
-            Text(label)
-                .font(.system(size: 14, weight: isSelected ? .bold : .regular, design: .rounded))
-                .foregroundStyle(isSelected ? Color.primaryColor : Color.textMuted)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(
-                    Group {
-                        if isSelected {
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color.surfacePrimary)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                        .stroke(Color.surfaceBorder, lineWidth: 1)
-                                )
-                                .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
-                        }
-                    }
-                )
+                .id(statsRefreshID)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
+            }
+            .background(Color.appBackground)
         }
-        .buttonStyle(.plain)
     }
 }
 
