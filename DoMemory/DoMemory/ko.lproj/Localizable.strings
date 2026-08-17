@@ -30,6 +30,16 @@
 "game_win_title" = "축하합니다!";
 "home_difficulty_title" = "난이도";
 "home_select_difficulty_prompt" = "난이도를 선택하세요";
+"level_back_to_levels" = "레벨로 돌아가기";
+"level_cleared" = "레벨 클리어!";
+"level_next" = "다음 레벨";
+"level_title_format" = "레벨 %d";
+"levels_current_level_format" = "현재 레벨 %d";
+"levels_screen_title" = "레벨";
+"levels_out_of_lives_title" = "생명이 없습니다!";
+"levels_out_of_lives_message" = "광고를 보고 생명 +1을 받거나, 내일 새로운 생명으로 다시 오세요.";
+"levels_watch_ad_for_life" = "광고 보고 생명 +1 받기";
+"levels_lives_remaining_format" = "생명 %d / %d 남음";
 "menu_create_add" = "추가";
 "menu_create_add_emoji" = "이모지 추가";
 "menu_create_emojis_label" = "이모지";
@@ -42,6 +52,7 @@
 "menu_empty_mine_message" = "아직 내 메모라마가 없습니다";
 "menu_random_game" = "랜덤 게임";
 "menu_tab_all" = "전체";
+"menu_tab_levels" = "레벨";
 "menu_tab_mine" = "내 메모라마";
 "settings_description" = "게임 환경설정을 조정하세요";
 "settings_select_difficulty" = "선택";
@@ -184,3 +195,22 @@
 "intro_skip" = "건너뛰기";
 "intro_next" = "다음";
 "intro_get_started" = "시작하기";
+
+/* Levels star economy */
+"levels_powerup_extra_time" = "+15초";
+"levels_powerup_peek" = "엿보기";
+"levels_powerup_freeze" = "일시정지";
+"levels_powerup_reveal_pair" = "짝 공개";
+"levels_star_balance_format" = "별 %d개 보유";
+"levels_powerup_cost_format" = "%1$@, 별 %2$d개";
+"levels_buy_life_format" = "생명 구매 — %d";
+"levels_skip_level_format" = "이 레벨 건너뛰기 — %d";
+"levels_skip_level_confirm_title" = "이 레벨을 건너뛸까요?";
+"levels_skip_level_confirm_message" = "다음 레벨이 열리지만 이 레벨은 별 0개로 남습니다. 언제든지 다시 플레이할 수 있습니다.";
+"levels_skip_level_confirm_action" = "건너뛰기";
+
+/* Levels mistake budget */
+"levels_lose_too_many_mistakes" = "실수가 너무 많습니다";
+"levels_forgive_ad_format" = "광고 보고 실수 %d회 취소";
+"levels_forgive_stars_format" = "실수 %1$d회 취소 — %2$d";
+"levels_mistakes_remaining_format" = "실수 %1$d / %2$d";

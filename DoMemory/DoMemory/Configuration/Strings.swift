@@ -92,6 +92,60 @@ enum Strings {
     // Menu tabs
     static let tabAll = NSLocalizedString("menu_tab_all", comment: "Tab showing all games")
     static let tabMine = NSLocalizedString("menu_tab_mine", comment: "Tab showing user-created games")
+    static let tabLevels = NSLocalizedString("menu_tab_levels", comment: "Tab showing the endless levels mode")
+
+    // Levels mode
+    static let levelsScreenTitle = NSLocalizedString("levels_screen_title", comment: "Levels map screen title")
+    static func levelsCurrentLevelFormat(_ level: Int) -> String {
+        String(format: NSLocalizedString("levels_current_level_format", comment: "Current level summary, %d = level number"), level)
+    }
+    static func levelTitle(_ level: Int) -> String {
+        String(format: NSLocalizedString("level_title_format", comment: "Level board name / win-modal subtitle, %d = level number"), level)
+    }
+    static let levelCleared = NSLocalizedString("level_cleared", comment: "Win modal title when clearing a level")
+    static let nextLevel = NSLocalizedString("level_next", comment: "Win modal primary action to advance to the next level")
+    static let backToLevels = NSLocalizedString("level_back_to_levels", comment: "Win modal secondary action returning to the levels map")
+
+    // Levels lives
+    static let outOfLivesTitle = NSLocalizedString("levels_out_of_lives_title", comment: "Title shown when the player has no lives left today")
+    static let outOfLivesMessage = NSLocalizedString("levels_out_of_lives_message", comment: "Message explaining how to get another life")
+    static let watchAdForLife = NSLocalizedString("levels_watch_ad_for_life", comment: "Button to watch a rewarded ad for +1 life")
+    static func livesRemainingFormat(_ remaining: Int, _ total: Int) -> String {
+        String(format: NSLocalizedString("levels_lives_remaining_format", comment: "Accessibility label, %d = lives remaining, %d = max lives"), remaining, total)
+    }
+
+    // Star economy
+    static let powerUpExtraTime = NSLocalizedString("levels_powerup_extra_time", comment: "Power-up that adds seconds to the clock")
+    static let powerUpPeek = NSLocalizedString("levels_powerup_peek", comment: "Power-up that briefly reveals the whole board")
+    static let powerUpFreeze = NSLocalizedString("levels_powerup_freeze", comment: "Power-up that pauses the countdown")
+    static let powerUpRevealPair = NSLocalizedString("levels_powerup_reveal_pair", comment: "Power-up that reveals one matching pair")
+    static func starBalanceFormat(_ balance: Int) -> String {
+        String(format: NSLocalizedString("levels_star_balance_format", comment: "Accessibility label for the spendable star balance, %d = stars"), balance)
+    }
+    static func powerUpCostFormat(_ title: String, _ cost: Int) -> String {
+        String(format: NSLocalizedString("levels_powerup_cost_format", comment: "Accessibility label, %@ = power-up name, %d = star cost"), title, cost)
+    }
+    static func buyLifeFormat(_ cost: Int) -> String {
+        String(format: NSLocalizedString("levels_buy_life_format", comment: "Button to buy one life with stars, %d = star cost"), cost)
+    }
+    static func skipLevelFormat(_ cost: Int) -> String {
+        String(format: NSLocalizedString("levels_skip_level_format", comment: "Button to skip the current level with stars, %d = star cost"), cost)
+    }
+    static let skipLevelConfirmTitle = NSLocalizedString("levels_skip_level_confirm_title", comment: "Confirmation title before skipping a level")
+    static let skipLevelConfirmMessage = NSLocalizedString("levels_skip_level_confirm_message", comment: "Confirmation body explaining that a skipped level earns no stars")
+    static let skipLevelConfirmAction = NSLocalizedString("levels_skip_level_confirm_action", comment: "Confirm action for skipping a level")
+
+    // Mistake budget
+    static let loseTooManyMistakes = NSLocalizedString("levels_lose_too_many_mistakes", comment: "Lose modal message when the mistake budget is spent")
+    static func forgiveAdFormat(_ amount: Int) -> String {
+        String(format: NSLocalizedString("levels_forgive_ad_format", comment: "Rewarded ad action forgiving mistakes, %d = mistakes forgiven"), amount)
+    }
+    static func forgiveStarsFormat(_ amount: Int, _ cost: Int) -> String {
+        String(format: NSLocalizedString("levels_forgive_stars_format", comment: "Star-priced action forgiving mistakes, %1$d = mistakes forgiven, %2$d = star cost"), amount, cost)
+    }
+    static func mistakesRemainingFormat(_ used: Int, _ total: Int) -> String {
+        String(format: NSLocalizedString("levels_mistakes_remaining_format", comment: "Accessibility label, %1$d = mistakes made, %2$d = mistakes allowed"), used, total)
+    }
 
     // Create memorama sheet
     static let createTitle = NSLocalizedString("menu_create_title", comment: "Sheet title for creating a new memorama")

@@ -30,6 +30,16 @@
 "game_win_title" = "बधाई हो!";
 "home_difficulty_title" = "कठिनाई";
 "home_select_difficulty_prompt" = "कठिनाई चुनें";
+"level_back_to_levels" = "स्तरों पर वापस जाएं";
+"level_cleared" = "स्तर पूरा हुआ!";
+"level_next" = "अगला स्तर";
+"level_title_format" = "स्तर %d";
+"levels_current_level_format" = "फिलहाल स्तर %d पर";
+"levels_screen_title" = "स्तर";
+"levels_out_of_lives_title" = "जीवन समाप्त!";
+"levels_out_of_lives_message" = "+1 जीवन के लिए विज्ञापन देखें, या नए सेट के लिए कल वापस आएं।";
+"levels_watch_ad_for_life" = "+1 जीवन के लिए विज्ञापन देखें";
+"levels_lives_remaining_format" = "%d में से %d जीवन शेष";
 "menu_create_add" = "जोड़ें";
 "menu_create_add_emoji" = "इमोजी जोड़ें";
 "menu_create_emojis_label" = "इमोजी";
@@ -42,6 +52,7 @@
 "menu_empty_mine_message" = "आपके पास अभी तक अपना कोई मेमोरामा नहीं है";
 "menu_random_game" = "रैंडम गेम";
 "menu_tab_all" = "सभी";
+"menu_tab_levels" = "स्तर";
 "menu_tab_mine" = "मेरे मेमोरामा";
 "settings_description" = "अपनी गेम पसंद बदलें";
 "settings_select_difficulty" = "चुनें";
@@ -184,3 +195,22 @@
 "intro_skip" = "छोड़ें";
 "intro_next" = "आगे";
 "intro_get_started" = "शुरू करें";
+
+/* Levels star economy */
+"levels_powerup_extra_time" = "+15 से.";
+"levels_powerup_peek" = "झलक";
+"levels_powerup_freeze" = "फ़्रीज़";
+"levels_powerup_reveal_pair" = "जोड़ी दिखाएँ";
+"levels_star_balance_format" = "%d सितारे उपलब्ध";
+"levels_powerup_cost_format" = "%1$@, %2$d सितारे लगेंगे";
+"levels_buy_life_format" = "एक जीवन खरीदें — %d";
+"levels_skip_level_format" = "यह स्तर छोड़ें — %d";
+"levels_skip_level_confirm_title" = "यह स्तर छोड़ें?";
+"levels_skip_level_confirm_message" = "अगला स्तर खुल जाएगा, लेकिन इस स्तर पर शून्य सितारे रहेंगे। आप इसे कभी भी दोबारा खेल सकते हैं।";
+"levels_skip_level_confirm_action" = "छोड़ें";
+
+/* Levels mistake budget */
+"levels_lose_too_many_mistakes" = "बहुत सारी गलतियाँ";
+"levels_forgive_ad_format" = "%d गलतियाँ माफ़ करने के लिए विज्ञापन देखें";
+"levels_forgive_stars_format" = "%1$d गलतियाँ माफ़ करें — %2$d";
+"levels_mistakes_remaining_format" = "%2$d में से %1$d गलतियाँ";

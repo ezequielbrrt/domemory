@@ -52,23 +52,30 @@ struct MemorizeView: View {
 
                     Spacer()
 
-                    // Fails chip
+                    // Fails chip — shows the budget in Levels mode, plain count elsewhere
                     HStack(spacing: 5) {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundStyle(Color.secundaryColor)
                             .font(.system(size: 14))
-                        Text("\(viewModel.failedTries)")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundStyle(Color.textPrimary)
+                        if let maxFailures = viewModel.maxFailures {
+                            Text("\(viewModel.failedTries)/\(maxFailures)")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundStyle(viewModel.isNearFailureLimit ? Color.secundaryColor : Color.textPrimary)
+                                .accessibilityLabel(Strings.mistakesRemainingFormat(viewModel.failedTries, maxFailures))
+                        } else {
+                            Text("\(viewModel.failedTries)")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundStyle(Color.textPrimary)
+                        }
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
                     .background(
                         Capsule()
-                            .fill(Color.surfacePrimary)
+                            .fill(viewModel.isNearFailureLimit ? Color.secundaryColor.opacity(0.12) : Color.surfacePrimary)
                             .overlay(
                                 Capsule()
-                                    .stroke(Color.surfaceBorder, lineWidth: 1)
+                                    .stroke(viewModel.isNearFailureLimit ? Color.secundaryColor.opacity(0.5) : Color.surfaceBorder, lineWidth: 1)
                             )
                             .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                     )
@@ -120,6 +127,12 @@ struct MemorizeView: View {
                 .padding(.top, 12)
                 .padding(.bottom, 8)
 
+                if viewModel.canUsePowerUps {
+                    PowerUpBar(balance: viewModel.starBalance) { powerUp in
+                        viewModel.use(powerUp)
+                    }
+                }
+
                 GeometryReader { geo in
                     let cols = gridColumns
                     let rows = max(1, Int(ceil(Double(viewModel.cards.count) / Double(cols))))
@@ -158,7 +171,7 @@ struct MemorizeView: View {
                 PauseModal(listener: viewModel)
             }
 
-            if viewModel.timeRemaining == 0 {
+            if viewModel.hasLost {
                 LoseModal(listener: viewModel)
             }
 
@@ -181,13 +194,12 @@ struct MemorizeView: View {
                     failedTries: viewModel.failedTries,
                     difficultyTitle: viewModel.difficultyDisplayTitle,
                     isDailyChallenge: viewModel.isDailyChallenge,
-                    streak: viewModel.dailyChallengeStreak
+                    streak: viewModel.dailyChallengeStreak,
+                    levelNumber: viewModel.levelNumber,
+                    starsEarned: viewModel.lastEarnedStars
                 )
                     .onAppear {
                         viewModel.stopTimer()
-                    }
-                    .onDisappear {
-                        dismiss()
                     }
             }
         }

@@ -147,7 +147,7 @@
     {
       "identity" : "whats-new-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ezequielbrrt/whats-new-ios.git",
+      "location" : "git@github.com:ezequielbrrt/whats-new-ios.git",
       "state" : {
         "revision" : "fef3ec8f870729b26547bf5ca2b11a41654186b0",
         "version" : "1.0.0"

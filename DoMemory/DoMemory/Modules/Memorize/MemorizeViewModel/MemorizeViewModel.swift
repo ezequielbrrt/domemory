@@ -8,6 +8,21 @@
 import SwiftUI
 import Observation
 
+/// What a MemorizeView instance is playing: a freely-picked board, today's
+/// Daily Challenge, or a numbered Levels-mode board.
+enum GameMode: Equatable {
+    case free
+    case dailyChallenge
+    case level(Int)
+}
+
+/// Why the current game ended in a loss. Drives which rescue the LoseModal
+/// offers — extra time is useless when you busted the mistake budget.
+enum LoseReason: Equatable {
+    case outOfTime
+    case tooManyMistakes
+}
+
 @Observable
 @MainActor
 class MemorizeViewModel {
@@ -19,13 +34,49 @@ class MemorizeViewModel {
     var isRewardedAdInProgress: Bool = false
 
     var memorama: Memorama?
-    let isDailyChallenge: Bool
+    private(set) var mode: GameMode
+    var isDailyChallenge: Bool { mode == .dailyChallenge }
+    var levelNumber: Int? {
+        if case .level(let number) = mode { return number }
+        return nil
+    }
+    private(set) var lastEarnedStars: Int = 0
+    /// Lives left today for Levels mode; nil outside of level play.
+    private(set) var levelLivesRemaining: Int?
+    /// Spendable star balance, mirrored from StarWalletService so the view can
+    /// observe it. Only meaningful during level play.
+    private(set) var starBalance: Int = 0
+    var showSkipLevelConfirm = false
+    /// Set when the game has been lost; nil while it's still playable. Replaces
+    /// the old `timeRemaining == 0` check so a second lose reason can exist.
+    private(set) var loseReason: LoseReason?
+    var hasLost: Bool { loseReason != nil }
+    /// Mistake budget for the current level; nil outside of level play.
+    var maxFailures: Int? {
+        guard let levelNumber else { return nil }
+        return LevelCurve.maxFailures(for: levelNumber)
+    }
+    /// True in the last two mistakes of the budget, so the HUD can warn before
+    /// the limit actually bites.
+    var isNearFailureLimit: Bool {
+        guard let maxFailures else { return false }
+        return maxFailures - model.failedTries <= 2
+    }
+    var canWatchAdForLife: Bool {
+        AdsService.shared.isRewardedConfigured(for: .levelsRewardedLife)
+    }
     var closeView: Bool = false
     var shouldShowPie: Bool!
 
     private var timerTask: Task<Void, Never>?
     private var flipBackTask: Task<Void, Never>?
     private var hideMatchedTask: Task<Void, Never>?
+    private var peekTask: Task<Void, Never>?
+    private var mistakeLossTask: Task<Void, Never>?
+    /// While set and in the future, the countdown holds. Kept as a deadline
+    /// rather than cancelling `timerTask`, so freezing doesn't tear down the
+    /// card flip-back scheduling the way `stopTimer()` would.
+    private var frozenUntil: Date?
     private var hasLoggedGameFinished = false
     private var gameStartedAt: Date?
     private var lastRewardedAdDate: Date?
@@ -35,9 +86,13 @@ class MemorizeViewModel {
             || AdsService.shared.isRewardedConfigured(for: .gameRewardedHint)
     }
 
-    init(memorama: Memorama?, isDailyChallenge: Bool = false) {
+    init(memorama: Memorama?, mode: GameMode = .free) {
         self.memorama = memorama
-        self.isDailyChallenge = isDailyChallenge
+        self.mode = mode
+        if case .level = mode {
+            self.levelLivesRemaining = LevelLivesService.shared.livesRemaining()
+            self.starBalance = StarWalletService.shared.balance
+        }
         guard let auxMemorama = memorama else { return }
         if auxMemorama.isDoubleItem {
             self.model = MemoryGame<String>(numbersOfPairsOfCards: auxMemorama.items.count) { partIndex in
@@ -49,6 +104,14 @@ class MemorizeViewModel {
             }
         }
         self.shouldShowPie = shouldShowPieByDifficulty()
+    }
+
+    convenience init(memorama: Memorama?, isDailyChallenge: Bool) {
+        self.init(memorama: memorama, mode: isDailyChallenge ? .dailyChallenge : .free)
+    }
+
+    convenience init(level: Int) {
+        self.init(memorama: LevelProgressService.shared.board(for: level), mode: .level(level))
     }
 
     private static func createMemoryGame() -> MemoryGame<String> {
@@ -78,6 +141,9 @@ class MemorizeViewModel {
     }
 
     func getRemainingTime() -> Int {
+        if case .level(let levelNumber) = mode {
+            return LevelCurve.seconds(for: levelNumber)
+        }
         let difficulty = getDifficulty()
         switch difficulty {
         case .easy: return 110
@@ -116,6 +182,35 @@ class MemorizeViewModel {
         }
         scheduleFlipBackIfNeeded()
         scheduleMatchedHideIfNeeded()
+        scheduleMistakeLossIfNeeded()
+    }
+
+    /// Ends the level once the mistake budget is spent. Deferred briefly so the
+    /// player sees the mismatched pair that finished them off instead of having
+    /// the modal slam over it.
+    private func scheduleMistakeLossIfNeeded() {
+        guard let maxFailures, loseReason == nil, mistakeLossTask == nil else { return }
+        guard model.failedTries >= maxFailures else { return }
+        mistakeLossTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(0.8))
+            guard !Task.isCancelled, let self else { return }
+            self.mistakeLossTask = nil
+            // The clock can reach zero inside the delay above. Whichever
+            // failure landed first is the real one, so never overwrite it —
+            // otherwise a timeout would be offered the mistake rescue.
+            guard self.loseReason == nil else { return }
+            self.stopTimer()
+            self.loseReason = .tooManyMistakes
+            if let levelNumber = self.levelNumber {
+                AnalyticsService.log(
+                    .levelFailedByMistakes(
+                        level: levelNumber,
+                        maxFailures: maxFailures,
+                        timeRemaining: self.timeRemaining
+                    )
+                )
+            }
+        }
     }
 
     private func scheduleFlipBackIfNeeded() {
@@ -158,11 +253,21 @@ class MemorizeViewModel {
             while let self, !Task.isCancelled, self.timeRemaining > 0 {
                 try? await Task.sleep(for: .seconds(1))
                 guard !Task.isCancelled else { break }
+                if let frozenUntil = self.frozenUntil {
+                    guard Date() >= frozenUntil else { continue }
+                    self.frozenUntil = nil
+                }
                 if self.timeRemaining > 0 {
                     self.timeRemaining -= 1
                 }
+                if self.timeRemaining == 0, self.loseReason == nil {
+                    self.loseReason = .outOfTime
+                }
             }
         }
+        // stopTimer() above cancelled any pending mistake loss; re-arm it so
+        // pausing mid-delay can't be used to play on past the budget.
+        scheduleMistakeLossIfNeeded()
     }
 
     func stopTimer() {
@@ -172,6 +277,19 @@ class MemorizeViewModel {
         flipBackTask = nil
         hideMatchedTask?.cancel()
         hideMatchedTask = nil
+        mistakeLossTask?.cancel()
+        mistakeLossTask = nil
+        endPeekIfActive()
+    }
+
+    /// Ends an in-flight Peek, flipping the board back. Without this, pausing
+    /// during a peek would cancel the scheduled flip-back and leave every card
+    /// revealed for free.
+    private func endPeekIfActive() {
+        guard peekTask != nil else { return }
+        peekTask?.cancel()
+        peekTask = nil
+        model.flipBackUnmatchedCards()
     }
 
     func reconnectTime() {
@@ -185,6 +303,10 @@ class MemorizeViewModel {
             AdsService.shared.loadInterstitial(for: .gameFinishedInterstitial)
             AdsService.shared.loadRewardedAd(for: .gameRewardedExtraTime)
             AdsService.shared.loadRewardedAd(for: .gameRewardedHint)
+            if case .level = mode {
+                AdsService.shared.loadRewardedAd(for: .levelsRewardedLife)
+                AdsService.shared.loadRewardedAd(for: .levelsRewardedForgive)
+            }
         }
         AnalyticsService.log(
             .gameStarted(
@@ -196,6 +318,9 @@ class MemorizeViewModel {
         )
         if isDailyChallenge {
             AnalyticsService.log(.dailyChallengeStarted(streak: DailyChallengeService.shared.currentStreak))
+        }
+        if case .level(let levelNumber) = mode {
+            AnalyticsService.log(.levelStarted(level: levelNumber))
         }
     }
 
@@ -236,6 +361,28 @@ class MemorizeViewModel {
             }
             NotificationService.shared.refreshStreakAtRiskReminder()
         }
+        if case .level(let levelNumber) = mode {
+            let progressService = LevelProgressService.shared
+            let alreadyUnlockedNext = progressService.isUnlocked(levelNumber + 1)
+            let earnedStars = progressService.recordCompletion(
+                level: levelNumber,
+                didWin: didWin,
+                timeRemaining: timeRemaining,
+                totalTime: getRemainingTime(),
+                failedTries: model.failedTries
+            )
+            lastEarnedStars = earnedStars
+            starBalance = StarWalletService.shared.balance
+            AnalyticsService.log(.levelFinished(level: levelNumber, result: result, stars: earnedStars))
+            if didWin && !alreadyUnlockedNext {
+                AnalyticsService.log(.levelUnlocked(level: levelNumber + 1))
+            }
+            if !didWin {
+                let remaining = LevelLivesService.shared.consumeLife()
+                levelLivesRemaining = remaining
+                AnalyticsService.log(.levelLifeConsumed(livesRemaining: remaining))
+            }
+        }
         NotificationService.shared.scheduleInactivityReminder()
         AnalyticsService.log(
             .gameFinished(
@@ -260,6 +407,9 @@ extension MemorizeViewModel {
     private func restartGame() {
         self.showPauseView = false
         self.resetGame()
+        self.frozenUntil = nil
+        self.loseReason = nil
+        self.starBalance = StarWalletService.shared.balance
         self.timeRemaining = getRemainingTime()
         startTimer()
         trackGameStarted(source: "retry")
@@ -278,6 +428,9 @@ extension MemorizeViewModel {
     }
 
     private func shouldShowPieByDifficulty() -> Bool {
+        if case .level(let levelNumber) = mode {
+            return levelNumber >= 25
+        }
         let difficulty = getDifficulty()
         switch difficulty {
         case .easy: return false
@@ -285,6 +438,25 @@ extension MemorizeViewModel {
         case .hard: return true
         case .veryHard: return true
         }
+    }
+
+    /// Swaps in the next level's board in place (no navigation), with a fresh
+    /// timer and card layout. Only valid when currently playing a level.
+    fileprivate func advanceToNextLevel() {
+        guard case .level(let currentLevel) = mode else { return }
+        let nextLevel = currentLevel + 1
+        mode = .level(nextLevel)
+        memorama = LevelProgressService.shared.board(for: nextLevel)
+        levelLivesRemaining = LevelLivesService.shared.livesRemaining()
+        starBalance = StarWalletService.shared.balance
+        frozenUntil = nil
+        loseReason = nil
+        resetGame()
+        shouldShowPie = shouldShowPieByDifficulty()
+        showWinView = false
+        timeRemaining = getRemainingTime()
+        startTimer()
+        trackGameStarted(source: "next_level")
     }
 
     private var shouldPresentCompletionInterstitial: Bool {
@@ -327,6 +499,151 @@ extension MemorizeViewModel {
     private func revealHintPair() {
         guard model.revealUnmatchedPairForHint() else { return }
         scheduleFlipBackIfNeeded()
+    }
+}
+
+// MARK: - Star power-ups
+extension MemorizeViewModel {
+    /// Power-ups are a Levels-mode feature: stars are earned there, so they're
+    /// spent there too.
+    var canUsePowerUps: Bool { levelNumber != nil }
+
+    func canAfford(_ powerUp: LevelPowerUp) -> Bool {
+        starBalance >= powerUp.cost
+    }
+
+    /// Buys and immediately applies a power-up. No confirmation step — costs
+    /// are small and the clock is running, so a modal here would cost more than
+    /// a misfire does.
+    func use(_ powerUp: LevelPowerUp) {
+        guard let levelNumber, canAfford(powerUp) else { return }
+        guard StarWalletService.shared.spend(powerUp.cost) else { return }
+        starBalance = StarWalletService.shared.balance
+
+        switch powerUp {
+        case .extraTime:
+            timeRemaining += LevelPowerUp.extraTimeSeconds
+        case .peek:
+            startPeek()
+        case .freeze:
+            frozenUntil = Date().addingTimeInterval(LevelPowerUp.freezeDuration)
+        case .revealPair:
+            revealHintPair()
+        }
+
+        AnalyticsService.log(
+            .levelPowerUpUsed(
+                powerUp: powerUp.rawValue,
+                level: levelNumber,
+                cost: powerUp.cost,
+                balanceAfter: starBalance
+            )
+        )
+    }
+
+    private func startPeek() {
+        peekTask?.cancel()
+        flipBackTask?.cancel()
+        flipBackTask = nil
+        withAnimation(.easeInOut(duration: 0.3)) {
+            model.revealAllUnmatchedForPeek()
+        }
+        peekTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(LevelPowerUp.peekDuration))
+            guard !Task.isCancelled, let self else { return }
+            self.peekTask = nil
+            withAnimation(.easeInOut(duration: 0.4)) {
+                self.model.flipBackUnmatchedCards()
+            }
+        }
+    }
+}
+
+// MARK: - Star purchases from the lose modal
+extension MemorizeViewModel {
+    var canBuyLifeWithStars: Bool {
+        levelNumber != nil
+            && !PurchaseService.shared.hasRemovedAds
+            && starBalance >= LevelPowerUp.lifeCost
+    }
+
+    var canSkipLevelWithStars: Bool {
+        levelNumber != nil && starBalance >= LevelPowerUp.skipLevelCost
+    }
+
+    func tapOnBuyLifeWithStars() {
+        guard canBuyLifeWithStars else { return }
+        guard StarWalletService.shared.spend(LevelPowerUp.lifeCost) else { return }
+        starBalance = StarWalletService.shared.balance
+        levelLivesRemaining = LevelLivesService.shared.addLife()
+        AnalyticsService.log(
+            .levelLifePurchasedWithStars(cost: LevelPowerUp.lifeCost, balanceAfter: starBalance)
+        )
+        restartGame()
+    }
+
+    var canForgiveWithStars: Bool {
+        levelNumber != nil && starBalance >= LevelPowerUp.forgiveCost
+    }
+
+    var canWatchAdToForgive: Bool {
+        AdsService.shared.isRewardedConfigured(for: .levelsRewardedForgive)
+    }
+
+    func tapOnWatchAdToForgive() {
+        presentRewardedAd(for: .levelsRewardedForgive) { [weak self] in
+            self?.forgiveMistakes(LevelPowerUp.forgiveAmount, source: "ad")
+        }
+    }
+
+    func tapOnForgiveWithStars() {
+        guard canForgiveWithStars else { return }
+        guard StarWalletService.shared.spend(LevelPowerUp.forgiveCost) else { return }
+        starBalance = StarWalletService.shared.balance
+        forgiveMistakes(LevelPowerUp.forgiveAmount, source: "stars")
+    }
+
+    /// Refunds mistakes and resumes the *same* board — matched pairs stay
+    /// matched. Deliberately does not call `logGameFinishedIfNeeded`: the game
+    /// isn't over, and recording it would consume a life and log a loss.
+    private func forgiveMistakes(_ count: Int, source: String) {
+        guard let levelNumber else { return }
+        model.forgiveFailures(count)
+        loseReason = nil
+        // Guarantee a playable clock. `startTimer()`'s loop exits immediately
+        // when `timeRemaining` is already 0, which would resume the board with
+        // a permanently frozen countdown and no way to lose.
+        timeRemaining = max(timeRemaining, LevelPowerUp.forgiveMinimumSeconds)
+        startTimer()
+        AnalyticsService.log(
+            .levelMistakesForgiven(level: levelNumber, amount: count, source: source)
+        )
+    }
+
+    func tapOnSkipLevelPrompt() {
+        showSkipLevelConfirm = true
+    }
+
+    func tapOnCancelSkipLevel() {
+        showSkipLevelConfirm = false
+    }
+
+    func tapOnConfirmSkipLevel() {
+        guard let levelNumber, canSkipLevelWithStars else { return }
+        guard StarWalletService.shared.spend(LevelPowerUp.skipLevelCost) else { return }
+        starBalance = StarWalletService.shared.balance
+        showSkipLevelConfirm = false
+        // The attempt still counts as a loss — skipping buys the unlock, not a
+        // clean record. Idempotent, so this is a no-op if it already fired.
+        logGameFinishedIfNeeded(result: "lose")
+        LevelProgressService.shared.skipLevel(levelNumber)
+        AnalyticsService.log(
+            .levelSkipped(level: levelNumber, cost: LevelPowerUp.skipLevelCost, balanceAfter: starBalance)
+        )
+        AnalyticsService.log(.levelUnlocked(level: levelNumber + 1))
+        // Return to the map rather than auto-starting the next level, so the
+        // lives gate there still decides whether they can play on.
+        closeView = true
     }
 }
 
@@ -378,6 +695,11 @@ extension MemorizeViewModel: LoseModalViewModelListener {
                 source: "lose_modal"
             )
         )
+        guard levelNumber == nil || LevelLivesService.shared.hasLivesRemaining() else {
+            // Out of lives: stay on LoseModal, which re-renders into its
+            // out-of-lives state now that levelLivesRemaining is 0.
+            return
+        }
         restartGame()
     }
 
@@ -390,7 +712,20 @@ extension MemorizeViewModel: LoseModalViewModelListener {
         presentRewardedAd(for: .gameRewardedExtraTime) { [weak self] in
             guard let self else { return }
             self.timeRemaining = max(self.timeRemaining, 0) + 30
+            // The modal is driven by `loseReason` now, not by the clock, so
+            // adding time alone would leave it on screen.
+            self.loseReason = nil
             self.startTimer()
+        }
+    }
+
+    func tapOnWatchAdForLife() {
+        presentRewardedAd(for: .levelsRewardedLife) { [weak self] in
+            guard let self else { return }
+            let updated = LevelLivesService.shared.addLife()
+            self.levelLivesRemaining = updated
+            AnalyticsService.log(.levelLifeGrantedFromAd(livesRemaining: updated))
+            self.restartGame()
         }
     }
 }
@@ -417,8 +752,13 @@ extension MemorizeViewModel: QuitModalListener {
 extension MemorizeViewModel: WinModalListener {
     func tapOnContinue() {
         self.showWinView = false
+        self.closeView = true
         Task { @MainActor in
             ReviewRequestService.shared.registerSuccessfulGameWin()
         }
+    }
+
+    func tapOnNextLevel() {
+        advanceToNextLevel()
     }
 }

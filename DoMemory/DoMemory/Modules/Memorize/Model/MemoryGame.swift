@@ -32,6 +32,21 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         }
     }
 
+    /// Refunds failed matches after a "forgive mistakes" rescue. Floors at zero.
+    mutating func forgiveFailures(_ count: Int) {
+        guard count > 0 else { return }
+        failedTries = max(0, failedTries - count)
+    }
+
+    /// Flips every still-unmatched card face up for the Peek power-up. Ended by
+    /// `flipBackUnmatchedCards()`, which also clears any half-made guess so the
+    /// board returns to a clean state.
+    mutating func revealAllUnmatchedForPeek() {
+        for index in cards.indices where !cards[index].isMatched {
+            cards[index].isFaceUp = true
+        }
+    }
+
     mutating func revealUnmatchedPairForHint() -> Bool {
         guard let itemID = cards.first(where: { !$0.isMatched })?.itemId else { return false }
         var revealedCount = 0

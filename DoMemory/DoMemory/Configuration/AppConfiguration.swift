@@ -43,6 +43,18 @@ enum AnalyticsEvent {
     case resultShared(source: String)
     case onboardingIntroCompleted
     case onboardingIntroSkipped
+    case levelStarted(level: Int)
+    case levelFinished(level: Int, result: String, stars: Int)
+    case levelUnlocked(level: Int)
+    case levelLifeConsumed(livesRemaining: Int)
+    case levelLifeGrantedFromAd(livesRemaining: Int)
+    case levelOutOfLivesShown(source: String)
+    case levelStarsCredited(level: Int, amount: Int, balanceAfter: Int)
+    case levelPowerUpUsed(powerUp: String, level: Int, cost: Int, balanceAfter: Int)
+    case levelLifePurchasedWithStars(cost: Int, balanceAfter: Int)
+    case levelSkipped(level: Int, cost: Int, balanceAfter: Int)
+    case levelFailedByMistakes(level: Int, maxFailures: Int, timeRemaining: Int)
+    case levelMistakesForgiven(level: Int, amount: Int, source: String)
 
     var name: String {
         switch self {
@@ -75,6 +87,18 @@ enum AnalyticsEvent {
         case .resultShared: return "result_shared"
         case .onboardingIntroCompleted: return "onboarding_intro_completed"
         case .onboardingIntroSkipped: return "onboarding_intro_skipped"
+        case .levelStarted: return "level_started"
+        case .levelFinished: return "level_finished"
+        case .levelUnlocked: return "level_unlocked"
+        case .levelLifeConsumed: return "level_life_consumed"
+        case .levelLifeGrantedFromAd: return "level_life_granted_from_ad"
+        case .levelOutOfLivesShown: return "level_out_of_lives_shown"
+        case .levelStarsCredited: return "level_stars_credited"
+        case .levelPowerUpUsed: return "level_power_up_used"
+        case .levelLifePurchasedWithStars: return "level_life_purchased_with_stars"
+        case .levelSkipped: return "level_skipped"
+        case .levelFailedByMistakes: return "level_failed_by_mistakes"
+        case .levelMistakesForgiven: return "level_mistakes_forgiven"
         }
     }
 
@@ -189,6 +213,58 @@ enum AnalyticsEvent {
             return ["source": source]
         case .onboardingIntroCompleted, .onboardingIntroSkipped:
             return [:]
+        case .levelStarted(let level):
+            return ["level": level]
+        case .levelFinished(let level, let result, let stars):
+            return [
+                "level": level,
+                "result": result,
+                "stars": stars
+            ]
+        case .levelUnlocked(let level):
+            return ["level": level]
+        case .levelLifeConsumed(let livesRemaining):
+            return ["lives_remaining": livesRemaining]
+        case .levelLifeGrantedFromAd(let livesRemaining):
+            return ["lives_remaining": livesRemaining]
+        case .levelOutOfLivesShown(let source):
+            return ["source": source]
+        case .levelStarsCredited(let level, let amount, let balanceAfter):
+            return [
+                "level": level,
+                "amount": amount,
+                "balance_after": balanceAfter
+            ]
+        case .levelPowerUpUsed(let powerUp, let level, let cost, let balanceAfter):
+            return [
+                "power_up": powerUp,
+                "level": level,
+                "cost": cost,
+                "balance_after": balanceAfter
+            ]
+        case .levelLifePurchasedWithStars(let cost, let balanceAfter):
+            return [
+                "cost": cost,
+                "balance_after": balanceAfter
+            ]
+        case .levelSkipped(let level, let cost, let balanceAfter):
+            return [
+                "level": level,
+                "cost": cost,
+                "balance_after": balanceAfter
+            ]
+        case .levelFailedByMistakes(let level, let maxFailures, let timeRemaining):
+            return [
+                "level": level,
+                "max_failures": maxFailures,
+                "time_remaining": timeRemaining
+            ]
+        case .levelMistakesForgiven(let level, let amount, let source):
+            return [
+                "level": level,
+                "amount": amount,
+                "source": source
+            ]
         }
     }
 }
