@@ -86,9 +86,20 @@ struct MemorizeView: View {
                         Image(systemName: viewModel.isFrozen ? "snowflake" : "timer")
                             .foregroundStyle(viewModel.isFrozen ? Color.freezeBlue : Color.primaryColor)
                             .font(.system(size: 14))
-                        Text("\(viewModel.timeRemaining)")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundStyle(viewModel.isFrozen ? Color.freezeBlue : Color.textPrimary)
+                        // Labelled only while frozen, matching the fails chip:
+                        // an explicit label here would otherwise replace the
+                        // icon-plus-number VoiceOver reads by default with a
+                        // bare, contextless number.
+                        if viewModel.isFrozen {
+                            Text("\(viewModel.timeRemaining)")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundStyle(Color.freezeBlue)
+                                .accessibilityLabel(Strings.timerFrozenFormat(viewModel.timeRemaining))
+                        } else {
+                            Text("\(viewModel.timeRemaining)")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundStyle(Color.textPrimary)
+                        }
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
