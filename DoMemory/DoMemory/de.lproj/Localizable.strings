@@ -30,6 +30,16 @@
 "game_win_title" = "Glückwunsch!";
 "home_difficulty_title" = "Schwierigkeit";
 "home_select_difficulty_prompt" = "Wähle die Schwierigkeit";
+"level_back_to_levels" = "Zurück zu den Leveln";
+"level_cleared" = "Level geschafft!";
+"level_next" = "Nächstes Level";
+"level_title_format" = "Level %d";
+"levels_current_level_format" = "Aktuell auf Level %d";
+"levels_screen_title" = "Level";
+"levels_out_of_lives_title" = "Keine Leben mehr!";
+"levels_out_of_lives_message" = "Schau dir eine Anzeige für +1 Leben an, oder komm morgen für neue Leben wieder.";
+"levels_watch_ad_for_life" = "Anzeige für +1 Leben ansehen";
+"levels_lives_remaining_format" = "%d von %d Leben übrig";
 "menu_create_add" = "Hinzufügen";
 "menu_create_add_emoji" = "Emoji hinzufügen";
 "menu_create_emojis_label" = "Emojis";
@@ -42,6 +52,7 @@
 "menu_empty_mine_message" = "Du hast noch keine eigenen Memoramas";
 "menu_random_game" = "Zufallsspiel";
 "menu_tab_all" = "Alle";
+"menu_tab_levels" = "Level";
 "menu_tab_mine" = "Meine Memoramas";
 "settings_description" = "Passe deine Spieleinstellungen an";
 "settings_select_difficulty" = "Auswählen";
@@ -184,3 +195,22 @@
 "intro_skip" = "Überspringen";
 "intro_next" = "Weiter";
 "intro_get_started" = "Los geht's";
+
+/* Levels star economy */
+"levels_powerup_extra_time" = "+15 Sek.";
+"levels_powerup_peek" = "Spicken";
+"levels_powerup_freeze" = "Einfrieren";
+"levels_powerup_reveal_pair" = "Aufdecken";
+"levels_star_balance_format" = "%d Sterne verfügbar";
+"levels_powerup_cost_format" = "%1$@, kostet %2$d Sterne";
+"levels_buy_life_format" = "Leben kaufen — %d";
+"levels_skip_level_format" = "Level überspringen — %d";
+"levels_skip_level_confirm_title" = "Level überspringen?";
+"levels_skip_level_confirm_message" = "Du schaltest das nächste Level frei, aber dieses bleibt bei null Sternen. Du kannst es jederzeit wiederholen.";
+"levels_skip_level_confirm_action" = "Überspringen";
+
+/* Levels mistake budget */
+"levels_lose_too_many_mistakes" = "Zu viele Fehler";
+"levels_forgive_ad_format" = "Video ansehen für %d Fehler weniger";
+"levels_forgive_stars_format" = "%1$d Fehler erlassen — %2$d";
+"levels_mistakes_remaining_format" = "%1$d von %2$d Fehlern verbraucht";

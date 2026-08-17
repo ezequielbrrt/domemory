@@ -19,6 +19,8 @@ enum AdPlacement: String {
     case settingsRewardedRemoveAds = "settings_rewarded_remove_ads"
     case appOpen = "app_open"
     case multiplayerFinishedNative = "multiplayer_finished_native"
+    case levelsRewardedLife = "levels_rewarded_life"
+    case levelsRewardedForgive = "levels_rewarded_forgive"
 }
 
 enum AdUnitConfiguration {
@@ -34,7 +36,7 @@ enum AdUnitConfiguration {
                 debugID: "ca-app-pub-3940256099942544/2435281174",
                 releaseID: "ca-app-pub-4297174845441653/5761017394"
             )
-        case .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .appOpen, .multiplayerFinishedNative:
+        case .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .appOpen, .multiplayerFinishedNative, .levelsRewardedLife, .levelsRewardedForgive:
             return nil
         }
     }
@@ -46,7 +48,7 @@ enum AdUnitConfiguration {
                 debugID: "ca-app-pub-3940256099942544/4411468910",
                 releaseID: "ca-app-pub-4297174845441653/8078681089"
             )
-        case .homeBanner, .gameBanner, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .appOpen, .multiplayerFinishedNative:
+        case .homeBanner, .gameBanner, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .appOpen, .multiplayerFinishedNative, .levelsRewardedLife, .levelsRewardedForgive:
             return nil
         }
     }
@@ -68,6 +70,16 @@ enum AdUnitConfiguration {
                 debugID: "ca-app-pub-3940256099942544/1712485313",
                 releaseID: ""
             )
+        case .levelsRewardedLife:
+            return configuredUnitID(
+                debugID: "ca-app-pub-3940256099942544/1712485313",
+                releaseID: ""
+            )
+        case .levelsRewardedForgive:
+            return configuredUnitID(
+                debugID: "ca-app-pub-3940256099942544/1712485313",
+                releaseID: ""
+            )
         case .homeBanner, .gameBanner, .gameFinishedInterstitial, .appOpen, .multiplayerFinishedNative:
             return nil
         }
@@ -80,7 +92,7 @@ enum AdUnitConfiguration {
                 debugID: "ca-app-pub-3940256099942544/5575463023",
                 releaseID: "ca-app-pub-4297174845441653/6311078899"
             )
-        case .homeBanner, .gameBanner, .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .multiplayerFinishedNative:
+        case .homeBanner, .gameBanner, .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .multiplayerFinishedNative, .levelsRewardedLife, .levelsRewardedForgive:
             return nil
         }
     }
@@ -92,7 +104,7 @@ enum AdUnitConfiguration {
                 debugID: "ca-app-pub-3940256099942544/3986624511",
                 releaseID: "ca-app-pub-4297174845441653/7396929856"
             )
-        case .homeBanner, .gameBanner, .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .appOpen:
+        case .homeBanner, .gameBanner, .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .appOpen, .levelsRewardedLife, .levelsRewardedForgive:
             return nil
         }
     }

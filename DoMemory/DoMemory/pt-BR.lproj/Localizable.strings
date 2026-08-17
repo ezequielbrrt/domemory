@@ -30,6 +30,16 @@
 "game_win_title" = "Parabéns!";
 "home_difficulty_title" = "Dificuldade";
 "home_select_difficulty_prompt" = "Selecione a dificuldade";
+"level_back_to_levels" = "Voltar aos níveis";
+"level_cleared" = "Nível concluído!";
+"level_next" = "Próximo nível";
+"level_title_format" = "Nível %d";
+"levels_current_level_format" = "Atualmente no nível %d";
+"levels_screen_title" = "Níveis";
+"levels_out_of_lives_title" = "Sem vidas!";
+"levels_out_of_lives_message" = "Assista a um anúncio para +1 vida, ou volte amanhã para um novo conjunto.";
+"levels_watch_ad_for_life" = "Assistir anúncio por +1 vida";
+"levels_lives_remaining_format" = "%d de %d vidas restantes";
 "menu_create_add" = "Adicionar";
 "menu_create_add_emoji" = "Adicionar emoji";
 "menu_create_emojis_label" = "Emojis";
@@ -42,6 +52,7 @@
 "menu_empty_mine_message" = "Você ainda não tem memoramas";
 "menu_random_game" = "Jogo aleatorio";
 "menu_tab_all" = "Todos";
+"menu_tab_levels" = "Níveis";
 "menu_tab_mine" = "Meus memoramas";
 "settings_description" = "Ajuste suas preferências de jogo";
 "settings_select_difficulty" = "Selecionar";
@@ -184,3 +195,22 @@
 "intro_skip" = "Pular";
 "intro_next" = "Próximo";
 "intro_get_started" = "Começar";
+
+/* Levels star economy */
+"levels_powerup_extra_time" = "+15s";
+"levels_powerup_peek" = "Espiar";
+"levels_powerup_freeze" = "Congelar";
+"levels_powerup_reveal_pair" = "Revelar";
+"levels_star_balance_format" = "%d estrelas disponíveis";
+"levels_powerup_cost_format" = "%1$@, custa %2$d estrelas";
+"levels_buy_life_format" = "Comprar uma vida — %d";
+"levels_skip_level_format" = "Pular este nível — %d";
+"levels_skip_level_confirm_title" = "Pular este nível?";
+"levels_skip_level_confirm_message" = "Você desbloqueará o próximo nível, mas este ficará com zero estrelas. Pode jogar de novo quando quiser.";
+"levels_skip_level_confirm_action" = "Pular";
+
+/* Levels mistake budget */
+"levels_lose_too_many_mistakes" = "Erros demais";
+"levels_forgive_ad_format" = "Ver anúncio para perdoar %d erros";
+"levels_forgive_stars_format" = "Perdoar %1$d erros — %2$d";
+"levels_mistakes_remaining_format" = "%1$d de %2$d erros usados";

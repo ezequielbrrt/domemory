@@ -30,6 +30,16 @@
 "game_win_title" = "Félicitations !";
 "home_difficulty_title" = "Difficulté";
 "home_select_difficulty_prompt" = "Sélectionnez la difficulté";
+"level_back_to_levels" = "Retour aux niveaux";
+"level_cleared" = "Niveau réussi !";
+"level_next" = "Niveau suivant";
+"level_title_format" = "Niveau %d";
+"levels_current_level_format" = "Actuellement au niveau %d";
+"levels_screen_title" = "Niveaux";
+"levels_out_of_lives_title" = "Plus de vies !";
+"levels_out_of_lives_message" = "Regardez une pub pour +1 vie, ou revenez demain pour un nouveau lot.";
+"levels_watch_ad_for_life" = "Regarder une pub pour +1 vie";
+"levels_lives_remaining_format" = "%d vies restantes sur %d";
 "menu_create_add" = "Ajouter";
 "menu_create_add_emoji" = "Ajouter un emoji";
 "menu_create_emojis_label" = "Emojis";
@@ -42,6 +52,7 @@
 "menu_empty_mine_message" = "Vous n'avez pas encore de mémoramas";
 "menu_random_game" = "Partie aléatoire";
 "menu_tab_all" = "Tous";
+"menu_tab_levels" = "Niveaux";
 "menu_tab_mine" = "Mes mémoramas";
 "settings_description" = "Ajustez vos préférences de jeu";
 "settings_select_difficulty" = "Sélectionner";
@@ -184,3 +195,22 @@
 "intro_skip" = "Passer";
 "intro_next" = "Suivant";
 "intro_get_started" = "Commencer";
+
+/* Levels star economy */
+"levels_powerup_extra_time" = "+15 s";
+"levels_powerup_peek" = "Coup d'œil";
+"levels_powerup_freeze" = "Geler";
+"levels_powerup_reveal_pair" = "Révéler";
+"levels_star_balance_format" = "%d étoiles disponibles";
+"levels_powerup_cost_format" = "%1$@, coûte %2$d étoiles";
+"levels_buy_life_format" = "Acheter une vie — %d";
+"levels_skip_level_format" = "Passer ce niveau — %d";
+"levels_skip_level_confirm_title" = "Passer ce niveau ?";
+"levels_skip_level_confirm_message" = "Vous débloquerez le niveau suivant, mais celui-ci restera à zéro étoile. Vous pourrez le rejouer à tout moment.";
+"levels_skip_level_confirm_action" = "Passer";
+
+/* Levels mistake budget */
+"levels_lose_too_many_mistakes" = "Trop d'erreurs";
+"levels_forgive_ad_format" = "Voir une pub pour effacer %d erreurs";
+"levels_forgive_stars_format" = "Effacer %1$d erreurs — %2$d";
+"levels_mistakes_remaining_format" = "%1$d erreurs sur %2$d utilisées";

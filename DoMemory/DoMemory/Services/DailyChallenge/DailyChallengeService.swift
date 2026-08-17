@@ -28,16 +28,6 @@ final class DailyChallengeService {
     private let pairsPerChallenge = 6
     private let challengeDifficulty: Difficulty = .medium
 
-    /// Curated, visually distinct emoji pool. Order is fixed so the seeded
-    /// selection is reproducible across app versions; only append, never reorder.
-    private let emojiPool: [String] = [
-        "😀", "😎", "🥳", "😍", "🤓", "😴", "🤖", "👻", "💩", "🐶",
-        "🐱", "🦊", "🐻", "🐼", "🐸", "🐵", "🦁", "🐯", "🦄", "🐝",
-        "🐢", "🐙", "🦋", "🌵", "🌸", "🍄", "🍎", "🍌", "🍉", "🍓",
-        "🍕", "🍔", "🌮", "🍦", "🎈", "⚽️", "🚀", "⭐️", "🌈", "🔥",
-        "💎", "🎸", "🎲", "🎯", "👑", "🎁", "❤️", "⚡️"
-    ]
-
     private let defaults = DailyChallengeSharedStore.defaults
     private var calendar: Calendar { Calendar.current }
 
@@ -55,7 +45,7 @@ final class DailyChallengeService {
     func boardForToday(for date: Date = Date()) -> Memorama {
         let seed = todaysSeed(for: date)
         var generator = SeededGenerator(seed: seed)
-        let items = Array(emojiPool.shuffled(using: &generator).prefix(pairsPerChallenge))
+        let items = Array(EmojiPool.all.shuffled(using: &generator).prefix(pairsPerChallenge))
 
         return Memorama(
             id: "daily-\(seed)",
@@ -128,29 +118,5 @@ final class DailyChallengeService {
               let month = Int(seed.dropFirst(4).prefix(2)),
               let day = Int(seed.suffix(2)) else { return nil }
         return calendar.date(from: DateComponents(year: year, month: month, day: day))
-    }
-}
-
-/// Small deterministic RNG (SplitMix64) seeded from a string, so the daily
-/// board is identical on every device for a given day.
-private struct SeededGenerator: RandomNumberGenerator {
-    private var state: UInt64
-
-    init(seed: String) {
-        // FNV-1a hash of the seed string → 64-bit state.
-        var hash: UInt64 = 1_469_598_103_934_665_603
-        for byte in seed.utf8 {
-            hash ^= UInt64(byte)
-            hash = hash &* 1_099_511_628_211
-        }
-        state = hash
-    }
-
-    mutating func next() -> UInt64 {
-        state = state &+ 0x9E37_79B9_7F4A_7C15
-        var z = state
-        z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
-        z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
-        return z ^ (z >> 31)
     }
 }

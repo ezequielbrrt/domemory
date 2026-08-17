@@ -30,6 +30,16 @@
 "game_win_title" = "Congratulations!";
 "home_difficulty_title" = "Difficulty";
 "home_select_difficulty_prompt" = "Select difficulty";
+"level_back_to_levels" = "Back to levels";
+"level_cleared" = "Level Cleared!";
+"level_next" = "Next Level";
+"level_title_format" = "Level %d";
+"levels_current_level_format" = "Currently on level %d";
+"levels_screen_title" = "Levels";
+"levels_out_of_lives_title" = "Out of Lives!";
+"levels_out_of_lives_message" = "Watch an ad for +1 life, or come back tomorrow for a fresh set.";
+"levels_watch_ad_for_life" = "Watch ad for +1 life";
+"levels_lives_remaining_format" = "%d of %d lives remaining";
 "menu_create_add" = "Add";
 "menu_create_add_emoji" = "Add emoji";
 "menu_create_emojis_label" = "Emojis";
@@ -42,6 +52,7 @@
 "menu_empty_mine_message" = "You don't have any memoramas yet";
 "menu_random_game" = "Random game";
 "menu_tab_all" = "All";
+"menu_tab_levels" = "Levels";
 "menu_tab_mine" = "My memoramas";
 "settings_description" = "Adjust your game preferences";
 "settings_select_difficulty" = "Select";
@@ -184,3 +195,22 @@
 "intro_skip" = "Skip";
 "intro_next" = "Next";
 "intro_get_started" = "Get Started";
+
+/* Levels star economy */
+"levels_powerup_extra_time" = "+15s";
+"levels_powerup_peek" = "Peek";
+"levels_powerup_freeze" = "Freeze";
+"levels_powerup_reveal_pair" = "Reveal";
+"levels_star_balance_format" = "%d stars available";
+"levels_powerup_cost_format" = "%1$@, costs %2$d stars";
+"levels_buy_life_format" = "Buy a life — %d";
+"levels_skip_level_format" = "Skip this level — %d";
+"levels_skip_level_confirm_title" = "Skip this level?";
+"levels_skip_level_confirm_message" = "You'll unlock the next level, but this one stays at zero stars. You can replay it any time.";
+"levels_skip_level_confirm_action" = "Skip";
+
+/* Levels mistake budget */
+"levels_lose_too_many_mistakes" = "Too many mistakes";
+"levels_forgive_ad_format" = "Watch ad to forgive %d mistakes";
+"levels_forgive_stars_format" = "Forgive %1$d mistakes — %2$d";
+"levels_mistakes_remaining_format" = "%1$d of %2$d mistakes used";

@@ -30,6 +30,16 @@
 "game_win_title" = "おめでとう！";
 "home_difficulty_title" = "難易度";
 "home_select_difficulty_prompt" = "難易度を選択";
+"level_back_to_levels" = "レベル一覧に戻る";
+"level_cleared" = "レベルクリア!";
+"level_next" = "次のレベル";
+"level_title_format" = "レベル %d";
+"levels_current_level_format" = "現在レベル %d";
+"levels_screen_title" = "レベル";
+"levels_out_of_lives_title" = "ライフがありません!";
+"levels_out_of_lives_message" = "広告を見てライフを+1するか、明日また新しいライフでお越しください。";
+"levels_watch_ad_for_life" = "広告を見てライフ+1";
+"levels_lives_remaining_format" = "ライフ残り %d / %d";
 "menu_create_add" = "追加";
 "menu_create_add_emoji" = "絵文字を追加";
 "menu_create_emojis_label" = "絵文字";
@@ -42,6 +52,7 @@
 "menu_empty_mine_message" = "まだ自分のメモラマがありません";
 "menu_random_game" = "ランダムゲーム";
 "menu_tab_all" = "すべて";
+"menu_tab_levels" = "レベル";
 "menu_tab_mine" = "マイメモラマ";
 "settings_description" = "ゲーム設定を調整";
 "settings_select_difficulty" = "選択";
@@ -184,3 +195,22 @@
 "intro_skip" = "スキップ";
 "intro_next" = "次へ";
 "intro_get_started" = "はじめる";
+
+/* Levels star economy */
+"levels_powerup_extra_time" = "+15秒";
+"levels_powerup_peek" = "チラ見";
+"levels_powerup_freeze" = "フリーズ";
+"levels_powerup_reveal_pair" = "ペア公開";
+"levels_star_balance_format" = "スター%d個";
+"levels_powerup_cost_format" = "%1$@、スター%2$d個";
+"levels_buy_life_format" = "ライフを購入 — %d";
+"levels_skip_level_format" = "このレベルをスキップ — %d";
+"levels_skip_level_confirm_title" = "このレベルをスキップしますか？";
+"levels_skip_level_confirm_message" = "次のレベルが解放されますが、このレベルはスター0のままです。いつでも再挑戦できます。";
+"levels_skip_level_confirm_action" = "スキップ";
+
+/* Levels mistake budget */
+"levels_lose_too_many_mistakes" = "ミスが多すぎます";
+"levels_forgive_ad_format" = "広告を見てミスを%d回取り消す";
+"levels_forgive_stars_format" = "ミスを%1$d回取り消す — %2$d";
+"levels_mistakes_remaining_format" = "ミス %1$d / %2$d";

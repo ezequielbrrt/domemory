@@ -10,7 +10,7 @@ import WaterfallGrid
 import AppTrackingTransparency
 import GoogleMobileAds
 
-private enum GameTab { case all, mine }
+private enum GameTab { case all, mine, levels }
 
 struct MenuView: View {
     @State private var viewModel = MenuViewModel()
@@ -28,8 +28,9 @@ struct MenuView: View {
 
     private var displayedGames: [Memorama] {
         switch selectedTab {
-        case .all:  return allGames
-        case .mine: return myGames
+        case .all:    return allGames
+        case .mine:   return myGames
+        case .levels: return []
         }
     }
 
@@ -195,6 +196,12 @@ struct MenuView: View {
                                         Label(Strings.tabMine, systemImage: "square.and.pencil")
                                     }
                                     .tag(GameTab.mine)
+
+                                LevelsView()
+                                    .tabItem {
+                                        Label(Strings.tabLevels, systemImage: "trophy.fill")
+                                    }
+                                    .tag(GameTab.levels)
                             }
                         }
                     }
@@ -273,7 +280,7 @@ struct MenuView: View {
 
     private var selectedVisibleTab: MenuViewModel.VisibleTab {
         switch selectedTab {
-        case .all:
+        case .all, .levels:
             return .all
         case .mine:
             return .mine

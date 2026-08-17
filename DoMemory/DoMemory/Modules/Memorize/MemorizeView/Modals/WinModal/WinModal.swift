@@ -15,6 +15,8 @@ struct WinModal: View {
     var difficultyTitle: String = ""
     var isDailyChallenge: Bool = false
     var streak: Int = 0
+    var levelNumber: Int? = nil
+    var starsEarned: Int = 0
 
     @State private var showShareSheet = false
 
@@ -27,6 +29,14 @@ struct WinModal: View {
             isDailyChallenge: isDailyChallenge,
             streak: streak
         )
+    }
+
+    private func primaryAction() {
+        if levelNumber != nil {
+            listener?.tapOnNextLevel()
+        } else {
+            listener?.tapOnContinue()
+        }
     }
 
     var body: some View {
@@ -65,17 +75,33 @@ struct WinModal: View {
                     .font(.system(size: 68))
                     .padding(.bottom, 8)
 
-                Text(Strings.youWin)
+                Text(levelNumber != nil ? Strings.levelCleared : Strings.youWin)
                     .font(.system(size: 36, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color.primaryColor)
                     .multilineTextAlignment(.center)
 
-                Text(Strings.youWinDescription)
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color.textMuted)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
+                if let levelNumber {
+                    Text(Strings.levelTitle(levelNumber))
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.textMuted)
+
+                    HStack(spacing: 6) {
+                        ForEach(0..<3, id: \.self) { index in
+                            Image(systemName: index < starsEarned ? "star.fill" : "star")
+                                .foregroundStyle(index < starsEarned ? Color.hardAmber : Color.textMuted.opacity(0.3))
+                        }
+                    }
+                    .font(.system(size: 24))
+                    .padding(.top, 4)
                     .padding(.bottom, 8)
+                } else {
+                    Text(Strings.youWinDescription)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color.textMuted)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.bottom, 8)
+                }
 
                 HStack(spacing: 10) {
                     WinStatView(
@@ -115,8 +141,8 @@ struct WinModal: View {
                 .buttonStyle(.plain)
                 .padding(.bottom, 10)
 
-                Button(action: { listener?.tapOnContinue() }) {
-                    Text(Strings.goToMenu)
+                Button(action: { primaryAction() }) {
+                    Text(levelNumber != nil ? Strings.nextLevel : Strings.goToMenu)
                         .font(.system(size: 17, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -127,6 +153,16 @@ struct WinModal: View {
                         .shadow(color: Color.primaryColor.opacity(0.35), radius: 16, x: 0, y: 4)
                 }
                 .buttonStyle(.plain)
+
+                if levelNumber != nil {
+                    Button(action: { listener?.tapOnContinue() }) {
+                        Text(Strings.backToLevels)
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.textMuted)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 8)
+                }
             }
             .sheet(isPresented: $showShareSheet) {
                 ResultActivityView(data: shareData) {

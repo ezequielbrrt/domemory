@@ -30,6 +30,16 @@
 "game_win_title" = "恭喜！";
 "home_difficulty_title" = "难度";
 "home_select_difficulty_prompt" = "请选择难度";
+"level_back_to_levels" = "返回关卡";
+"level_cleared" = "关卡完成！";
+"level_next" = "下一关";
+"level_title_format" = "第 %d 关";
+"levels_current_level_format" = "当前第 %d 关";
+"levels_screen_title" = "关卡";
+"levels_out_of_lives_title" = "生命值用完了！";
+"levels_out_of_lives_message" = "观看广告获得 +1 生命值，或明天再来获取新的生命值。";
+"levels_watch_ad_for_life" = "观看广告获得 +1 生命值";
+"levels_lives_remaining_format" = "剩余 %d / %d 条生命";
 "menu_create_add" = "添加";
 "menu_create_add_emoji" = "添加表情";
 "menu_create_emojis_label" = "表情";
@@ -42,6 +52,7 @@
 "menu_empty_mine_message" = "你还没有自己的记忆游戏";
 "menu_random_game" = "随机游戏";
 "menu_tab_all" = "全部";
+"menu_tab_levels" = "关卡";
 "menu_tab_mine" = "我的记忆游戏";
 "settings_description" = "调整你的游戏偏好";
 "settings_select_difficulty" = "选择";
@@ -184,3 +195,22 @@
 "intro_skip" = "跳过";
 "intro_next" = "下一步";
 "intro_get_started" = "开始";
+
+/* Levels star economy */
+"levels_powerup_extra_time" = "+15秒";
+"levels_powerup_peek" = "偷看";
+"levels_powerup_freeze" = "冻结";
+"levels_powerup_reveal_pair" = "揭示配对";
+"levels_star_balance_format" = "可用星星 %d 颗";
+"levels_powerup_cost_format" = "%1$@，需要 %2$d 颗星星";
+"levels_buy_life_format" = "购买一条生命 — %d";
+"levels_skip_level_format" = "跳过本关 — %d";
+"levels_skip_level_confirm_title" = "要跳过本关吗？";
+"levels_skip_level_confirm_message" = "下一关会解锁，但本关将保持零星。你可以随时重玩。";
+"levels_skip_level_confirm_action" = "跳过";
+
+/* Levels mistake budget */
+"levels_lose_too_many_mistakes" = "错误次数过多";
+"levels_forgive_ad_format" = "观看广告抵消 %d 次错误";
+"levels_forgive_stars_format" = "抵消 %1$d 次错误 — %2$d";
+"levels_mistakes_remaining_format" = "已用错误 %1$d / %2$d";
