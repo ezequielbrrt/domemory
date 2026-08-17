@@ -30,6 +30,10 @@ def call_tool(name, arguments, req_id):
     )
     if "error" in response:
         raise RuntimeError(response["error"])
+    # Paper signals unknown tools and tool failures with isError inside result.
+    # Missing this made an API rename silently no-op the whole split.
+    if response.get("result", {}).get("isError"):
+        raise RuntimeError(f"Paper tool error ({name}): {response['result']['content']}")
     return response["result"]["content"]
 
 
@@ -44,8 +48,13 @@ def basic_info(req_id):
     return text_payload(call_tool("get_basic_info", {}, req_id))
 
 
-def source_artboards():
-    call_tool("open_page", {"pageId": SOURCE_PAGE_ID}, 1)
+def open_page(page_id, file_id, req_id):
+    """Paper replaced open_page with open_file(pageId)."""
+    call_tool("open_file", {"fileId": file_id, "pageId": page_id}, req_id)
+
+
+def source_artboards(file_id):
+    open_page(SOURCE_PAGE_ID, file_id, 1)
     info = basic_info(2)
     by_locale = {}
 
@@ -110,7 +119,8 @@ def main():
         0,
     )
 
-    sources = source_artboards()
+    file_id = exporter.current_file_id()
+    sources = source_artboards(file_id)
     page_ids = dict(EXISTING_PAGES)
     req_id = 10
 
@@ -126,7 +136,7 @@ def main():
             page_ids[locale] = page_id
             req_id += 1
 
-        call_tool("open_page", {"pageId": page_id}, req_id)
+        open_page(page_id, file_id, req_id)
         req_id += 1
         existing = {a["name"]: a["id"] for a in basic_info(req_id)["artboards"]}
         req_id += 1
