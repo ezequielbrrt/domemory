@@ -226,3 +226,14 @@
 "levels_intro_mistakes_subtitle" = "Each level allows only so many wrong matches. Hit the limit and the run ends — but you can forgive mistakes and carry on.";
 "levels_intro_done" = "Got It";
 "levels_intro_info_accessibility" = "How Levels works";
+
+/* What's New v4.0.0 */
+"whats_new_levels_title" = "Levels";
+"whats_new_levels_description" = "A brand-new endless mode. Clear a level to unlock the next — boards keep growing and the clock keeps tightening.";
+"whats_new_stars_title" = "Star Ratings";
+"whats_new_stars_description" = "Finish fast and clean to earn up to 3 stars on every level. Replay any level to improve your score.";
+"whats_new_powerups_title" = "Power-Ups";
+"whats_new_powerups_description" = "Spend your stars mid-game on extra time, a peek at the board, a frozen clock, or a free matching pair.";
+"whats_new_lives_title" = "Lives & Mistakes";
+"whats_new_lives_description" = "You get 4 lives a day, and every level allows only so many wrong matches. Out of either? Watch an ad or spend stars to keep going.";
+"levels_timer_frozen_format" = "Timer frozen, %d seconds left";

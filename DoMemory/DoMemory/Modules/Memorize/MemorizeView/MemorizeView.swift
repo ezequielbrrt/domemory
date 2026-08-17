@@ -80,26 +80,42 @@ struct MemorizeView: View {
                             .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                     )
 
-                    // Timer chip
+                    // Timer chip — turns frosty while the Freeze power-up holds
+                    // the countdown, which otherwise looks like a stalled clock.
                     HStack(spacing: 5) {
-                        Image(systemName: "timer")
-                            .foregroundStyle(Color.primaryColor)
+                        Image(systemName: viewModel.isFrozen ? "snowflake" : "timer")
+                            .foregroundStyle(viewModel.isFrozen ? Color.freezeBlue : Color.primaryColor)
                             .font(.system(size: 14))
-                        Text("\(viewModel.timeRemaining)")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundStyle(Color.textPrimary)
+                        // Labelled only while frozen, matching the fails chip:
+                        // an explicit label here would otherwise replace the
+                        // icon-plus-number VoiceOver reads by default with a
+                        // bare, contextless number.
+                        if viewModel.isFrozen {
+                            Text("\(viewModel.timeRemaining)")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundStyle(Color.freezeBlue)
+                                .accessibilityLabel(Strings.timerFrozenFormat(viewModel.timeRemaining))
+                        } else {
+                            Text("\(viewModel.timeRemaining)")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundStyle(Color.textPrimary)
+                        }
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
                     .background(
                         Capsule()
-                            .fill(Color.surfacePrimary)
+                            .fill(viewModel.isFrozen ? Color.freezeBlue.opacity(0.12) : Color.surfacePrimary)
                             .overlay(
                                 Capsule()
-                                    .stroke(Color.surfaceBorder, lineWidth: 1)
+                                    .stroke(viewModel.isFrozen ? Color.freezeBlue.opacity(0.5) : Color.surfaceBorder, lineWidth: 1)
                             )
                             .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                     )
+                    .accessibilityLabel(viewModel.isFrozen
+                        ? Strings.timerFrozenFormat(viewModel.timeRemaining)
+                        : "\(viewModel.timeRemaining)")
+                    .animation(.easeInOut(duration: 0.2), value: viewModel.isFrozen)
 
                     Spacer()
 

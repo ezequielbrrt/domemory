@@ -226,3 +226,14 @@
 "levels_intro_mistakes_subtitle" = "Cada nível permite apenas um número limitado de erros. Ao atingir o limite a partida acaba — mas você pode perdoar erros e continuar.";
 "levels_intro_done" = "Entendi";
 "levels_intro_info_accessibility" = "Como os Níveis funcionam";
+
+/* What's New v4.0.0 */
+"whats_new_levels_title" = "Níveis";
+"whats_new_levels_description" = "Um modo infinito totalmente novo. Complete um nível para desbloquear o próximo — os tabuleiros crescem e o relógio aperta.";
+"whats_new_stars_title" = "Classificação por Estrelas";
+"whats_new_stars_description" = "Termine rápido e sem erros para ganhar até 3 estrelas em cada nível. Rejogue qualquer nível para melhorar sua pontuação.";
+"whats_new_powerups_title" = "Power-Ups";
+"whats_new_powerups_description" = "Gaste suas estrelas durante a partida em tempo extra, uma espiada no tabuleiro, relógio congelado ou um par grátis.";
+"whats_new_lives_title" = "Vidas e Erros";
+"whats_new_lives_description" = "Você recebe 4 vidas por dia, e cada nível permite apenas um número limitado de erros. Acabou? Veja um anúncio ou gaste estrelas.";
+"levels_timer_frozen_format" = "Relógio congelado, %d segundos restantes";

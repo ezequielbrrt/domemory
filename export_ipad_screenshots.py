@@ -47,6 +47,7 @@ SCREEN_SPECS = [
     ("iPad 4 — Play Dozens",           "04_play_dozens.jpg"),
     ("iPad 5 — Create Your Own",       "05_create_your_own.jpg"),
     ("iPad 6 — Choose Challenge",      "06_choose_challenge.jpg"),
+    ("iPad 7 — Levels (NEW)",          "07_levels.jpg"),
 ]
 
 # Maps Paper/app locale codes → App Store Connect locale codes.
@@ -91,17 +92,42 @@ def text_payload(result):
     """Decode the first JSON text item in a Paper tool response."""
     if "error" in result:
         raise RuntimeError(f"MCP error: {result['error']}")
+    # Paper reports unknown tools and tool failures as isError inside result,
+    # not as a JSON-RPC error. Without this check a renamed tool fails silently
+    # and the caller happily reads whichever page happened to be open.
+    if result.get("result", {}).get("isError"):
+        raise RuntimeError(f"Paper tool error: {result['result']['content']}")
     for item in result["result"]["content"]:
         if item.get("type") == "text":
             return json.loads(item["text"])
     raise RuntimeError("Paper returned no text payload")
 
 
-def discover_artboards(page_id):
+def current_file_id():
+    """Resolve the open Paper file's ID from the URL in get_basic_info."""
+    payload = text_payload(mcp_call("tools/call", {"name": "get_basic_info", "arguments": {}}, 1))
+    # https://app.paper.design/file/<fileId>/<pageId>
+    return payload["url"].split("/file/")[1].split("/")[0]
+
+
+def open_page(page_id, file_id):
+    """Switch the active page. Paper replaced open_page with open_file(pageId)."""
+    result = mcp_call("tools/call", {
+        "name": "open_file",
+        "arguments": {"fileId": file_id, "pageId": page_id},
+    }, 1)
+    text_payload(result)
+
+
+def discover_artboards(page_id, file_id):
     """Return [(node_id, filename)] for one locale-specific Paper page."""
-    mcp_call("tools/call", {"name": "open_page", "arguments": {"pageId": page_id}}, 1)
+    open_page(page_id, file_id)
     result = mcp_call("tools/call", {"name": "get_basic_info", "arguments": {}}, 1)
     payload = text_payload(result)
+    if payload["pageId"] != page_id:
+        raise RuntimeError(
+            f"Expected page {page_id}, but Paper is on {payload['pageId']}"
+        )
     artboards_by_name = {a["name"]: a["id"] for a in payload["artboards"]}
     discovered = []
     for base_name, filename in SCREEN_SPECS:
@@ -150,10 +176,11 @@ def main():
     files_written = []
     total = len(PAGE_IDS) * len(SCREEN_SPECS)
     current = 0
+    file_id = current_file_id()
 
     for app_locale, page_id in PAGE_IDS.items():
         locale = LOCALE_MAP.get(app_locale, app_locale)
-        artboards = discover_artboards(page_id)
+        artboards = discover_artboards(page_id, file_id)
         exported = export_artboards(artboards, 100 + current)
         dest_dir = os.path.join(OUT_DIR, locale)
         os.makedirs(dest_dir, exist_ok=True)

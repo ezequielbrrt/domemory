@@ -24,6 +24,7 @@ SCREEN_SPECS = [
     ("Proposal 4 — Play Dozens",           "04_play_dozens.jpg"),
     ("Proposal 5 — Create Your Own (NEW)", "05_create_your_own.jpg"),
     ("Proposal 6 — Choose Challenge",      "06_choose_challenge.jpg"),
+    ("Proposal 7 — Levels (NEW)",          "07_levels.jpg"),
 ]
 
 # Maps Paper/app locale codes → App Store Connect locale codes.
@@ -115,6 +116,7 @@ def discover_artboards():
             elif name.startswith(f"{base_name} — "):
                 app_locales.add(name[len(f"{base_name} — "):])
 
+    missing = []
     for app_locale in sorted(app_locales):
         asc_locale = LOCALE_MAP.get(app_locale, app_locale)
         for base_name, filename in SCREEN_SPECS:
@@ -125,9 +127,20 @@ def discover_artboards():
                 node_id = artboards_by_name.get(f"{base_name} — {app_locale}")
             if node_id:
                 discovered.append((node_id, asc_locale, filename))
+            else:
+                missing.append(f"{base_name} — {app_locale}")
 
     if not discovered:
         raise RuntimeError("No screenshot artboards found on the Paper canvas")
+
+    # A locale that matched some specs but not all means either the wrong page
+    # is open or an artboard was never authored. Skipping it quietly would ship
+    # a partial set over the top of the previous release's screenshots.
+    if missing:
+        raise RuntimeError(
+            "Missing artboards on the active Paper page "
+            f"({payload.get('pageName', '?')}):\n  " + "\n  ".join(missing)
+        )
 
     return discovered
 

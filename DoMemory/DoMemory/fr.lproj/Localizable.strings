@@ -226,3 +226,14 @@
 "levels_intro_mistakes_subtitle" = "Chaque niveau n'autorise qu'un nombre limité d'erreurs. À la limite, la partie s'arrête — mais vous pouvez effacer des erreurs et continuer.";
 "levels_intro_done" = "J'ai compris";
 "levels_intro_info_accessibility" = "Fonctionnement des Niveaux";
+
+/* What's New v4.0.0 */
+"whats_new_levels_title" = "Niveaux";
+"whats_new_levels_description" = "Un tout nouveau mode infini. Terminez un niveau pour débloquer le suivant : les plateaux s'agrandissent et le chrono se resserre.";
+"whats_new_stars_title" = "Notation par Étoiles";
+"whats_new_stars_description" = "Terminez vite et sans faute pour gagner jusqu'à 3 étoiles par niveau. Rejouez n'importe quel niveau pour améliorer votre score.";
+"whats_new_powerups_title" = "Bonus";
+"whats_new_powerups_description" = "Dépensez vos étoiles en cours de partie : temps supplémentaire, aperçu du plateau, chrono gelé ou paire offerte.";
+"whats_new_lives_title" = "Vies et Erreurs";
+"whats_new_lives_description" = "Vous avez 4 vies par jour, et chaque niveau n'autorise qu'un nombre limité d'erreurs. À court ? Regardez une pub ou dépensez des étoiles.";
+"levels_timer_frozen_format" = "Chrono gelé, %d secondes restantes";

@@ -116,4 +116,42 @@ final class MemorizeViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isNearFailureLimit)
         XCTAssertFalse(viewModel.canUsePowerUps)
     }
+
+    // MARK: - Freeze
+
+    /// The HUD's only cue that Freeze did anything. Nothing else changes while
+    /// the clock is held — `timeRemaining` stops ticking — so if this flag does
+    /// not flip, the player pays 5 stars for no visible feedback at all.
+    func testFreezeRaisesTheFrozenFlag() {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.freeze.cost)
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+
+        XCTAssertFalse(viewModel.isFrozen, "a fresh board is not frozen")
+        viewModel.use(.freeze)
+        XCTAssertTrue(viewModel.isFrozen, "using Freeze must be visible in the HUD")
+    }
+
+    func testFreezeIsNotAppliedWhenItCannotBeAfforded() {
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+
+        viewModel.use(.freeze)
+        XCTAssertFalse(viewModel.isFrozen, "an unaffordable power-up must not fire")
+    }
+
+    /// Restarting has to clear the flag, or a frozen-looking clock survives into
+    /// a board where the countdown is actually running.
+    func testFrozenFlagClearsOnRestart() {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.freeze.cost)
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+
+        viewModel.use(.freeze)
+        XCTAssertTrue(viewModel.isFrozen)
+        viewModel.tapOnTryAgain()
+        XCTAssertFalse(viewModel.isFrozen, "a fresh board must not look frozen")
+    }
 }

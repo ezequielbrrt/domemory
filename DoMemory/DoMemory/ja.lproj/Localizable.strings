@@ -226,3 +226,14 @@
 "levels_intro_mistakes_subtitle" = "各レベルで許されるミスの数は決まっています。上限に達すると終了ですが、ミスを取り消して続けることもできます。";
 "levels_intro_done" = "OK";
 "levels_intro_info_accessibility" = "レベルの遊び方";
+
+/* What's New v4.0.0 */
+"whats_new_levels_title" = "レベル";
+"whats_new_levels_description" = "まったく新しい無限モード。レベルをクリアすると次が解放され、盤面は大きく、制限時間は短くなっていきます。";
+"whats_new_stars_title" = "スター評価";
+"whats_new_stars_description" = "速くミスなくクリアすると各レベルで最大3つのスターを獲得。何度でも挑戦してスコアを更新できます。";
+"whats_new_powerups_title" = "パワーアップ";
+"whats_new_powerups_description" = "スターを使って、時間の追加、盤面のちら見、時間停止、ペア1組の無料公開が可能です。";
+"whats_new_lives_title" = "ライフとミス";
+"whats_new_lives_description" = "ライフは1日4個、各レベルで許されるミスの数も決まっています。なくなったら広告を見るか、スターを使って続行できます。";
+"levels_timer_frozen_format" = "時間停止中、残り%d秒";

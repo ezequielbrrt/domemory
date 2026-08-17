@@ -1,0 +1,8 @@
+Levels mode is here.
+
+• Endless levels — clear one to unlock the next. Boards keep growing and the clock keeps tightening.
+• Star ratings — finish fast and clean to earn up to 3 stars on a level, and replay any level to improve your score.
+• Power-ups — spend your stars mid-game on extra time, a peek at the board, a frozen clock, or a free matching pair.
+• Lives and mistakes — you get 4 lives a day, and every level allows only so many wrong matches. Out of either? Watch an ad or spend stars to keep going.
+
+Plus fixes and polish across the app.

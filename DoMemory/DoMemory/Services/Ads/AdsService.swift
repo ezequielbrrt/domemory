@@ -73,12 +73,12 @@ enum AdUnitConfiguration {
         case .levelsRewardedLife:
             return configuredUnitID(
                 debugID: "ca-app-pub-3940256099942544/1712485313",
-                releaseID: ""
+                releaseID: "ca-app-pub-4297174845441653/6370619149"
             )
         case .levelsRewardedForgive:
             return configuredUnitID(
                 debugID: "ca-app-pub-3940256099942544/1712485313",
-                releaseID: ""
+                releaseID: "ca-app-pub-4297174845441653/9605593478"
             )
         case .homeBanner, .gameBanner, .gameFinishedInterstitial, .appOpen, .multiplayerFinishedNative:
             return nil
@@ -133,6 +133,7 @@ final class AdsService: NSObject {
     private var isLoadingAppOpenAd = false
     private var isPresentingFullScreenAd = false
     private var menuIsReadyForAppOpenAds = false
+    private var fullScreenAdsSuppressed = false
     private var lastFullScreenAdPresentationDate: Date?
     private let gameFinishedInterstitialCountKey = "ads.game_finished_interstitial_completion_count"
     private let appOpenAdExpirationInterval: TimeInterval = 4 * 60 * 60
@@ -274,6 +275,16 @@ final class AdsService: NSObject {
         log("Rewarded presented for \(placement.rawValue).")
     }
 
+    /// Set while a first-run surface that the player is meant to read owns the
+    /// screen — currently the What's New sheet. An app-open ad arrives on
+    /// `didBecomeActive`, which fires again after the ATT prompt is dismissed,
+    /// so without this it lands directly on top of the release announcement.
+    func setFullScreenAdsSuppressed(_ suppressed: Bool) {
+        guard fullScreenAdsSuppressed != suppressed else { return }
+        fullScreenAdsSuppressed = suppressed
+        log("Full-screen ads \(suppressed ? "suppressed" : "unsuppressed").")
+    }
+
     func registerMenuReadyForAppOpenAds() {
         guard !PurchaseService.shared.hasRemovedAds else { return }
         menuIsReadyForAppOpenAds = true
@@ -288,6 +299,12 @@ final class AdsService: NSObject {
 
         guard menuIsReadyForAppOpenAds else {
             log("App open skipped. Menu is not ready.")
+            loadAppOpenAdIfNeeded()
+            return
+        }
+
+        guard !fullScreenAdsSuppressed else {
+            log("App open skipped. A first-run surface is on screen.")
             loadAppOpenAdIfNeeded()
             return
         }

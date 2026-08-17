@@ -1,0 +1,8 @@
+Der Level-Modus ist da.
+
+• Endlose Level – schließe eines ab, um das nächste freizuschalten. Die Felder werden größer, die Zeit wird knapper.
+• Sternewertung – beende ein Level schnell und fehlerfrei für bis zu 3 Sterne, und wiederhole jedes Level, um deine Wertung zu verbessern.
+• Power-ups – gib deine Sterne im Spiel für Extrazeit, einen Blick aufs Feld, eine eingefrorene Uhr oder ein Gratis-Paar aus.
+• Leben und Fehler – du bekommst 4 Leben pro Tag, und jedes Level erlaubt nur eine begrenzte Zahl an Fehlversuchen. Alles aufgebraucht? Sieh ein Video an oder gib Sterne aus.
+
+Dazu Fehlerbehebungen und Feinschliff in der ganzen App.
