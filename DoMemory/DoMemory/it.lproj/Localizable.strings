@@ -214,3 +214,15 @@
 "levels_forgive_ad_format" = "Guarda un annuncio per cancellare %d errori";
 "levels_forgive_stars_format" = "Cancella %1$d errori — %2$d";
 "levels_mistakes_remaining_format" = "%1$d errori su %2$d";
+
+/* Levels intro */
+"levels_intro_progress_title" = "Livelli Infiniti";
+"levels_intro_progress_subtitle" = "Completa un livello per sbloccare il successivo. I tabelloni crescono e il tempo si stringe: ce n'è sempre un altro ad aspettarti.";
+"levels_intro_stars_title" = "Guadagna Stelle";
+"levels_intro_stars_subtitle" = "Finisci in fretta e senza errori per ottenere fino a 3 stelle a livello, poi spendile in potenziamenti, vite extra o per saltare un livello.";
+"levels_intro_lives_title" = "Le Vite si Ricaricano Ogni Giorno";
+"levels_intro_lives_subtitle" = "Hai %d vite al giorno e ne perdi una ogni volta che un livello ti batte. Vite finite? Guarda un annuncio o spendi stelle per continuare.";
+"levels_intro_mistakes_title" = "Occhio agli Errori";
+"levels_intro_mistakes_subtitle" = "Ogni livello concede solo un certo numero di errori. Al limite la partita finisce, ma puoi cancellare errori e proseguire.";
+"levels_intro_done" = "Ho capito";
+"levels_intro_info_accessibility" = "Come funzionano i Livelli";

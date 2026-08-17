@@ -12,6 +12,10 @@ struct LevelsView: View {
     @State private var viewModel = LevelsViewModel()
     @State private var selectedLevel: Int?
     @State private var purchaseService = PurchaseService.shared
+    @State private var showIntro = false
+    @State private var introSource = "auto"
+
+    private let introGate = LevelsIntroGate()
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 18), count: 4)
 
@@ -54,10 +58,19 @@ struct LevelsView: View {
                     viewModel.refresh()
                 }
             }
+            .fullScreenCover(isPresented: $showIntro) {
+                LevelsIntroView(source: introSource) { showIntro = false }
+            }
             .onAppear {
                 viewModel.refresh()
                 viewModel.preloadLivesAd()
                 AnalyticsService.log(.screenView(name: "levels", screenClass: "LevelsView"))
+                // Also fires on every return from a level; the gate closes once
+                // the intro is dismissed, so this is a no-op from then on.
+                if introGate.shouldPresent {
+                    introSource = "auto"
+                    showIntro = true
+                }
             }
 
             if viewModel.showOutOfLivesPrompt {
@@ -76,9 +89,22 @@ struct LevelsView: View {
     private var header: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(Strings.levelsScreenTitle)
-                    .font(.system(size: 20, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color.textPrimary)
+                HStack(spacing: 6) {
+                    Text(Strings.levelsScreenTitle)
+                        .font(.system(size: 20, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color.textPrimary)
+
+                    Button {
+                        introSource = "info_button"
+                        showIntro = true
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(Color.textMuted)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Strings.levelsIntroInfoAccessibility)
+                }
                 Text(Strings.levelsCurrentLevelFormat(viewModel.currentLevel))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.textMuted)

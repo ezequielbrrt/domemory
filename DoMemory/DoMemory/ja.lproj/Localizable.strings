@@ -214,3 +214,15 @@
 "levels_forgive_ad_format" = "広告を見てミスを%d回取り消す";
 "levels_forgive_stars_format" = "ミスを%1$d回取り消す — %2$d";
 "levels_mistakes_remaining_format" = "ミス %1$d / %2$d";
+
+/* Levels intro */
+"levels_intro_progress_title" = "無限のレベル";
+"levels_intro_progress_subtitle" = "レベルをクリアすると次が解放されます。盤面は大きく、制限時間は短くなり、次のレベルが必ず待っています。";
+"levels_intro_stars_title" = "スターを集めよう";
+"levels_intro_stars_subtitle" = "速くミスなくクリアすると1レベルで最大3つのスターを獲得。パワーアップ、ライフの追加、レベルのスキップに使えます。";
+"levels_intro_lives_title" = "ライフは毎日回復";
+"levels_intro_lives_subtitle" = "ライフは1日%d個。レベルに負けるたびに1つ減ります。なくなったら広告を見るか、スターを使って続行できます。";
+"levels_intro_mistakes_title" = "ミスに注意";
+"levels_intro_mistakes_subtitle" = "各レベルで許されるミスの数は決まっています。上限に達すると終了ですが、ミスを取り消して続けることもできます。";
+"levels_intro_done" = "OK";
+"levels_intro_info_accessibility" = "レベルの遊び方";

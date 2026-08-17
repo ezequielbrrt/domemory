@@ -147,6 +147,20 @@ enum Strings {
         String(format: NSLocalizedString("levels_mistakes_remaining_format", comment: "Accessibility label, %1$d = mistakes made, %2$d = mistakes allowed"), used, total)
     }
 
+    // Levels intro
+    static let levelsIntroProgressTitle = NSLocalizedString("levels_intro_progress_title", comment: "Levels intro slide 1 title: endless progression")
+    static let levelsIntroProgressSubtitle = NSLocalizedString("levels_intro_progress_subtitle", comment: "Levels intro slide 1 subtitle: clear a level to unlock the next")
+    static let levelsIntroStarsTitle = NSLocalizedString("levels_intro_stars_title", comment: "Levels intro slide 2 title: earning and spending stars")
+    static let levelsIntroStarsSubtitle = NSLocalizedString("levels_intro_stars_subtitle", comment: "Levels intro slide 2 subtitle: up to three stars per level, spendable")
+    static let levelsIntroLivesTitle = NSLocalizedString("levels_intro_lives_title", comment: "Levels intro slide 3 title: daily lives")
+    static func levelsIntroLivesSubtitle(_ maxLives: Int) -> String {
+        String(format: NSLocalizedString("levels_intro_lives_subtitle", comment: "Levels intro slide 3 subtitle, %d = lives granted per day"), maxLives)
+    }
+    static let levelsIntroMistakesTitle = NSLocalizedString("levels_intro_mistakes_title", comment: "Levels intro slide 4 title: the mistake budget")
+    static let levelsIntroMistakesSubtitle = NSLocalizedString("levels_intro_mistakes_subtitle", comment: "Levels intro slide 4 subtitle: limited mistakes per level, forgivable")
+    static let levelsIntroDone = NSLocalizedString("levels_intro_done", comment: "Button dismissing the Levels intro on its last slide")
+    static let levelsIntroInfoAccessibility = NSLocalizedString("levels_intro_info_accessibility", comment: "Accessibility label for the button that reopens the Levels intro")
+
     // Create memorama sheet
     static let createTitle = NSLocalizedString("menu_create_title", comment: "Sheet title for creating a new memorama")
     static let createName = NSLocalizedString("menu_create_name_label", comment: "Label for memorama name field")
