@@ -1,0 +1,8 @@
+Le mode Niveaux est là.
+
+• Niveaux infinis — terminez-en un pour débloquer le suivant. Les plateaux s'agrandissent et le chrono se resserre.
+• Notation par étoiles — terminez vite et sans faute pour gagner jusqu'à 3 étoiles par niveau, et rejouez n'importe quel niveau pour améliorer votre score.
+• Bonus — dépensez vos étoiles en cours de partie : temps supplémentaire, aperçu du plateau, chrono gelé ou paire offerte.
+• Vies et erreurs — vous avez 4 vies par jour, et chaque niveau n'autorise qu'un nombre limité d'erreurs. À court ? Regardez une pub ou dépensez des étoiles pour continuer.
+
+Ainsi que des corrections et des finitions dans toute l'app.

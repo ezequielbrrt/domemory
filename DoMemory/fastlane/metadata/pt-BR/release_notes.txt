@@ -1,0 +1,8 @@
+O modo Níveis chegou.
+
+• Níveis infinitos — complete um para desbloquear o próximo. Os tabuleiros crescem e o relógio aperta.
+• Classificação por estrelas — termine rápido e sem erros para ganhar até 3 estrelas por nível, e rejogue qualquer nível para melhorar sua pontuação.
+• Power-ups — gaste suas estrelas durante a partida em tempo extra, uma espiada no tabuleiro, relógio congelado ou um par grátis.
+• Vidas e erros — você recebe 4 vidas por dia, e cada nível permite apenas um número limitado de erros. Acabou? Veja um anúncio ou gaste estrelas para continuar.
+
+Além de correções e ajustes em todo o app.

@@ -1,0 +1,8 @@
+Ya está aquí el modo Niveles.
+
+• Niveles infinitos: supera uno para desbloquear el siguiente. Los tableros crecen y el reloj aprieta más.
+• Calificación por estrellas: termina rápido y sin fallos para ganar hasta 3 estrellas por nivel, y repite cualquier nivel para mejorar tu puntuación.
+• Potenciadores: gasta tus estrellas durante la partida en tiempo extra, un vistazo al tablero, congelar el reloj o un par gratis.
+• Vidas y errores: tienes 4 vidas al día y cada nivel permite un número limitado de fallos. ¿Se te acabaron? Mira un anuncio o gasta estrellas para seguir.
+
+Además, correcciones y mejoras en toda la app.
