@@ -214,3 +214,15 @@
 "levels_forgive_ad_format" = "%d गलतियाँ माफ़ करने के लिए विज्ञापन देखें";
 "levels_forgive_stars_format" = "%1$d गलतियाँ माफ़ करें — %2$d";
 "levels_mistakes_remaining_format" = "%2$d में से %1$d गलतियाँ";
+
+/* Levels intro */
+"levels_intro_progress_title" = "अनंत स्तर";
+"levels_intro_progress_subtitle" = "अगला स्तर खोलने के लिए मौजूदा स्तर पूरा करें। बोर्ड बड़े होते जाते हैं और समय कम — हमेशा एक और स्तर तैयार रहता है।";
+"levels_intro_stars_title" = "सितारे कमाएँ";
+"levels_intro_stars_subtitle" = "तेज़ी से और बिना गलती पूरा करें और हर स्तर पर 3 तक सितारे कमाएँ, फिर उन्हें पावर-अप, अतिरिक्त जीवन या स्तर छोड़ने पर खर्च करें।";
+"levels_intro_lives_title" = "जीवन रोज़ भरते हैं";
+"levels_intro_lives_subtitle" = "आपको हर दिन %d जीवन मिलते हैं और हर हार पर एक कम हो जाता है। जीवन खत्म? विज्ञापन देखें या सितारे खर्च करें।";
+"levels_intro_mistakes_title" = "गलतियों का ध्यान रखें";
+"levels_intro_mistakes_subtitle" = "हर स्तर में सीमित गलतियाँ ही चलती हैं। सीमा पर पहुँचते ही खेल खत्म — लेकिन आप गलतियाँ माफ़ करके जारी रख सकते हैं।";
+"levels_intro_done" = "समझ गया";
+"levels_intro_info_accessibility" = "स्तर कैसे काम करते हैं";

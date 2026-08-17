@@ -214,3 +214,15 @@
 "levels_forgive_ad_format" = "Watch ad to forgive %d mistakes";
 "levels_forgive_stars_format" = "Forgive %1$d mistakes — %2$d";
 "levels_mistakes_remaining_format" = "%1$d of %2$d mistakes used";
+
+/* Levels intro */
+"levels_intro_progress_title" = "Endless Levels";
+"levels_intro_progress_subtitle" = "Clear a level to unlock the next. Boards keep growing and the clock keeps tightening — there's always one more waiting.";
+"levels_intro_stars_title" = "Earn Stars";
+"levels_intro_stars_subtitle" = "Finish fast and clean to earn up to 3 stars a level, then spend them on power-ups, extra lives, or skipping a level you're stuck on.";
+"levels_intro_lives_title" = "Lives Refill Daily";
+"levels_intro_lives_subtitle" = "You get %d lives a day and lose one whenever a level beats you. Out of lives? Watch an ad or spend stars to keep going.";
+"levels_intro_mistakes_title" = "Mind Your Mistakes";
+"levels_intro_mistakes_subtitle" = "Each level allows only so many wrong matches. Hit the limit and the run ends — but you can forgive mistakes and carry on.";
+"levels_intro_done" = "Got It";
+"levels_intro_info_accessibility" = "How Levels works";

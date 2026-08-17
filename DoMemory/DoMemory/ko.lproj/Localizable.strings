@@ -214,3 +214,15 @@
 "levels_forgive_ad_format" = "광고 보고 실수 %d회 취소";
 "levels_forgive_stars_format" = "실수 %1$d회 취소 — %2$d";
 "levels_mistakes_remaining_format" = "실수 %1$d / %2$d";
+
+/* Levels intro */
+"levels_intro_progress_title" = "끝없는 레벨";
+"levels_intro_progress_subtitle" = "레벨을 클리어하면 다음 레벨이 열립니다. 판은 커지고 시간은 촉박해지며, 다음 레벨이 항상 기다립니다.";
+"levels_intro_stars_title" = "별 모으기";
+"levels_intro_stars_subtitle" = "빠르고 실수 없이 끝내면 레벨당 최대 3개의 별을 얻습니다. 파워업, 추가 목숨, 레벨 건너뛰기에 사용하세요.";
+"levels_intro_lives_title" = "목숨은 매일 충전";
+"levels_intro_lives_subtitle" = "하루에 %d개의 목숨을 받고, 레벨에 질 때마다 하나씩 줄어듭니다. 다 떨어지면 광고를 보거나 별을 써서 계속하세요.";
+"levels_intro_mistakes_title" = "실수에 주의하세요";
+"levels_intro_mistakes_subtitle" = "레벨마다 허용되는 실수 횟수가 정해져 있습니다. 한도에 도달하면 끝나지만, 실수를 취소하고 이어갈 수 있습니다.";
+"levels_intro_done" = "확인";
+"levels_intro_info_accessibility" = "레벨 이용 방법";

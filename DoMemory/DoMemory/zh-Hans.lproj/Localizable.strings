@@ -214,3 +214,15 @@
 "levels_forgive_ad_format" = "观看广告抵消 %d 次错误";
 "levels_forgive_stars_format" = "抵消 %1$d 次错误 — %2$d";
 "levels_mistakes_remaining_format" = "已用错误 %1$d / %2$d";
+
+/* Levels intro */
+"levels_intro_progress_title" = "无尽关卡";
+"levels_intro_progress_subtitle" = "通关后即可解锁下一关。牌面越来越大，时间越来越紧，总有下一关在等着你。";
+"levels_intro_stars_title" = "赚取星星";
+"levels_intro_stars_subtitle" = "又快又准地通关，每关最多可得 3 颗星。星星可用于道具、额外生命，或跳过卡住的关卡。";
+"levels_intro_lives_title" = "生命每日恢复";
+"levels_intro_lives_subtitle" = "每天获得 %d 个生命，每输一关消耗一个。用完了？观看广告或花费星星即可继续。";
+"levels_intro_mistakes_title" = "小心失误";
+"levels_intro_mistakes_subtitle" = "每关允许的失误次数有限。达到上限本轮就结束了——但你可以抵消失误后继续。";
+"levels_intro_done" = "知道了";
+"levels_intro_info_accessibility" = "关卡玩法说明";

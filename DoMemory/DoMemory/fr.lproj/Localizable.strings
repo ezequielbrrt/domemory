@@ -214,3 +214,15 @@
 "levels_forgive_ad_format" = "Voir une pub pour effacer %d erreurs";
 "levels_forgive_stars_format" = "Effacer %1$d erreurs — %2$d";
 "levels_mistakes_remaining_format" = "%1$d erreurs sur %2$d utilisées";
+
+/* Levels intro */
+"levels_intro_progress_title" = "Niveaux Infinis";
+"levels_intro_progress_subtitle" = "Terminez un niveau pour débloquer le suivant. Les plateaux s'agrandissent et le chrono se resserre : il y en a toujours un de plus.";
+"levels_intro_stars_title" = "Gagnez des Étoiles";
+"levels_intro_stars_subtitle" = "Terminez vite et sans faute pour gagner jusqu'à 3 étoiles par niveau, puis dépensez-les en bonus, en vies supplémentaires ou pour passer un niveau.";
+"levels_intro_lives_title" = "Vies Rechargées Chaque Jour";
+"levels_intro_lives_subtitle" = "Vous avez %d vies par jour et en perdez une à chaque échec. Plus de vies ? Regardez une pub ou dépensez des étoiles pour continuer.";
+"levels_intro_mistakes_title" = "Attention aux Erreurs";
+"levels_intro_mistakes_subtitle" = "Chaque niveau n'autorise qu'un nombre limité d'erreurs. À la limite, la partie s'arrête — mais vous pouvez effacer des erreurs et continuer.";
+"levels_intro_done" = "J'ai compris";
+"levels_intro_info_accessibility" = "Fonctionnement des Niveaux";

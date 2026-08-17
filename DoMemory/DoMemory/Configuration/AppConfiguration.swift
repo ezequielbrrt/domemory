@@ -55,6 +55,9 @@ enum AnalyticsEvent {
     case levelSkipped(level: Int, cost: Int, balanceAfter: Int)
     case levelFailedByMistakes(level: Int, maxFailures: Int, timeRemaining: Int)
     case levelMistakesForgiven(level: Int, amount: Int, source: String)
+    case levelsIntroShown(source: String)
+    case levelsIntroCompleted
+    case levelsIntroSkipped
 
     var name: String {
         switch self {
@@ -99,6 +102,9 @@ enum AnalyticsEvent {
         case .levelSkipped: return "level_skipped"
         case .levelFailedByMistakes: return "level_failed_by_mistakes"
         case .levelMistakesForgiven: return "level_mistakes_forgiven"
+        case .levelsIntroShown: return "levels_intro_shown"
+        case .levelsIntroCompleted: return "levels_intro_completed"
+        case .levelsIntroSkipped: return "levels_intro_skipped"
         }
     }
 
@@ -265,6 +271,10 @@ enum AnalyticsEvent {
                 "amount": amount,
                 "source": source
             ]
+        case .levelsIntroShown(let source):
+            return ["source": source]
+        case .levelsIntroCompleted, .levelsIntroSkipped:
+            return [:]
         }
     }
 }

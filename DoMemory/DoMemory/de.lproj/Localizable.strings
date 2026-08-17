@@ -214,3 +214,15 @@
 "levels_forgive_ad_format" = "Video ansehen für %d Fehler weniger";
 "levels_forgive_stars_format" = "%1$d Fehler erlassen — %2$d";
 "levels_mistakes_remaining_format" = "%1$d von %2$d Fehlern verbraucht";
+
+/* Levels intro */
+"levels_intro_progress_title" = "Endlose Level";
+"levels_intro_progress_subtitle" = "Schließe ein Level ab, um das nächste freizuschalten. Die Felder werden größer und die Zeit knapper – es wartet immer noch eins.";
+"levels_intro_stars_title" = "Sterne verdienen";
+"levels_intro_stars_subtitle" = "Beende Level schnell und fehlerfrei für bis zu 3 Sterne und gib sie für Power-ups, zusätzliche Leben oder das Überspringen eines Levels aus.";
+"levels_intro_lives_title" = "Leben füllen sich täglich";
+"levels_intro_lives_subtitle" = "Du bekommst %d Leben pro Tag und verlierst eines, wenn ein Level dich schlägt. Keine Leben mehr? Sieh ein Video an oder gib Sterne aus.";
+"levels_intro_mistakes_title" = "Achte auf Fehler";
+"levels_intro_mistakes_subtitle" = "Jedes Level erlaubt nur eine begrenzte Zahl an Fehlversuchen. Am Limit endet der Versuch – doch du kannst Fehler erlassen und weiterspielen.";
+"levels_intro_done" = "Verstanden";
+"levels_intro_info_accessibility" = "So funktionieren die Level";
