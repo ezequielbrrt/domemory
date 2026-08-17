@@ -73,12 +73,12 @@ enum AdUnitConfiguration {
         case .levelsRewardedLife:
             return configuredUnitID(
                 debugID: "ca-app-pub-3940256099942544/1712485313",
-                releaseID: ""
+                releaseID: "ca-app-pub-4297174845441653/6370619149"
             )
         case .levelsRewardedForgive:
             return configuredUnitID(
                 debugID: "ca-app-pub-3940256099942544/1712485313",
-                releaseID: ""
+                releaseID: "ca-app-pub-4297174845441653/9605593478"
             )
         case .homeBanner, .gameBanner, .gameFinishedInterstitial, .appOpen, .multiplayerFinishedNative:
             return nil
