@@ -226,3 +226,13 @@
 "levels_intro_mistakes_subtitle" = "每关允许的失误次数有限。达到上限本轮就结束了——但你可以抵消失误后继续。";
 "levels_intro_done" = "知道了";
 "levels_intro_info_accessibility" = "关卡玩法说明";
+
+/* What's New v4.0.0 */
+"whats_new_levels_title" = "关卡";
+"whats_new_levels_description" = "全新的无尽模式。通关后解锁下一关，牌面越来越大，时间越来越紧。";
+"whats_new_stars_title" = "星级评价";
+"whats_new_stars_description" = "又快又准地通关，每关最多可得 3 颗星。随时重玩任意关卡来刷新成绩。";
+"whats_new_powerups_title" = "道具";
+"whats_new_powerups_description" = "在游戏中花费星星：延长时间、偷看牌面、冻结时钟，或免费翻开一对。";
+"whats_new_lives_title" = "生命与失误";
+"whats_new_lives_description" = "每天 4 个生命，每关允许的失误次数也有限。用完了？观看广告或花费星星即可继续。";

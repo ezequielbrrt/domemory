@@ -226,3 +226,13 @@
 "levels_intro_mistakes_subtitle" = "레벨마다 허용되는 실수 횟수가 정해져 있습니다. 한도에 도달하면 끝나지만, 실수를 취소하고 이어갈 수 있습니다.";
 "levels_intro_done" = "확인";
 "levels_intro_info_accessibility" = "레벨 이용 방법";
+
+/* What's New v4.0.0 */
+"whats_new_levels_title" = "레벨";
+"whats_new_levels_description" = "완전히 새로운 무한 모드. 레벨을 클리어하면 다음이 열리고, 판은 커지고 시간은 촉박해집니다.";
+"whats_new_stars_title" = "별 평가";
+"whats_new_stars_description" = "빠르고 실수 없이 끝내면 레벨마다 최대 3개의 별을 얻습니다. 언제든 다시 도전해 점수를 올리세요.";
+"whats_new_powerups_title" = "파워업";
+"whats_new_powerups_description" = "게임 중 별을 사용해 시간 추가, 판 미리보기, 시간 정지, 무료 짝 공개를 쓸 수 있습니다.";
+"whats_new_lives_title" = "목숨과 실수";
+"whats_new_lives_description" = "하루 4개의 목숨이 주어지고, 레벨마다 허용되는 실수도 정해져 있습니다. 다 떨어지면 광고를 보거나 별을 쓰세요.";

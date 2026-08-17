@@ -226,3 +226,13 @@
 "levels_intro_mistakes_subtitle" = "Ogni livello concede solo un certo numero di errori. Al limite la partita finisce, ma puoi cancellare errori e proseguire.";
 "levels_intro_done" = "Ho capito";
 "levels_intro_info_accessibility" = "Come funzionano i Livelli";
+
+/* What's New v4.0.0 */
+"whats_new_levels_title" = "Livelli";
+"whats_new_levels_description" = "Una modalità infinita tutta nuova. Completa un livello per sbloccare il successivo: i tabelloni crescono e il tempo si stringe.";
+"whats_new_stars_title" = "Valutazione a Stelle";
+"whats_new_stars_description" = "Finisci in fretta e senza errori per ottenere fino a 3 stelle a livello. Rigioca qualsiasi livello per migliorare il punteggio.";
+"whats_new_powerups_title" = "Potenziamenti";
+"whats_new_powerups_description" = "Spendi le stelle durante la partita per tempo extra, uno sguardo al tabellone, il tempo congelato o una coppia gratis.";
+"whats_new_lives_title" = "Vite ed Errori";
+"whats_new_lives_description" = "Hai 4 vite al giorno e ogni livello concede solo un certo numero di errori. Finiti? Guarda un annuncio o spendi stelle per continuare.";

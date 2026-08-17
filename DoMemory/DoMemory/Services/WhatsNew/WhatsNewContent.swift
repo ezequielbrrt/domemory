@@ -26,29 +26,24 @@ extension WhatsNew {
             title: Strings.whatsNewTitle,
             items: [
                 .init(
-                    symbol: "square.grid.3x3.fill",
-                    title: Strings.whatsNewGamesTitle,
-                    description: Strings.whatsNewGamesDescription
+                    symbol: "trophy.fill",
+                    title: Strings.whatsNewLevelsTitle,
+                    description: Strings.whatsNewLevelsDescription
                 ),
                 .init(
-                    symbol: "person.2.fill",
-                    title: Strings.whatsNewMultiplayerTitle,
-                    description: Strings.whatsNewMultiplayerDescription
+                    symbol: "star.fill",
+                    title: Strings.whatsNewStarsTitle,
+                    description: Strings.whatsNewStarsDescription
                 ),
                 .init(
-                    symbol: "bell.badge",
-                    title: Strings.whatsNewRemindersTitle,
-                    description: Strings.whatsNewRemindersDescription
+                    symbol: "wand.and.stars",
+                    title: Strings.whatsNewPowerUpsTitle,
+                    description: Strings.whatsNewPowerUpsDescription
                 ),
                 .init(
-                    symbol: "circle.lefthalf.filled",
-                    title: Strings.whatsNewThemeTitle,
-                    description: Strings.whatsNewThemeDescription
-                ),
-                .init(
-                    symbol: "lightbulb",
-                    title: Strings.whatsNewHintTitle,
-                    description: Strings.whatsNewHintDescription
+                    symbol: "heart.fill",
+                    title: Strings.whatsNewLivesTitle,
+                    description: Strings.whatsNewLivesDescription
                 ),
             ],
             primaryButtonTitle: Strings.whatsNewButton

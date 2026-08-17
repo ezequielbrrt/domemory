@@ -256,4 +256,14 @@ enum Strings {
     // What's New sheet (v3.1.0)
     static let whatsNewGamesTitle = NSLocalizedString("whats_new_games_title", comment: "New games feature title in What's New")
     static let whatsNewGamesDescription = NSLocalizedString("whats_new_games_description", comment: "New games feature description in What's New")
+
+    // What's New sheet (v4.0.0)
+    static let whatsNewLevelsTitle = NSLocalizedString("whats_new_levels_title", comment: "Levels mode title in What's New")
+    static let whatsNewLevelsDescription = NSLocalizedString("whats_new_levels_description", comment: "Levels mode description in What's New")
+    static let whatsNewStarsTitle = NSLocalizedString("whats_new_stars_title", comment: "Star rating title in What's New")
+    static let whatsNewStarsDescription = NSLocalizedString("whats_new_stars_description", comment: "Star rating description in What's New")
+    static let whatsNewPowerUpsTitle = NSLocalizedString("whats_new_powerups_title", comment: "Power-ups title in What's New")
+    static let whatsNewPowerUpsDescription = NSLocalizedString("whats_new_powerups_description", comment: "Power-ups description in What's New")
+    static let whatsNewLivesTitle = NSLocalizedString("whats_new_lives_title", comment: "Daily lives and mistake budget title in What's New")
+    static let whatsNewLivesDescription = NSLocalizedString("whats_new_lives_description", comment: "Daily lives and mistake budget description in What's New")
 }

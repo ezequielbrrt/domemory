@@ -226,3 +226,13 @@
 "levels_intro_mistakes_subtitle" = "Jedes Level erlaubt nur eine begrenzte Zahl an Fehlversuchen. Am Limit endet der Versuch – doch du kannst Fehler erlassen und weiterspielen.";
 "levels_intro_done" = "Verstanden";
 "levels_intro_info_accessibility" = "So funktionieren die Level";
+
+/* What's New v4.0.0 */
+"whats_new_levels_title" = "Level";
+"whats_new_levels_description" = "Ein völlig neuer Endlosmodus. Schließe ein Level ab, um das nächste freizuschalten – die Felder werden größer, die Zeit knapper.";
+"whats_new_stars_title" = "Sternewertung";
+"whats_new_stars_description" = "Beende jedes Level schnell und fehlerfrei für bis zu 3 Sterne. Wiederhole Level jederzeit, um deine Wertung zu verbessern.";
+"whats_new_powerups_title" = "Power-ups";
+"whats_new_powerups_description" = "Gib deine Sterne im Spiel für Extrazeit, einen Blick aufs Feld, eine eingefrorene Uhr oder ein Gratis-Paar aus.";
+"whats_new_lives_title" = "Leben & Fehler";
+"whats_new_lives_description" = "Du bekommst 4 Leben pro Tag, und jedes Level erlaubt nur eine begrenzte Zahl an Fehlern. Alles aufgebraucht? Sieh ein Video an oder gib Sterne aus.";
