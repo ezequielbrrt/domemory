@@ -143,6 +143,9 @@ enum Strings {
     static func forgiveStarsFormat(_ amount: Int, _ cost: Int) -> String {
         String(format: NSLocalizedString("levels_forgive_stars_format", comment: "Star-priced action forgiving mistakes, %1$d = mistakes forgiven, %2$d = star cost"), amount, cost)
     }
+    static func timerFrozenFormat(_ seconds: Int) -> String {
+        String(format: NSLocalizedString("levels_timer_frozen_format", comment: "Accessibility label while the Freeze power-up holds the clock, %d = seconds left"), seconds)
+    }
     static func mistakesRemainingFormat(_ used: Int, _ total: Int) -> String {
         String(format: NSLocalizedString("levels_mistakes_remaining_format", comment: "Accessibility label, %1$d = mistakes made, %2$d = mistakes allowed"), used, total)
     }

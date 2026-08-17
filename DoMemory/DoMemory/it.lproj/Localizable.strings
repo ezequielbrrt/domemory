@@ -236,3 +236,4 @@
 "whats_new_powerups_description" = "Spendi le stelle durante la partita per tempo extra, uno sguardo al tabellone, il tempo congelato o una coppia gratis.";
 "whats_new_lives_title" = "Vite ed Errori";
 "whats_new_lives_description" = "Hai 4 vite al giorno e ogni livello concede solo un certo numero di errori. Finiti? Guarda un annuncio o spendi stelle per continuare.";
+"levels_timer_frozen_format" = "Tempo congelato, %d secondi rimasti";

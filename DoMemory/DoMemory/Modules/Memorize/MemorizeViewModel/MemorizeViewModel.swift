@@ -76,7 +76,14 @@ class MemorizeViewModel {
     /// While set and in the future, the countdown holds. Kept as a deadline
     /// rather than cancelling `timerTask`, so freezing doesn't tear down the
     /// card flip-back scheduling the way `stopTimer()` would.
-    private var frozenUntil: Date?
+    private var frozenUntil: Date? {
+        didSet { isFrozen = frozenUntil != nil }
+    }
+    /// Mirrors `frozenUntil` for the HUD. A separate observable flag rather than
+    /// a computed property because nothing else changes while the clock is held
+    /// — `timeRemaining` stops ticking — so the view would have no signal to
+    /// re-render when the freeze starts or expires.
+    private(set) var isFrozen = false
     private var hasLoggedGameFinished = false
     private var gameStartedAt: Date?
     private var lastRewardedAdDate: Date?
@@ -340,7 +347,10 @@ class MemorizeViewModel {
         showQuitView.toggle()
     }
 
-    private func logGameFinishedIfNeeded(result: String) {
+    /// - Parameter allowInterstitial: pass `false` when the player has just
+    ///   paid for the outcome. Charging 15★ to skip a level and then serving an
+    ///   ad on the way out is the worst moment in the app to show one.
+    private func logGameFinishedIfNeeded(result: String, allowInterstitial: Bool = true) {
         guard !hasLoggedGameFinished else { return }
         hasLoggedGameFinished = true
         let didWin = result == "win"
@@ -394,7 +404,7 @@ class MemorizeViewModel {
                 isCustom: memorama?.id.hasPrefix("custom_") ?? false
             )
         )
-        if shouldPresentCompletionInterstitial {
+        if allowInterstitial, shouldPresentCompletionInterstitial {
             let frequency = interstitialFrequency()
             Task { @MainActor in
                 AdsService.shared.presentInterstitialEvery(frequency, for: .gameFinishedInterstitial)
@@ -635,7 +645,7 @@ extension MemorizeViewModel {
         showSkipLevelConfirm = false
         // The attempt still counts as a loss — skipping buys the unlock, not a
         // clean record. Idempotent, so this is a no-op if it already fired.
-        logGameFinishedIfNeeded(result: "lose")
+        logGameFinishedIfNeeded(result: "lose", allowInterstitial: false)
         LevelProgressService.shared.skipLevel(levelNumber)
         AnalyticsService.log(
             .levelSkipped(level: levelNumber, cost: LevelPowerUp.skipLevelCost, balanceAfter: starBalance)

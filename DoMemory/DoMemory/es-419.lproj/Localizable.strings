@@ -236,3 +236,4 @@
 "whats_new_powerups_description" = "Gasta tus estrellas durante la partida en tiempo extra, un vistazo al tablero, congelar el reloj o un par gratis.";
 "whats_new_lives_title" = "Vidas y Errores";
 "whats_new_lives_description" = "Tienes 4 vidas al día y cada nivel permite un número limitado de fallos. ¿Se te acabaron? Mira un anuncio o gasta estrellas para seguir.";
+"levels_timer_frozen_format" = "Reloj congelado, quedan %d segundos";

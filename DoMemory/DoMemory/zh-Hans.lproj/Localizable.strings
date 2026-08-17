@@ -236,3 +236,4 @@
 "whats_new_powerups_description" = "在游戏中花费星星：延长时间、偷看牌面、冻结时钟，或免费翻开一对。";
 "whats_new_lives_title" = "生命与失误";
 "whats_new_lives_description" = "每天 4 个生命，每关允许的失误次数也有限。用完了？观看广告或花费星星即可继续。";
+"levels_timer_frozen_format" = "时间已冻结，剩余 %d 秒";

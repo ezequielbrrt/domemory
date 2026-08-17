@@ -236,3 +236,4 @@
 "whats_new_powerups_description" = "Dépensez vos étoiles en cours de partie : temps supplémentaire, aperçu du plateau, chrono gelé ou paire offerte.";
 "whats_new_lives_title" = "Vies et Erreurs";
 "whats_new_lives_description" = "Vous avez 4 vies par jour, et chaque niveau n'autorise qu'un nombre limité d'erreurs. À court ? Regardez une pub ou dépensez des étoiles.";
+"levels_timer_frozen_format" = "Chrono gelé, %d secondes restantes";

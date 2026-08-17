@@ -354,6 +354,7 @@ extension Color {
     static var secundaryColor: Color  { dynamicColor(light: (255, 99, 64), dark: (255, 134, 109)) }
     static var easyGreen: Color       { dynamicColor(light: (40, 182, 126), dark: (73, 214, 151)) }
     static var hardAmber: Color       { dynamicColor(light: (245, 166, 35), dark: (255, 193, 87)) }
+    static var freezeBlue: Color      { dynamicColor(light: (0, 145, 199), dark: (94, 200, 245)) }
 
     static var appBackground: Color   { dynamicColor(light: (247, 243, 237), dark: (17, 19, 31)) }
     static var surfacePrimary: Color  { dynamicColor(light: (255, 255, 255), dark: (30, 34, 52)) }

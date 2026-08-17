@@ -236,3 +236,4 @@
 "whats_new_powerups_description" = "Gib deine Sterne im Spiel für Extrazeit, einen Blick aufs Feld, eine eingefrorene Uhr oder ein Gratis-Paar aus.";
 "whats_new_lives_title" = "Leben & Fehler";
 "whats_new_lives_description" = "Du bekommst 4 Leben pro Tag, und jedes Level erlaubt nur eine begrenzte Zahl an Fehlern. Alles aufgebraucht? Sieh ein Video an oder gib Sterne aus.";
+"levels_timer_frozen_format" = "Zeit eingefroren, noch %d Sekunden";

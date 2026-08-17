@@ -23,6 +23,15 @@ struct ContentView: View {
                                 whatsNewManager.markSeen()
                             }
                         }
+                        // The app-open ad rides `didBecomeActive`, which fires
+                        // again once the ATT prompt is dismissed — right when
+                        // the release announcement is on screen.
+                        .onAppear {
+                            AdsService.shared.setFullScreenAdsSuppressed(whatsNewManager.shouldShow)
+                        }
+                        .onChange(of: whatsNewManager.shouldShow) { _, isShowing in
+                            AdsService.shared.setFullScreenAdsSuppressed(isShowing)
+                        }
                 } else {
                     HomeView(onDidComplete: { hasOnboarded = true })
                 }
