@@ -60,6 +60,11 @@ enum LevelPowerUp: String, CaseIterable, Identifiable {
     static let forgiveCost = 8
     /// How many mistakes a rescue refunds, from an ad or from stars.
     static let forgiveAmount = 3
+    /// Seconds the board is guaranteed to have left after a forgive rescue.
+    /// Without a floor the rescue is worthless when the budget runs out late:
+    /// at 0 seconds the countdown can't restart at all, and at 3 seconds the
+    /// player loses again before they can use the refunded mistakes.
+    static let forgiveMinimumSeconds = 15
     /// Star price of skipping a level you're stuck on.
     static let skipLevelCost = 15
 }

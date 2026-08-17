@@ -18,6 +18,10 @@ struct LoseModal: View {
         listener?.loseReason == .tooManyMistakes
     }
 
+    private var showSkipConfirm: Bool {
+        listener?.showSkipLevelConfirm == true
+    }
+
     var body: some View {
         ZStack {
             Color.overlayBackdrop
@@ -135,9 +139,13 @@ struct LoseModal: View {
                     .shadow(color: Color.shadowColor, radius: 24, x: 0, y: 8)
             )
             .padding(.horizontal, 32)
-            .opacity(listener?.showSkipLevelConfirm == true ? 0 : 1)
+            .opacity(showSkipConfirm ? 0 : 1)
+            // Opacity alone still accepts taps: the confirm card is shorter
+            // than this one, so the invisible Menu / Try again buttons would
+            // stay live in the gap around it.
+            .allowsHitTesting(!showSkipConfirm)
 
-            if listener?.showSkipLevelConfirm == true {
+            if showSkipConfirm {
                 skipConfirmCard
             }
         }

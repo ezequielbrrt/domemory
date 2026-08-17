@@ -195,6 +195,10 @@ class MemorizeViewModel {
             try? await Task.sleep(for: .seconds(0.8))
             guard !Task.isCancelled, let self else { return }
             self.mistakeLossTask = nil
+            // The clock can reach zero inside the delay above. Whichever
+            // failure landed first is the real one, so never overwrite it —
+            // otherwise a timeout would be offered the mistake rescue.
+            guard self.loseReason == nil else { return }
             self.stopTimer()
             self.loseReason = .tooManyMistakes
             if let levelNumber = self.levelNumber {
@@ -606,6 +610,10 @@ extension MemorizeViewModel {
         guard let levelNumber else { return }
         model.forgiveFailures(count)
         loseReason = nil
+        // Guarantee a playable clock. `startTimer()`'s loop exits immediately
+        // when `timeRemaining` is already 0, which would resume the board with
+        // a permanently frozen countdown and no way to lose.
+        timeRemaining = max(timeRemaining, LevelPowerUp.forgiveMinimumSeconds)
         startTimer()
         AnalyticsService.log(
             .levelMistakesForgiven(level: levelNumber, amount: count, source: source)

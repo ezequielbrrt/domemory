@@ -82,6 +82,7 @@
 		58772EE17414F7DC80932232 /* Promises.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DF319D3122D1C039FCA5F97 /* Promises.framework */; };
 		58D05942EE5FFA546A64781F /* FeatureIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E0A0D82FBC36B03F6822F37 /* FeatureIntroView.swift */; };
 		5D9C916C021AA13A4C672D99 /* GoogleUtilities_GoogleUtilities_UserDefaults.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E60241E5697D981A2369DECD /* GoogleUtilities_GoogleUtilities_UserDefaults.bundle */; };
+		5E14A96E1DEEB582EB116534 /* MemorizeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9DE9F32CAF0B87850C08DC /* MemorizeViewModelTests.swift */; };
 		66664DBCD421345596F278E4 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469110C3F688E6F797346CE5 /* HomeView.swift */; };
 		66874457ACEE73B1C8BCFDA8 /* InviteLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B2F265B2B17D94E65431C3 /* InviteLink.swift */; };
 		6976BE00BC3CC415C28F5B03 /* FirebaseSessionsObjC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C49A16BA60A33A5D4DD667B8 /* FirebaseSessionsObjC.framework */; };
@@ -347,6 +348,7 @@
 		577712FCA1A461D36249B92F /* GoogleUtilities_GoogleUtilities_Reachability.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GoogleUtilities_GoogleUtilities_Reachability.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		577FC55F2643D836ED7CFE39 /* StarWalletServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarWalletServiceTests.swift; sourceTree = "<group>"; };
 		57FF9A59F47F36C877AF60AC /* DailyChallengeShared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeShared.swift; sourceTree = "<group>"; };
+		5A9DE9F32CAF0B87850C08DC /* MemorizeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorizeViewModelTests.swift; sourceTree = "<group>"; };
 		5AC55ECA7801E962F5367E1C /* GoogleUtilities_NSData.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GoogleUtilities_NSData.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5BE617ACCD63DEDF2ED7AC55 /* FirebaseCoreExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseCoreExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5CFB9BF81FD04DA3BEB11B60 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -1177,6 +1179,7 @@
 				C990444D7670DF53DC051D34 /* LevelCurveTests.swift */,
 				0309EC51A91F7E6966E98006 /* LevelLivesServiceTests.swift */,
 				D322E3D203B117CAFBE372BF /* LevelProgressServiceTests.swift */,
+				5A9DE9F32CAF0B87850C08DC /* MemorizeViewModelTests.swift */,
 				F6ACF9294A68A492E545DA60 /* MemoryGameTests.swift */,
 				577FC55F2643D836ED7CFE39 /* StarWalletServiceTests.swift */,
 			);
@@ -1424,6 +1427,7 @@
 				1092E9B801AD6E9D2F2B0BB9 /* LevelCurveTests.swift in Sources */,
 				6B292345B7B5712A1F0E6515 /* LevelLivesServiceTests.swift in Sources */,
 				099C8CCE02DF4A8AE15202D6 /* LevelProgressServiceTests.swift in Sources */,
+				5E14A96E1DEEB582EB116534 /* MemorizeViewModelTests.swift in Sources */,
 				8A6E24BD38735E13906B3029 /* MemoryGameTests.swift in Sources */,
 				1C9C667E21A1FE8857874A34 /* StarWalletServiceTests.swift in Sources */,
 			);
