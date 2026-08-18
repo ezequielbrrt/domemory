@@ -248,10 +248,17 @@ private extension MultiplayerRoomViewModel {
         }
         wasCurrentUserTurn = isMyTurn
 
-        if room.status == .finished, !hasFiredFinishHaptic {
-            hasFiredFinishHaptic = true
-            let won = room.winnerId == MultiplayerService.currentUserID
-            HapticsService.shared.fire(won ? .success : .failure)
+        if room.status == .finished {
+            if !hasFiredFinishHaptic {
+                hasFiredFinishHaptic = true
+                let won = room.winnerId == MultiplayerService.currentUserID
+                HapticsService.shared.fire(won ? .success : .failure)
+            }
+        } else {
+            // restartGame puts the same room back to .playing, and this view
+            // model outlives the rematch — without clearing the latch here,
+            // every game after the first would finish silently.
+            hasFiredFinishHaptic = false
         }
     }
 

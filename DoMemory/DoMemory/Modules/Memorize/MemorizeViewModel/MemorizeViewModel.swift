@@ -194,8 +194,13 @@ class MemorizeViewModel {
         // changing the pure model's signature.
         let failuresBefore = model.failedTries
         let matchedBefore = model.cards.filter(\.isMatched).count
+        let faceUpBefore = model.cards.filter(\.isFaceUp).count
         model.choose(card: card)
-        fireChooseHaptic(failuresBefore: failuresBefore, matchedBefore: matchedBefore)
+        fireChooseHaptic(
+            failuresBefore: failuresBefore,
+            matchedBefore: matchedBefore,
+            faceUpBefore: faceUpBefore
+        )
         if AnalyticsService.shouldSample(AnalyticsService.cardTapSampleRate) {
             AnalyticsService.log(
                 .cardTapped(
@@ -210,8 +215,16 @@ class MemorizeViewModel {
         scheduleMistakeLossIfNeeded()
     }
 
-    private func fireChooseHaptic(failuresBefore: Int, matchedBefore: Int) {
+    private func fireChooseHaptic(failuresBefore: Int, matchedBefore: Int, faceUpBefore: Int) {
         let matchedNow = model.cards.filter(\.isMatched).count
+        // MemoryGame.choose ignores taps on cards that are already face-up or
+        // already matched — both reachable, since the mismatched pair stays
+        // tappable for the 2s flip-back delay. Nothing moved, so nothing is
+        // felt; otherwise a dead tap buzzes as though a card turned over.
+        guard model.failedTries > failuresBefore
+                || matchedNow > matchedBefore
+                || model.cards.filter(\.isFaceUp).count != faceUpBefore else { return }
+
         if model.failedTries > failuresBefore {
             HapticsService.shared.fire(.mismatch)
         } else if matchedNow > matchedBefore {
@@ -614,8 +627,9 @@ extension MemorizeViewModel {
 
 // MARK: - Star purchases from the lose modal
 extension MemorizeViewModel {
-    /// Not gated on the Remove-Ads entitlement: purchasers still spend lives,
-    /// and with no rewarded ad available to them this is their only top-up.
+    /// Not gated on the Remove-Ads entitlement: purchasers spend lives like
+    /// everyone else, and Remove Ads suppresses involuntary advertising only,
+    /// so both top-ups — this and the rewarded ad — stay open to them.
     var canBuyLifeWithStars: Bool {
         levelNumber != nil && starBalance >= LevelPowerUp.lifeCost
     }

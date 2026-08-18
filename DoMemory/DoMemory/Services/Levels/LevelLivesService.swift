@@ -36,9 +36,10 @@ final class LevelLivesService {
     }
 
     /// The daily budget applies to everyone, including Remove-Ads purchasers:
-    /// losing has to cost something or the levels have no stakes. Purchasers
-    /// have no rewarded-ad refill, so the star purchase is their top-up —
-    /// see `canBuyLifeWithStars`, which is deliberately not entitlement-gated.
+    /// losing has to cost something or the levels have no stakes. Both refills
+    /// stay open to them — Remove Ads suppresses involuntary advertising only,
+    /// so the rewarded ad is still offered (see `suppressesInvoluntaryAds`),
+    /// and `canBuyLifeWithStars` is deliberately not entitlement-gated either.
     func hasLivesRemaining(for date: Date = Date()) -> Bool {
         livesRemaining(for: date) > 0
     }
