@@ -49,7 +49,14 @@ class MemorizeViewModel {
     var showSkipLevelConfirm = false
     /// Set when the game has been lost; nil while it's still playable. Replaces
     /// the old `timeRemaining == 0` check so a second lose reason can exist.
-    private(set) var loseReason: LoseReason?
+    private(set) var loseReason: LoseReason? {
+        didSet {
+            // Only the transition into a loss is felt. This is also assigned
+            // nil on every restart and rescue, which must stay silent.
+            guard loseReason != nil, oldValue == nil else { return }
+            HapticsService.shared.fire(.failure)
+        }
+    }
     var hasLost: Bool { loseReason != nil }
     /// Mistake budget for the current level; nil outside of level play.
     var maxFailures: Int? {
@@ -167,8 +174,13 @@ class MemorizeViewModel {
     func getIfAllAreMatched() {
         let count = model.cards.count
         let matchedCount = self.model.cards.filter { $0.isMatched }
+        // Called on every tap, so the win only counts on the transition.
+        let wasShowing = showWinView
         showWinView = count == matchedCount.count
         if showWinView {
+            if !wasShowing {
+                HapticsService.shared.fire(.success)
+            }
             logGameFinishedIfNeeded(result: "win")
         }
     }
@@ -177,7 +189,13 @@ class MemorizeViewModel {
     func choose(card: MemoryGame<String>.Card) {
         flipBackTask?.cancel()
         flipBackTask = nil
+        // MemoryGame.choose is a value-type mutation that reports nothing, so
+        // the outcome is read from the state either side of it rather than
+        // changing the pure model's signature.
+        let failuresBefore = model.failedTries
+        let matchedBefore = model.cards.filter(\.isMatched).count
         model.choose(card: card)
+        fireChooseHaptic(failuresBefore: failuresBefore, matchedBefore: matchedBefore)
         if AnalyticsService.shouldSample(AnalyticsService.cardTapSampleRate) {
             AnalyticsService.log(
                 .cardTapped(
@@ -190,6 +208,24 @@ class MemorizeViewModel {
         scheduleFlipBackIfNeeded()
         scheduleMatchedHideIfNeeded()
         scheduleMistakeLossIfNeeded()
+    }
+
+    private func fireChooseHaptic(failuresBefore: Int, matchedBefore: Int) {
+        let matchedNow = model.cards.filter(\.isMatched).count
+        if model.failedTries > failuresBefore {
+            HapticsService.shared.fire(.mismatch)
+        } else if matchedNow > matchedBefore {
+            // The final pair is followed within milliseconds by the win
+            // pattern from getIfAllAreMatched. A thud in front of it reads as
+            // a stutter, so the win is left to speak for itself.
+            if matchedNow < model.cards.count {
+                HapticsService.shared.fire(.match)
+            }
+        } else {
+            HapticsService.shared.fire(.cardFlip)
+        }
+        // The next tap is almost always another card.
+        HapticsService.shared.prepare(for: .cardFlip)
     }
 
     /// Ends the level once the mistake budget is spent. Deferred briefly so the
@@ -256,6 +292,7 @@ class MemorizeViewModel {
     // MARK: - Timer
     func startTimer() {
         stopTimer()
+        HapticsService.shared.prepare(for: .cardFlip)
         timerTask = Task { @MainActor [weak self] in
             while let self, !Task.isCancelled, self.timeRemaining > 0 {
                 try? await Task.sleep(for: .seconds(1))
@@ -263,6 +300,8 @@ class MemorizeViewModel {
                 if let frozenUntil = self.frozenUntil {
                     guard Date() >= frozenUntil else { continue }
                     self.frozenUntil = nil
+                    // The clock restarting is easy to miss visually.
+                    HapticsService.shared.fire(.select)
                 }
                 if self.timeRemaining > 0 {
                     self.timeRemaining -= 1
@@ -332,6 +371,7 @@ class MemorizeViewModel {
     }
 
     func tapOnPause() {
+        HapticsService.shared.fire(.tap)
         stopTimer()
         showPauseView.toggle()
         AnalyticsService.log(
@@ -343,6 +383,7 @@ class MemorizeViewModel {
     }
 
     func tapOnQuitPrompt() {
+        HapticsService.shared.fire(.tap)
         stopTimer()
         showQuitView.toggle()
     }
@@ -496,6 +537,7 @@ extension MemorizeViewModel {
                 guard let self else { return }
                 self.lastRewardedAdDate = Date()
                 AnalyticsService.log(.adLifecycle(placement: placement.rawValue, action: "reward_earned"))
+                HapticsService.shared.fire(.reward)
                 reward()
             },
             completion: { [weak self] didEarnReward in
@@ -528,6 +570,7 @@ extension MemorizeViewModel {
     func use(_ powerUp: LevelPowerUp) {
         guard let levelNumber, canAfford(powerUp) else { return }
         guard StarWalletService.shared.spend(powerUp.cost) else { return }
+        HapticsService.shared.fire(.reward)
         starBalance = StarWalletService.shared.balance
 
         switch powerUp {
@@ -571,10 +614,10 @@ extension MemorizeViewModel {
 
 // MARK: - Star purchases from the lose modal
 extension MemorizeViewModel {
+    /// Not gated on the Remove-Ads entitlement: purchasers still spend lives,
+    /// and with no rewarded ad available to them this is their only top-up.
     var canBuyLifeWithStars: Bool {
-        levelNumber != nil
-            && !PurchaseService.shared.hasRemovedAds
-            && starBalance >= LevelPowerUp.lifeCost
+        levelNumber != nil && starBalance >= LevelPowerUp.lifeCost
     }
 
     var canSkipLevelWithStars: Bool {
@@ -584,6 +627,7 @@ extension MemorizeViewModel {
     func tapOnBuyLifeWithStars() {
         guard canBuyLifeWithStars else { return }
         guard StarWalletService.shared.spend(LevelPowerUp.lifeCost) else { return }
+        HapticsService.shared.fire(.reward)
         starBalance = StarWalletService.shared.balance
         levelLivesRemaining = LevelLivesService.shared.addLife()
         AnalyticsService.log(
@@ -601,6 +645,7 @@ extension MemorizeViewModel {
     }
 
     func tapOnWatchAdToForgive() {
+        HapticsService.shared.fire(.tap)
         presentRewardedAd(for: .levelsRewardedForgive) { [weak self] in
             self?.forgiveMistakes(LevelPowerUp.forgiveAmount, source: "ad")
         }
@@ -609,6 +654,7 @@ extension MemorizeViewModel {
     func tapOnForgiveWithStars() {
         guard canForgiveWithStars else { return }
         guard StarWalletService.shared.spend(LevelPowerUp.forgiveCost) else { return }
+        HapticsService.shared.fire(.reward)
         starBalance = StarWalletService.shared.balance
         forgiveMistakes(LevelPowerUp.forgiveAmount, source: "stars")
     }
@@ -631,16 +677,19 @@ extension MemorizeViewModel {
     }
 
     func tapOnSkipLevelPrompt() {
+        HapticsService.shared.fire(.tap)
         showSkipLevelConfirm = true
     }
 
     func tapOnCancelSkipLevel() {
+        HapticsService.shared.fire(.tap)
         showSkipLevelConfirm = false
     }
 
     func tapOnConfirmSkipLevel() {
         guard let levelNumber, canSkipLevelWithStars else { return }
         guard StarWalletService.shared.spend(LevelPowerUp.skipLevelCost) else { return }
+        HapticsService.shared.fire(.reward)
         starBalance = StarWalletService.shared.balance
         showSkipLevelConfirm = false
         // The attempt still counts as a loss — skipping buys the unlock, not a
@@ -660,10 +709,12 @@ extension MemorizeViewModel {
 // MARK: LISTENERS
 extension MemorizeViewModel: PauseModalListener {
     func tapOnGoHome() {
+        HapticsService.shared.fire(.tap)
 
     }
 
     func tapOnResumeGame() {
+        HapticsService.shared.fire(.tap)
         self.showPauseView = false
         AnalyticsService.log(
             .resumeTapped(
@@ -675,6 +726,7 @@ extension MemorizeViewModel: PauseModalListener {
     }
 
     func tapOnReloadGame() {
+        HapticsService.shared.fire(.tap)
         AnalyticsService.log(
             .retryTapped(
                 difficulty: gameDifficulty().rawValue,
@@ -686,6 +738,7 @@ extension MemorizeViewModel: PauseModalListener {
     }
 
     func tapOnRewardedHint() {
+        HapticsService.shared.fire(.tap)
         presentRewardedAd(for: .gameRewardedHint) { [weak self] in
             guard let self else { return }
             self.showPauseView = false
@@ -697,6 +750,7 @@ extension MemorizeViewModel: PauseModalListener {
 
 extension MemorizeViewModel: LoseModalViewModelListener {
     func tapOnTryAgain() {
+        HapticsService.shared.fire(.tap)
         logGameFinishedIfNeeded(result: "lose")
         AnalyticsService.log(
             .retryTapped(
@@ -714,11 +768,13 @@ extension MemorizeViewModel: LoseModalViewModelListener {
     }
 
     func tapOnGoToMenuAfterLose() {
+        HapticsService.shared.fire(.tap)
         logGameFinishedIfNeeded(result: "lose")
         closeView = true
     }
 
     func tapOnRewardedExtraTime() {
+        HapticsService.shared.fire(.tap)
         presentRewardedAd(for: .gameRewardedExtraTime) { [weak self] in
             guard let self else { return }
             self.timeRemaining = max(self.timeRemaining, 0) + 30
@@ -730,6 +786,7 @@ extension MemorizeViewModel: LoseModalViewModelListener {
     }
 
     func tapOnWatchAdForLife() {
+        HapticsService.shared.fire(.tap)
         presentRewardedAd(for: .levelsRewardedLife) { [weak self] in
             guard let self else { return }
             let updated = LevelLivesService.shared.addLife()
@@ -742,11 +799,13 @@ extension MemorizeViewModel: LoseModalViewModelListener {
 
 extension MemorizeViewModel: QuitModalListener {
     func tapOnCancel() {
+        HapticsService.shared.fire(.tap)
         self.showQuitView = false
         self.closeView = false
     }
 
     func tapOnExit() {
+        HapticsService.shared.fire(.tap)
         self.showQuitView = false
         self.closeView = true
         AnalyticsService.log(
@@ -761,6 +820,7 @@ extension MemorizeViewModel: QuitModalListener {
 
 extension MemorizeViewModel: WinModalListener {
     func tapOnContinue() {
+        HapticsService.shared.fire(.tap)
         self.showWinView = false
         self.closeView = true
         Task { @MainActor in
@@ -769,6 +829,7 @@ extension MemorizeViewModel: WinModalListener {
     }
 
     func tapOnNextLevel() {
+        HapticsService.shared.fire(.tap)
         advanceToNextLevel()
     }
 }

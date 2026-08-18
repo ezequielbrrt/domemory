@@ -149,9 +149,7 @@ private struct DifficultyTile: View {
     }
 
     private func trigger() {
-        #if os(iOS)
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        #endif
+        HapticsService.shared.fire(.tap)
         action()
     }
 }

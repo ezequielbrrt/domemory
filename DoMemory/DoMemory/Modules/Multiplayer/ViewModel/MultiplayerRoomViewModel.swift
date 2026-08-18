@@ -20,6 +20,11 @@ final class MultiplayerRoomViewModel {
     let availableMemoramas: [Memorama]
     private var selectedMemorama: Memorama?
     private var roomObserverHandle: UInt?
+    // Remote updates arrive as whole-room snapshots, so each felt moment needs
+    // its own edge detection to avoid re-firing on every snapshot.
+    private var lastResolvedPair: String?
+    private var wasCurrentUserTurn = false
+    private var hasFiredFinishHaptic = false
     private var flipBackTask: Task<Void, Never>?
     private var hideMatchedTask: Task<Void, Never>?
     private var heartbeatTask: Task<Void, Never>?
@@ -169,6 +174,7 @@ final class MultiplayerRoomViewModel {
 
     func choose(card: MemoryGame<String>.Card) {
         guard let room, isInteractionEnabled else { return }
+        HapticsService.shared.fire(.cardFlip)
         Task {
             do {
                 try await service.chooseCard(room: room, cardId: card.id)
@@ -221,7 +227,36 @@ private extension MultiplayerRoomViewModel {
         }
     }
 
+    /// Multiplayer is the one place the player may not be looking at the
+    /// screen when something happens, so remote events are felt as well as seen.
+    func fireRoomHaptics(_ room: MultiplayerRoom) {
+        if room.status == .playing, room.selectedCardIds.count == 2 {
+            let signature = room.selectedCardIds.sorted().map(String.init).joined(separator: "-")
+            if signature != lastResolvedPair {
+                lastResolvedPair = signature
+                let selected = room.cards.filter { room.selectedCardIds.contains($0.id) }
+                let matched = !selected.isEmpty && selected.allSatisfy(\.isMatched)
+                HapticsService.shared.fire(matched ? .match : .mismatch)
+            }
+        } else if room.selectedCardIds.isEmpty {
+            lastResolvedPair = nil
+        }
+
+        let isMyTurn = room.status == .playing && room.isCurrentUserTurn
+        if isMyTurn, !wasCurrentUserTurn {
+            HapticsService.shared.fire(.select)
+        }
+        wasCurrentUserTurn = isMyTurn
+
+        if room.status == .finished, !hasFiredFinishHaptic {
+            hasFiredFinishHaptic = true
+            let won = room.winnerId == MultiplayerService.currentUserID
+            HapticsService.shared.fire(won ? .success : .failure)
+        }
+    }
+
     func handleRoomUpdate(_ room: MultiplayerRoom) {
+        fireRoomHaptics(room)
         if room.status == .finished,
            room.winnerId == MultiplayerService.currentUserID,
            !hasRecordedMultiplayerWin {

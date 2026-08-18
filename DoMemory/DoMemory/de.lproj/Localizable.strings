@@ -38,6 +38,7 @@
 "levels_screen_title" = "Level";
 "levels_out_of_lives_title" = "Keine Leben mehr!";
 "levels_out_of_lives_message" = "Schau dir eine Anzeige für +1 Leben an, oder komm morgen für neue Leben wieder.";
+"levels_out_of_lives_message_no_ad" = "Gib Sterne für ein weiteres Leben aus oder komm morgen für neue wieder.";
 "levels_watch_ad_for_life" = "Anzeige für +1 Leben ansehen";
 "levels_lives_remaining_format" = "%d von %d Leben übrig";
 "menu_create_add" = "Hinzufügen";
@@ -123,6 +124,11 @@
 "multiplayer_error_permission_denied" = "Firebase-Regeln blockieren Mehrspieler-Räume.";
 "multiplayer_error_encoding" = "Raum konnte nicht vorbereitet werden.";
 "multiplayer_error_decoding" = "Raum konnte nicht gelesen werden.";
+"settings_haptics_title" = "Haptik";
+"settings_haptics_description_on" = "Tasten und gefundene Paare geben eine leichte Vibration.";
+"settings_haptics_description_off" = "Vibrations-Feedback ist ausgeschaltet.";
+"settings_haptics_enable" = "Einschalten";
+"settings_haptics_disable" = "Ausschalten";
 "settings_notifications_title" = "Erinnerungen";
 "settings_notifications_description_on" = "Du wirst erinnert, wenn du 2 Tage nicht gespielt hast";
 "settings_notifications_description_off" = "Erhalte eine Benachrichtigung, wenn du längere Zeit nicht gespielt hast";

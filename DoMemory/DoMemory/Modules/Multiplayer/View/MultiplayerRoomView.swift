@@ -117,6 +117,7 @@ struct MultiplayerRoomView: View {
                 }
 
                 Button {
+                    HapticsService.shared.fire(.tap)
                     viewModel.startGame()
                 } label: {
                     Label(Strings.multiplayerStartGame, systemImage: "play.fill")
@@ -190,6 +191,8 @@ struct MultiplayerRoomView: View {
                     ) {
                         ForEach(viewModel.cards) { card in
                             Button {
+                                // choose() emits .cardFlip; a .tap here as well
+                                // would double-buzz every card.
                                 withAnimation(.linear(duration: 0.35)) {
                                     viewModel.choose(card: card)
                                 }
@@ -208,6 +211,7 @@ struct MultiplayerRoomView: View {
             if let room = viewModel.room, room.status == .finished {
                 VStack(spacing: 10) {
                     Button {
+                        HapticsService.shared.fire(.tap)
                         viewModel.restartGame()
                     } label: {
                         Label(
@@ -227,6 +231,7 @@ struct MultiplayerRoomView: View {
                     .disabled(!viewModel.canRestartGame)
 
                     Button {
+                        HapticsService.shared.fire(.tap)
                         showGamePicker = true
                     } label: {
                         Label(
@@ -250,6 +255,7 @@ struct MultiplayerRoomView: View {
                     .disabled(!viewModel.canRestartGame)
 
                     Button {
+                        HapticsService.shared.fire(.tap)
                         viewModel.leaveRoom()
                     } label: {
                         Text(Strings.goToMenu)
@@ -269,6 +275,7 @@ struct MultiplayerRoomView: View {
     private var header: some View {
         HStack {
             Button {
+                HapticsService.shared.fire(.tap)
                 viewModel.leaveRoom()
             } label: {
                 Image(systemName: "xmark")
@@ -325,6 +332,7 @@ private struct MultiplayerGamePickerView: View {
                     LazyVStack(spacing: 10) {
                         ForEach(memoramas) { memorama in
                             Button {
+                                HapticsService.shared.fire(.tap)
                                 onSelect(memorama)
                             } label: {
                                 HStack(spacing: 12) {

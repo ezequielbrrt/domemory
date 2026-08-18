@@ -139,6 +139,7 @@ struct WinModal: View {
                         )
                 }
                 .buttonStyle(.plain)
+                .hapticTap()
                 .padding(.bottom, 10)
 
                 Button(action: { primaryAction() }) {

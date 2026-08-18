@@ -38,6 +38,7 @@
 "levels_screen_title" = "레벨";
 "levels_out_of_lives_title" = "생명이 없습니다!";
 "levels_out_of_lives_message" = "광고를 보고 생명 +1을 받거나, 내일 새로운 생명으로 다시 오세요.";
+"levels_out_of_lives_message_no_ad" = "별을 써서 목숨을 더 얻거나, 내일 다시 오세요.";
 "levels_watch_ad_for_life" = "광고 보고 생명 +1 받기";
 "levels_lives_remaining_format" = "생명 %d / %d 남음";
 "menu_create_add" = "추가";
@@ -123,6 +124,11 @@
 "multiplayer_error_permission_denied" = "Firebase 규칙이 멀티플레이 방을 차단하고 있습니다.";
 "multiplayer_error_encoding" = "방을 준비할 수 없습니다.";
 "multiplayer_error_decoding" = "방을 읽을 수 없습니다.";
+"settings_haptics_title" = "햅틱";
+"settings_haptics_description_on" = "버튼을 누르거나 짝을 맞추면 가볍게 진동합니다.";
+"settings_haptics_description_off" = "진동 피드백이 꺼져 있습니다.";
+"settings_haptics_enable" = "켜기";
+"settings_haptics_disable" = "끄기";
 "settings_notifications_title" = "리마인더";
 "settings_notifications_description_on" = "2일 동안 플레이하지 않으면 알림을 받습니다";
 "settings_notifications_description_off" = "한동안 플레이하지 않았을 때 알림 받기";

@@ -38,6 +38,7 @@
 "levels_screen_title" = "Levels";
 "levels_out_of_lives_title" = "Out of Lives!";
 "levels_out_of_lives_message" = "Watch an ad for +1 life, or come back tomorrow for a fresh set.";
+"levels_out_of_lives_message_no_ad" = "Spend stars for another life, or come back tomorrow for a fresh set.";
 "levels_watch_ad_for_life" = "Watch ad for +1 life";
 "levels_lives_remaining_format" = "%d of %d lives remaining";
 "menu_create_add" = "Add";
@@ -123,6 +124,11 @@
 "multiplayer_error_permission_denied" = "Firebase rules are blocking multiplayer rooms.";
 "multiplayer_error_encoding" = "Could not prepare the room.";
 "multiplayer_error_decoding" = "Could not read the room.";
+"settings_haptics_title" = "Haptics";
+"settings_haptics_description_on" = "Buttons and card matches give a small vibration.";
+"settings_haptics_description_off" = "Vibration feedback is turned off.";
+"settings_haptics_enable" = "Turn on";
+"settings_haptics_disable" = "Turn off";
 "settings_notifications_title" = "Reminders";
 "settings_notifications_description_on" = "You'll be reminded if you haven't played in 2 days";
 "settings_notifications_description_off" = "Get notified when you haven't played in a while";

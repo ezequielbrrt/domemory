@@ -18,8 +18,8 @@ struct SettingsView: View {
     @State private var showAchievements = false
     @AppStorage(UserDefaultsKeys.themePreference) private var themePreference = AppTheme.system.rawValue
     @AppStorage(UserDefaultsKeys.notificationsEnabled) private var notificationsEnabled = false
+    @AppStorage(UserDefaultsKeys.hapticsEnabled) private var hapticsEnabled = true
 
-    let impactMed = UIImpactFeedbackGenerator(style: .medium)
 
     init(listener: SettingsListener?) {
         self.viewModel = SettingsViewModel(listener: listener)
@@ -50,7 +50,7 @@ struct SettingsView: View {
                         actionTitle: Strings.achievementsView,
                         systemImage: "trophy.fill"
                     ) {
-                        impactMed.impactOccurred()
+                        HapticsService.shared.fire(.tap)
                         showAchievements = true
                     }
 
@@ -60,7 +60,7 @@ struct SettingsView: View {
                         actionTitle: Strings.settingsSelectTheme,
                         systemImage: "circle.lefthalf.filled"
                     ) {
-                        impactMed.impactOccurred()
+                        HapticsService.shared.fire(.tap)
                         showThemePicker = true
                     }
 
@@ -70,7 +70,7 @@ struct SettingsView: View {
                         actionTitle: Strings.settingsSelectDifficulty,
                         systemImage: "slider.horizontal.3"
                     ) {
-                        impactMed.impactOccurred()
+                        HapticsService.shared.fire(.tap)
                         showDifficultyPicker = true
                     }
 
@@ -84,7 +84,7 @@ struct SettingsView: View {
                             : Strings.settingsNotificationsEnable,
                         systemImage: "bell.fill"
                     ) {
-                        impactMed.impactOccurred()
+                        HapticsService.shared.fire(.tap)
                         if notificationsEnabled {
                             notificationsEnabled = false
                             NotificationService.shared.cancelAll()
@@ -94,19 +94,41 @@ struct SettingsView: View {
                     }
 
                     SettingsOptionRow(
+                        title: Strings.settingsHapticsTitle,
+                        subtitle: hapticsEnabled
+                            ? Strings.settingsHapticsDescriptionOn
+                            : Strings.settingsHapticsDescriptionOff,
+                        actionTitle: hapticsEnabled
+                            ? Strings.settingsHapticsDisable
+                            : Strings.settingsHapticsEnable,
+                        systemImage: "iphone.radiowaves.left.and.right"
+                    ) {
+                        // Fire before flipping the flag so turning haptics OFF
+                        // still confirms the tap; turning them on is confirmed
+                        // by the row's own tap handler on the next press.
+                        HapticsService.shared.fire(.tap)
+                        hapticsEnabled.toggle()
+                    }
+
+                    SettingsOptionRow(
                         title: Strings.settingsRemoveAdsTitle,
                         subtitle: removeAdsSubtitle,
                         actionTitle: removeAdsActionTitle,
                         systemImage: "nosign",
                         isDisabled: purchaseService.hasRemovedAds || purchaseService.isLoading
                     ) {
-                        impactMed.impactOccurred()
+                        HapticsService.shared.fire(.tap)
                         Task {
                             await purchaseService.purchaseRemoveAds()
                         }
                     }
 
-                    if AdsService.shared.isRewardedConfigured(for: .settingsRewardedRemoveAds)
+                    // Rewarded ads are no longer gated on the entitlement, so this
+                    // row would otherwise appear — permanently disabled — for
+                    // someone who already owns ad-free forever. This one reward
+                    // is genuinely worthless to them, unlike the in-game ones.
+                    if !purchaseService.hasPurchasedRemoveAds,
+                       AdsService.shared.isRewardedConfigured(for: .settingsRewardedRemoveAds)
                         || purchaseService.hasActiveRewardedRemoveAds {
                         SettingsOptionRow(
                             title: Strings.settingsRewardedRemoveAdsTitle,
@@ -115,7 +137,7 @@ struct SettingsView: View {
                             systemImage: "play.rectangle.fill",
                             isDisabled: purchaseService.hasRemovedAds || isRewardedAdInProgress
                         ) {
-                            impactMed.impactOccurred()
+                            HapticsService.shared.fire(.tap)
                             presentRewardedRemoveAds()
                         }
                     }
@@ -127,7 +149,7 @@ struct SettingsView: View {
                         systemImage: "arrow.clockwise",
                         isDisabled: purchaseService.isLoading
                     ) {
-                        impactMed.impactOccurred()
+                        HapticsService.shared.fire(.tap)
                         Task {
                             await purchaseService.restorePurchases()
                         }
@@ -183,7 +205,7 @@ struct SettingsView: View {
             DifficultyPickerSheet(
                 selectedDifficulty: viewModel.difficulty,
                 onSelect: { difficultyIndex in
-                    impactMed.impactOccurred()
+                    HapticsService.shared.fire(.tap)
                     viewModel.saveDifficulty(difficultyIndex: difficultyIndex)
                     showDifficultyPicker = false
                 }
@@ -195,7 +217,7 @@ struct SettingsView: View {
             ThemePickerSheet(
                 selectedTheme: AppTheme(rawValue: themePreference) ?? .system,
                 onSelect: { theme in
-                    impactMed.impactOccurred()
+                    HapticsService.shared.fire(.tap)
                     themePreference = theme.rawValue
                     showThemePicker = false
                 }
@@ -566,9 +588,7 @@ private struct SelectableRow: View {
     }
 
     private func trigger() {
-        #if os(iOS)
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        #endif
+        HapticsService.shared.fire(.tap)
         action()
     }
 }
@@ -632,9 +652,7 @@ private struct ThemeOptionRow: View {
     }
 
     private func trigger() {
-        #if os(iOS)
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        #endif
+        HapticsService.shared.fire(.tap)
         action()
     }
 }

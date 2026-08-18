@@ -38,6 +38,7 @@
 "levels_screen_title" = "Livelli";
 "levels_out_of_lives_title" = "Vite esaurite!";
 "levels_out_of_lives_message" = "Guarda un annuncio per +1 vita, oppure torna domani per un nuovo set.";
+"levels_out_of_lives_message_no_ad" = "Spendi stelle per un'altra vita o torna domani per un nuovo set.";
 "levels_watch_ad_for_life" = "Guarda l'annuncio per +1 vita";
 "levels_lives_remaining_format" = "%d vite rimaste su %d";
 "menu_create_add" = "Aggiungi";
@@ -123,6 +124,11 @@
 "multiplayer_error_permission_denied" = "Le regole Firebase bloccano le stanze multigiocatore.";
 "multiplayer_error_encoding" = "Impossibile preparare la stanza.";
 "multiplayer_error_decoding" = "Impossibile leggere la stanza.";
+"settings_haptics_title" = "Vibrazione";
+"settings_haptics_description_on" = "I pulsanti e le coppie trovate danno una leggera vibrazione.";
+"settings_haptics_description_off" = "Il feedback aptico è disattivato.";
+"settings_haptics_enable" = "Attiva";
+"settings_haptics_disable" = "Disattiva";
 "settings_notifications_title" = "Promemoria";
 "settings_notifications_description_on" = "Riceverai un promemoria se non giochi per 2 giorni";
 "settings_notifications_description_off" = "Ricevi una notifica quando non giochi da un po'";

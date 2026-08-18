@@ -67,7 +67,7 @@ struct MenuView: View {
 
                                 Spacer()
 
-                                Button(action: { self.showJoinMultiplayerSheet = true }) {
+                                Button(action: { HapticsService.shared.fire(.tap); self.showJoinMultiplayerSheet = true }) {
                                     Image(systemName: "person.2.fill")
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundStyle(Color.primaryColor)
@@ -85,7 +85,7 @@ struct MenuView: View {
                                 .buttonStyle(.plain)
                                 .accessibilityLabel(Strings.multiplayerJoinRoom)
 
-                                Button(action: { self.showCreateSheet = true }) {
+                                Button(action: { HapticsService.shared.fire(.tap); self.showCreateSheet = true }) {
                                     Image(systemName: "plus")
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundStyle(Color.primaryColor)
@@ -102,7 +102,7 @@ struct MenuView: View {
                                 }
                                 .buttonStyle(.plain)
 
-                                Button(action: { self.showNewView = true }) {
+                                Button(action: { HapticsService.shared.fire(.tap); self.showNewView = true }) {
                                     Image(systemName: "gearshape.fill")
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundStyle(Color.textPrimary.opacity(0.6))
@@ -154,6 +154,7 @@ struct MenuView: View {
 
                             if !displayedGames.isEmpty {
                                 Button {
+                                    HapticsService.shared.fire(.tap)
                                     randomMemorama = viewModel.randomGame(for: selectedVisibleTab)
                                 } label: {
                                     HStack(spacing: 10) {
@@ -299,7 +300,7 @@ struct MenuView: View {
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.textMuted)
                     .multilineTextAlignment(.center)
-                Button(action: { showCreateSheet = true }) {
+                Button(action: { HapticsService.shared.fire(.tap); showCreateSheet = true }) {
                     Text(Strings.emptyMyGamesAction)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
@@ -359,6 +360,7 @@ private struct MemoramaGridCell: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             Button {
+                HapticsService.shared.fire(.tap)
                 isNavigating = true
             } label: {
                 MemoramaCard(memorama: memorama, stats: stats)
@@ -373,6 +375,7 @@ private struct MemoramaGridCell: View {
             }
             .contextMenu {
                 Button {
+                    HapticsService.shared.fire(.tap)
                     isStartingMultiplayer = true
                 } label: {
                     Label(Strings.multiplayerCreateRoom, systemImage: "person.2.fill")
@@ -386,7 +389,7 @@ private struct MemoramaGridCell: View {
             }
 
             VStack(spacing: 4) {
-                Button(action: onToggleFavorite) {
+                Button(action: { HapticsService.shared.fire(.tap); onToggleFavorite() }) {
                     Image(systemName: isFavorite ? "heart.fill" : "heart")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(isFavorite ? Color.secundaryColor : Color.textMuted)
@@ -395,6 +398,7 @@ private struct MemoramaGridCell: View {
                 .buttonStyle(.plain)
 
                 Button {
+                    HapticsService.shared.fire(.tap)
                     isStartingMultiplayer = true
                 } label: {
                     Image(systemName: "person.2.fill")
@@ -419,7 +423,7 @@ private struct DailyChallengeCard: View {
     let onPlay: () -> Void
 
     var body: some View {
-        Button(action: { if !isCompleted { onPlay() } }) {
+        Button(action: { if !isCompleted { HapticsService.shared.fire(.tap); onPlay() } }) {
             HStack(spacing: 14) {
                 ZStack {
                     Circle()
@@ -605,6 +609,7 @@ private struct CreateMemoramaView: View {
                                                 .foregroundStyle(Color.textMuted)
                                             Spacer()
                                             Button {
+                                                HapticsService.shared.fire(.tap)
                                                 items.remove(at: index)
                                             } label: {
                                                 Image(systemName: "minus.circle.fill")
@@ -676,6 +681,7 @@ private struct CreateMemoramaView: View {
 
                             if !isAddingEmoji {
                                 Button {
+                                    HapticsService.shared.fire(.tap)
                                     isAddingEmoji = true
                                 } label: {
                                     HStack {
