@@ -109,6 +109,10 @@ enum Strings {
     // Levels lives
     static let outOfLivesTitle = NSLocalizedString("levels_out_of_lives_title", comment: "Title shown when the player has no lives left today")
     static let outOfLivesMessage = NSLocalizedString("levels_out_of_lives_message", comment: "Message explaining how to get another life")
+    /// Shown when no rewarded ad is available — Remove-Ads purchasers, or an
+    /// unfilled ad slot. The default copy tells them to watch an ad they will
+    /// never be offered.
+    static let outOfLivesMessageNoAd = NSLocalizedString("levels_out_of_lives_message_no_ad", comment: "Out-of-lives message when no rewarded ad is available")
     static let watchAdForLife = NSLocalizedString("levels_watch_ad_for_life", comment: "Button to watch a rewarded ad for +1 life")
     static func livesRemainingFormat(_ remaining: Int, _ total: Int) -> String {
         String(format: NSLocalizedString("levels_lives_remaining_format", comment: "Accessibility label, %d = lives remaining, %d = max lives"), remaining, total)
@@ -235,6 +239,11 @@ enum Strings {
     static let multiplayerErrorDecoding = NSLocalizedString("multiplayer_error_decoding", comment: "Decoding error")
 
     // Notifications settings
+    static let settingsHapticsTitle = NSLocalizedString("settings_haptics_title", comment: "Haptic feedback setting title")
+    static let settingsHapticsDescriptionOn = NSLocalizedString("settings_haptics_description_on", comment: "Haptics enabled description")
+    static let settingsHapticsDescriptionOff = NSLocalizedString("settings_haptics_description_off", comment: "Haptics disabled description")
+    static let settingsHapticsEnable = NSLocalizedString("settings_haptics_enable", comment: "Enable haptics button")
+    static let settingsHapticsDisable = NSLocalizedString("settings_haptics_disable", comment: "Disable haptics button")
     static let settingsNotificationsTitle = NSLocalizedString("settings_notifications_title", comment: "Notifications setting title")
     static let settingsNotificationsDescriptionOn = NSLocalizedString("settings_notifications_description_on", comment: "Notifications enabled description")
     static let settingsNotificationsDescriptionOff = NSLocalizedString("settings_notifications_description_off", comment: "Notifications disabled description")

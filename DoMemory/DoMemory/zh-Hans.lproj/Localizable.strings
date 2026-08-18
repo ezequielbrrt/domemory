@@ -38,6 +38,7 @@
 "levels_screen_title" = "关卡";
 "levels_out_of_lives_title" = "生命值用完了！";
 "levels_out_of_lives_message" = "观看广告获得 +1 生命值，或明天再来获取新的生命值。";
+"levels_out_of_lives_message_no_ad" = "花费星星再获得一个生命，或明天回来领取新的生命。";
 "levels_watch_ad_for_life" = "观看广告获得 +1 生命值";
 "levels_lives_remaining_format" = "剩余 %d / %d 条生命";
 "menu_create_add" = "添加";
@@ -123,6 +124,11 @@
 "multiplayer_error_permission_denied" = "Firebase 规则正在阻止多人房间。";
 "multiplayer_error_encoding" = "无法准备房间。";
 "multiplayer_error_decoding" = "无法读取房间。";
+"settings_haptics_title" = "触感反馈";
+"settings_haptics_description_on" = "点击按钮和配对成功时会有轻微振动。";
+"settings_haptics_description_off" = "振动反馈已关闭。";
+"settings_haptics_enable" = "开启";
+"settings_haptics_disable" = "关闭";
 "settings_notifications_title" = "提醒";
 "settings_notifications_description_on" = "若 2 天未游戏，将向您发送提醒";
 "settings_notifications_description_off" = "长时间未游戏时收到通知";

@@ -7,7 +7,10 @@ APP_ID="${APP_ID:-1533115091}"
 VERSION_STRING="${VERSION_STRING:-3.1.0}"
 SCREENSHOTS_DIR="${SCREENSHOTS_DIR:-./screenshots/ipad-12.9}"
 DEVICE_TYPE="${DEVICE_TYPE:-IPAD_PRO_3GEN_129}"
-EXPECTED_COUNT_PER_LOCALE="${EXPECTED_COUNT_PER_LOCALE:-6}"
+# Bump this whenever a screen is added to SCREEN_SPECS in
+# export_ipad_screenshots.py. The guard below refuses to --replace a complete
+# App Store set with a short one, so a stale value here blocks every upload.
+EXPECTED_COUNT_PER_LOCALE="${EXPECTED_COUNT_PER_LOCALE:-7}"
 ALLOW_PARTIAL_LOCALE="${ALLOW_PARTIAL_LOCALE:-0}"
 
 for tool in asc jq /usr/bin/sips; do

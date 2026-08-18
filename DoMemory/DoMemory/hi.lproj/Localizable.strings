@@ -38,6 +38,7 @@
 "levels_screen_title" = "स्तर";
 "levels_out_of_lives_title" = "जीवन समाप्त!";
 "levels_out_of_lives_message" = "+1 जीवन के लिए विज्ञापन देखें, या नए सेट के लिए कल वापस आएं।";
+"levels_out_of_lives_message_no_ad" = "एक और जीवन के लिए सितारे खर्च करें, या कल नए सेट के लिए वापस आएँ।";
 "levels_watch_ad_for_life" = "+1 जीवन के लिए विज्ञापन देखें";
 "levels_lives_remaining_format" = "%d में से %d जीवन शेष";
 "menu_create_add" = "जोड़ें";
@@ -123,6 +124,11 @@
 "multiplayer_error_permission_denied" = "Firebase नियम मल्टीप्लेयर रूम रोक रहे हैं.";
 "multiplayer_error_encoding" = "रूम तैयार नहीं हो सका.";
 "multiplayer_error_decoding" = "रूम पढ़ा नहीं जा सका.";
+"settings_haptics_title" = "हैप्टिक्स";
+"settings_haptics_description_on" = "बटन और मिलान वाले जोड़े हल्का कंपन देते हैं।";
+"settings_haptics_description_off" = "कंपन फ़ीडबैक बंद है।";
+"settings_haptics_enable" = "चालू करें";
+"settings_haptics_disable" = "बंद करें";
 "settings_notifications_title" = "रिमाइंडर";
 "settings_notifications_description_on" = "यदि आपने 2 दिनों में नहीं खेला तो आपको याद दिलाया जाएगा";
 "settings_notifications_description_off" = "जब आपने कुछ समय से नहीं खेला हो तो सूचना पाएं";

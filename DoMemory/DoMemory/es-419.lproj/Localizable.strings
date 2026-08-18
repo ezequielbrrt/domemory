@@ -38,6 +38,7 @@
 "levels_screen_title" = "Niveles";
 "levels_out_of_lives_title" = "¡Sin vidas!";
 "levels_out_of_lives_message" = "Mira un anuncio para +1 vida, o vuelve mañana para un set nuevo.";
+"levels_out_of_lives_message_no_ad" = "Gasta estrellas para otra vida, o vuelve mañana para un set nuevo.";
 "levels_watch_ad_for_life" = "Ver anuncio por +1 vida";
 "levels_lives_remaining_format" = "%d de %d vidas restantes";
 "menu_create_add" = "Agregar";
@@ -123,6 +124,11 @@
 "multiplayer_error_permission_denied" = "Las reglas de Firebase están bloqueando las salas multijugador.";
 "multiplayer_error_encoding" = "No se pudo preparar la sala.";
 "multiplayer_error_decoding" = "No se pudo leer la sala.";
+"settings_haptics_title" = "Vibración";
+"settings_haptics_description_on" = "Los botones y las parejas encontradas vibran ligeramente.";
+"settings_haptics_description_off" = "La respuesta con vibración está desactivada.";
+"settings_haptics_enable" = "Activar";
+"settings_haptics_disable" = "Desactivar";
 "settings_notifications_title" = "Recordatorios";
 "settings_notifications_description_on" = "Te recordaremos si no juegas en 2 días";
 "settings_notifications_description_off" = "Recibe una notificación cuando no hayas jugado en un tiempo";

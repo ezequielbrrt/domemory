@@ -35,7 +35,7 @@ struct IntroCarouselView: View {
             VStack(spacing: 0) {
                 HStack {
                     Spacer()
-                    Button(Strings.introSkip, action: onSkip)
+                    Button(Strings.introSkip) { HapticsService.shared.fire(.tap); onSkip() }
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .foregroundStyle(Color.textMuted)
                 }
@@ -68,8 +68,10 @@ struct IntroCarouselView: View {
 
     private func advance() {
         if isLastPage {
+            HapticsService.shared.fire(.tap)
             onFinish()
         } else {
+            HapticsService.shared.fire(.select)
             withAnimation { page += 1 }
         }
     }

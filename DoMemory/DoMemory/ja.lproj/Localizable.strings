@@ -38,6 +38,7 @@
 "levels_screen_title" = "レベル";
 "levels_out_of_lives_title" = "ライフがありません!";
 "levels_out_of_lives_message" = "広告を見てライフを+1するか、明日また新しいライフでお越しください。";
+"levels_out_of_lives_message_no_ad" = "スターを使ってライフを補充するか、明日また挑戦しましょう。";
 "levels_watch_ad_for_life" = "広告を見てライフ+1";
 "levels_lives_remaining_format" = "ライフ残り %d / %d";
 "menu_create_add" = "追加";
@@ -123,6 +124,11 @@
 "multiplayer_error_permission_denied" = "Firebase ルールがマルチプレイルームをブロックしています。";
 "multiplayer_error_encoding" = "ルームを準備できませんでした。";
 "multiplayer_error_decoding" = "ルームを読み込めませんでした。";
+"settings_haptics_title" = "触覚フィードバック";
+"settings_haptics_description_on" = "ボタン操作やペア成立時に軽い振動が返ります。";
+"settings_haptics_description_off" = "振動フィードバックはオフです。";
+"settings_haptics_enable" = "オンにする";
+"settings_haptics_disable" = "オフにする";
 "settings_notifications_title" = "リマインダー";
 "settings_notifications_description_on" = "2日間プレイしていないとお知らせします";
 "settings_notifications_description_off" = "しばらくプレイしていない場合に通知を受け取る";

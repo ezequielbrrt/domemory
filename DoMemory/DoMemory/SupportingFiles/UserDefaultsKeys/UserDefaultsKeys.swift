@@ -19,5 +19,6 @@ class UserDefaultsKeys: NSObject {
     static var whatsNewLastSeenVersion: String = "whatsNewLastSeenVersion"
     static var onboardingIntroShown: String = "onboardingIntroShown"
     static var levelsIntroShown: String = "levelsIntroShown"
+    static var hapticsEnabled: String = "hapticsEnabled"
     // Daily-challenge keys live in DailyChallengeKeys (shared with the widget target).
 }

@@ -11,7 +11,6 @@ import SwiftUI
 struct LevelsView: View {
     @State private var viewModel = LevelsViewModel()
     @State private var selectedLevel: Int?
-    @State private var purchaseService = PurchaseService.shared
     @State private var showIntro = false
     @State private var introSource = "auto"
 
@@ -32,10 +31,14 @@ struct LevelsView: View {
                                 .onTapGesture {
                                     guard !tile.isLocked else { return }
                                     guard viewModel.hasLivesRemaining else {
+                                        // Refusal, not a selection — the modal
+                                        // that follows is bad news.
+                                        HapticsService.shared.fire(.warning)
                                         AnalyticsService.log(.levelOutOfLivesShown(source: "level_tile"))
                                         viewModel.showOutOfLivesPrompt = true
                                         return
                                     }
+                                    HapticsService.shared.fire(.select)
                                     selectedLevel = tile.level
                                 }
                                 .onAppear {
@@ -95,6 +98,7 @@ struct LevelsView: View {
                         .foregroundStyle(Color.textPrimary)
 
                     Button {
+                        HapticsService.shared.fire(.tap)
                         introSource = "info_button"
                         showIntro = true
                     } label: {
@@ -113,16 +117,17 @@ struct LevelsView: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 6) {
-                if !purchaseService.hasRemovedAds {
-                    LivesRow(remaining: viewModel.livesRemaining, iconSize: 13)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(
-                            Capsule()
-                                .fill(Color.surfacePrimary)
-                                .overlay(Capsule().stroke(Color.surfaceBorder, lineWidth: 1))
-                        )
-                }
+                // Shown to everyone, Remove-Ads purchasers included: the
+                // daily budget applies to them too, so hiding the counter
+                // would mean losing a life with no visible cause.
+                LivesRow(remaining: viewModel.livesRemaining, iconSize: 13)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule()
+                            .fill(Color.surfacePrimary)
+                            .overlay(Capsule().stroke(Color.surfaceBorder, lineWidth: 1))
+                    )
 
                 HStack(spacing: 4) {
                     Image(systemName: "star.fill")

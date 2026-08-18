@@ -53,7 +53,9 @@ struct LoseModal: View {
                         .padding(.bottom, 8)
 
                     if isOutOfLives {
-                        Text(Strings.outOfLivesMessage)
+                        Text(listener?.canWatchAdForLife == true
+                             ? Strings.outOfLivesMessage
+                             : Strings.outOfLivesMessageNoAd)
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .foregroundStyle(Color.textMuted)
                             .multilineTextAlignment(.center)

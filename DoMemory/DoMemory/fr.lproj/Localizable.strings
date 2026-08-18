@@ -38,6 +38,7 @@
 "levels_screen_title" = "Niveaux";
 "levels_out_of_lives_title" = "Plus de vies !";
 "levels_out_of_lives_message" = "Regardez une pub pour +1 vie, ou revenez demain pour un nouveau lot.";
+"levels_out_of_lives_message_no_ad" = "Dépensez des étoiles pour une vie de plus, ou revenez demain pour un nouveau lot.";
 "levels_watch_ad_for_life" = "Regarder une pub pour +1 vie";
 "levels_lives_remaining_format" = "%d vies restantes sur %d";
 "menu_create_add" = "Ajouter";
@@ -123,6 +124,11 @@
 "multiplayer_error_permission_denied" = "Les règles Firebase bloquent les salons multijoueur.";
 "multiplayer_error_encoding" = "Impossible de préparer le salon.";
 "multiplayer_error_decoding" = "Impossible de lire le salon.";
+"settings_haptics_title" = "Vibrations";
+"settings_haptics_description_on" = "Les boutons et les paires trouvées déclenchent une légère vibration.";
+"settings_haptics_description_off" = "Le retour vibrant est désactivé.";
+"settings_haptics_enable" = "Activer";
+"settings_haptics_disable" = "Désactiver";
 "settings_notifications_title" = "Rappels";
 "settings_notifications_description_on" = "Vous serez rappelé si vous n'avez pas joué depuis 2 jours";
 "settings_notifications_description_off" = "Soyez notifié quand vous n'avez pas joué depuis un moment";

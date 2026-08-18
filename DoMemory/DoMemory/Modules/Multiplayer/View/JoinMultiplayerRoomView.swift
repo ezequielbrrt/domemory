@@ -58,6 +58,7 @@ struct JoinMultiplayerRoomView: View {
                     }
 
                     Button {
+                        HapticsService.shared.fire(.tap)
                         isJoining = true
                     } label: {
                         Label(Strings.multiplayerJoinRoom, systemImage: "arrow.right.circle.fill")

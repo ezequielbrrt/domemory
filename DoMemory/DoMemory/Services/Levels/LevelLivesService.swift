@@ -14,8 +14,11 @@ final class LevelLivesService {
     static let shared = LevelLivesService()
     static let maxLives = 4
 
-    private let defaults = UserDefaults.standard
-    private init() {}
+    private let defaults: UserDefaults
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+    }
 
     private enum Key {
         static let livesRemaining = "levels.lives.remaining"
@@ -32,11 +35,13 @@ final class LevelLivesService {
         return stored
     }
 
-    /// Remove-Ads purchasers have no ad-refill path (ads are disabled
-    /// app-wide for them), so they get unlimited lives rather than being
-    /// stricter-gated than free players.
+    /// The daily budget applies to everyone, including Remove-Ads purchasers:
+    /// losing has to cost something or the levels have no stakes. Both refills
+    /// stay open to them — Remove Ads suppresses involuntary advertising only,
+    /// so the rewarded ad is still offered (see `suppressesInvoluntaryAds`),
+    /// and `canBuyLifeWithStars` is deliberately not entitlement-gated either.
     func hasLivesRemaining(for date: Date = Date()) -> Bool {
-        PurchaseService.shared.hasRemovedAds || livesRemaining(for: date) > 0
+        livesRemaining(for: date) > 0
     }
 
     /// Spends one life on a loss. Never goes below 0.
