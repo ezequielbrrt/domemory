@@ -1,0 +1,5 @@
+# Pins the Tuist version for this repo so the `tuist` mise shim resolves.
+# Must stay in sync with the version used by the release lane in
+# DoMemory/fastlane/Fastfile, so the CLI and CI generate the same project.
+[tools]
+tuist = "4.195.6"
