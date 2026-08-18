@@ -141,12 +141,21 @@ final class AdsService: NSObject {
 
     private override init() {}
 
+    /// Remove Ads suppresses *involuntary* advertising only: banners, natives,
+    /// interstitials and app-open — the ones that interrupt without being
+    /// asked for. Rewarded ads are opt-in and hand the player something back,
+    /// so purchasers keep access to them. Anything gated on this property is
+    /// advertising the player never chose to see.
+    private var suppressesInvoluntaryAds: Bool {
+        PurchaseService.shared.hasRemovedAds
+    }
+
     func isBannerConfigured(for placement: AdPlacement) -> Bool {
-        !PurchaseService.shared.hasRemovedAds && AdUnitConfiguration.bannerUnitID(for: placement) != nil
+        !suppressesInvoluntaryAds && AdUnitConfiguration.bannerUnitID(for: placement) != nil
     }
 
     func makeBannerView(for placement: AdPlacement, rootViewController: UIViewController?) -> BannerView? {
-        guard !PurchaseService.shared.hasRemovedAds else {
+        guard !suppressesInvoluntaryAds else {
             log("Banner skipped. Remove Ads is active.")
             return nil
         }
@@ -165,11 +174,11 @@ final class AdsService: NSObject {
     }
 
     func isNativeConfigured(for placement: AdPlacement) -> Bool {
-        !PurchaseService.shared.hasRemovedAds && AdUnitConfiguration.nativeUnitID(for: placement) != nil
+        !suppressesInvoluntaryAds && AdUnitConfiguration.nativeUnitID(for: placement) != nil
     }
 
     func loadInterstitial(for placement: AdPlacement) {
-        guard !PurchaseService.shared.hasRemovedAds else {
+        guard !suppressesInvoluntaryAds else {
             log("Interstitial skipped. Remove Ads is active.")
             return
         }
@@ -203,16 +212,12 @@ final class AdsService: NSObject {
         }
     }
 
+    /// Deliberately not gated on Remove Ads — see `suppressesInvoluntaryAds`.
     func isRewardedConfigured(for placement: AdPlacement) -> Bool {
-        !PurchaseService.shared.hasRemovedAds && AdUnitConfiguration.rewardedUnitID(for: placement) != nil
+        AdUnitConfiguration.rewardedUnitID(for: placement) != nil
     }
 
     func loadRewardedAd(for placement: AdPlacement) {
-        guard !PurchaseService.shared.hasRemovedAds else {
-            log("Rewarded skipped. Remove Ads is active.")
-            return
-        }
-
         guard rewardedAds[placement] == nil else { return }
 
         guard let adUnitID = AdUnitConfiguration.rewardedUnitID(for: placement) else {
@@ -241,12 +246,6 @@ final class AdsService: NSObject {
         rewardHandler: @escaping () -> Void,
         completion: @escaping (Bool) -> Void
     ) {
-        guard !PurchaseService.shared.hasRemovedAds else {
-            log("Rewarded skipped. Remove Ads is active.")
-            completion(false)
-            return
-        }
-
         guard let rewardedAd = rewardedAds[placement] else {
             log("Rewarded not ready for \(placement.rawValue).")
             loadRewardedAd(for: placement)
@@ -286,13 +285,13 @@ final class AdsService: NSObject {
     }
 
     func registerMenuReadyForAppOpenAds() {
-        guard !PurchaseService.shared.hasRemovedAds else { return }
+        guard !suppressesInvoluntaryAds else { return }
         menuIsReadyForAppOpenAds = true
         loadAppOpenAdIfNeeded()
     }
 
     func presentAppOpenAdIfAvailable(from viewController: UIViewController? = nil) {
-        guard !PurchaseService.shared.hasRemovedAds else {
+        guard !suppressesInvoluntaryAds else {
             log("App open skipped. Remove Ads is active.")
             return
         }
@@ -342,7 +341,7 @@ final class AdsService: NSObject {
         for placement: AdPlacement,
         from viewController: UIViewController? = nil
     ) {
-        guard !PurchaseService.shared.hasRemovedAds else {
+        guard !suppressesInvoluntaryAds else {
             log("Interstitial skipped. Remove Ads is active.")
             return
         }
@@ -372,7 +371,7 @@ final class AdsService: NSObject {
 
     @discardableResult
     private func presentInterstitial(for placement: AdPlacement, from viewController: UIViewController? = nil) -> Bool {
-        guard !PurchaseService.shared.hasRemovedAds else {
+        guard !suppressesInvoluntaryAds else {
             log("Interstitial skipped. Remove Ads is active.")
             return false
         }
@@ -401,7 +400,7 @@ final class AdsService: NSObject {
     }
 
     private func loadAppOpenAdIfNeeded() {
-        guard !PurchaseService.shared.hasRemovedAds else { return }
+        guard !suppressesInvoluntaryAds else { return }
         guard !isLoadingAppOpenAd else { return }
         guard appOpenAd == nil || !isAppOpenAdFresh else { return }
 

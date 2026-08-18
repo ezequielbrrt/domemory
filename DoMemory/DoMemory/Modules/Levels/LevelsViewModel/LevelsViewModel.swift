@@ -39,13 +39,15 @@ final class LevelsViewModel {
     var hasLivesRemaining: Bool { LevelLivesService.shared.hasLivesRemaining() }
     var canWatchAdForLife: Bool { AdsService.shared.isRewardedConfigured(for: .levelsRewardedLife) }
     var starBalance: Int { StarWalletService.shared.balance }
+    /// Not gated on the Remove-Ads entitlement — see MemorizeViewModel's twin.
     var canBuyLifeWithStars: Bool {
-        !PurchaseService.shared.hasRemovedAds && StarWalletService.shared.canAfford(LevelPowerUp.lifeCost)
+        StarWalletService.shared.canAfford(LevelPowerUp.lifeCost)
     }
 
     func buyLifeWithStars() {
         guard canBuyLifeWithStars else { return }
         guard StarWalletService.shared.spend(LevelPowerUp.lifeCost) else { return }
+        HapticsService.shared.fire(.reward)
         LevelLivesService.shared.addLife()
         AnalyticsService.log(
             .levelLifePurchasedWithStars(
@@ -72,6 +74,7 @@ final class LevelsViewModel {
         AdsService.shared.presentRewardedAd(
             for: .levelsRewardedLife,
             rewardHandler: {
+                HapticsService.shared.fire(.reward)
                 let updated = LevelLivesService.shared.addLife()
                 AnalyticsService.log(.levelLifeGrantedFromAd(livesRemaining: updated))
                 AnalyticsService.log(.adLifecycle(placement: AdPlacement.levelsRewardedLife.rawValue, action: "reward_earned"))

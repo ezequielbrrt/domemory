@@ -57,6 +57,22 @@ final class LevelLivesServiceTests: XCTestCase {
         XCTAssertEqual(service.livesRemaining(), LevelLivesService.maxLives)
     }
 
+    /// Remove-Ads purchasers are deliberately *not* exempt — losing has to
+    /// cost a life for them too, or Levels has no stakes. The service must
+    /// therefore stay entitlement-blind; the top-up is stars, not an exemption.
+    func testBudgetIsNotEntitlementAware() throws {
+        let scratch = try XCTUnwrap(UserDefaults(suiteName: "LevelLivesServiceTests.scoped"))
+        UserDefaults.standard.removePersistentDomain(forName: "LevelLivesServiceTests.scoped")
+        defer { UserDefaults.standard.removePersistentDomain(forName: "LevelLivesServiceTests.scoped") }
+
+        let scoped = LevelLivesService(defaults: scratch)
+        for _ in 0..<LevelLivesService.maxLives {
+            scoped.consumeLife()
+        }
+        XCTAssertEqual(scoped.livesRemaining(), 0)
+        XCTAssertFalse(scoped.hasLivesRemaining())
+    }
+
     func testDailyResetRestoresMaxLives() {
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
 

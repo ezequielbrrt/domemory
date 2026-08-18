@@ -35,7 +35,7 @@ struct OutOfLivesModal: View {
                 LivesRow(remaining: 0)
                     .padding(.bottom, 12)
 
-                Text(Strings.outOfLivesMessage)
+                Text(canWatchAd ? Strings.outOfLivesMessage : Strings.outOfLivesMessageNoAd)
                     .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(Color.textMuted)
                     .multilineTextAlignment(.center)
@@ -43,7 +43,7 @@ struct OutOfLivesModal: View {
 
                 VStack(spacing: 12) {
                     if canWatchAd {
-                        Button(action: onWatchAd) {
+                        Button(action: { HapticsService.shared.fire(.tap); onWatchAd() }) {
                             Text(isAdInProgress ? Strings.adLoading : Strings.watchAdForLife)
                                 .font(.system(size: 17, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
@@ -58,7 +58,7 @@ struct OutOfLivesModal: View {
                     }
 
                     if canBuyWithStars {
-                        Button(action: onBuyWithStars) {
+                        Button(action: onBuyWithStars) {  // emits .reward on the spend; a .tap here would double-buzz
                             HStack(spacing: 6) {
                                 Text(Strings.buyLifeFormat(LevelPowerUp.lifeCost))
                                 Image(systemName: "star.fill")
@@ -75,7 +75,7 @@ struct OutOfLivesModal: View {
                         .buttonStyle(.plain)
                     }
 
-                    Button(action: onDismiss) {
+                    Button(action: { HapticsService.shared.fire(.tap); onDismiss() }) {
                         Text(Strings.cancel)
                             .font(.system(size: 17, weight: .semibold, design: .rounded))
                             .foregroundStyle(Color.primaryColor)
