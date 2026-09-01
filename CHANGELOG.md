@@ -35,7 +35,7 @@ All notable changes to this project will be documented in this file.
 - Added Levels, an endless mode of procedurally generated boards where clearing a level unlocks the next. Each board is generated from its level number, so a given level draws the same set of emoji on every device.
 - Added a 1-3 star rating on every level, earned on how much time is left and how few wrong matches were made, with any level replayable to improve its rating.
 - Added a spendable star economy: stars earned by clearing levels buy four in-game power-ups (+15 seconds, a peek at the board, a 10-second clock freeze, and revealing a matching pair), an extra life for 10 stars, or a skip past a level you are stuck on for 15.
-- Added a budget of four Levels lives per day, spent only on a loss and refilled by a rewarded ad or 10 stars.
+- Added a budget of four Levels lives per day, spent only on a loss and refilled by a rewarded ad or 10 stars. It applies to everyone, Remove Ads purchasers included, so losing always costs something.
 - Added a mistake budget to every level, so a level can no longer be brute-forced by tapping until the clock runs out. Ordinary memoramas are unaffected and still end only on the clock. Busting it offers a rescue — a rewarded ad or 8 stars — that forgives three mistakes and resumes the same board without costing a life.
 - Added a four-slide Levels intro carousel covering progression, stars, lives and the mistake budget, shown the first time the Levels tab is opened and reopenable from an info button in the level map header.
 - Added app-wide haptic feedback across cards, matches, mismatches, wins, losses, star rewards and multiplayer turn changes, with a Haptics toggle in Settings that defaults to on.
@@ -47,8 +47,7 @@ All notable changes to this project will be documented in this file.
 - Replaced the custom "All / My memoramas" segmented picker with a native iOS tab bar pinned to the bottom of the menu, which now also carries the Levels tab.
 - Rewrote the What's New sheet around the 4.0.0 highlights — Levels, star ratings, power-ups, and lives and mistakes — replacing the 3.1.0 list.
 - Bumped `MARKETING_VERSION` to 4.0.0, without which the What's New sheet would never have presented and every existing player would have upgraded into Levels with no announcement at all.
-- Applied the daily lives budget to Remove Ads purchasers, who were previously exempt from it and so had nothing at stake in Levels.
-- Narrowed Remove Ads to suppress only involuntary advertising — banners, natives, interstitials and app-open. Rewarded ads are opt-in and now stay available to purchasers, which is what keeps the lives and mistake refills reachable for them.
+- Narrowed Remove Ads to suppress only involuntary advertising — banners, natives, interstitials and app-open. Rewarded ads are opt-in, so purchasers now keep them: the in-game extra-time and hint ads that 3.1.0 withheld from them, as well as the new Levels lives and mistake refills.
 - Pinned Tuist to 4.195.6 in `.mise.toml`, matching the version the release lane hardcodes, so `tuist generate` no longer fails with no version to resolve.
 
 ### Fixed
