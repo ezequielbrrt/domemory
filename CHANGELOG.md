@@ -24,6 +24,9 @@ All notable changes to this project will be documented in this file.
 - Changed the `whats-new-ios` dependency from its SSH URL to HTTPS so clones and CI no longer need a deploy key.
 - Upgraded WhatsNewKit from 1.0.0 to 2.0.0 and adopted its redesigned sheet, which now shows a version badge and groups the highlights into a bordered card.
 - Restyled the What's New sheet with the app's own palette instead of `Color.accentColor`, which was rendering the sheet in the asset-catalog blue rather than the DoMemory violet.
+- Inverted the localized App Store name in all 10 locales to the required `<keywords>: <app name>` order, so `DoMemory: Memory Card Game` becomes `Memory Card Game: DoMemory`. Each locale's existing name was inverted in place rather than re-translated, so every storefront keeps the keyword phrase it is already indexed for.
+- Normalized the App Store name separator to one ASCII colon and one space, replacing the spaced colon in `fr-FR` and the fullwidth colon in `ja` and `zh-Hans`.
+- Bumped `MARKETING_VERSION` to 4.1.0 in `Project.swift` and regenerated `project.pbxproj`. `CURRENT_PROJECT_VERSION` is untouched because the fastlane release lane owns the build number.
 
 [3.1.0] 23-06-2026
 
