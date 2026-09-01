@@ -32,11 +32,11 @@ All notable changes to this project will be documented in this file.
 [4.0.0] 18-08-2026
 
 ### Added
-- Added Levels, an endless mode of procedurally generated boards where clearing a level unlocks the next. Each board is generated from its level number, so the same level deals the same cards on every device.
+- Added Levels, an endless mode of procedurally generated boards where clearing a level unlocks the next. Each board is generated from its level number, so a given level draws the same set of emoji on every device.
 - Added a 1-3 star rating on every level, earned on how much time is left and how few wrong matches were made, with any level replayable to improve its rating.
 - Added a spendable star economy: stars earned by clearing levels buy four in-game power-ups (+15 seconds, a peek at the board, a 10-second clock freeze, and revealing a matching pair), an extra life for 10 stars, or a skip past a level you are stuck on for 15.
 - Added a budget of four Levels lives per day, spent only on a loss and refilled by a rewarded ad or 10 stars.
-- Added a per-level mistake budget, so a board can no longer be brute-forced by tapping until the clock runs out. Busting it offers a rescue — a rewarded ad or 8 stars — that forgives three mistakes and resumes the same board without costing a life.
+- Added a mistake budget to every level, so a level can no longer be brute-forced by tapping until the clock runs out. Ordinary memoramas are unaffected and still end only on the clock. Busting it offers a rescue — a rewarded ad or 8 stars — that forgives three mistakes and resumes the same board without costing a life.
 - Added a four-slide Levels intro carousel covering progression, stars, lives and the mistake budget, shown the first time the Levels tab is opened and reopenable from an info button in the level map header.
 - Added app-wide haptic feedback across cards, matches, mismatches, wins, losses, star rewards and multiplayer turn changes, with a Haptics toggle in Settings that defaults to on.
 - Added a "Levels" App Store screenshot to both the iPhone and iPad galleries in all 10 supported locales.
@@ -54,7 +54,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Fixed the app-open ad landing on top of the What's New sheet. The ad rides `didBecomeActive`, which fires again the moment the ATT prompt is dismissed, so the release announcement was buried before it could be read.
 - Fixed `export_screenshots.py` reporting success after exporting an incomplete set. A spec whose artboard was missing was skipped silently, so a partial export could overwrite the previous release's screenshots.
-- Fixed both Paper page scripts silently doing nothing after Paper renamed `open_page` to `open_file`. They checked only for a JSON-RPC `error` key, while Paper reports an unknown tool as `isError` inside `result`, so each script carried on against whichever page happened to be open.
+- Fixed `export_ipad_screenshots.py` and `split_ipad_paper_pages.py` silently doing nothing after Paper renamed `open_page` to `open_file`. They checked only for a JSON-RPC `error` key, while Paper reports an unknown tool as `isError` inside `result`, so each script carried on against whichever page happened to be open.
 
 [3.1.0] 23-06-2026
 
