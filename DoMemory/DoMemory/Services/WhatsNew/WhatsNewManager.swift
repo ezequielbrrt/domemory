@@ -16,8 +16,23 @@ final class WhatsNewManager: ObservableObject {
 
     private let defaults: UserDefaults
 
-    init(defaults: UserDefaults = .standard) {
+    /// - Parameter isExistingUser: whether this install has played before. A missing
+    ///   stored version cannot tell us that on its own — someone upgrading from a build
+    ///   that predates this manager has no stored version either, and they *should* see
+    ///   the sheet. Onboarding state is what separates the two.
+    init(defaults: UserDefaults = .standard, isExistingUser: Bool) {
         self.defaults = defaults
+
+        // A first launch has nothing to announce: the "new" features are simply the
+        // app. Record the running version so the sheet stays quiet until a real
+        // upgrade happens, rather than greeting a brand-new player with release
+        // notes for a version they have never not had.
+        guard isExistingUser else {
+            defaults.set(Self.currentVersion, forKey: UserDefaultsKeys.whatsNewLastSeenVersion)
+            shouldShow = false
+            return
+        }
+
         let seen = defaults.string(forKey: UserDefaultsKeys.whatsNewLastSeenVersion)
         shouldShow = Self.currentVersion != seen
         if shouldShow, let version = Self.currentVersion {

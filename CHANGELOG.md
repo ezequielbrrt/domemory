@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Fixed Settings row subtitles truncating mid-word, by replacing the per-row action pills with chevrons and switches where the pill was not the point.
 - Fixed notification permission granted from the menu never enabling reminders: the grant did not set `notificationsEnabled`, which every scheduling method checks, so users who accepted received no reminders until they separately toggled Settings on.
 - Fixed the ATT, ads, and notification prompts firing back to back on first menu appearance with no context between them.
+- Fixed the What's New sheet appearing on a brand-new install, greeting a first-time player with release notes for a version they had never not had. Nothing wrote `whatsNewLastSeenVersion` on install, so the version gate read the empty slot as an upgrade. A first launch now records the running version and stays quiet. Onboarding state, not the empty slot, decides this — someone upgrading from a build that predates the What's New manager also has nothing stored, and they still see the sheet.
 
 ### Changed
 - Regrouped Settings into four titled sections — Game, Preferences, Purchases and About — each a single card with hairline separators, replacing ten individually shadowed cards.

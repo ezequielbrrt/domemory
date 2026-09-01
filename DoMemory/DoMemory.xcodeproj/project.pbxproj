@@ -90,6 +90,7 @@
 		66874457ACEE73B1C8BCFDA8 /* InviteLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B2F265B2B17D94E65431C3 /* InviteLink.swift */; };
 		6976BE00BC3CC415C28F5B03 /* FirebaseSessionsObjC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C49A16BA60A33A5D4DD667B8 /* FirebaseSessionsObjC.framework */; };
 		6B292345B7B5712A1F0E6515 /* LevelLivesServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0309EC51A91F7E6966E98006 /* LevelLivesServiceTests.swift */; };
+		6CCEDE337FE8CCF18921212C /* WhatsNewManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88E5FFF2B567B5B36E73164F /* WhatsNewManagerTests.swift */; };
 		6D1D6FEC628123E546513E4F /* nanopb.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6458F7C6BA56025928C3A7B5 /* nanopb.framework */; };
 		6E35FE50F8C771FF49528145 /* GTMSessionFetcher_GTMSessionFetcherCore.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C9F64375C9249CFD343F2D5B /* GTMSessionFetcher_GTMSessionFetcherCore.bundle */; };
 		6E91EF09820119F83AF21A4A /* WhatsNewContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D3523464992CC70D38CFE5 /* WhatsNewContent.swift */; };
@@ -399,6 +400,7 @@
 		846021B8F99EFD207858ECC5 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreTelephony.framework; sourceTree = DEVELOPER_DIR; };
 		859DD5389F5EB017E491BC14 /* LevelCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelCurve.swift; sourceTree = "<group>"; };
 		867122F55C9E89CC4318A76D /* HapticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsService.swift; sourceTree = "<group>"; };
+		88E5FFF2B567B5B36E73164F /* WhatsNewManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewManagerTests.swift; sourceTree = "<group>"; };
 		8CE112DBDE53DA20D32621AB /* PurchaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseService.swift; sourceTree = "<group>"; };
 		913603DB308279B454551AF4 /* GoogleAppMeasurementCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GoogleAppMeasurementCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		941A9B53D6F54040761109A8 /* AdsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsService.swift; sourceTree = "<group>"; };
@@ -1222,6 +1224,7 @@
 				F6ACF9294A68A492E545DA60 /* MemoryGameTests.swift */,
 				7EA877981D5E10DC5E4EA4F1 /* ReviewHistoryMigrationTests.swift */,
 				577FC55F2643D836ED7CFE39 /* StarWalletServiceTests.swift */,
+				88E5FFF2B567B5B36E73164F /* WhatsNewManagerTests.swift */,
 			);
 			path = DoMemoryTests;
 			sourceTree = "<group>";
@@ -1478,6 +1481,7 @@
 				8A6E24BD38735E13906B3029 /* MemoryGameTests.swift in Sources */,
 				78B1A948387E1E49C812F9CB /* ReviewHistoryMigrationTests.swift in Sources */,
 				1C9C667E21A1FE8857874A34 /* StarWalletServiceTests.swift in Sources */,
+				6CCEDE337FE8CCF18921212C /* WhatsNewManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
