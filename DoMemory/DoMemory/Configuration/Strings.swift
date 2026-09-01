@@ -27,7 +27,6 @@ enum Strings {
     }
     static let achievementsTitle = NSLocalizedString("achievements_title", comment: "Achievements screen title")
     static let achievementsSubtitle = NSLocalizedString("achievements_subtitle", comment: "Achievements settings row subtitle")
-    static let achievementsView = NSLocalizedString("achievements_view", comment: "Achievements settings row action")
     static let achievementsStatsSection = NSLocalizedString("achievements_stats_section", comment: "Stats section header")
     static let achievementsBadgesSection = NSLocalizedString("achievements_badges_section", comment: "Badges section header")
     static let statTotalGames = NSLocalizedString("stat_total_games", comment: "Total games stat label")
@@ -38,10 +37,8 @@ enum Strings {
     static let statMultiplayerWins = NSLocalizedString("stat_multiplayer_wins", comment: "Multiplayer wins stat label")
     static let settingsTitle = NSLocalizedString("settings_title", comment: "Settings screen title")
     static let settingsDescription = NSLocalizedString("settings_description", comment: "Settings screen subtitle")
-    static let settingsSelectDifficulty = NSLocalizedString("settings_select_difficulty", comment: "Button to select difficulty")
     static let settingsThemeTitle = NSLocalizedString("settings_theme_title", comment: "Theme setting title")
     static let settingsThemePrompt = NSLocalizedString("settings_theme_prompt", comment: "Theme picker subtitle")
-    static let settingsSelectTheme = NSLocalizedString("settings_select_theme", comment: "Button to select theme")
     static let settingsRemoveAdsTitle = NSLocalizedString("settings_remove_ads_title", comment: "Remove ads setting title")
     static let settingsRemoveAdsDescription = NSLocalizedString("settings_remove_ads_description", comment: "Remove ads setting description")
     static let settingsRemoveAdsActionFormat = NSLocalizedString("settings_remove_ads_action_format", comment: "Remove ads purchase action with localized price")
@@ -242,16 +239,35 @@ enum Strings {
     static let settingsHapticsTitle = NSLocalizedString("settings_haptics_title", comment: "Haptic feedback setting title")
     static let settingsHapticsDescriptionOn = NSLocalizedString("settings_haptics_description_on", comment: "Haptics enabled description")
     static let settingsHapticsDescriptionOff = NSLocalizedString("settings_haptics_description_off", comment: "Haptics disabled description")
-    static let settingsHapticsEnable = NSLocalizedString("settings_haptics_enable", comment: "Enable haptics button")
-    static let settingsHapticsDisable = NSLocalizedString("settings_haptics_disable", comment: "Disable haptics button")
     static let settingsNotificationsTitle = NSLocalizedString("settings_notifications_title", comment: "Notifications setting title")
     static let settingsNotificationsDescriptionOn = NSLocalizedString("settings_notifications_description_on", comment: "Notifications enabled description")
     static let settingsNotificationsDescriptionOff = NSLocalizedString("settings_notifications_description_off", comment: "Notifications disabled description")
-    static let settingsNotificationsEnable = NSLocalizedString("settings_notifications_enable", comment: "Enable notifications button")
-    static let settingsNotificationsDisable = NSLocalizedString("settings_notifications_disable", comment: "Disable notifications button")
     static let settingsNotificationsDeniedTitle = NSLocalizedString("settings_notifications_denied_title", comment: "Alert title when notification permission denied")
     static let settingsNotificationsDeniedMessage = NSLocalizedString("settings_notifications_denied_message", comment: "Alert message when notification permission denied")
     static let settingsNotificationsOpenSettings = NSLocalizedString("settings_notifications_open_settings", comment: "Button to open iOS Settings")
+
+    // Settings sections
+    static let settingsSectionGame = NSLocalizedString("settings_section_game", comment: "Settings section: game")
+    static let settingsSectionPreferences = NSLocalizedString("settings_section_preferences", comment: "Settings section: preferences")
+    static let settingsSectionPurchases = NSLocalizedString("settings_section_purchases", comment: "Settings section: purchases")
+    static let settingsSectionAbout = NSLocalizedString("settings_section_about", comment: "Settings section: about")
+
+    // Notification permission primer
+    static let notificationPrimerTitle = NSLocalizedString("notification_primer_title", comment: "Notification primer headline")
+    static let notificationPrimerMessage = NSLocalizedString("notification_primer_message", comment: "Notification primer subtitle introducing the benefits")
+    static let notificationPrimerBenefitStreak = NSLocalizedString("notification_primer_benefit_streak", comment: "Notification primer benefit: streak about to end")
+    static let notificationPrimerBenefitInactive = NSLocalizedString("notification_primer_benefit_inactive", comment: "Notification primer benefit: haven't played in a while")
+    static let notificationPrimerBenefitNoSpam = NSLocalizedString("notification_primer_benefit_no_spam", comment: "Notification primer benefit: reminders stay rare")
+    static let notificationPrimerPreviewTitle = NSLocalizedString("notification_primer_preview_title", comment: "Title of the sample notification shown in the primer")
+    static let notificationPrimerPreviewMessage = NSLocalizedString("notification_primer_preview_message", comment: "Body of the sample notification shown in the primer")
+    static let notificationPrimerEnable = NSLocalizedString("notification_primer_enable", comment: "Notification primer primary button")
+    static let notificationPrimerLater = NSLocalizedString("notification_primer_later", comment: "Notification primer secondary button")
+
+    // Review and What's New settings rows
+    static let settingsReviewTitle = NSLocalizedString("settings_review_title", comment: "Write a review setting title")
+    static let settingsReviewDescription = NSLocalizedString("settings_review_description", comment: "Write a review setting description")
+    static let settingsWhatsNewTitle = NSLocalizedString("settings_whats_new_title", comment: "What's New setting title")
+    static let settingsWhatsNewDescription = NSLocalizedString("settings_whats_new_description", comment: "What's New setting description")
 
     // What's New sheet (v3.0.0)
     static let whatsNewTitle = NSLocalizedString("whats_new_title", comment: "What's New sheet headline")

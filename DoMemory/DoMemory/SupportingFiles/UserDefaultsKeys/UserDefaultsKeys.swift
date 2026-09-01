@@ -12,10 +12,14 @@ class UserDefaultsKeys: NSObject {
     static var favoriteIDs: String = "favoriteIDs"
     static var customMemoramas: String = "customMemoramas"
     static var themePreference: String = "themePreference"
+    // Legacy ReviewRequestService keys, read once by ReviewHistoryMigration and
+    // then removed. Do not use them for new work.
     static var reviewSuccessfulWins: String = "reviewSuccessfulWins"
     static var reviewLastPromptedVersion: String = "reviewLastPromptedVersion"
     static var reviewLastPromptedDate: String = "reviewLastPromptedDate"
+    static var reviewHistoryMigrated: String = "reviewHistoryMigrated"
     static var notificationsEnabled: String = "notificationsEnabled"
+    static var notificationPrimerShown: String = "notificationPrimerShown"
     static var whatsNewLastSeenVersion: String = "whatsNewLastSeenVersion"
     static var onboardingIntroShown: String = "onboardingIntroShown"
     static var levelsIntroShown: String = "levelsIntroShown"

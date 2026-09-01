@@ -5,6 +5,7 @@
 //  Created by Ezequiel Barreto on 23/09/20.
 //
 
+import ReviewFlow
 import SwiftUI
 
 @main
@@ -16,6 +17,9 @@ struct DoMemoryApp: App {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(AppTheme(rawValue: themePreference)?.colorScheme)
+                // Connects the shared manager to StoreKit's prompt. Recording a
+                // win anywhere in the app flows back through this modifier.
+                .reviewRequest(using: AppReviews.manager)
                 .task {
                     await NotificationService.shared.syncAuthorizationStatus()
                     guard UserDefaults.standard.bool(forKey: UserDefaultsKeys.notificationsEnabled) else { return }

@@ -32,12 +32,22 @@ final class NotificationService {
 
     private init() {}
 
-    func requestPermission() async -> Bool {
-        do {
-            return try await center.requestAuthorization(options: [.alert, .sound, .badge])
-        } catch {
-            return false
-        }
+    // Deliberately no `requestPermission()`. Asking is the primer's job now, and
+    // a bare authorization request here is the exact bug this service used to
+    // have: a grant that never sets `notificationsEnabled` leaves the player
+    // authorized and silently un-reminded. Go through `activateReminders()`.
+
+    /// Turns reminders on and arms every scheduled nudge.
+    ///
+    /// Granting system authorization is not enough on its own: every scheduling
+    /// method early-returns on `notificationsEnabled`, so a grant that skips this
+    /// leaves the user authorized but silently un-reminded. Call this from any
+    /// path that obtains authorization.
+    @MainActor
+    func activateReminders() {
+        UserDefaults.standard.set(true, forKey: UserDefaultsKeys.notificationsEnabled)
+        scheduleInactivityReminder()
+        refreshStreakAtRiskReminder()
     }
 
     func scheduleInactivityReminder() {

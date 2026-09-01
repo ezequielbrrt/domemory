@@ -29,6 +29,8 @@ let appTarget = Target.target(
         .external(name: "FirebaseDatabase"),
         .external(name: "FirebaseMessaging"),
         .external(name: "GoogleMobileAds"),
+        .external(name: "NotificationPermissionKit"),
+        .external(name: "ReviewFlow"),
         .external(name: "WaterfallGrid"),
         .external(name: "WhatsNewKit"),
     ],

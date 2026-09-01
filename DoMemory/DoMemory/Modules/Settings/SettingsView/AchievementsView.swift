@@ -48,6 +48,10 @@ struct AchievementsView: View {
         }
         .navigationTitle(Strings.achievementsTitle)
         .navigationBarTitleDisplayMode(.inline)
+        // Same reason as SettingsView: without an opaque bar the stat cards
+        // scroll straight under the title and the floating back button.
+        .toolbarBackground(Color.appBackground, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .onAppear {
             AnalyticsService.log(.screenView(name: "achievements", screenClass: "AchievementsView"))
         }

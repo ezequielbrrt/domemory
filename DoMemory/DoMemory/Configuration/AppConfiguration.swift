@@ -35,6 +35,10 @@ enum AnalyticsEvent {
     case adLifecycle(placement: String, action: String)
     case whatsNewShown(version: String)
     case whatsNewDismissed(version: String)
+    case whatsNewOpenedFromSettings(version: String)
+    case notificationPrimerShown(source: String)
+    case notificationPrimerCompleted(source: String, outcome: String)
+    case reviewLinkOpened(source: String)
     case dailyChallengeStarted(streak: Int)
     case dailyChallengeFinished(result: String, streak: Int)
     case streakMilestone(days: Int)
@@ -82,6 +86,10 @@ enum AnalyticsEvent {
         case .adLifecycle: return "ad_lifecycle"
         case .whatsNewShown: return "whats_new_shown"
         case .whatsNewDismissed: return "whats_new_dismissed"
+        case .whatsNewOpenedFromSettings: return "whats_new_opened_from_settings"
+        case .notificationPrimerShown: return "notification_primer_shown"
+        case .notificationPrimerCompleted: return "notification_primer_completed"
+        case .reviewLinkOpened: return "review_link_opened"
         case .dailyChallengeStarted: return "daily_challenge_started"
         case .dailyChallengeFinished: return "daily_challenge_finished"
         case .streakMilestone: return "streak_milestone"
@@ -202,6 +210,17 @@ enum AnalyticsEvent {
             return ["version": version]
         case .whatsNewDismissed(let version):
             return ["version": version]
+        case .whatsNewOpenedFromSettings(let version):
+            return ["version": version]
+        case .notificationPrimerShown(let source):
+            return ["source": source]
+        case .notificationPrimerCompleted(let source, let outcome):
+            return [
+                "source": source,
+                "outcome": outcome
+            ]
+        case .reviewLinkOpened(let source):
+            return ["source": source]
         case .dailyChallengeStarted(let streak):
             return ["streak": streak]
         case .dailyChallengeFinished(let result, let streak):

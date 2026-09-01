@@ -56,7 +56,6 @@
 "menu_tab_levels" = "Levels";
 "menu_tab_mine" = "My memoramas";
 "settings_description" = "Adjust your game preferences";
-"settings_select_difficulty" = "Select";
 "settings_title" = "Settings";
 "settings_remove_ads_action_format" = "Buy %@";
 "settings_remove_ads_description" = "Remove banners and interstitials";
@@ -83,7 +82,6 @@
 "settings_restore_success_message" = "Your previous purchase has been restored.";
 "stats_played_label" = "played";
 "stats_won_label" = "won";
-"settings_select_theme" = "Select";
 "settings_theme_prompt" = "Choose your preferred appearance";
 "settings_theme_title" = "Theme";
 "theme_dark" = "Dark";
@@ -127,13 +125,9 @@
 "settings_haptics_title" = "Haptics";
 "settings_haptics_description_on" = "Buttons and card matches give a small vibration.";
 "settings_haptics_description_off" = "Vibration feedback is turned off.";
-"settings_haptics_enable" = "Turn on";
-"settings_haptics_disable" = "Turn off";
 "settings_notifications_title" = "Reminders";
 "settings_notifications_description_on" = "You'll be reminded if you haven't played in 2 days";
 "settings_notifications_description_off" = "Get notified when you haven't played in a while";
-"settings_notifications_enable" = "Enable";
-"settings_notifications_disable" = "Disable";
 "settings_notifications_denied_title" = "Notifications Disabled";
 "settings_notifications_denied_message" = "Enable notifications for DoMemory in iOS Settings to receive reminders.";
 "settings_notifications_open_settings" = "Open Settings";
@@ -169,7 +163,6 @@
 /* Achievements */
 "achievements_title" = "Achievements";
 "achievements_subtitle" = "Track your progress and badges";
-"achievements_view" = "View";
 "achievements_stats_section" = "Your Stats";
 "achievements_badges_section" = "Badges";
 "stat_total_games" = "Games Played";
@@ -243,3 +236,26 @@
 "whats_new_lives_title" = "Lives & Mistakes";
 "whats_new_lives_description" = "You get 4 lives a day, and every level allows only so many wrong matches. Out of either? Watch an ad or spend stars to keep going.";
 "levels_timer_frozen_format" = "Timer frozen, %d seconds left";
+
+/* Notification permission primer */
+"notification_primer_title" = "Keep your streak alive";
+"notification_primer_message" = "Turn on reminders and DoMemory will let you know when:";
+"notification_primer_benefit_streak" = "Your daily challenge streak is about to end";
+"notification_primer_benefit_inactive" = "You haven't played in a couple of days";
+"notification_primer_benefit_no_spam" = "That's it — just a few nudges, never spam";
+"notification_primer_preview_title" = "Don't break your streak!";
+"notification_primer_preview_message" = "Your 5-day streak ends tonight. Play today's challenge!";
+"notification_primer_enable" = "Turn On Reminders";
+"notification_primer_later" = "Maybe Later";
+
+/* Review and What's New settings rows */
+"settings_review_title" = "Rate DoMemory";
+"settings_review_description" = "Reviews help other players find the game";
+"settings_whats_new_title" = "What's New";
+"settings_whats_new_description" = "See what changed in the latest update";
+
+/* Settings sections */
+"settings_section_game" = "Game";
+"settings_section_preferences" = "Preferences";
+"settings_section_purchases" = "Purchases";
+"settings_section_about" = "About";
