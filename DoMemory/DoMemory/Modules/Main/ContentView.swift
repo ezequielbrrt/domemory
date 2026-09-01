@@ -9,9 +9,15 @@ import SwiftUI
 import WhatsNewKit
 
 struct ContentView: View {
-    @State private var hasOnboarded: Bool = UserManageObject().getUserSettings() != nil
-    @StateObject private var whatsNewManager = WhatsNewManager()
+    @State private var hasOnboarded: Bool = ContentView.hasPlayedBefore
+    @StateObject private var whatsNewManager = WhatsNewManager(isExistingUser: ContentView.hasPlayedBefore)
     @State private var showLaunch = true
+
+    /// A stored `UserSettings` record is the app's own marker for "this install has
+    /// been used before" — it is written when onboarding completes and never removed.
+    private static var hasPlayedBefore: Bool {
+        UserManageObject().getUserSettings() != nil
+    }
 
     var body: some View {
         ZStack {
