@@ -237,7 +237,7 @@
 "whats_new_lives_description" = "每天 4 个生命，每关允许的失误次数也有限。用完了？观看广告或花费星星即可继续。";
 "levels_timer_frozen_format" = "时间已冻结，剩余 %d 秒";
 
-// Notification permission primer
+/* Notification permission primer */
 "notification_primer_title" = "保持你的连续纪录";
 "notification_primer_message" = "开启提醒，DoMemory 会在这些时候通知你：";
 "notification_primer_benefit_streak" = "每日挑战的连续纪录即将中断";
@@ -248,13 +248,13 @@
 "notification_primer_enable" = "开启提醒";
 "notification_primer_later" = "以后再说";
 
-// Review and What's New settings rows
+/* Review and What's New settings rows */
 "settings_review_title" = "为 DoMemory 评分";
 "settings_review_description" = "评价能帮助更多玩家发现这款游戏";
 "settings_whats_new_title" = "新功能";
 "settings_whats_new_description" = "看看最新版本有哪些变化";
 
-// Settings sections
+/* Settings sections */
 "settings_section_game" = "游戏";
 "settings_section_preferences" = "偏好设置";
 "settings_section_purchases" = "购买";

@@ -237,7 +237,7 @@
 "whats_new_lives_description" = "Tienes 4 vidas al día y cada nivel permite un número limitado de fallos. ¿Se te acabaron? Mira un anuncio o gasta estrellas para seguir.";
 "levels_timer_frozen_format" = "Reloj congelado, quedan %d segundos";
 
-// Notification permission primer
+/* Notification permission primer */
 "notification_primer_title" = "Mantén viva tu racha";
 "notification_primer_message" = "Activa los recordatorios y DoMemory te avisará cuando:";
 "notification_primer_benefit_streak" = "Tu racha del reto diario esté por terminar";
@@ -248,13 +248,13 @@
 "notification_primer_enable" = "Activar recordatorios";
 "notification_primer_later" = "Quizá después";
 
-// Review and What's New settings rows
+/* Review and What's New settings rows */
 "settings_review_title" = "Califica DoMemory";
 "settings_review_description" = "Las reseñas ayudan a otros jugadores a encontrar el juego";
 "settings_whats_new_title" = "Novedades";
 "settings_whats_new_description" = "Mira qué cambió en la última actualización";
 
-// Settings sections
+/* Settings sections */
 "settings_section_game" = "Juego";
 "settings_section_preferences" = "Preferencias";
 "settings_section_purchases" = "Compras";

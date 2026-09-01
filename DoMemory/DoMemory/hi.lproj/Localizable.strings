@@ -237,7 +237,7 @@
 "whats_new_lives_description" = "हर दिन 4 जीवन मिलते हैं, और हर स्तर में सीमित गलतियाँ ही चलती हैं। खत्म हो गए? विज्ञापन देखें या सितारे खर्च करें।";
 "levels_timer_frozen_format" = "घड़ी रुकी है, %d सेकंड बाकी";
 
-// Notification permission primer
+/* Notification permission primer */
 "notification_primer_title" = "अपनी लय बनाए रखें";
 "notification_primer_message" = "रिमाइंडर चालू करें और DoMemory आपको तब बताएगा जब:";
 "notification_primer_benefit_streak" = "आपकी दैनिक चुनौती की लय टूटने वाली हो";
@@ -248,13 +248,13 @@
 "notification_primer_enable" = "रिमाइंडर चालू करें";
 "notification_primer_later" = "बाद में";
 
-// Review and What's New settings rows
+/* Review and What's New settings rows */
 "settings_review_title" = "DoMemory को रेट करें";
 "settings_review_description" = "समीक्षाएँ दूसरे खिलाड़ियों को गेम खोजने में मदद करती हैं";
 "settings_whats_new_title" = "नया क्या है";
 "settings_whats_new_description" = "देखें कि नए अपडेट में क्या बदला";
 
-// Settings sections
+/* Settings sections */
 "settings_section_game" = "गेम";
 "settings_section_preferences" = "प्राथमिकताएँ";
 "settings_section_purchases" = "खरीदारी";

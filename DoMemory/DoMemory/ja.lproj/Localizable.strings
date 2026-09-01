@@ -237,7 +237,7 @@
 "whats_new_lives_description" = "ライフは1日4個、各レベルで許されるミスの数も決まっています。なくなったら広告を見るか、スターを使って続行できます。";
 "levels_timer_frozen_format" = "時間停止中、残り%d秒";
 
-// Notification permission primer
+/* Notification permission primer */
 "notification_primer_title" = "連続記録を守ろう";
 "notification_primer_message" = "リマインダーをオンにすると、次のときにお知らせします：";
 "notification_primer_benefit_streak" = "デイリーチャレンジの連続記録が途切れそうなとき";
@@ -248,13 +248,13 @@
 "notification_primer_enable" = "リマインダーをオンにする";
 "notification_primer_later" = "あとで";
 
-// Review and What's New settings rows
+/* Review and What's New settings rows */
 "settings_review_title" = "DoMemoryを評価";
 "settings_review_description" = "レビューは他のプレイヤーがゲームを見つける助けになります";
 "settings_whats_new_title" = "新機能";
 "settings_whats_new_description" = "最新アップデートの変更点を見る";
 
-// Settings sections
+/* Settings sections */
 "settings_section_game" = "ゲーム";
 "settings_section_preferences" = "環境設定";
 "settings_section_purchases" = "購入";

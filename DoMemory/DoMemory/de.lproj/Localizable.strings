@@ -237,7 +237,7 @@
 "whats_new_lives_description" = "Du bekommst 4 Leben pro Tag, und jedes Level erlaubt nur eine begrenzte Zahl an Fehlern. Alles aufgebraucht? Sieh ein Video an oder gib Sterne aus.";
 "levels_timer_frozen_format" = "Zeit eingefroren, noch %d Sekunden";
 
-// Notification permission primer
+/* Notification permission primer */
 "notification_primer_title" = "Halte deine Serie am Leben";
 "notification_primer_message" = "Aktiviere Erinnerungen und DoMemory sagt dir Bescheid, wenn:";
 "notification_primer_benefit_streak" = "Deine Serie bei der Tagesaufgabe zu Ende geht";
@@ -248,13 +248,13 @@
 "notification_primer_enable" = "Erinnerungen aktivieren";
 "notification_primer_later" = "Später";
 
-// Review and What's New settings rows
+/* Review and What's New settings rows */
 "settings_review_title" = "DoMemory bewerten";
 "settings_review_description" = "Bewertungen helfen anderen, das Spiel zu finden";
 "settings_whats_new_title" = "Neuigkeiten";
 "settings_whats_new_description" = "Sieh dir an, was sich im letzten Update geändert hat";
 
-// Settings sections
+/* Settings sections */
 "settings_section_game" = "Spiel";
 "settings_section_preferences" = "Einstellungen";
 "settings_section_purchases" = "Käufe";

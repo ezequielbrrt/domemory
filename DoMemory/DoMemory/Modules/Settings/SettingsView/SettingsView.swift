@@ -262,6 +262,16 @@ struct SettingsView: View {
                 showNotificationPrimer = false
             }
         }
+        // MenuView stays alive underneath this screen, so its `didBecomeActive`
+        // handler still fires — and both of these surfaces cause exactly that
+        // cycle: the primer through its system alert, What's New through its own
+        // dismissal. Without this the app-open ad lands on top of a screen the
+        // player was asked to read. Same suppression the menu applies.
+        // Watched as one value rather than two handlers, so closing either sheet
+        // cannot un-suppress while the other is still up.
+        .onChange(of: showNotificationPrimer || showWhatsNew) { _, isShowing in
+            AdsService.shared.setFullScreenAdsSuppressed(isShowing)
+        }
         .sheet(isPresented: $showDifficultyPicker) {
             DifficultyPickerSheet(
                 selectedDifficulty: viewModel.difficulty,

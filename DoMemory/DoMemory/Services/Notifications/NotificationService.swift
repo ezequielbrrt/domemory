@@ -32,13 +32,10 @@ final class NotificationService {
 
     private init() {}
 
-    func requestPermission() async -> Bool {
-        do {
-            return try await center.requestAuthorization(options: [.alert, .sound, .badge])
-        } catch {
-            return false
-        }
-    }
+    // Deliberately no `requestPermission()`. Asking is the primer's job now, and
+    // a bare authorization request here is the exact bug this service used to
+    // have: a grant that never sets `notificationsEnabled` leaves the player
+    // authorized and silently un-reminded. Go through `activateReminders()`.
 
     /// Turns reminders on and arms every scheduled nudge.
     ///

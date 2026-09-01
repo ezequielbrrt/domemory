@@ -237,7 +237,7 @@
 "whats_new_lives_description" = "하루 4개의 목숨이 주어지고, 레벨마다 허용되는 실수도 정해져 있습니다. 다 떨어지면 광고를 보거나 별을 쓰세요.";
 "levels_timer_frozen_format" = "시간 정지, %d초 남음";
 
-// Notification permission primer
+/* Notification permission primer */
 "notification_primer_title" = "연속 기록을 지키세요";
 "notification_primer_message" = "알림을 켜면 이런 순간에 알려 드립니다:";
 "notification_primer_benefit_streak" = "일일 도전 연속 기록이 곧 끊길 때";
@@ -248,13 +248,13 @@
 "notification_primer_enable" = "알림 켜기";
 "notification_primer_later" = "나중에";
 
-// Review and What's New settings rows
+/* Review and What's New settings rows */
 "settings_review_title" = "DoMemory 평가하기";
 "settings_review_description" = "리뷰는 다른 플레이어가 게임을 찾는 데 도움이 됩니다";
 "settings_whats_new_title" = "새로운 기능";
 "settings_whats_new_description" = "최신 업데이트에서 바뀐 점 보기";
 
-// Settings sections
+/* Settings sections */
 "settings_section_game" = "게임";
 "settings_section_preferences" = "환경설정";
 "settings_section_purchases" = "구입";

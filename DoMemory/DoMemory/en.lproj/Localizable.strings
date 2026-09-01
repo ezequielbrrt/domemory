@@ -237,7 +237,7 @@
 "whats_new_lives_description" = "You get 4 lives a day, and every level allows only so many wrong matches. Out of either? Watch an ad or spend stars to keep going.";
 "levels_timer_frozen_format" = "Timer frozen, %d seconds left";
 
-// Notification permission primer
+/* Notification permission primer */
 "notification_primer_title" = "Keep your streak alive";
 "notification_primer_message" = "Turn on reminders and DoMemory will let you know when:";
 "notification_primer_benefit_streak" = "Your daily challenge streak is about to end";
@@ -248,13 +248,13 @@
 "notification_primer_enable" = "Turn On Reminders";
 "notification_primer_later" = "Maybe Later";
 
-// Review and What's New settings rows
+/* Review and What's New settings rows */
 "settings_review_title" = "Rate DoMemory";
 "settings_review_description" = "Reviews help other players find the game";
 "settings_whats_new_title" = "What's New";
 "settings_whats_new_description" = "See what changed in the latest update";
 
-// Settings sections
+/* Settings sections */
 "settings_section_game" = "Game";
 "settings_section_preferences" = "Preferences";
 "settings_section_purchases" = "Purchases";
