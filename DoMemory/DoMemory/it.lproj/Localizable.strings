@@ -56,7 +56,6 @@
 "menu_tab_levels" = "Livelli";
 "menu_tab_mine" = "I miei memorama";
 "settings_description" = "Modifica le preferenze di gioco";
-"settings_select_difficulty" = "Seleziona";
 "settings_title" = "Impostazioni";
 "settings_remove_ads_action_format" = "Acquista %@";
 "settings_remove_ads_description" = "Rimuovi banner e interstitial";
@@ -83,7 +82,6 @@
 "settings_restore_success_message" = "Il tuo acquisto precedente è stato ripristinato.";
 "stats_played_label" = "giocate";
 "stats_won_label" = "vinte";
-"settings_select_theme" = "Seleziona";
 "settings_theme_prompt" = "Scegli l’aspetto che preferisci";
 "settings_theme_title" = "Tema";
 "theme_dark" = "Scuro";
@@ -127,13 +125,9 @@
 "settings_haptics_title" = "Vibrazione";
 "settings_haptics_description_on" = "I pulsanti e le coppie trovate danno una leggera vibrazione.";
 "settings_haptics_description_off" = "Il feedback aptico è disattivato.";
-"settings_haptics_enable" = "Attiva";
-"settings_haptics_disable" = "Disattiva";
 "settings_notifications_title" = "Promemoria";
 "settings_notifications_description_on" = "Riceverai un promemoria se non giochi per 2 giorni";
 "settings_notifications_description_off" = "Ricevi una notifica quando non giochi da un po'";
-"settings_notifications_enable" = "Abilita";
-"settings_notifications_disable" = "Disabilita";
 "settings_notifications_denied_title" = "Notifiche disabilitate";
 "settings_notifications_denied_message" = "Abilita le notifiche per DoMemory nelle impostazioni iOS per ricevere promemoria.";
 "settings_notifications_open_settings" = "Apri Impostazioni";
@@ -169,7 +163,6 @@
 /* Achievements */
 "achievements_title" = "Obiettivi";
 "achievements_subtitle" = "Tieni traccia dei tuoi progressi e distintivi";
-"achievements_view" = "Vedi";
 "achievements_stats_section" = "Le tue statistiche";
 "achievements_badges_section" = "Distintivi";
 "stat_total_games" = "Partite giocate";
@@ -243,3 +236,26 @@
 "whats_new_lives_title" = "Vite ed Errori";
 "whats_new_lives_description" = "Hai 4 vite al giorno e ogni livello concede solo un certo numero di errori. Finiti? Guarda un annuncio o spendi stelle per continuare.";
 "levels_timer_frozen_format" = "Tempo congelato, %d secondi rimasti";
+
+// Notification permission primer
+"notification_primer_title" = "Mantieni viva la tua serie";
+"notification_primer_message" = "Attiva i promemoria e DoMemory ti avviserà quando:";
+"notification_primer_benefit_streak" = "La tua serie della sfida quotidiana sta per finire";
+"notification_primer_benefit_inactive" = "Non giochi da un paio di giorni";
+"notification_primer_benefit_no_spam" = "Tutto qui: solo pochi avvisi, mai spam";
+"notification_primer_preview_title" = "Non interrompere la tua serie!";
+"notification_primer_preview_message" = "La tua serie di 5 giorni finisce stasera. Gioca la sfida di oggi!";
+"notification_primer_enable" = "Attiva i promemoria";
+"notification_primer_later" = "Più tardi";
+
+// Review and What's New settings rows
+"settings_review_title" = "Valuta DoMemory";
+"settings_review_description" = "Le recensioni aiutano altri giocatori a trovare il gioco";
+"settings_whats_new_title" = "Novità";
+"settings_whats_new_description" = "Scopri cosa è cambiato nell'ultimo aggiornamento";
+
+// Settings sections
+"settings_section_game" = "Gioco";
+"settings_section_preferences" = "Preferenze";
+"settings_section_purchases" = "Acquisti";
+"settings_section_about" = "Informazioni";

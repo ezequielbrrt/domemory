@@ -56,7 +56,6 @@
 "menu_tab_levels" = "レベル";
 "menu_tab_mine" = "マイメモラマ";
 "settings_description" = "ゲーム設定を調整";
-"settings_select_difficulty" = "選択";
 "settings_title" = "設定";
 "settings_remove_ads_action_format" = "%@で購入";
 "settings_remove_ads_description" = "バナー広告とインタースティシャル広告を削除";
@@ -83,7 +82,6 @@
 "settings_restore_success_message" = "以前のご購入が復元されました。";
 "stats_played_label" = "プレイ";
 "stats_won_label" = "勝利";
-"settings_select_theme" = "選択";
 "settings_theme_prompt" = "お好みの表示テーマを選択";
 "settings_theme_title" = "テーマ";
 "theme_dark" = "ダーク";
@@ -127,13 +125,9 @@
 "settings_haptics_title" = "触覚フィードバック";
 "settings_haptics_description_on" = "ボタン操作やペア成立時に軽い振動が返ります。";
 "settings_haptics_description_off" = "振動フィードバックはオフです。";
-"settings_haptics_enable" = "オンにする";
-"settings_haptics_disable" = "オフにする";
 "settings_notifications_title" = "リマインダー";
 "settings_notifications_description_on" = "2日間プレイしていないとお知らせします";
 "settings_notifications_description_off" = "しばらくプレイしていない場合に通知を受け取る";
-"settings_notifications_enable" = "有効にする";
-"settings_notifications_disable" = "無効にする";
 "settings_notifications_denied_title" = "通知がオフです";
 "settings_notifications_denied_message" = "リマインダーを受け取るには、iOSの設定でDoMemoryの通知を有効にしてください。";
 "settings_notifications_open_settings" = "設定を開く";
@@ -169,7 +163,6 @@
 /* Achievements */
 "achievements_title" = "実績";
 "achievements_subtitle" = "進捗とバッジを確認";
-"achievements_view" = "表示";
 "achievements_stats_section" = "あなたの統計";
 "achievements_badges_section" = "バッジ";
 "stat_total_games" = "プレイ回数";
@@ -243,3 +236,26 @@
 "whats_new_lives_title" = "ライフとミス";
 "whats_new_lives_description" = "ライフは1日4個、各レベルで許されるミスの数も決まっています。なくなったら広告を見るか、スターを使って続行できます。";
 "levels_timer_frozen_format" = "時間停止中、残り%d秒";
+
+// Notification permission primer
+"notification_primer_title" = "連続記録を守ろう";
+"notification_primer_message" = "リマインダーをオンにすると、次のときにお知らせします：";
+"notification_primer_benefit_streak" = "デイリーチャレンジの連続記録が途切れそうなとき";
+"notification_primer_benefit_inactive" = "しばらくプレイしていないとき";
+"notification_primer_benefit_no_spam" = "それだけです。通知は最小限、スパムは送りません";
+"notification_primer_preview_title" = "連続記録が途切れます！";
+"notification_primer_preview_message" = "5日間の連続記録が今夜終わります。今日のチャレンジをプレイしよう！";
+"notification_primer_enable" = "リマインダーをオンにする";
+"notification_primer_later" = "あとで";
+
+// Review and What's New settings rows
+"settings_review_title" = "DoMemoryを評価";
+"settings_review_description" = "レビューは他のプレイヤーがゲームを見つける助けになります";
+"settings_whats_new_title" = "新機能";
+"settings_whats_new_description" = "最新アップデートの変更点を見る";
+
+// Settings sections
+"settings_section_game" = "ゲーム";
+"settings_section_preferences" = "環境設定";
+"settings_section_purchases" = "購入";
+"settings_section_about" = "情報";

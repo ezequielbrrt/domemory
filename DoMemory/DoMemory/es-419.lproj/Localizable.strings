@@ -56,7 +56,6 @@
 "menu_tab_levels" = "Niveles";
 "menu_tab_mine" = "Mis memoramas";
 "settings_description" = "Ajusta tus preferencias de juego";
-"settings_select_difficulty" = "Seleccionar";
 "settings_title" = "Configuración";
 "settings_remove_ads_action_format" = "Comprar %@";
 "settings_remove_ads_description" = "Quita banners e intersticiales";
@@ -83,7 +82,6 @@
 "settings_restore_success_message" = "Tu compra anterior ha sido restaurada.";
 "stats_played_label" = "jugadas";
 "stats_won_label" = "ganadas";
-"settings_select_theme" = "Seleccionar";
 "settings_theme_prompt" = "Elige la apariencia que prefieras";
 "settings_theme_title" = "Tema";
 "theme_dark" = "Oscuro";
@@ -127,13 +125,9 @@
 "settings_haptics_title" = "Vibración";
 "settings_haptics_description_on" = "Los botones y las parejas encontradas vibran ligeramente.";
 "settings_haptics_description_off" = "La respuesta con vibración está desactivada.";
-"settings_haptics_enable" = "Activar";
-"settings_haptics_disable" = "Desactivar";
 "settings_notifications_title" = "Recordatorios";
 "settings_notifications_description_on" = "Te recordaremos si no juegas en 2 días";
 "settings_notifications_description_off" = "Recibe una notificación cuando no hayas jugado en un tiempo";
-"settings_notifications_enable" = "Activar";
-"settings_notifications_disable" = "Desactivar";
 "settings_notifications_denied_title" = "Notificaciones desactivadas";
 "settings_notifications_denied_message" = "Activa las notificaciones para DoMemory en Configuración de iOS para recibir recordatorios.";
 "settings_notifications_open_settings" = "Abrir Configuración";
@@ -169,7 +163,6 @@
 /* Achievements */
 "achievements_title" = "Logros";
 "achievements_subtitle" = "Mira tu progreso e insignias";
-"achievements_view" = "Ver";
 "achievements_stats_section" = "Tus estadísticas";
 "achievements_badges_section" = "Insignias";
 "stat_total_games" = "Partidas jugadas";
@@ -243,3 +236,26 @@
 "whats_new_lives_title" = "Vidas y Errores";
 "whats_new_lives_description" = "Tienes 4 vidas al día y cada nivel permite un número limitado de fallos. ¿Se te acabaron? Mira un anuncio o gasta estrellas para seguir.";
 "levels_timer_frozen_format" = "Reloj congelado, quedan %d segundos";
+
+// Notification permission primer
+"notification_primer_title" = "Mantén viva tu racha";
+"notification_primer_message" = "Activa los recordatorios y DoMemory te avisará cuando:";
+"notification_primer_benefit_streak" = "Tu racha del reto diario esté por terminar";
+"notification_primer_benefit_inactive" = "No hayas jugado en un par de días";
+"notification_primer_benefit_no_spam" = "Eso es todo: solo unos avisos, nunca spam";
+"notification_primer_preview_title" = "¡No pierdas tu racha!";
+"notification_primer_preview_message" = "Tu racha de 5 días termina esta noche. ¡Juega el reto de hoy!";
+"notification_primer_enable" = "Activar recordatorios";
+"notification_primer_later" = "Quizá después";
+
+// Review and What's New settings rows
+"settings_review_title" = "Califica DoMemory";
+"settings_review_description" = "Las reseñas ayudan a otros jugadores a encontrar el juego";
+"settings_whats_new_title" = "Novedades";
+"settings_whats_new_description" = "Mira qué cambió en la última actualización";
+
+// Settings sections
+"settings_section_game" = "Juego";
+"settings_section_preferences" = "Preferencias";
+"settings_section_purchases" = "Compras";
+"settings_section_about" = "Acerca de";

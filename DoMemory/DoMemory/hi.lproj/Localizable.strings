@@ -56,7 +56,6 @@
 "menu_tab_levels" = "स्तर";
 "menu_tab_mine" = "मेरे मेमोरामा";
 "settings_description" = "अपनी गेम पसंद बदलें";
-"settings_select_difficulty" = "चुनें";
 "settings_title" = "सेटिंग्स";
 "settings_remove_ads_action_format" = "%@ खरीदें";
 "settings_remove_ads_description" = "बैनर और इंटरस्टिशियल विज्ञापन हटाएं";
@@ -83,7 +82,6 @@
 "settings_restore_success_message" = "आपकी पिछली खरीदारी पुनर्स्थापित की गई है।";
 "stats_played_label" = "खेले";
 "stats_won_label" = "जीते";
-"settings_select_theme" = "चुनें";
 "settings_theme_prompt" = "अपनी पसंद का रूप चुनें";
 "settings_theme_title" = "थीम";
 "theme_dark" = "डार्क";
@@ -127,13 +125,9 @@
 "settings_haptics_title" = "हैप्टिक्स";
 "settings_haptics_description_on" = "बटन और मिलान वाले जोड़े हल्का कंपन देते हैं।";
 "settings_haptics_description_off" = "कंपन फ़ीडबैक बंद है।";
-"settings_haptics_enable" = "चालू करें";
-"settings_haptics_disable" = "बंद करें";
 "settings_notifications_title" = "रिमाइंडर";
 "settings_notifications_description_on" = "यदि आपने 2 दिनों में नहीं खेला तो आपको याद दिलाया जाएगा";
 "settings_notifications_description_off" = "जब आपने कुछ समय से नहीं खेला हो तो सूचना पाएं";
-"settings_notifications_enable" = "सक्षम करें";
-"settings_notifications_disable" = "अक्षम करें";
 "settings_notifications_denied_title" = "सूचनाएं अक्षम हैं";
 "settings_notifications_denied_message" = "रिमाइंडर पाने के लिए iOS सेटिंग्स में DoMemory की सूचनाएं सक्षम करें।";
 "settings_notifications_open_settings" = "सेटिंग्स खोलें";
@@ -169,7 +163,6 @@
 /* Achievements */
 "achievements_title" = "उपलब्धियाँ";
 "achievements_subtitle" = "अपनी प्रगति और बैज देखें";
-"achievements_view" = "देखें";
 "achievements_stats_section" = "आपके आँकड़े";
 "achievements_badges_section" = "बैज";
 "stat_total_games" = "खेली गई बाज़ियाँ";
@@ -243,3 +236,26 @@
 "whats_new_lives_title" = "जीवन और गलतियाँ";
 "whats_new_lives_description" = "हर दिन 4 जीवन मिलते हैं, और हर स्तर में सीमित गलतियाँ ही चलती हैं। खत्म हो गए? विज्ञापन देखें या सितारे खर्च करें।";
 "levels_timer_frozen_format" = "घड़ी रुकी है, %d सेकंड बाकी";
+
+// Notification permission primer
+"notification_primer_title" = "अपनी लय बनाए रखें";
+"notification_primer_message" = "रिमाइंडर चालू करें और DoMemory आपको तब बताएगा जब:";
+"notification_primer_benefit_streak" = "आपकी दैनिक चुनौती की लय टूटने वाली हो";
+"notification_primer_benefit_inactive" = "आपने कुछ दिनों से न खेला हो";
+"notification_primer_benefit_no_spam" = "बस इतना ही — कुछ ही रिमाइंडर, कभी स्पैम नहीं";
+"notification_primer_preview_title" = "अपनी लय मत तोड़िए!";
+"notification_primer_preview_message" = "आपकी 5 दिन की लय आज रात खत्म हो रही है। आज की चुनौती खेलें!";
+"notification_primer_enable" = "रिमाइंडर चालू करें";
+"notification_primer_later" = "बाद में";
+
+// Review and What's New settings rows
+"settings_review_title" = "DoMemory को रेट करें";
+"settings_review_description" = "समीक्षाएँ दूसरे खिलाड़ियों को गेम खोजने में मदद करती हैं";
+"settings_whats_new_title" = "नया क्या है";
+"settings_whats_new_description" = "देखें कि नए अपडेट में क्या बदला";
+
+// Settings sections
+"settings_section_game" = "गेम";
+"settings_section_preferences" = "प्राथमिकताएँ";
+"settings_section_purchases" = "खरीदारी";
+"settings_section_about" = "परिचय";

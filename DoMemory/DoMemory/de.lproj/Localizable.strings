@@ -56,7 +56,6 @@
 "menu_tab_levels" = "Level";
 "menu_tab_mine" = "Meine Memoramas";
 "settings_description" = "Passe deine Spieleinstellungen an";
-"settings_select_difficulty" = "Auswählen";
 "settings_title" = "Einstellungen";
 "settings_remove_ads_action_format" = "%@ kaufen";
 "settings_remove_ads_description" = "Banner und Interstitials entfernen";
@@ -83,7 +82,6 @@
 "settings_restore_success_message" = "Dein früherer Kauf wurde wiederhergestellt.";
 "stats_played_label" = "gespielt";
 "stats_won_label" = "gewonnen";
-"settings_select_theme" = "Auswählen";
 "settings_theme_prompt" = "Wähle dein bevorzugtes Erscheinungsbild";
 "settings_theme_title" = "Design";
 "theme_dark" = "Dunkel";
@@ -127,13 +125,9 @@
 "settings_haptics_title" = "Haptik";
 "settings_haptics_description_on" = "Tasten und gefundene Paare geben eine leichte Vibration.";
 "settings_haptics_description_off" = "Vibrations-Feedback ist ausgeschaltet.";
-"settings_haptics_enable" = "Einschalten";
-"settings_haptics_disable" = "Ausschalten";
 "settings_notifications_title" = "Erinnerungen";
 "settings_notifications_description_on" = "Du wirst erinnert, wenn du 2 Tage nicht gespielt hast";
 "settings_notifications_description_off" = "Erhalte eine Benachrichtigung, wenn du längere Zeit nicht gespielt hast";
-"settings_notifications_enable" = "Aktivieren";
-"settings_notifications_disable" = "Deaktivieren";
 "settings_notifications_denied_title" = "Benachrichtigungen deaktiviert";
 "settings_notifications_denied_message" = "Aktiviere Benachrichtigungen für DoMemory in den iOS-Einstellungen, um Erinnerungen zu erhalten.";
 "settings_notifications_open_settings" = "Einstellungen öffnen";
@@ -169,7 +163,6 @@
 /* Achievements */
 "achievements_title" = "Erfolge";
 "achievements_subtitle" = "Verfolge deinen Fortschritt und Abzeichen";
-"achievements_view" = "Ansehen";
 "achievements_stats_section" = "Deine Statistiken";
 "achievements_badges_section" = "Abzeichen";
 "stat_total_games" = "Gespielte Spiele";
@@ -243,3 +236,26 @@
 "whats_new_lives_title" = "Leben & Fehler";
 "whats_new_lives_description" = "Du bekommst 4 Leben pro Tag, und jedes Level erlaubt nur eine begrenzte Zahl an Fehlern. Alles aufgebraucht? Sieh ein Video an oder gib Sterne aus.";
 "levels_timer_frozen_format" = "Zeit eingefroren, noch %d Sekunden";
+
+// Notification permission primer
+"notification_primer_title" = "Halte deine Serie am Leben";
+"notification_primer_message" = "Aktiviere Erinnerungen und DoMemory sagt dir Bescheid, wenn:";
+"notification_primer_benefit_streak" = "Deine Serie bei der Tagesaufgabe zu Ende geht";
+"notification_primer_benefit_inactive" = "Du ein paar Tage nicht gespielt hast";
+"notification_primer_benefit_no_spam" = "Das war's – nur ein paar Hinweise, niemals Spam";
+"notification_primer_preview_title" = "Lass deine Serie nicht reißen!";
+"notification_primer_preview_message" = "Deine 5-Tage-Serie endet heute Abend. Spiel die heutige Aufgabe!";
+"notification_primer_enable" = "Erinnerungen aktivieren";
+"notification_primer_later" = "Später";
+
+// Review and What's New settings rows
+"settings_review_title" = "DoMemory bewerten";
+"settings_review_description" = "Bewertungen helfen anderen, das Spiel zu finden";
+"settings_whats_new_title" = "Neuigkeiten";
+"settings_whats_new_description" = "Sieh dir an, was sich im letzten Update geändert hat";
+
+// Settings sections
+"settings_section_game" = "Spiel";
+"settings_section_preferences" = "Einstellungen";
+"settings_section_purchases" = "Käufe";
+"settings_section_about" = "Info";
