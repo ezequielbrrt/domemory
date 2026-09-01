@@ -9,6 +9,7 @@ import SwiftUI
 import WaterfallGrid
 import AppTrackingTransparency
 import GoogleMobileAds
+import UserNotifications
 
 private enum GameTab { case all, mine, levels }
 
@@ -25,6 +26,7 @@ struct MenuView: View {
     @State private var purchaseService = PurchaseService.shared
     @ObservedObject private var deepLinkRouter = DeepLinkRouter.shared
     @State private var joinDeepLink: JoinDeepLink?
+    @State private var showNotificationPrimer = false
 
     private var displayedGames: [Memorama] {
         switch selectedTab {
@@ -251,7 +253,17 @@ struct MenuView: View {
             }
             await ATTrackingManager.requestTrackingAuthorization()
             await MobileAds.shared.start()
-            _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+            await presentNotificationPrimerIfNeeded()
+        }
+        .sheet(isPresented: $showNotificationPrimer) {
+            NotificationPrimerView(source: "menu") {
+                showNotificationPrimer = false
+            }
+        }
+        // The primer's own system alert lands on `didBecomeActive`, which is
+        // what triggers the app-open ad — same collision the What's New sheet has.
+        .onChange(of: showNotificationPrimer) { _, isShowing in
+            AdsService.shared.setFullScreenAdsSuppressed(isShowing)
         }
         .onAppear {
             statsRefreshID = UUID()
@@ -277,6 +289,23 @@ struct MenuView: View {
     private struct JoinDeepLink: Identifiable, Hashable {
         let id = UUID()
         let code: String
+    }
+
+    /// Shows the reminder primer once per install, and only while iOS would
+    /// still accept an authorization request.
+    ///
+    /// Runs last in the launch sequence so it never stacks on the ATT alert.
+    /// The flag is set before presenting: a user who dismisses the primer has
+    /// spent their one uninvited ask, and can still enable reminders in Settings.
+    private func presentNotificationPrimerIfNeeded() async {
+        guard !UserDefaults.standard.bool(forKey: UserDefaultsKeys.notificationPrimerShown) else { return }
+
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        guard settings.authorizationStatus == .notDetermined else { return }
+
+        UserDefaults.standard.set(true, forKey: UserDefaultsKeys.notificationPrimerShown)
+        AnalyticsService.log(.notificationPrimerShown(source: "menu"))
+        showNotificationPrimer = true
     }
 
     private var selectedVisibleTab: MenuViewModel.VisibleTab {

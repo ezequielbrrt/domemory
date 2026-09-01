@@ -837,9 +837,7 @@ extension MemorizeViewModel: WinModalListener {
         HapticsService.shared.fire(.tap)
         self.showWinView = false
         self.closeView = true
-        Task { @MainActor in
-            ReviewRequestService.shared.registerSuccessfulGameWin()
-        }
+        AppReviews.recordSuccessfulGameWin()
     }
 
     func tapOnNextLevel() {

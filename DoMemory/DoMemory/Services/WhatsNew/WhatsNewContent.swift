@@ -9,10 +9,24 @@ import WhatsNewKit
 // MARK: - App theme
 
 extension WhatsNewTheme {
-    /// Matches the app's accent colour with sensible defaults for everything else.
+    /// Built from the app's own palette rather than `Color.accentColor`, which
+    /// resolves to the asset-catalog blue and left the sheet looking like a
+    /// different app. Surfaces reuse the Settings row tokens so the card reads
+    /// as part of DoMemory in both light and dark mode.
     static let doMemory = WhatsNewTheme(
-        accentColor: .accentColor,
-        symbolColor: .accentColor
+        accentColor: .primaryColor,
+        backgroundColor: .appBackground,
+        titleColor: .textPrimary,
+        itemTitleColor: .textPrimary,
+        itemDescriptionColor: .textSecondary,
+        symbolColor: .primaryColor,
+        versionColor: .primaryColor,
+        versionBackgroundColor: .primaryColor.opacity(0.14),
+        symbolBackgroundColor: .primaryColor.opacity(0.14),
+        cardBackgroundColor: .surfacePrimary,
+        cardBorderColor: .surfaceBorder,
+        cardShadowColor: .shadowColor,
+        separatorColor: .surfaceBorder
     )
 }
 
@@ -24,6 +38,7 @@ extension WhatsNew {
     static var current: WhatsNew {
         WhatsNew(
             title: Strings.whatsNewTitle,
+            version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String,
             items: [
                 .init(
                     symbol: "trophy.fill",

@@ -40,6 +40,19 @@ final class NotificationService {
         }
     }
 
+    /// Turns reminders on and arms every scheduled nudge.
+    ///
+    /// Granting system authorization is not enough on its own: every scheduling
+    /// method early-returns on `notificationsEnabled`, so a grant that skips this
+    /// leaves the user authorized but silently un-reminded. Call this from any
+    /// path that obtains authorization.
+    @MainActor
+    func activateReminders() {
+        UserDefaults.standard.set(true, forKey: UserDefaultsKeys.notificationsEnabled)
+        scheduleInactivityReminder()
+        refreshStreakAtRiskReminder()
+    }
+
     func scheduleInactivityReminder() {
         center.removePendingNotificationRequests(withIdentifiers: [inactivityDay2ID, inactivityDay7ID])
 

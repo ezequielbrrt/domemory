@@ -109,12 +109,30 @@
       }
     },
     {
+      "identity" : "notificationpermissionkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ezequielbrrt/NotificationPermissionKit.git",
+      "state" : {
+        "revision" : "5c18cac91e0f8b6228787d7a85be08526f3dc778",
+        "version" : "1.0.0"
+      }
+    },
+    {
       "identity" : "promises",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/google/promises.git",
       "state" : {
         "revision" : "540318ecedd63d883069ae7f1ed811a2df00b6ac",
         "version" : "2.4.0"
+      }
+    },
+    {
+      "identity" : "reviewflow",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ezequielbrrt/ReviewFlow.git",
+      "state" : {
+        "revision" : "83e00d819b9498c317227c670b43d17c88af40d9",
+        "version" : "1.0.0"
       }
     },
     {
@@ -147,10 +165,10 @@
     {
       "identity" : "whats-new-ios",
       "kind" : "remoteSourceControl",
-      "location" : "git@github.com:ezequielbrrt/whats-new-ios.git",
+      "location" : "https://github.com/ezequielbrrt/whats-new-ios.git",
       "state" : {
-        "revision" : "fef3ec8f870729b26547bf5ca2b11a41654186b0",
-        "version" : "1.0.0"
+        "revision" : "d43aabd23d9e7e125d04ccdf7de7b9dc27eef0f6",
+        "version" : "2.0.0"
       }
     }
   ],
