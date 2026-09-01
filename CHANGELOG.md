@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+[Unreleased]
+
+### Added
+- Added a notification permission primer (NotificationPermissionKit) that explains what reminders are for before the one-time iOS authorization alert, shown once per install on the menu and reused by the Settings toggle.
+- Added a "Rate DoMemory" row in Settings linking to the App Store review page, so leaving a review no longer depends on catching the throttled system prompt.
+- Added a "What's New" row in Settings that presents the current release highlights outside the automatic version gate.
+
+### Fixed
+- Fixed the Settings screen having no scroll view, which clipped every row past the viewport. "Restore purchases" was completely unreachable, leaving reinstalling customers with no way to recover their Remove Ads entitlement.
+- Fixed the Settings header rendering underneath the status bar and Dynamic Island.
+- Fixed scrolled content passing under the floating back button on Settings and Achievements, by giving both navigation bars an opaque background instead of leaving them transparent.
+- Fixed Settings row subtitles truncating mid-word, by replacing the per-row action pills with chevrons and switches where the pill was not the point.
+- Fixed notification permission granted from the menu never enabling reminders: the grant did not set `notificationsEnabled`, which every scheduling method checks, so users who accepted received no reminders until they separately toggled Settings on.
+- Fixed the ATT, ads, and notification prompts firing back to back on first menu appearance with no context between them.
+
+### Changed
+- Regrouped Settings into four titled sections — Game, Preferences, Purchases and About — each a single card with hairline separators, replacing ten individually shadowed cards.
+- Changed the Reminders and Haptics rows from pill buttons to switches, so their state is readable without parsing an "Enable" or "Disable" label.
+- Replaced the hand-rolled `ReviewRequestService` with ReviewFlow's `ReviewManager`, carrying existing win counts, cooldown dates, and per-version prompt history across so returning players are not re-prompted.
+- Changed the `whats-new-ios` dependency from its SSH URL to HTTPS so clones and CI no longer need a deploy key.
+- Upgraded WhatsNewKit from 1.0.0 to 2.0.0 and adopted its redesigned sheet, which now shows a version badge and groups the highlights into a bordered card.
+- Restyled the What's New sheet with the app's own palette instead of `Color.accentColor`, which was rendering the sheet in the asset-catalog blue rather than the DoMemory violet.
+
 [3.1.0] 23-06-2026
 
 ### Added
