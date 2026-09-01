@@ -10,7 +10,7 @@ import XCTest
 /// Getting it wrong is silent in both directions: a first-time player is greeted
 /// with release notes for a version they have never not had, or an upgrading
 /// player never learns what changed. Neither shows up in a screenshot of a
-/// working app, so the four cases are pinned here.
+/// working app, so every branch of the gate is pinned here.
 @MainActor
 final class WhatsNewManagerTests: XCTestCase {
     private let suiteName = "WhatsNewManagerTests"
