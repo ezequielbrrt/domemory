@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-[Unreleased]
+[4.1.0] 01-09-2026
 
 ### Added
 - Added a notification permission primer (NotificationPermissionKit) that explains what reminders are for before the one-time iOS authorization alert, shown once per install on the menu and reused by the Settings toggle.
