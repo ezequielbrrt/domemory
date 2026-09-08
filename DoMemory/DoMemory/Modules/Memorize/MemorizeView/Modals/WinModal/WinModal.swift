@@ -17,8 +17,15 @@ struct WinModal: View {
     var streak: Int = 0
     var levelNumber: Int? = nil
     var starsEarned: Int = 0
+    /// Whether another level follows this one. Endless Levels always has one;
+    /// a finite season does not on its last board, where offering "Next Level"
+    /// would promise a level that does not exist.
+    var hasNextLevel: Bool = true
 
     @State private var showShareSheet = false
+
+    /// A level was cleared *and* there is another to play.
+    private var offersNextLevel: Bool { levelNumber != nil && hasNextLevel }
 
     private var shareData: ResultShareData {
         ResultShareData(
@@ -32,11 +39,19 @@ struct WinModal: View {
     }
 
     private func primaryAction() {
-        if levelNumber != nil {
+        if offersNextLevel {
             listener?.tapOnNextLevel()
         } else {
             listener?.tapOnContinue()
         }
+    }
+
+    /// On a season's final level the only sensible move is back to the map, so
+    /// the primary button takes over the secondary's label instead of adding a
+    /// new string. Celebratory season-complete copy is a later phase's job.
+    private var primaryTitle: String {
+        if offersNextLevel { return Strings.nextLevel }
+        return levelNumber != nil ? Strings.backToLevels : Strings.goToMenu
     }
 
     var body: some View {
@@ -143,7 +158,7 @@ struct WinModal: View {
                 .padding(.bottom, 10)
 
                 Button(action: { primaryAction() }) {
-                    Text(levelNumber != nil ? Strings.nextLevel : Strings.goToMenu)
+                    Text(primaryTitle)
                         .font(.system(size: 17, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -155,7 +170,10 @@ struct WinModal: View {
                 }
                 .buttonStyle(.plain)
 
-                if levelNumber != nil {
+                // Hidden on a season's final level: the primary button already
+                // says "Back to Levels" there, and two buttons doing the same
+                // thing reads as a bug.
+                if offersNextLevel {
                     Button(action: { listener?.tapOnContinue() }) {
                         Text(Strings.backToLevels)
                             .font(.system(size: 15, weight: .semibold, design: .rounded))

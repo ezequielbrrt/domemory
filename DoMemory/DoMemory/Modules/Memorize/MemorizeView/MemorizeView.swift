@@ -212,7 +212,8 @@ struct MemorizeView: View {
                     isDailyChallenge: viewModel.isDailyChallenge,
                     streak: viewModel.dailyChallengeStreak,
                     levelNumber: viewModel.levelNumber,
-                    starsEarned: viewModel.lastEarnedStars
+                    starsEarned: viewModel.lastEarnedStars,
+                    hasNextLevel: viewModel.hasNextLevel
                 )
                     .onAppear {
                         viewModel.stopTimer()

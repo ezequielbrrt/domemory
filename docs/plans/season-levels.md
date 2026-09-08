@@ -212,7 +212,15 @@ is reported rather than guessed.
   - **Assert 235 + N key parity across all ten files.**
   - Add an optional `seasonID` to the existing `levelStarted` / `levelFinished` /
     `levelUnlocked` events (`AppConfiguration.swift:50-52` and `:241-250`). No
-    parallel event set.
+    parallel event set. Phase 2 left `// Phase 4:` markers at each call site.
+  - **Surfaced by Phase 2:** on a season's final win, `levelUnlocked` fires for
+    `levelCount + 1`, because `recordCompletion` uses `highestUnlocked =
+    levelCount + 1` as its completion marker and `logGameFinishedIfNeeded` logs
+    the unlock whenever `didWin && !alreadyUnlockedNext`. Harmless today and
+    correctly left alone by Phase 2 (analytics were out of its scope), but Phase 4
+    must decide: suppress it for a season's last level, or let the `seasonID`
+    dimension make it separable and keep it as a completion signal. The same
+    artifact reaches `tapOnConfirmSkipLevel`, which logs `levelUnlocked` directly.
 - **Acceptance criteria:** every locale has equal key count; no hard-coded
   user-facing string in the season UI.
 - **User-visible:** yes — amends the Phase 3 changelog entry.
@@ -235,13 +243,16 @@ is reported rather than guessed.
 
 | Phase | State | PR | Merge commit |
 |---|---|---|---|
-| 1 — Model, catalog, progress, board generation | awaiting-pr | — | — |
-| 2 — `LevelProgressStore` + `GameMode` refactor | ready | — | — |
+| 1 — Model, catalog, progress, board generation | validated, held local (`475106f`) | — | — |
+| 2 — `LevelProgressStore` + `GameMode` refactor | validated, held local | — | — |
 | 3 — UI | ready | — | — |
 | 4 — Localization + analytics | ready | — | — |
 | 5 — Tooling + seeded season | ready | — | — |
 
-Overall: approved, Phase 1 awaiting delivery.
+Overall: approved. Phases 1 and 2 are implemented and validated but deliberately
+**undelivered** — by user decision they are held as local commits on
+`feature/season-levels-catalog` and will be pushed and reviewed together as one
+PR. Nothing is pushed; `master` remains untouched at `bd02fd6`.
 
 ### Phase 1 validation evidence
 
@@ -277,6 +288,47 @@ emoji would deal four matching cards; `enabled` defaults to `false` when absent;
 and `season.*` writes were tested not to inflate `levels.lifetimeStars` or touch
 any `levels.highestUnlocked` / `levels.stars.<n>` key, while the shared wallet is
 credited as designed.
+
+### Phase 2 validation evidence
+
+Bound to the staged tree on `feature/season-levels-catalog`, base `475106f`:
+7 files, 519 insertions, 20 deletions.
+
+- `tuist generate --no-open` — success.
+- `xcodebuild … -workspace … test` — `** TEST SUCCEEDED **`, exit 0, 0 failures.
+  Run by the engineer and **re-run independently by the orchestrator** against
+  this same staged state.
+- 152 tests, up from the Phase 1 baseline of 140; the 12 added are
+  `SeasonGameModeTests`.
+- **Regression gate holds:** `MemorizeViewModelTests` is unmodified (confirmed by
+  `git diff --cached --name-only`) and passes. A failing test would have flipped
+  the run to `TEST FAILED`, so the green result covers every pre-existing suite.
+- `project.pbxproj`: staged diff is 12 added lines, 0 removed — only the three
+  new file entries. Still `objectVersion = 55`, no Xcode rewrite signature.
+- No do-not-touch file modified: `DailyChallengeService`, `EmojiPool`,
+  `LevelCurve`, `MenuView`, `LevelsView`, `Strings.swift`, every
+  `Localizable.strings`, `AppConfiguration.swift` and `CHANGELOG.md` are all
+  absent from the staged list. No new user-facing strings were added.
+- No runtime check, and none is warranted: nothing constructs a season
+  `LevelContext` yet (that is Phase 3's entry point), so the only reachable path
+  is endless Levels, where `hasNextLevel` is always true and `WinModal` behaves
+  identically to before.
+
+Design decisions worth carrying forward:
+
+- **Board accessor:** the protocol keeps one uniform `board(for:)`. The season
+  side binds its pool in a `SeasonLevelProgressStore` adapter rather than storing
+  an optional pool on `SeasonProgressService`, which would let a pool-less
+  instance silently deal an empty board. Phase 1's API and tests were untouched.
+- **`Equatable`:** hand-written on `GameMode`; `.level` compares
+  `(number, seasonID)` only, since the store is identity rather than value.
+  `isDailyChallenge` keeps its `mode == .dailyChallenge` form.
+- **Terminal state:** `LevelContext.nextLevelNumber` is the single ceiling.
+  `advanceToNextLevel` guards on it, and `WinModal.offersNextLevel` drives both
+  the primary button's label and the suppression of the now-redundant secondary
+  button. The final-level button reuses the existing `Strings.backToLevels`.
+- **Phase 3 entry point:** `LevelContext.season(_:level:progress:)` is the single
+  place a season's id, pool, length and store are read together.
 
 ## Conventions
 
