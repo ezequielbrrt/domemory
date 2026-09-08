@@ -4,6 +4,10 @@
       ".read": true,
       ".write": false
     },
+    "seasons": {
+      ".read": true,
+      ".write": false
+    },
     "multiplayerRooms": {
       "$roomId": {
         ".read": "auth != null && (data.child('hostId').val() === auth.uid || data.child('guestId').val() === auth.uid || !data.exists())",
