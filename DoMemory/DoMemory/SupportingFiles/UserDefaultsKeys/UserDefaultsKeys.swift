@@ -24,5 +24,8 @@ class UserDefaultsKeys: NSObject {
     static var onboardingIntroShown: String = "onboardingIntroShown"
     static var levelsIntroShown: String = "levelsIntroShown"
     static var hapticsEnabled: String = "hapticsEnabled"
+    /// Cached `/seasons` payload, so the season card renders on cold launch and offline.
+    static var seasonCatalog: String = "seasonCatalog"
     // Daily-challenge keys live in DailyChallengeKeys (shared with the widget target).
+    // Per-season progress keys live in SeasonProgressService, namespaced `season.<id>.*`.
 }

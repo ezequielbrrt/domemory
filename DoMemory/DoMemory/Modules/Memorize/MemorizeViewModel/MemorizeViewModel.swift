@@ -9,11 +9,33 @@ import SwiftUI
 import Observation
 
 /// What a MemorizeView instance is playing: a freely-picked board, today's
-/// Daily Challenge, or a numbered Levels-mode board.
+/// Daily Challenge, or a numbered level — endless Levels or a finite Season,
+/// told apart by the `LevelContext`'s store rather than by a separate case.
 enum GameMode: Equatable {
     case free
     case dailyChallenge
-    case level(Int)
+    case level(LevelContext)
+
+    /// Hand-written because `LevelContext` carries a `LevelProgressStore`
+    /// existential, which is not `Equatable` and so kills the synthesis the
+    /// declaration used to get for free. `isDailyChallenge` below is written as
+    /// `mode == .dailyChallenge` and would stop compiling without this.
+    ///
+    /// Two `.level` modes are the same game when they are the same numbered
+    /// level of the same season (`nil` season being endless Levels). The store
+    /// is identity, not value — comparing witnesses would make two equivalent
+    /// contexts unequal for no useful reason.
+    static func == (lhs: GameMode, rhs: GameMode) -> Bool {
+        switch (lhs, rhs) {
+        case (.free, .free), (.dailyChallenge, .dailyChallenge):
+            return true
+        case let (.level(lhsContext), .level(rhsContext)):
+            return lhsContext.number == rhsContext.number
+                && lhsContext.seasonID == rhsContext.seasonID
+        default:
+            return false
+        }
+    }
 }
 
 /// Why the current game ended in a loss. Drives which rescue the LoseModal
@@ -37,9 +59,20 @@ class MemorizeViewModel {
     private(set) var mode: GameMode
     var isDailyChallenge: Bool { mode == .dailyChallenge }
     var levelNumber: Int? {
-        if case .level(let number) = mode { return number }
+        if case .level(let context) = mode { return context.number }
         return nil
     }
+    /// The level being played, or nil outside level play. Everything that needs
+    /// the *store* — boards, unlocks, stars, skip — goes through this;
+    /// `levelNumber` stays the narrow value the views already read.
+    private var levelContext: LevelContext? {
+        if case .level(let context) = mode { return context }
+        return nil
+    }
+    /// True when clearing the current board leads somewhere. Endless Levels
+    /// always does; a finite season does not on its last level, and the win
+    /// modal must not offer level 21 of a 20-level season.
+    var hasNextLevel: Bool { levelContext?.nextLevelNumber != nil }
     private(set) var lastEarnedStars: Int = 0
     /// Lives left today for Levels mode; nil outside of level play.
     private(set) var levelLivesRemaining: Int?
@@ -124,8 +157,16 @@ class MemorizeViewModel {
         self.init(memorama: memorama, mode: isDailyChallenge ? .dailyChallenge : .free)
     }
 
+    /// Endless Levels. Kept at its original signature so `LevelsView`'s call
+    /// site is unaffected by the store refactor.
     convenience init(level: Int) {
-        self.init(memorama: LevelProgressService.shared.board(for: level), mode: .level(level))
+        self.init(context: LevelContext(number: level))
+    }
+
+    /// Any numbered level, endless or seasonal. The board comes from whichever
+    /// store the context carries.
+    convenience init(context: LevelContext) {
+        self.init(memorama: context.board(), mode: .level(context))
     }
 
     private static func createMemoryGame() -> MemoryGame<String> {
@@ -155,7 +196,7 @@ class MemorizeViewModel {
     }
 
     func getRemainingTime() -> Int {
-        if case .level(let levelNumber) = mode {
+        if let levelNumber {
             return LevelCurve.seconds(for: levelNumber)
         }
         let difficulty = getDifficulty()
@@ -378,7 +419,9 @@ class MemorizeViewModel {
         if isDailyChallenge {
             AnalyticsService.log(.dailyChallengeStarted(streak: DailyChallengeService.shared.currentStreak))
         }
-        if case .level(let levelNumber) = mode {
+        if let levelNumber {
+            // Phase 4 attaches the context's optional seasonID here rather than
+            // adding a parallel season event set.
             AnalyticsService.log(.levelStarted(level: levelNumber))
         }
     }
@@ -425,8 +468,10 @@ class MemorizeViewModel {
             }
             NotificationService.shared.refreshStreakAtRiskReminder()
         }
-        if case .level(let levelNumber) = mode {
-            let progressService = LevelProgressService.shared
+        if let context = levelContext {
+            let levelNumber = context.number
+            // Endless Levels or a season, whichever owns this level's progress.
+            let progressService = context.store
             let alreadyUnlockedNext = progressService.isUnlocked(levelNumber + 1)
             let earnedStars = progressService.recordCompletion(
                 level: levelNumber,
@@ -492,7 +537,7 @@ extension MemorizeViewModel {
     }
 
     private func shouldShowPieByDifficulty() -> Bool {
-        if case .level(let levelNumber) = mode {
+        if let levelNumber {
             return levelNumber >= 25
         }
         let difficulty = getDifficulty()
@@ -505,12 +550,18 @@ extension MemorizeViewModel {
     }
 
     /// Swaps in the next level's board in place (no navigation), with a fresh
-    /// timer and card layout. Only valid when currently playing a level.
+    /// timer and card layout. Only valid when currently playing a level that
+    /// has a successor: a finite season stops at `levelCount`, and this is the
+    /// backstop for that even if a caller offers the action anyway.
     fileprivate func advanceToNextLevel() {
-        guard case .level(let currentLevel) = mode else { return }
-        let nextLevel = currentLevel + 1
-        mode = .level(nextLevel)
-        memorama = LevelProgressService.shared.board(for: nextLevel)
+        // A season whose last level was just cleared has no `nextLevelNumber`
+        // and bails here, leaving the win modal up with its primary action
+        // pointing back at the map. No completion reward is granted; that is
+        // deliberately out of scope, and this guard is where one would hook in.
+        guard let context = levelContext, let nextLevel = context.nextLevelNumber else { return }
+        let nextContext = context.advanced(to: nextLevel)
+        mode = .level(nextContext)
+        memorama = nextContext.board()
         levelLivesRemaining = LevelLivesService.shared.livesRemaining()
         starBalance = StarWalletService.shared.balance
         frozenUntil = nil
@@ -701,7 +752,8 @@ extension MemorizeViewModel {
     }
 
     func tapOnConfirmSkipLevel() {
-        guard let levelNumber, canSkipLevelWithStars else { return }
+        guard let context = levelContext, canSkipLevelWithStars else { return }
+        let levelNumber = context.number
         guard StarWalletService.shared.spend(LevelPowerUp.skipLevelCost) else { return }
         HapticsService.shared.fire(.reward)
         starBalance = StarWalletService.shared.balance
@@ -709,7 +761,7 @@ extension MemorizeViewModel {
         // The attempt still counts as a loss — skipping buys the unlock, not a
         // clean record. Idempotent, so this is a no-op if it already fired.
         logGameFinishedIfNeeded(result: "lose", allowInterstitial: false)
-        LevelProgressService.shared.skipLevel(levelNumber)
+        context.store.skipLevel(levelNumber)
         AnalyticsService.log(
             .levelSkipped(level: levelNumber, cost: LevelPowerUp.skipLevelCost, balanceAfter: starBalance)
         )
