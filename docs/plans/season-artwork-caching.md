@@ -230,7 +230,7 @@ acceptance criteria below are taken directly from that approval.
 |---|---|---|---|
 | 1 — Immutable cache-control header | committed locally | `476f9c8` | not pushed |
 | 2 — RemoteImageService disk cache | committed locally | `5c9d871` | not pushed |
-| 3 — Prefetch on active-season change | proposed | — | — |
+| 3 — Prefetch on active-season change | committed locally | `b53a82c` | not pushed |
 
 Overall: approved by the user prior to this plan file's creation ("run the
 development agent and start"). No plan-level questions are open.
@@ -299,6 +299,49 @@ actor) and `RemoteImageServiceTests.swift` (injectable `diskCacheDirectory`/
   non-image response is never written to disk (write only follows a
   successful decode), and `RemoteImage.swift`/`SeasonCatalogService.swift`/all
   UI files are untouched, matching scope.
+
+### Phase 3 validation evidence
+
+Committed locally as `b53a82c` on `feature/season-artwork-immutable-cache`, on
+top of `d53dd68`: 2 files changed, 184 insertions, 4 deletions —
+`SeasonCatalogService.swift` (prefetch spawned from `refreshActiveSeason`,
+gated on the active season's `id` actually changing to a new non-nil value;
+resolves `cardArtworkURL` and both `backgroundArtworkURL(for:)` variants to
+plain `URL`s on the main actor before handing them to a `Task.detached`, so no
+`Season` value or `self` crosses the actor boundary; a new `prefetchImage`
+seam defaults to `RemoteImageService.shared.image(for:)` and lets tests spy on
+requested URLs) and `SeasonCatalogServiceTests.swift` (4 new tests).
+
+- `xcodebuild … -workspace … build` — **BUILD SUCCEEDED**.
+- `xcodebuild … -workspace … test -only-testing:DoMemoryTests/SeasonCatalogServiceTests`
+  — **re-run independently by the orchestrator**: `Executed 17 tests, with 0
+  failures (0 unexpected)` (13 pre-existing + 4 new), `** TEST SUCCEEDED **`.
+- `xcodebuild … -workspace … test` (full suite) — **re-run independently by
+  the orchestrator**: `Executed 193 tests, with 0 failures (0 unexpected)`,
+  `** TEST SUCCEEDED **` — up from 189 at the end of Phase 2, confirming the 4
+  new tests and no regression anywhere else in the suite.
+- New tests: artwork prefetch fires for all 3 URLs on a change to a new
+  season; re-running `refreshActiveSeason` for the same still-active season
+  does not re-trigger; a season with no artwork URLs prefetches nothing
+  without crashing; `init`/`apply(payload:on:)`/`refreshActiveSeason` remain
+  synchronous with the seam wired in.
+- Orchestrator read the full diff of `SeasonCatalogService.swift` directly:
+  confirmed `refreshActiveSeason`, `apply(payload:on:)`, and `init` keep their
+  exact prior signatures and synchronous return timing; the prefetch is
+  strictly fire-and-forget (`Task.detached`, no `await` in the caller); the
+  change gate compares `newActiveSeason.id != previousSeasonID`; no UI file,
+  `RemoteImage.swift`, or `RemoteImageService.swift` touched, matching scope.
+
+## Delivery summary
+
+All three phases are implemented, independently validated, and committed
+locally in order on `feature/season-artwork-immutable-cache`
+(`476f9c8` → `5c9d871` → `d53dd68` → `b53a82c`), branched from `master` at
+`23e280b`. Per the user's explicit scope change mid-plan, none of this branch
+has been pushed, no PR was opened, and nothing was merged — this plan's
+originally documented PR-per-phase delivery workflow was superseded for this
+run. The branch and its four commits are held entirely local, ready for the
+user to push/PR/merge themselves whenever they choose.
 
 ## Conventions
 
