@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - Season progress is stored per season, so a season ending cannot disturb endless-Levels progress and a season that returns next year resumes where it left off.
 - Extracted the level map — the tile grid, its styling and its tap rules — out of the Levels screen so both modes render the same map under their own headers. Endless Levels is unchanged.
 - A season whose emoji pool holds fewer than 12 distinct entries is rejected when it is read, because the difficulty curve tops out at 12 pairs and a smaller pool cannot fill its own later boards. The floor is derived from the curve, so retuning the curve moves it. Every other failure — no network, no cached season, the kill switch off, a malformed accent colour — falls back rather than showing a broken season.
+- The season screens read in all ten supported languages rather than falling back to English, and the progress bar now announces "7 of 20 levels cleared" to VoiceOver instead of the bare "7 / 20".
 
 [4.1.0] 01-09-2026
 

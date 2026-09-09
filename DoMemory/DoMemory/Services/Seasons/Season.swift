@@ -75,10 +75,13 @@ struct Season: Codable, Identifiable, Hashable {
     static let minimumEmojiPoolSize = LevelCurve.pairs(for: .max)
 
     /// Title shown when a season carries no usable strings for the current
-    /// locale and no `en` entry either. Deliberately a plain constant for now.
-    // Phase 4: replace with `Strings.seasonFallbackTitle` once the localized
-    // key exists in all ten Localizable.strings files.
-    static let fallbackTitle = "Season"
+    /// locale and no `en` entry either.
+    ///
+    /// `Strings` is a plain `Foundation`-only enum of `NSLocalizedString`
+    /// lookups, which the services layer already reaches directly
+    /// (`PurchaseService`, `SeasonProgressService`), so a model reading it
+    /// pulls in no UI dependency.
+    static let fallbackTitle = Strings.seasonFallbackTitle
 
     // MARK: - Decoding
 

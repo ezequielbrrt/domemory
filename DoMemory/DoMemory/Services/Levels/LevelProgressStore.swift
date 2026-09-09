@@ -67,8 +67,10 @@ struct LevelContext {
     /// Where unlocks, stars and boards for this level come from.
     let store: LevelProgressStore
     /// nil for endless Levels; the Realtime Database season key otherwise.
-    // Phase 4 attaches this to the levelStarted / levelFinished / levelUnlocked
-    // events so season play can be told apart from endless play in the funnel.
+    ///
+    /// Rides along on the `levelStarted` / `levelFinished` / `levelUnlocked`
+    /// events as a `season_id` parameter so season play can be told apart from
+    /// endless play without a parallel event set.
     let seasonID: String?
     /// nil for endless Levels; the season's length otherwise. A season is
     /// finite, so callers must not simply increment past this.

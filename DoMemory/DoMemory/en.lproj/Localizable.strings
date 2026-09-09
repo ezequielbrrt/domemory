@@ -260,8 +260,10 @@
 "settings_section_purchases" = "Purchases";
 "settings_section_about" = "About";
 
-/* Season levels — English copy pending translation (Phase 4) */
+/* Season levels */
+"season_fallback_title" = "Season";
 "season_progress_format" = "%1$d / %2$d";
+"season_progress_accessibility_format" = "%1$d of %2$d levels cleared";
 "season_days_left_format" = "%d days left";
 "season_one_day_left" = "1 day left";
 "season_last_day" = "Last day";

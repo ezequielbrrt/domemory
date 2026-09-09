@@ -260,11 +260,13 @@
 "settings_section_purchases" = "購入";
 "settings_section_about" = "情報";
 
-/* Season levels — English copy pending translation (Phase 4) */
+/* Season levels */
+"season_fallback_title" = "シーズン";
 "season_progress_format" = "%1$d / %2$d";
-"season_days_left_format" = "%d days left";
-"season_one_day_left" = "1 day left";
-"season_last_day" = "Last day";
-"season_complete_badge" = "Complete";
-"season_complete_title" = "Season complete!";
-"season_complete_message" = "You cleared every level. Replay any of them to improve its stars.";
+"season_progress_accessibility_format" = "%2$dレベル中%1$dレベルクリア";
+"season_days_left_format" = "残り%d日";
+"season_one_day_left" = "残り1日";
+"season_last_day" = "最終日";
+"season_complete_badge" = "クリア";
+"season_complete_title" = "シーズンクリア!";
+"season_complete_message" = "すべてのレベルをクリアしました。どのレベルでも再挑戦してスターを増やせます。";

@@ -260,11 +260,13 @@
 "settings_section_purchases" = "खरीदारी";
 "settings_section_about" = "परिचय";
 
-/* Season levels — English copy pending translation (Phase 4) */
+/* Season levels */
+"season_fallback_title" = "सीज़न";
 "season_progress_format" = "%1$d / %2$d";
-"season_days_left_format" = "%d days left";
-"season_one_day_left" = "1 day left";
-"season_last_day" = "Last day";
-"season_complete_badge" = "Complete";
-"season_complete_title" = "Season complete!";
-"season_complete_message" = "You cleared every level. Replay any of them to improve its stars.";
+"season_progress_accessibility_format" = "%2$d में से %1$d स्तर पूरे";
+"season_days_left_format" = "%d दिन बाकी";
+"season_one_day_left" = "1 दिन बाकी";
+"season_last_day" = "आखिरी दिन";
+"season_complete_badge" = "पूर्ण";
+"season_complete_title" = "सीज़न पूरा हुआ!";
+"season_complete_message" = "आपने सभी स्तर पूरे कर लिए। इनमें से किसी को दोबारा खेलकर उसके सितारे बेहतर करें।";

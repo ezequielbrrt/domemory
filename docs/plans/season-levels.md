@@ -208,10 +208,29 @@ is reported rather than guessed.
 - **Dependencies:** Phase 3 merged.
 - **Branch:** `feature/season-levels-localization`
 - **Tasks:**
-  - Add `season_ends_in_format`, `season_ends_today`, `season_completed`,
-    `season_progress_format`, `season_fallback_title` and anything Phase 3
-    surfaced, to `Strings.swift` and to all ten `Localizable.strings`.
-  - **Assert 235 + N key parity across all ten files.**
+  - **Corrected task list.** The key names originally written here
+    (`season_ends_in_format`, `season_ends_today`, `season_completed`) were
+    guessed before Phase 3 was written and do not exist. The seven keys Phase 3
+    actually shipped — currently English copy in all ten locales, flagged by a
+    `Season levels — English copy pending translation (Phase 4)` comment at
+    line 263 of each file — are:
+    `season_progress_format` (`"%1$d / %2$d"`), `season_days_left_format`
+    (`"%d days left"`, only ever called with 2+), `season_one_day_left`,
+    `season_last_day`, `season_complete_badge`, `season_complete_title`,
+    `season_complete_message`.
+  - Translate those seven into the nine non-English locales, reusing how each
+    locale already renders "level" and "stars" in the Levels keys so the season
+    UI does not read as a different product. Keep `%1$d` / `%2$d` positional
+    specifiers intact. Remove the pending-translation comment per file as it is
+    completed.
+  - Add `season_fallback_title` in all ten locales and replace the plain constant
+    at `Season.swift:81` that its `// Phase 4:` marker points at.
+  - Add a VoiceOver label key for the season progress bar in
+    `SeasonLevelsView.swift`, whose accessibility label is currently the raw
+    `"7 / 20"` string. Phase 3 deferred it here because it needs ten locales.
+  - **Assert key parity across all ten files.** Verified baseline at the start of
+    Phase 4: **242 keys each** (235 pre-season + Phase 3's 7). Ends at 242 + N.
+    Add a test guarding this invariant — it is now load-bearing and unguarded.
   - Add an optional `seasonID` to the existing `levelStarted` / `levelFinished` /
     `levelUnlocked` events (`AppConfiguration.swift:50-52` and `:241-250`). No
     parallel event set. Phase 2 left `// Phase 4:` markers at each call site.
@@ -247,8 +266,8 @@ is reported rather than guessed.
 |---|---|---|---|
 | 1 — Model, catalog, progress, board generation | merged (`475106f`) | #27 | `de328f9` |
 | 2 — `LevelProgressStore` + `GameMode` refactor | merged (`f4d75cd`) | #27 | `de328f9` |
-| 3 — UI | validated, held local | — | — |
-| 4 — Localization + analytics | ready | — | — |
+| 3 — UI | merged (`8e10052`, `b0947d9`) | #28 | `2b30d36` |
+| 4 — Localization + analytics | validated, held local | — | — |
 | 5 — Tooling + seeded season | ready | — | — |
 
 Overall: approved. Phases 1 and 2 shipped together as PR #27, merged at
@@ -383,6 +402,50 @@ Design decisions worth carrying forward:
   button. The final-level button reuses the existing `Strings.backToLevels`.
 - **Phase 3 entry point:** `LevelContext.season(_:level:progress:)` is the single
   place a season's id, pool, length and store are read together.
+
+### Phase 4 validation evidence
+
+Bound to the staged tree on `feature/season-levels-localization`, base `2b30d36`:
+20 files, 323 insertions, 105 deletions.
+
+- `xcodebuild … -workspace … test` — `** TEST SUCCEEDED **`, exit 0,
+  **170 tests, 0 failures**. Re-run independently by the orchestrator.
+- **All ten locales verified at 244 keys** (242 + `season_fallback_title` +
+  `season_progress_accessibility_format`).
+- All four `// Phase 4:` Swift markers removed; no `pending translation` comment
+  survives in any locale file.
+- `project.pbxproj`: 4 added lines, only the new test file's entries. Still
+  `objectVersion = 55`, no Xcode rewrite signature.
+- Runtime: ja and ko verified in the simulator — the two half-width menu cards,
+  the season map header, and the season-complete banner all render without
+  mojibake or truncation; the ko completion message wraps to two lines inside its
+  card. The `season_fallback_title` path was exercised with an empty `strings`
+  map.
+
+**A note for future runs:** the first independent full-suite run failed all three
+`LocalizationParityTests`, then passed in isolation and in two subsequent full
+runs. The cause was a stale app bundle left on the simulator by the screenshot
+fixture session — the parity tests read the *built* bundle, so they compare
+whatever was last installed. If they fail unexpectedly, rebuild before believing
+it.
+
+### Follow-ups surfaced by Phase 4 — not in this plan's scope
+
+1. **Four analytics events still carry no `seasonID`:** `levelSkipped`,
+   `levelPowerUpUsed`, `levelFailedByMistakes`, `levelMistakesForgiven`. All fire
+   during season play. The engineer correctly stopped at the three events plus
+   `levelStarsCredited` that were specified rather than widening scope unasked,
+   but skip-rate and power-up funnels are consequently not separable by mode.
+   A user decision, deliberately not taken here.
+2. **Pre-existing defect, unrelated to seasons:** `hi`'s
+   `levels_lives_remaining_format` is `"%d में से %d जीवन शेष"` with
+   non-positional specifiers while `Strings.livesRemainingFormat(remaining, total)`
+   passes remaining first, so it renders the two numbers in the wrong roles.
+   Note the new format-specifier parity test does **not** catch this: both
+   locales use the same specifiers, and only the argument *meaning* is reversed.
+   Worth a separate one-line fix.
+3. **Pre-existing:** the menu's difficulty pill renders "Medium" untranslated
+   (confirmed visually in the ja screenshot). Outside this feature.
 
 ## Conventions
 

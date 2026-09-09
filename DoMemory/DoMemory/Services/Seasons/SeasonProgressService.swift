@@ -131,7 +131,7 @@ final class SeasonProgressService {
             // Only the improvement is paid out, so replaying a cleared level
             // can't be farmed for currency while beating your own rating still
             // earns the difference.
-            creditNewStars(earned - existing)
+            creditNewStars(earned - existing, level: level)
         }
 
         if level + 1 > highestUnlockedLevel {
@@ -153,12 +153,17 @@ final class SeasonProgressService {
     /// balance across both modes, per the approved plan. Note this deliberately
     /// does *not* touch `levels.lifetimeStars`: that value is the endless-Levels
     /// mastery score and season play must not inflate it.
-    private func creditNewStars(_ amount: Int) {
+    /// - Parameter level: only needed for the analytics dimension; the star
+    ///   value itself is already stored by `recordCompletion`.
+    private func creditNewStars(_ amount: Int, level: Int) {
         guard amount > 0 else { return }
-        StarWalletService.shared.credit(amount)
-        // Phase 4: log `levelStarsCredited` here once the analytics events
-        // carry an optional `seasonID`. Logging it now would fold season play
-        // into the endless-Levels funnel with no way to separate them again.
+        let balance = StarWalletService.shared.credit(amount)
+        // Now separable from endless-Levels credits by `season_id`, so season
+        // payouts stop being invisible in the star-economy funnel while both
+        // modes still report through the one event.
+        AnalyticsService.log(
+            .levelStarsCredited(level: level, amount: amount, balanceAfter: balance, seasonID: seasonID)
+        )
     }
 
     private func starRating(timeRemaining: Int, totalTime: Int, failedTries: Int) -> Int {
