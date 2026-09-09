@@ -226,14 +226,22 @@ acceptance criteria below are taken directly from that approval.
 
 ## State ledger
 
-| Phase | State | PR | Merge commit |
+| Phase | State | Local commit | Notes |
 |---|---|---|---|
-| 1 — Immutable cache-control header | awaiting-pr | — | — |
-| 2 — RemoteImageService disk cache | proposed | — | — |
+| 1 — Immutable cache-control header | committed locally | `476f9c8` | not pushed |
+| 2 — RemoteImageService disk cache | committed locally | `5c9d871` | not pushed |
 | 3 — Prefetch on active-season change | proposed | — | — |
 
 Overall: approved by the user prior to this plan file's creation ("run the
 development agent and start"). No plan-level questions are open.
+
+**Delivery mode changed mid-plan:** the user explicitly limited delivery to
+local commits only — no push, no PR, no merge, for any phase — superseding
+this plan's originally documented PR-per-phase workflow. All phases are
+implemented, tested, and committed sequentially on
+`feature/season-artwork-immutable-cache`, left unpushed. The "PR state" field
+in each phase's own section below is stale as a result; the state ledger table
+above is authoritative for actual delivery status.
 
 ### Phase 1 validation evidence
 
@@ -252,6 +260,45 @@ paragraph documenting the immutability contract and the undeployed manual
   was run. No `firebase deploy` run, per scope.
 - No xcodebuild/test run required for this phase — it has zero Swift changes,
   so the existing test suite is unaffected by construction.
+
+### Phase 2 validation evidence
+
+Committed locally as `5c9d871` on `feature/season-artwork-immutable-cache`, on
+top of `476f9c8`: 2 files changed, 193 insertions, 11 deletions —
+`RemoteImageService.swift` (third cache tier: SHA-256-named files under
+`Caches/RemoteImages`, checked before any network access; LRU-by-mtime
+eviction capped at 64MB; disk I/O dispatched via `nonisolated private static`
+functions called from the existing detached task, never touching the main
+actor) and `RemoteImageServiceTests.swift` (injectable `diskCacheDirectory`/
+`diskCacheCapacityBytes` on the service initializer; two new tests).
+
+- `xcodebuild … -workspace … build` — **BUILD SUCCEEDED**.
+- `xcodebuild … -workspace … test -only-testing:DoMemoryTests/RemoteImageServiceTests`
+  — **re-run independently by the orchestrator** (not solely the engineer's
+  report): `Executed 9 tests, with 0 failures (0 unexpected)`, `** TEST
+  SUCCEEDED **`. The engineer separately reported the full suite at 189 tests,
+  0 failures.
+- New tests: `testAColdInstanceReadsFromDiskWithoutHittingTheNetwork`
+  constructs a second `RemoteImageService` instance pointed at the same disk
+  directory after a first successful load, asserts its own memory cache starts
+  cold (`cachedImage(for:)` is nil) and that `image(for:)` for the same URL
+  produces zero additional requests via `StubURLProtocol.requestCount`.
+  `testDiskCacheEvictsOldestFileWhenOverBudget` writes two noise-PNG entries
+  sized so eviction is forced deterministically and asserts only the newer
+  file survives.
+- All 7 pre-existing tests in the file preserved in behavior (memory-cache
+  hit, in-flight de-dup, 404/transport-failure/non-image-body → nil, not
+  cached) — confirmed by reading the diff directly: no existing test body was
+  altered, only `makeService()`'s signature gained optional parameters with
+  defaults that preserve prior behavior (fresh isolated temp directory).
+- No new file added (both changes are to existing files), so `tuist generate`
+  was correctly skipped; `project.pbxproj` untouched.
+- Orchestrator read the full diff of `RemoteImageService.swift` directly:
+  confirmed the on-disk store is checked strictly before network access inside
+  `image(for:)`, a disk hit never issues a conditional GET, a failed/404/
+  non-image response is never written to disk (write only follows a
+  successful decode), and `RemoteImage.swift`/`SeasonCatalogService.swift`/all
+  UI files are untouched, matching scope.
 
 ## Conventions
 
