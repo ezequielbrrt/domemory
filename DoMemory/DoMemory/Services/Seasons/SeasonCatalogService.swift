@@ -9,6 +9,7 @@
 
 import Foundation
 import Observation
+import SwiftUI
 import FirebaseCore
 import FirebaseDatabase
 import FirebaseAuth
@@ -29,8 +30,20 @@ final class SeasonCatalogService {
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var hasLoaded = false
 
-    init(defaults: UserDefaults = .standard) {
+    /// Seam for warming `RemoteImageService`'s cache with one artwork URL.
+    /// Defaults to the real service; tests substitute a spy so they can
+    /// observe *which* URLs were requested without depending on
+    /// `RemoteImageService`'s network/disk internals (covered separately).
+    @ObservationIgnored private let prefetchImage: @Sendable (URL) async -> Void
+
+    init(
+        defaults: UserDefaults = .standard,
+        prefetchImage: @escaping @Sendable (URL) async -> Void = { url in
+            _ = await RemoteImageService.shared.image(for: url)
+        }
+    ) {
         self.defaults = defaults
+        self.prefetchImage = prefetchImage
         // Read the cache synchronously so the first render already has an
         // answer; the network read below only ever corrects it.
         seasons = Self.decodeCache(defaults.data(forKey: UserDefaultsKeys.seasonCatalog))
@@ -84,7 +97,42 @@ final class SeasonCatalogService {
     /// Re-evaluates which season is active. Cheap; call it when the app returns
     /// to the foreground so a season cannot appear stale across midnight.
     func refreshActiveSeason(on date: Date = Date(), calendar: Calendar = .current) {
-        activeSeason = Self.selectActive(from: seasons, on: date, calendar: calendar)
+        let previousSeasonID = activeSeason?.id
+        let newActiveSeason = Self.selectActive(from: seasons, on: date, calendar: calendar)
+        activeSeason = newActiveSeason
+
+        // Only warm the cache when the active season actually changed to a
+        // new, non-nil season — this method is called repeatedly (e.g. on
+        // every app foreground) and re-prefetching the same season each time
+        // would spawn needless tasks, even though a cache hit inside
+        // `RemoteImageService` would make each of them cheap regardless.
+        guard let newActiveSeason, newActiveSeason.id != previousSeasonID else { return }
+        prefetchArtwork(for: newActiveSeason)
+    }
+
+    /// Fire-and-forget cache warm for `season`'s card and both background
+    /// artwork variants, so `SeasonLevelsView`/the menu card do not show a
+    /// flash of flat colour on first paint. Must never block the caller —
+    /// `refreshActiveSeason` is synchronous and is called from `init`.
+    ///
+    /// Only `Sendable` values (the resolved `URL`s and the `prefetchImage`
+    /// closure) cross into the detached task; `self` and the `Season` value
+    /// are never read from inside it, so there is nothing to race against a
+    /// later, unrelated call to `refreshActiveSeason` on the main actor.
+    private func prefetchArtwork(for season: Season) {
+        let urls: [URL] = [
+            season.cardArtworkURL,
+            season.backgroundArtworkURL(for: .light),
+            season.backgroundArtworkURL(for: .dark)
+        ].compactMap { $0 }
+        guard !urls.isEmpty else { return }
+
+        let prefetchImage = self.prefetchImage
+        Task.detached {
+            for url in urls {
+                await prefetchImage(url)
+            }
+        }
     }
 
     // MARK: - Decoding
