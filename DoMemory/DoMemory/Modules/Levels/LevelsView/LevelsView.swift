@@ -10,6 +10,13 @@
 import SwiftUI
 
 struct LevelsView: View {
+    /// Whether the launch sequence has cleared the screen for the one-shot
+    /// intro. The Menu holds this false while the ATT prompt, the What's New
+    /// sheet or the notification primer still owns the screen — Levels is the
+    /// landing tab, so without it the intro's cover races them. A `LevelsView`
+    /// opened outside that sequence never has to wait.
+    var canPresentIntro: Bool = true
+
     @State private var viewModel = LevelsViewModel()
     @State private var selectedLevel: Int?
     @State private var showIntro = false
@@ -52,12 +59,19 @@ struct LevelsView: View {
                 viewModel.refresh()
                 viewModel.preloadLivesAd()
                 AnalyticsService.log(.screenView(name: "levels", screenClass: "LevelsView"))
-                // Also fires on every return from a level; the gate closes once
-                // the intro is dismissed, so this is a no-op from then on.
-                if introGate.shouldPresent {
-                    introSource = "auto"
-                    showIntro = true
-                }
+                presentIntroIfNeeded()
+            }
+            // The launch sequence normally settles *after* this view has
+            // appeared, so the intro waits on the flag rather than on another
+            // appearance that would never come.
+            .onChange(of: canPresentIntro) { _, _ in
+                presentIntroIfNeeded()
+            }
+            // The intro is a first-run surface the player is meant to read, so
+            // it holds off the app-open ad for as long as it is up — the same
+            // guard the What's New sheet and the notification primer use.
+            .onChange(of: showIntro) { _, isShowing in
+                AdsService.shared.setFullScreenAdsSuppressed(isShowing)
             }
 
             if viewModel.showOutOfLivesPrompt {
@@ -71,6 +85,15 @@ struct LevelsView: View {
                 )
             }
         }
+    }
+
+    /// Presents the one-shot intro once the launch sequence has cleared the
+    /// screen. Also runs on every return from a level; the gate closes when the
+    /// intro is dismissed, so this is a no-op from then on.
+    private func presentIntroIfNeeded() {
+        guard canPresentIntro, introGate.shouldPresent, !showIntro else { return }
+        introSource = "auto"
+        showIntro = true
     }
 
     private var header: some View {
