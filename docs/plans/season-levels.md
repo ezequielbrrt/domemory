@@ -197,8 +197,10 @@ is reported rather than guessed.
 - **Acceptance criteria:** both layouts verified in the simulator (season active
   and season absent); Levels map unchanged after the extraction.
 - **User-visible:** yes. **This phase names the changelog entry; Phases 4 and 5
-  amend that same entry rather than adding near-duplicates.**
-- **PR state:** not opened.
+  amend that same entry rather than adding near-duplicates.** Entry written under
+  `[Unreleased]`, following the file's convention of versioning that heading at
+  release time (see `8d4c481`). `MARKETING_VERSION` deliberately not bumped.
+- **PR state:** not opened; implemented and validated, held local.
 
 ### Phase 4 — Localization and analytics
 
@@ -243,16 +245,68 @@ is reported rather than guessed.
 
 | Phase | State | PR | Merge commit |
 |---|---|---|---|
-| 1 — Model, catalog, progress, board generation | validated, held local (`475106f`) | — | — |
-| 2 — `LevelProgressStore` + `GameMode` refactor | validated, held local | — | — |
-| 3 — UI | ready | — | — |
+| 1 — Model, catalog, progress, board generation | merged (`475106f`) | #27 | `de328f9` |
+| 2 — `LevelProgressStore` + `GameMode` refactor | merged (`f4d75cd`) | #27 | `de328f9` |
+| 3 — UI | validated, held local | — | — |
 | 4 — Localization + analytics | ready | — | — |
 | 5 — Tooling + seeded season | ready | — | — |
 
-Overall: approved. Phases 1 and 2 are implemented and validated but deliberately
-**undelivered** — by user decision they are held as local commits on
-`feature/season-levels-catalog` and will be pushed and reviewed together as one
-PR. Nothing is pushed; `master` remains untouched at `bd02fd6`.
+Overall: approved. Phases 1 and 2 shipped together as PR #27, merged at
+`de328f9` — the user chose to hold Phase 1 rather than deliver it alone, then
+push both once Phase 2 was validated. Phase 3 is implemented and validated on
+`feature/season-levels-ui`, branched from `de328f9`, and is held local pending
+the same delivery decision.
+
+### Phase 3 validation evidence
+
+Bound to the tree on `feature/season-levels-ui`, base `de328f9`: 19 source and
+test files, including three new season view files, the extracted `LevelMapView`,
+and one new test file, plus `CHANGELOG.md`, `project.pbxproj` and this plan.
+
+- `tuist generate --no-open` — success.
+- `xcodebuild -workspace DoMemory.xcworkspace -scheme DoMemory -sdk iphonesimulator
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -configuration Debug test`
+  — `** TEST SUCCEEDED **`, 167 passed, 0 failed, 0 skipped.
+- 15 new tests (`SeasonLevelsViewModelTests`) over the 152 baseline, covering the
+  bounded map's cleared/current/locked split, a completed season leaving no
+  current tile, a non-positive `levelCount` yielding an empty map rather than a
+  crash, the countdown's inclusive last day and its clamp past the end date, and
+  the icon and accent-colour fallbacks a malformed payload reaches first.
+- `project.pbxproj`: 44 added lines, 0 removed — only the new file and group
+  entries, and re-running `tuist generate` reproduces the committed file. Still
+  `objectVersion = 55`, zero `expectedSignature` occurrences. No Xcode rewrite
+  signature.
+- The whole pre-existing suite still passes, which is the regression gate for the
+  `LevelMapView` extraction: `LevelsView` and `LevelsViewModel` were changed only
+  to consume the shared map and the now-top-level `LevelTile`, with the tile
+  styling moved across unmodified.
+
+**Carried into Phase 4:** the seven new keys are present in all ten
+`Localizable.strings` files but hold English copy in every locale, marked with a
+`Season levels — English copy pending translation (Phase 4)` comment. Phase 4
+owns the real translation pass. The keys are `season_progress_format`,
+`season_days_left_format`, `season_one_day_left`, `season_last_day`,
+`season_complete_badge`, `season_complete_title` and `season_complete_message` —
+note these differ from the names this plan originally guessed, and
+`season_fallback_title` is still unwritten (`Season.swift` carries the marker).
+
+**Not verified:** no simulator run of the two card layouts. The acceptance
+criterion asked for both states checked visually; the test suite covers the view
+model and the presentation fallbacks, but the half-width card layout and the
+full-width no-season fallback have not been looked at on a device.
+
+**PR self-review, fixed in #28:** `SeasonCard` seeded its `SeasonProgressService`
+into `@State` from its `init`. SwiftUI does not re-run a `State(initialValue:)`
+initializer when a view is rebuilt in the same structural position, so a season
+*handover* — `refreshActiveSeason()` crossing local midnight into the next
+season, or `load()` correcting a stale cache to a different one — would have
+rendered the incoming season's title and `levelCount` against the outgoing
+season's progress store. Now derived from `season` on each evaluation.
+
+**PR self-review, left for Phase 4:** the season progress bar's VoiceOver label
+is the raw `season_progress_format` string (`"7 / 20"`), which reads poorly.
+A proper label needs a new key in all ten locales, so it belongs to Phase 4's
+translation pass rather than adding an English-only key now.
 
 ### Phase 1 validation evidence
 

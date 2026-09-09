@@ -2,8 +2,9 @@
 //  LevelsView.swift
 //  DoMemory
 //
-//  Endless procedural level map: a scrollable grid of numbered tiles —
-//  cleared (with stars, replayable), current (highlighted), and locked.
+//  Endless procedural level map. The grid and its tiles live in the shared
+//  LevelMapView; this screen supplies the stars/lives header, the lazy paging
+//  and the out-of-lives refusal.
 //
 
 import SwiftUI
@@ -16,42 +17,25 @@ struct LevelsView: View {
 
     private let introGate = LevelsIntroGate()
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 18), count: 4)
-
     var body: some View {
         ZStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    header
-
-                    LazyVGrid(columns: columns, spacing: 22) {
-                        ForEach(viewModel.tiles) { tile in
-                            LevelTileView(tile: tile)
-                                .frame(maxWidth: .infinity)
-                                .onTapGesture {
-                                    guard !tile.isLocked else { return }
-                                    guard viewModel.hasLivesRemaining else {
-                                        // Refusal, not a selection — the modal
-                                        // that follows is bad news.
-                                        HapticsService.shared.fire(.warning)
-                                        AnalyticsService.log(.levelOutOfLivesShown(source: "level_tile"))
-                                        viewModel.showOutOfLivesPrompt = true
-                                        return
-                                    }
-                                    HapticsService.shared.fire(.select)
-                                    selectedLevel = tile.level
-                                }
-                                .onAppear {
-                                    viewModel.extendIfNeeded(nearing: tile)
-                                }
-                        }
+            LevelMapView(
+                tiles: viewModel.tiles,
+                onTileAppear: { viewModel.extendIfNeeded(nearing: $0) },
+                onSelect: { tile in
+                    guard viewModel.hasLivesRemaining else {
+                        // Refusal, not a selection — the modal
+                        // that follows is bad news.
+                        HapticsService.shared.fire(.warning)
+                        AnalyticsService.log(.levelOutOfLivesShown(source: "level_tile"))
+                        viewModel.showOutOfLivesPrompt = true
+                        return
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 16)
-                }
-                .padding(.top, 8)
-            }
-            .background(Color.appBackground)
+                    HapticsService.shared.fire(.select)
+                    selectedLevel = tile.level
+                },
+                header: { header }
+            )
             .navigationDestination(item: $selectedLevel) { level in
                 MemorizeView(
                     viewModel: MemorizeViewModel(level: level),
@@ -146,88 +130,6 @@ struct LevelsView: View {
             }
         }
         .padding(.horizontal, 16)
-    }
-}
-
-private struct LevelTileView: View {
-    let tile: LevelsViewModel.LevelTile
-
-    private let nodeSize: CGFloat = 64
-
-    var body: some View {
-        VStack(spacing: 6) {
-            ZStack {
-                Circle()
-                    .fill(fillColor)
-                    .overlay(
-                        Circle().stroke(borderColor, lineWidth: tile.isCurrent ? 3 : 1.5)
-                    )
-                    .shadow(color: Color.shadowColor, radius: tile.isLocked ? 0 : 8, x: 0, y: 4)
-
-                content
-            }
-            .frame(width: nodeSize, height: nodeSize)
-
-            starsRow
-        }
-        .opacity(tile.isLocked ? 0.55 : 1)
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        switch tile.state {
-        case .locked:
-            Image(systemName: "lock.fill")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(Color.textMuted)
-
-        case .current:
-            Text("\(tile.level)")
-                .font(.system(size: 26, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-                .minimumScaleFactor(0.6)
-                .lineLimit(1)
-
-        case .cleared:
-            Text("\(tile.level)")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.textPrimary)
-                .minimumScaleFactor(0.6)
-                .lineLimit(1)
-        }
-    }
-
-    /// Reserves a consistent row height across every tile so cleared tiles'
-    /// star ratings don't shift the grid's row spacing.
-    @ViewBuilder
-    private var starsRow: some View {
-        if case .cleared(let stars) = tile.state {
-            HStack(spacing: 2) {
-                ForEach(0..<3, id: \.self) { index in
-                    Image(systemName: index < stars ? "star.fill" : "star")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(index < stars ? Color.hardAmber : Color.textMuted.opacity(0.3))
-                }
-            }
-            .frame(height: 14)
-        } else {
-            Color.clear.frame(height: 14)
-        }
-    }
-
-    private var fillColor: Color {
-        switch tile.state {
-        case .current: return Color.primaryColor
-        case .cleared: return Color.surfacePrimary
-        case .locked: return Color.surfaceSecondary
-        }
-    }
-
-    private var borderColor: Color {
-        switch tile.state {
-        case .current: return Color.primaryColor
-        case .cleared, .locked: return Color.surfaceBorder
-        }
     }
 }
 

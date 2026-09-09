@@ -12,18 +12,9 @@ import Observation
 @Observable
 @MainActor
 final class LevelsViewModel {
-    struct LevelTile: Identifiable, Hashable {
-        enum State: Hashable {
-            case cleared(stars: Int)
-            case current
-            case locked
-        }
-
-        let level: Int
-        let state: State
-        var id: Int { level }
-    }
-
+    /// Tiles are the shared `LevelTile` from `LevelMapView`, not a type of this
+    /// view model's own: a season's map renders the same tiles from its own
+    /// progress store.
     private(set) var tiles: [LevelTile] = []
     var showOutOfLivesPrompt = false
     var isWatchingLivesAd = false
@@ -115,17 +106,5 @@ final class LevelsViewModel {
         } else {
             return LevelTile(level: level, state: .locked)
         }
-    }
-}
-
-extension LevelsViewModel.LevelTile {
-    var isLocked: Bool {
-        if case .locked = state { return true }
-        return false
-    }
-
-    var isCurrent: Bool {
-        if case .current = state { return true }
-        return false
     }
 }
