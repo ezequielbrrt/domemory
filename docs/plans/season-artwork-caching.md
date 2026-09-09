@@ -228,13 +228,30 @@ acceptance criteria below are taken directly from that approval.
 
 | Phase | State | PR | Merge commit |
 |---|---|---|---|
-| 1 — Immutable cache-control header | proposed | — | — |
+| 1 — Immutable cache-control header | awaiting-pr | — | — |
 | 2 — RemoteImageService disk cache | proposed | — | — |
 | 3 — Prefetch on active-season change | proposed | — | — |
 
 Overall: approved by the user prior to this plan file's creation ("run the
-development agent and start"). No plan-level questions are open. Proceeding
-directly to Phase 1 preparation.
+development agent and start"). No plan-level questions are open.
+
+### Phase 1 validation evidence
+
+Bound to the working tree on `feature/season-artwork-immutable-cache`, base
+`23e280b` (master): 2 files changed, 3 insertions, 1 deletion —
+`firebase.json` (`Cache-Control` value only) and `CLAUDE.md` (one new
+paragraph documenting the immutability contract and the undeployed manual
+`firebase deploy --only hosting` step).
+
+- `python3 -c "import json; json.load(open('firebase.json'))"` — valid JSON.
+- `git status --porcelain=v1` / `git diff` confirmed by the orchestrator
+  directly (not solely on the engineer's report): only `CLAUDE.md` and
+  `firebase.json` modified, diff limited to exactly the scoped Cache-Control
+  value and the new documentation paragraph. No Swift or project file touched.
+- No `tuist generate` needed (no source files added/renamed/deleted) and none
+  was run. No `firebase deploy` run, per scope.
+- No xcodebuild/test run required for this phase — it has zero Swift changes,
+  so the existing test suite is unaffected by construction.
 
 ## Conventions
 
