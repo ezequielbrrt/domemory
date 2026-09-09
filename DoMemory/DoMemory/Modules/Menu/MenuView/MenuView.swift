@@ -568,23 +568,26 @@ private struct SeasonCard: View {
     let season: Season
     let onOpen: () -> Void
 
-    @State private var progress: SeasonProgressService
-
-    init(season: Season, onOpen: @escaping () -> Void) {
-        self.season = season
-        self.onOpen = onOpen
-        _progress = State(initialValue: SeasonProgressService(season: season))
-    }
-
-    private var isComplete: Bool { progress.isComplete(levelCount: season.levelCount) }
+    /// Derived from `season` on every evaluation rather than seeded into
+    /// `@State`, because a season *handover* — `refreshActiveSeason()` crossing
+    /// local midnight into the next season, or `load()` correcting a stale
+    /// cache to a different one — rebuilds this card in the same structural
+    /// position, which does not re-run a `State` initializer. Seeded state
+    /// would then read the outgoing season's store under the incoming season's
+    /// title and `levelCount`. The service holds no state of its own (every
+    /// read hits `UserDefaults` live) and is trivial to construct, so there is
+    /// nothing to cache.
+    private var progress: SeasonProgressService { SeasonProgressService(season: season) }
 
     private var badgeText: String {
-        isComplete
-            ? Strings.seasonCompleteBadge
-            : Strings.seasonProgressFormat(
-                progress.clearedLevelCount(levelCount: season.levelCount),
-                season.levelCount
-            )
+        let progress = self.progress
+        guard !progress.isComplete(levelCount: season.levelCount) else {
+            return Strings.seasonCompleteBadge
+        }
+        return Strings.seasonProgressFormat(
+            progress.clearedLevelCount(levelCount: season.levelCount),
+            season.levelCount
+        )
     }
 
     var body: some View {

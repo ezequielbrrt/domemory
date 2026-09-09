@@ -36,6 +36,8 @@ The app is a SwiftUI memory-card (memorama) game targeting iOS.
 | `Home` | Onboarding / difficulty selection shown on first launch |
 | `Menu` | Game list screen; fetches games from Firebase Realtime Database |
 | `Memorize` | Active game screen; owns the timer and card-flip logic |
+| `Levels` | Endless procedural level map; owns the stars/lives header and the lazy paging. The grid itself is `LevelMapView` |
+| `Seasons` | Limited-time themed level runs driven by Firebase `/seasons`; renders `LevelMapView` under its own header |
 | `Settings` | Difficulty change + "Remove Ads" IAP |
 | `SharedModules` | Reusable views and helpers used across modules |
 

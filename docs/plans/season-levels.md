@@ -259,9 +259,9 @@ the same delivery decision.
 
 ### Phase 3 validation evidence
 
-Bound to the tree on `feature/season-levels-ui`, base `de328f9`: 18 files,
-including three new season view files, the extracted `LevelMapView`, and one new
-test file.
+Bound to the tree on `feature/season-levels-ui`, base `de328f9`: 19 source and
+test files, including three new season view files, the extracted `LevelMapView`,
+and one new test file, plus `CHANGELOG.md`, `project.pbxproj` and this plan.
 
 - `tuist generate --no-open` — success.
 - `xcodebuild -workspace DoMemory.xcworkspace -scheme DoMemory -sdk iphonesimulator
@@ -272,7 +272,8 @@ test file.
   current tile, a non-positive `levelCount` yielding an empty map rather than a
   crash, the countdown's inclusive last day and its clamp past the end date, and
   the icon and accent-colour fallbacks a malformed payload reaches first.
-- `project.pbxproj`: 40 added lines, 0 removed — only the new file entries. Still
+- `project.pbxproj`: 44 added lines, 0 removed — only the new file and group
+  entries, and re-running `tuist generate` reproduces the committed file. Still
   `objectVersion = 55`, zero `expectedSignature` occurrences. No Xcode rewrite
   signature.
 - The whole pre-existing suite still passes, which is the regression gate for the
@@ -280,7 +281,7 @@ test file.
   to consume the shared map and the now-top-level `LevelTile`, with the tile
   styling moved across unmodified.
 
-**Carried into Phase 4:** the nine new keys are present in all ten
+**Carried into Phase 4:** the seven new keys are present in all ten
 `Localizable.strings` files but hold English copy in every locale, marked with a
 `Season levels — English copy pending translation (Phase 4)` comment. Phase 4
 owns the real translation pass. The keys are `season_progress_format`,
@@ -293,6 +294,19 @@ note these differ from the names this plan originally guessed, and
 criterion asked for both states checked visually; the test suite covers the view
 model and the presentation fallbacks, but the half-width card layout and the
 full-width no-season fallback have not been looked at on a device.
+
+**PR self-review, fixed in #28:** `SeasonCard` seeded its `SeasonProgressService`
+into `@State` from its `init`. SwiftUI does not re-run a `State(initialValue:)`
+initializer when a view is rebuilt in the same structural position, so a season
+*handover* — `refreshActiveSeason()` crossing local midnight into the next
+season, or `load()` correcting a stale cache to a different one — would have
+rendered the incoming season's title and `levelCount` against the outgoing
+season's progress store. Now derived from `season` on each evaluation.
+
+**PR self-review, left for Phase 4:** the season progress bar's VoiceOver label
+is the raw `season_progress_format` string (`"7 / 20"`), which reads poorly.
+A proper label needs a new key in all ten locales, so it belongs to Phase 4's
+translation pass rather than adding an English-only key now.
 
 ### Phase 1 validation evidence
 
