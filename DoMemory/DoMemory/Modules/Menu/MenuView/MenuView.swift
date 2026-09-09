@@ -24,6 +24,8 @@ struct MenuView: View {
     @State private var dailyChallengeBoard: Memorama?
     @State private var statsRefreshID = UUID()
     @State private var purchaseService = PurchaseService.shared
+    @State private var seasonCatalog = SeasonCatalogService.shared
+    @State private var seasonDestination: Season?
     @ObservedObject private var deepLinkRouter = DeepLinkRouter.shared
     @State private var joinDeepLink: JoinDeepLink?
     @State private var showNotificationPrimer = false
@@ -125,15 +127,40 @@ struct MenuView: View {
                             .padding(.top, 12)
                             .padding(.bottom, 8)
 
-                            // Daily challenge
-                            DailyChallengeCard(
-                                streak: DailyChallengeService.shared.currentStreak,
-                                isCompleted: DailyChallengeService.shared.isCompletedToday(),
-                                onPlay: { dailyChallengeBoard = DailyChallengeService.shared.boardForToday() }
-                            )
-                            .id(statsRefreshID)
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 8)
+                            // Daily challenge, sharing the row with the active
+                            // season when there is one. With no season — the
+                            // common case, and every failure mode of the
+                            // catalog fetch — the daily card keeps the
+                            // full-width layout it has always had.
+                            if let season = seasonCatalog.activeSeason {
+                                HStack(spacing: 12) {
+                                    CompactDailyChallengeCard(
+                                        streak: DailyChallengeService.shared.currentStreak,
+                                        isCompleted: DailyChallengeService.shared.isCompletedToday(),
+                                        onPlay: { dailyChallengeBoard = DailyChallengeService.shared.boardForToday() }
+                                    )
+
+                                    SeasonCard(
+                                        season: season,
+                                        onOpen: {
+                                            HapticsService.shared.fire(.tap)
+                                            seasonDestination = season
+                                        }
+                                    )
+                                }
+                                .id(statsRefreshID)
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 8)
+                            } else {
+                                DailyChallengeCard(
+                                    streak: DailyChallengeService.shared.currentStreak,
+                                    isCompleted: DailyChallengeService.shared.isCompletedToday(),
+                                    onPlay: { dailyChallengeBoard = DailyChallengeService.shared.boardForToday() }
+                                )
+                                .id(statsRefreshID)
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 8)
+                            }
 
                             // Difficulty badge (All tab only)
                             if selectedTab == .all,
@@ -230,6 +257,12 @@ struct MenuView: View {
                             statsRefreshID = UUID()
                         }
                     }
+                    .navigationDestination(item: $seasonDestination) { season in
+                        SeasonLevelsView(season: season)
+                            .onDisappear {
+                                statsRefreshID = UUID()
+                            }
+                    }
                     .navigationDestination(item: $joinDeepLink) { link in
                         MultiplayerRoomView(entryMode: .join(link.code))
                     }
@@ -269,10 +302,20 @@ struct MenuView: View {
             statsRefreshID = UUID()
             AdsService.shared.registerMenuReadyForAppOpenAds()
             AnalyticsService.log(.screenView(name: "menu", screenClass: "MenuView"))
+            // The cached catalog was already read synchronously when the
+            // service was first touched, so a cache hit is on screen before
+            // this call; the fetch only ever corrects it. Every failure —
+            // no cache, no network, a kill switch off — leaves `activeSeason`
+            // nil and the daily card full width.
+            seasonCatalog.load()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             AdsService.shared.presentAppOpenAdIfAvailable()
             NotificationService.shared.refreshStreakAtRiskReminder()
+            // A season's window is evaluated in wall-clock days, so an app left
+            // open across local midnight would otherwise show a season that
+            // ended yesterday.
+            seasonCatalog.refreshActiveSeason()
         }
         .onReceive(deepLinkRouter.$pendingJoinCode.compactMap { $0 }) { code in
             joinDeepLink = JoinDeepLink(code: code)
@@ -443,6 +486,120 @@ private struct MemoramaGridCell: View {
         .navigationDestination(isPresented: $isStartingMultiplayer) {
             MultiplayerRoomView(entryMode: .create(memorama), availableMemoramas: availableMemoramas)
         }
+    }
+}
+
+/// The half-width layout used when a season shares the row.
+///
+/// A vertical stack of icon, title and badge rather than the full-width card's
+/// horizontal one, which squeezes its 48pt circle, two lines of text and a
+/// streak badge into roughly 170pt. Every element is a fixed height so this and
+/// `SeasonCard` line up without either having to stretch.
+private struct CompactCardLayout<Badge: View>: View {
+    let glyph: AnyView
+    let title: String
+    let background: Color
+    let badge: Badge
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.18))
+                    .frame(width: 40, height: 40)
+                glyph
+            }
+
+            Text(title)
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            badge
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Capsule().fill(Color.white.opacity(0.2)))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(background)
+                .shadow(color: background.opacity(0.3), radius: 12, x: 0, y: 4)
+        )
+    }
+}
+
+private struct CompactDailyChallengeCard: View {
+    let streak: Int
+    let isCompleted: Bool
+    let onPlay: () -> Void
+
+    private var badgeText: String {
+        if streak > 0 { return Strings.dailyChallengeStreak(streak) }
+        return isCompleted ? Strings.dailyChallengeCompleted : Strings.dailyChallengeSubtitle
+    }
+
+    var body: some View {
+        Button(action: { if !isCompleted { HapticsService.shared.fire(.tap); onPlay() } }) {
+            CompactCardLayout(
+                glyph: AnyView(
+                    Image(systemName: isCompleted ? "checkmark" : "calendar")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.white)
+                ),
+                title: Strings.dailyChallengeTitle,
+                background: Color.primaryColor,
+                badge: Text(badgeText)
+            )
+            .opacity(isCompleted ? 0.85 : 1)
+        }
+        .buttonStyle(.plain)
+        .disabled(isCompleted)
+    }
+}
+
+private struct SeasonCard: View {
+    let season: Season
+    let onOpen: () -> Void
+
+    @State private var progress: SeasonProgressService
+
+    init(season: Season, onOpen: @escaping () -> Void) {
+        self.season = season
+        self.onOpen = onOpen
+        _progress = State(initialValue: SeasonProgressService(season: season))
+    }
+
+    private var isComplete: Bool { progress.isComplete(levelCount: season.levelCount) }
+
+    private var badgeText: String {
+        isComplete
+            ? Strings.seasonCompleteBadge
+            : Strings.seasonProgressFormat(
+                progress.clearedLevelCount(levelCount: season.levelCount),
+                season.levelCount
+            )
+    }
+
+    var body: some View {
+        Button(action: onOpen) {
+            CompactCardLayout(
+                glyph: AnyView(
+                    Text(season.displayIcon)
+                        .font(.system(size: 20))
+                ),
+                title: season.displayTitle,
+                background: season.accent,
+                badge: Text(badgeText)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 

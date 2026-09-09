@@ -165,6 +165,27 @@ enum Strings {
     static let levelsIntroDone = NSLocalizedString("levels_intro_done", comment: "Button dismissing the Levels intro on its last slide")
     static let levelsIntroInfoAccessibility = NSLocalizedString("levels_intro_info_accessibility", comment: "Accessibility label for the button that reopens the Levels intro")
 
+    // Season levels
+    /// Cleared levels out of the season's length, e.g. "7 / 20".
+    static func seasonProgressFormat(_ cleared: Int, _ total: Int) -> String {
+        String(format: NSLocalizedString("season_progress_format", comment: "Season progress, %1$d = levels cleared, %2$d = levels in the season"), cleared, total)
+    }
+    /// How long the season is still running. Zero means it ends today, and one
+    /// gets its own string rather than reading "1 days left".
+    static func seasonDaysLeft(_ days: Int) -> String {
+        switch days {
+        case ...0: return seasonLastDay
+        case 1: return seasonOneDayLeft
+        default:
+            return String(format: NSLocalizedString("season_days_left_format", comment: "Season countdown, %d = whole days remaining, always 2 or more"), days)
+        }
+    }
+    static let seasonOneDayLeft = NSLocalizedString("season_one_day_left", comment: "Season countdown when exactly one day remains")
+    static let seasonLastDay = NSLocalizedString("season_last_day", comment: "Season countdown on the season's final day")
+    static let seasonCompleteBadge = NSLocalizedString("season_complete_badge", comment: "Menu card badge once every level of the season is cleared")
+    static let seasonCompleteTitle = NSLocalizedString("season_complete_title", comment: "Title of the season-complete banner on the season level map")
+    static let seasonCompleteMessage = NSLocalizedString("season_complete_message", comment: "Body of the season-complete banner explaining levels stay replayable")
+
     // Create memorama sheet
     static let createTitle = NSLocalizedString("menu_create_title", comment: "Sheet title for creating a new memorama")
     static let createName = NSLocalizedString("menu_create_name_label", comment: "Label for memorama name field")
