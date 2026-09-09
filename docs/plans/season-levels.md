@@ -250,15 +250,23 @@ is reported rather than guessed.
 ### Phase 5 — Tooling and seeded season
 
 - **Objective:** a repeatable way to publish and kill a season.
-- **Dependencies:** Phase 4 merged.
-- **Branch:** `feature/season-levels-tooling`
+- **Dependencies:** Phase 4 complete.
+- **Branch:** ~~`feature/season-levels-tooling`~~ — **superseded.** By user
+  decision Phases 4 and 5 ship together as one closing PR, so Phase 5 stacks as
+  a separate commit on `feature/season-levels-localization` on top of `789b4a4`.
 - **Tasks:** `Scripts/upload_seasons.py` mirroring `Scripts/upload_games.py`'s
-  `--dry-run` / `--credentials` contract; a seeded `spooky-2026` season; document
-  the `enabled` kill switch.
+  `--dry-run` / `--credentials` contract; `Scripts/seasons.json` (canonical,
+  hand-edited, keyed by season id) as the seeded `spooky-2026` catalog;
+  `Scripts/seasons_data.json` as its generated `--dry-run` output, tracked the
+  same way `Scripts/data.json` already is for games; document the `enabled`
+  kill switch and the still-unpublished `firebase-database.rules.json` rule in
+  the script's own header.
 - **Acceptance criteria:** `--dry-run` validates the seeded season without
-  credentials and rejects a sub-12 emoji pool the same way the app does.
+  credentials and rejects a sub-12 *distinct* emoji pool the same way the app
+  does — including 12 raw entries with a duplicate, which the app also rejects
+  because it deduplicates before measuring.
 - **User-visible:** yes — amends the Phase 3 changelog entry.
-- **PR state:** not opened.
+- **PR state:** not opened; implemented and validated, held local.
 
 ## State ledger
 
@@ -268,7 +276,7 @@ is reported rather than guessed.
 | 2 — `LevelProgressStore` + `GameMode` refactor | merged (`f4d75cd`) | #27 | `de328f9` |
 | 3 — UI | merged (`8e10052`, `b0947d9`) | #28 | `2b30d36` |
 | 4 — Localization + analytics | validated, held local | — | — |
-| 5 — Tooling + seeded season | ready | — | — |
+| 5 — Tooling + seeded season | validated, held local (`<uncommitted>`) | — | — |
 
 Overall: approved. Phases 1 and 2 shipped together as PR #27, merged at
 `de328f9` — the user chose to hold Phase 1 rather than deliver it alone, then
@@ -429,23 +437,77 @@ fixture session — the parity tests read the *built* bundle, so they compare
 whatever was last installed. If they fail unexpectedly, rebuild before believing
 it.
 
-### Follow-ups surfaced by Phase 4 — not in this plan's scope
+### Phase 5 validation evidence
 
-1. **Four analytics events still carry no `seasonID`:** `levelSkipped`,
-   `levelPowerUpUsed`, `levelFailedByMistakes`, `levelMistakesForgiven`. All fire
-   during season play. The engineer correctly stopped at the three events plus
-   `levelStarsCredited` that were specified rather than widening scope unasked,
-   but skip-rate and power-up funnels are consequently not separable by mode.
-   A user decision, deliberately not taken here.
-2. **Pre-existing defect, unrelated to seasons:** `hi`'s
-   `levels_lives_remaining_format` is `"%d में से %d जीवन शेष"` with
-   non-positional specifiers while `Strings.livesRemainingFormat(remaining, total)`
-   passes remaining first, so it renders the two numbers in the wrong roles.
-   Note the new format-specifier parity test does **not** catch this: both
-   locales use the same specifiers, and only the argument *meaning* is reversed.
-   Worth a separate one-line fix.
-3. **Pre-existing:** the menu's difficulty pill renders "Medium" untranslated
-   (confirmed visually in the ja screenshot). Outside this feature.
+Stacked as a separate commit on `feature/season-levels-localization`, on top of
+`789b4a4`. No new commit hash yet — recorded here, committed together.
+
+- `Scripts/upload_seasons.py` (436 lines), `Scripts/seasons.json` (the canonical,
+  hand-edited catalog — one season, `spooky-2026`), `Scripts/seasons_data.json`
+  (its generated `{"seasons": {...}}` output, tracked the same way
+  `Scripts/data.json` already is for games), plus the `Season.swift`
+  cross-reference comment and the changelog amendment.
+- `python3 Scripts/upload_seasons.py --dry-run` against the seeded catalog —
+  succeeds, exit 0, writes `seasons_data.json`, uploads nothing.
+- **Confirmed `seasons_data.json` is not a redundant duplicate of
+  `seasons.json`**: unwrapping the generated file's `"seasons"` key and
+  comparing produces an identical structure to the canonical input — one is the
+  hand-edited source, the other the build artifact, exactly parallel to
+  `games.csv` → `data.json`.
+- **Rejection path exercised twice, both by hand, not only by reading the code:**
+  a pool truncated to 11 distinct entries is rejected (exit 1, "emojiPool has 11
+  distinct emoji; 12 are required"); separately, a pool of 12 *raw* entries
+  containing one duplicate (11 distinct) is rejected with the same message —
+  confirming the script deduplicates before comparing to the floor, matching the
+  app's rule exactly rather than checking the raw count.
+- `project.pbxproj`: staged diff is 0 lines. Correct — `Scripts/` is outside the
+  Xcode target, so nothing here should touch it.
+- `xcodebuild … -workspace … test` — `** TEST SUCCEEDED **`, exit 0 (checked via
+  redirection, not a pipe, so the exit code is genuinely xcodebuild's — see the
+  Phase 4 note on this trap below). **170 passed, 0 failed, 0 skipped** — identical
+  to the Phase 4 count, as expected: this phase is Python-only, and the one Swift
+  change is a comment.
+
+## Deferred follow-up work
+
+Surfaced during this plan, **explicitly deferred by the user** and deliberately
+not addressed in Phase 5. Recorded here in enough detail to pick up cold.
+
+### 1. Four analytics events carry no `seasonID`
+
+`levelSkipped`, `levelPowerUpUsed`, `levelFailedByMistakes` and
+`levelMistakesForgiven` (declared in `AppConfiguration.swift`) all fire during
+season play but were not extended in Phase 4, which covered only `levelStarted`,
+`levelFinished`, `levelUnlocked` and `levelStarsCredited`.
+
+Consequence: skip-rate, power-up-spend and failure-mode funnels cannot be split
+by mode, so season play is silently mixed into endless-Levels numbers for those
+four events. Everything needed is already in place — `LevelContext.seasonID` is
+in scope at each call site, and `AnalyticsEvent.tagged(_:seasonID:)` already
+omits the key when nil, so endless-Levels event shapes stay unchanged. This is
+a mechanical extension of the Phase 4 pattern, not a design problem.
+
+### 2. `hi` — `levels_lives_remaining_format` swaps its argument roles
+
+`hi.lproj/Localizable.strings` has `"%d में से %d जीवन शेष"` with
+**non-positional** specifiers, while `Strings.livesRemainingFormat(remaining, total)`
+passes `remaining` first. Hindi's "X में से Y" reads as "Y out of X", so with
+2 of 4 lives left the label reads **"4 lives remaining out of 2"** — confirmed
+independently. Fix by making the specifiers positional (`%2$d में से %1$d जीवन शेष`)
+so the total lands in the "out of" slot.
+
+**The Phase 4 format-specifier parity test does not catch this**, and cannot:
+`en` and `hi` use the same specifier set, and only the argument *meaning* is
+reversed. Any future audit of positional correctness has to be done by reading,
+not by that test. Pre-existing Levels copy, unrelated to seasons.
+
+### 3. Menu difficulty pill is untranslated
+
+The difficulty badge on the menu renders the raw `Difficulty.rawValue`
+capitalized (`"Medium"`) rather than the localized `Strings.medium` / `.easy` /
+`.hard` / `.veryHard`, which already exist in all ten locales. Visible in the
+Japanese menu screenshot taken during Phase 4. Pre-existing, unrelated to
+seasons.
 
 ## Conventions
 

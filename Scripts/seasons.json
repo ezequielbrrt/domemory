@@ -1,0 +1,35 @@
+{
+  "spooky-2026": {
+    "enabled": true,
+    "startDate": "2026-10-01",
+    "endDate": "2026-11-02",
+    "priority": 10,
+    "levelCount": 20,
+    "icon": "🎃",
+    "accentColor": "#FF6B1A",
+    "emojiPool": [
+      "👻",
+      "🎃",
+      "🕷️",
+      "🦇",
+      "🧛",
+      "⚰️",
+      "🕸️",
+      "🔮",
+      "🍬",
+      "🧟",
+      "🪦",
+      "😱"
+    ],
+    "strings": {
+      "en": {
+        "title": "Spooky Season",
+        "subtitle": "20 haunted levels"
+      },
+      "es-419": {
+        "title": "Temporada de Sustos",
+        "subtitle": "20 niveles embrujados"
+      }
+    }
+  }
+}

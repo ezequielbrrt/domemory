@@ -72,6 +72,13 @@ struct Season: Codable, Identifiable, Hashable {
     /// A season whose pool is smaller than this cannot fill its own late
     /// boards, so decoding rejects it outright rather than dealing a short
     /// board at level 25.
+    ///
+    /// **Cross-reference — keep in sync.** `Scripts/upload_seasons.py` restates
+    /// this rule as `MINIMUM_EMOJI_POOL_SIZE` so a season is rejected before it
+    /// is published rather than skipped after. Python cannot import Swift, so
+    /// that script hardcodes 12 and will *not* follow a retuned
+    /// `LevelCurve.pairAnchors` the way this constant does. Change both
+    /// together; the script carries the matching pointer back here.
     static let minimumEmojiPoolSize = LevelCurve.pairs(for: .max)
 
     /// Title shown when a season carries no usable strings for the current
