@@ -12,13 +12,18 @@
 //  each time the player switched tabs.
 //
 
+import CryptoKit
 import UIKit
 
-/// Fetches remote images through a two-level cache: decoded `UIImage`s in
-/// memory, raw responses on disk via the session's own `URLCache`.
+/// Fetches remote images through a three-level cache: decoded `UIImage`s in
+/// memory, raw response bytes in a dedicated on-disk store, and (as a last
+/// resort) the session's own `URLCache`-backed network fetch.
 ///
-/// The disk half is what makes a season's background free after the first cold
-/// launch. The memory half is what makes it free on every redraw after that.
+/// The disk store is what makes a season's art free forever after the first
+/// successful load — Firebase Hosting now serves it with an immutable
+/// `Cache-Control`, so once a given URL's bytes are on disk they never need
+/// revalidating, even across app relaunches. The memory half is what makes it
+/// free on every redraw after that.
 @MainActor
 final class RemoteImageService {
     static let shared = RemoteImageService()
@@ -35,7 +40,19 @@ final class RemoteImageService {
     /// connection for the same bytes.
     private var inFlight: [URL: Task<UIImage?, Never>] = [:]
 
-    init(session: URLSession? = nil) {
+    /// Directory holding one file per cached URL (named by a hash of the URL),
+    /// independent of the session's `URLCache`. A hit here means the response
+    /// bytes are known-good forever (see the type doc), so `image(for:)` never
+    /// revalidates them over HTTP.
+    private let diskCacheDirectory: URL
+
+    /// Soft cap on `diskCacheDirectory`'s total size, in the same order of
+    /// magnitude as the `URLCache` disk budget below. Checked opportunistically
+    /// after each write so the directory doesn't grow unbounded as seasons
+    /// accumulate over the app's lifetime.
+    private let diskCacheCapacityBytes: Int
+
+    init(session: URLSession? = nil, diskCacheDirectory: URL? = nil, diskCacheCapacityBytes: Int? = nil) {
         if let session {
             self.session = session
         } else {
@@ -57,6 +74,15 @@ final class RemoteImageService {
             self.session = URLSession(configuration: configuration)
         }
 
+        if let diskCacheDirectory {
+            self.diskCacheDirectory = diskCacheDirectory
+        } else {
+            let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            self.diskCacheDirectory = caches.appendingPathComponent("RemoteImages", isDirectory: true)
+        }
+        // Same order of magnitude as the `URLCache` disk budget above.
+        self.diskCacheCapacityBytes = diskCacheCapacityBytes ?? 64 * 1024 * 1024
+
         // Roughly 40 MB of decoded pixels, costed in bytes below.
         memory.totalCostLimit = 40 * 1024 * 1024
     }
@@ -70,6 +96,11 @@ final class RemoteImageService {
 
     /// The image at `url`, or nil if it could not be fetched or decoded.
     ///
+    /// Checks memory, then the on-disk store, and only falls through to the
+    /// network when neither has the bytes. A disk hit skips HTTP entirely — no
+    /// conditional GET — because a cached URL's bytes are good forever (see
+    /// the type doc).
+    ///
     /// Never throws: every caller's fallback is the flat colour it drew before
     /// the season had art, so a failure is a visual no-op rather than an error
     /// anyone needs to handle.
@@ -77,11 +108,16 @@ final class RemoteImageService {
         if let cached = cachedImage(for: url) { return cached }
         if let existing = inFlight[url] { return await existing.value }
 
-        let task = Task<UIImage?, Never> { [session] in
+        let task = Task<UIImage?, Never> { [session, diskCacheDirectory, diskCacheCapacityBytes] in
             // Detached from the main actor: decoding a full-screen background
-            // is expensive enough to drop frames on the level map that is
-            // waiting for it.
+            // (and the disk I/O below) is expensive enough to drop frames on
+            // the level map that is waiting for it.
             await Task.detached(priority: .utility) { () -> UIImage? in
+                if let diskData = Self.readDiskCache(for: url, directory: diskCacheDirectory),
+                   let cached = UIImage(data: diskData)?.preparingForDisplay() {
+                    return cached
+                }
+
                 do {
                     let (data, response) = try await session.data(from: url)
                     if let http = response as? HTTPURLResponse,
@@ -90,7 +126,16 @@ final class RemoteImageService {
                     }
                     // `preparingForDisplay` forces the decode here instead of
                     // leaving it to the first draw on the main thread.
-                    return UIImage(data: data)?.preparingForDisplay()
+                    guard let image = UIImage(data: data)?.preparingForDisplay() else {
+                        return nil
+                    }
+                    Self.writeDiskCache(
+                        data: data,
+                        for: url,
+                        directory: diskCacheDirectory,
+                        capacityBytes: diskCacheCapacityBytes
+                    )
+                    return image
                 } catch {
                     return nil
                 }
@@ -105,6 +150,62 @@ final class RemoteImageService {
             memory.setObject(image, forKey: url as NSURL, cost: image.estimatedByteCount)
         }
         return image
+    }
+
+    // MARK: - On-disk store
+
+    /// `nonisolated` so it can run inside the detached task above without
+    /// hopping back to the main actor for pure file I/O. Takes every value it
+    /// needs as a parameter rather than touching `self`.
+    nonisolated private static func diskCacheFileName(for url: URL) -> String {
+        let digest = SHA256.hash(data: Data(url.absoluteString.utf8))
+        return digest.map { String(format: "%02x", $0) }.joined()
+    }
+
+    nonisolated private static func readDiskCache(for url: URL, directory: URL) -> Data? {
+        let fileURL = directory.appendingPathComponent(diskCacheFileName(for: url))
+        return try? Data(contentsOf: fileURL)
+    }
+
+    nonisolated private static func writeDiskCache(data: Data, for url: URL, directory: URL, capacityBytes: Int) {
+        let fileManager = FileManager.default
+        do {
+            try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+            let fileURL = directory.appendingPathComponent(diskCacheFileName(for: url))
+            try data.write(to: fileURL, options: .atomic)
+            evictIfNeeded(directory: directory, capacityBytes: capacityBytes)
+        } catch {
+            // Best-effort: a write failure just means this URL is fetched
+            // again next time rather than being cached forever.
+        }
+    }
+
+    /// Simple LRU-by-modification-date eviction, run opportunistically after
+    /// each write. Good enough to keep the directory bounded without a
+    /// separate index file to maintain.
+    nonisolated private static func evictIfNeeded(directory: URL, capacityBytes: Int) {
+        let fileManager = FileManager.default
+        guard let entries = try? fileManager.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey]
+        ) else { return }
+
+        let files: [(url: URL, date: Date, size: Int)] = entries.compactMap { fileURL in
+            guard let values = try? fileURL.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey]),
+                  let date = values.contentModificationDate,
+                  let size = values.fileSize else { return nil }
+            return (fileURL, date, size)
+        }
+
+        var totalSize = files.reduce(0) { $0 + $1.size }
+        guard totalSize > capacityBytes else { return }
+
+        for file in files.sorted(by: { $0.date < $1.date }) {
+            guard totalSize > capacityBytes else { break }
+            if (try? fileManager.removeItem(at: file.url)) != nil {
+                totalSize -= file.size
+            }
+        }
     }
 }
 

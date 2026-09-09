@@ -58,10 +58,22 @@ private final class StubURLProtocol: URLProtocol {
 final class RemoteImageServiceTests: XCTestCase {
     private let url = URL(string: "https://example.com/season-background.png")!
 
-    private func makeService() -> RemoteImageService {
+    /// A fresh, isolated directory per call so tests never collide with the
+    /// real app cache or with each other. Pass the same directory to two
+    /// `makeService` calls to simulate a cold relaunch reading the same bytes.
+    private func makeTemporaryDirectory() -> URL {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent("RemoteImageServiceTests-\(UUID().uuidString)", isDirectory: true)
+    }
+
+    private func makeService(diskCacheDirectory: URL? = nil, diskCacheCapacityBytes: Int? = nil) -> RemoteImageService {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [StubURLProtocol.self]
-        return RemoteImageService(session: URLSession(configuration: configuration))
+        return RemoteImageService(
+            session: URLSession(configuration: configuration),
+            diskCacheDirectory: diskCacheDirectory ?? makeTemporaryDirectory(),
+            diskCacheCapacityBytes: diskCacheCapacityBytes
+        )
     }
 
     private func pngData(size: CGFloat = 8) -> Data {
@@ -69,6 +81,27 @@ final class RemoteImageServiceTests: XCTestCase {
         let image = renderer.image { context in
             UIColor.orange.setFill()
             context.fill(CGRect(x: 0, y: 0, width: size, height: size))
+        }
+        return image.pngData()!
+    }
+
+    /// Random-noise PNG data, which (unlike a solid fill) does not compress
+    /// away to near-nothing — its encoded size scales with pixel count, which
+    /// is what the eviction test below relies on to force a size difference.
+    private func noisyPNGData(size: Int) -> Data {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        let image = renderer.image { context in
+            for x in 0..<size {
+                for y in 0..<size {
+                    UIColor(
+                        red: .random(in: 0...1),
+                        green: .random(in: 0...1),
+                        blue: .random(in: 0...1),
+                        alpha: 1
+                    ).setFill()
+                    context.fill(CGRect(x: x, y: y, width: 1, height: 1))
+                }
+            }
         }
         return image.pngData()!
     }
@@ -146,5 +179,53 @@ final class RemoteImageServiceTests: XCTestCase {
         // inherit a failure from a moment of bad signal.
         _ = await service.image(for: url)
         XCTAssertEqual(StubURLProtocol.requestCount, 2)
+    }
+
+    func testAColdInstanceReadsFromDiskWithoutHittingTheNetwork() async {
+        let data = pngData()
+        StubURLProtocol.install { [response] _ in .success((response(200), data)) }
+        let directory = makeTemporaryDirectory()
+
+        let firstLaunch = makeService(diskCacheDirectory: directory)
+        let firstImage = await firstLaunch.image(for: url)
+        XCTAssertNotNil(firstImage)
+        XCTAssertEqual(StubURLProtocol.requestCount, 1)
+
+        // A brand-new instance simulates a cold app relaunch: no warm
+        // `NSCache`, no in-flight state. It should still find the bytes on
+        // disk and never touch the network for them.
+        let secondLaunch = makeService(diskCacheDirectory: directory)
+        XCTAssertNil(secondLaunch.cachedImage(for: url), "the new instance's memory cache must start cold")
+
+        let secondImage = await secondLaunch.image(for: url)
+        XCTAssertNotNil(secondImage)
+        XCTAssertEqual(StubURLProtocol.requestCount, 1, "a disk cache hit must not touch the network")
+    }
+
+    func testDiskCacheEvictsOldestFileWhenOverBudget() async {
+        let urlA = URL(string: "https://example.com/season-a.png")!
+        let urlB = URL(string: "https://example.com/season-b.png")!
+        // B is much larger than A (noise defeats PNG compression, so encoded
+        // size tracks pixel count), which is what lets a capacity sized to fit
+        // only B force A's eviction regardless of exact byte counts.
+        let dataA = noisyPNGData(size: 2)
+        let dataB = noisyPNGData(size: 40)
+
+        StubURLProtocol.install { request in
+            if request.url == urlA {
+                return .success((HTTPURLResponse(url: urlA, statusCode: 200, httpVersion: nil, headerFields: nil)!, dataA))
+            } else {
+                return .success((HTTPURLResponse(url: urlB, statusCode: 200, httpVersion: nil, headerFields: nil)!, dataB))
+            }
+        }
+
+        let directory = makeTemporaryDirectory()
+        let service = makeService(diskCacheDirectory: directory, diskCacheCapacityBytes: dataB.count)
+
+        _ = await service.image(for: urlA)
+        _ = await service.image(for: urlB)
+
+        let remaining = try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+        XCTAssertEqual(remaining?.count, 1, "the older file should have been evicted to stay under budget")
     }
 }
