@@ -166,9 +166,19 @@ enum Strings {
     static let levelsIntroInfoAccessibility = NSLocalizedString("levels_intro_info_accessibility", comment: "Accessibility label for the button that reopens the Levels intro")
 
     // Season levels
+    /// Title for a season whose Firebase payload carries no strings the current
+    /// locale can resolve — not the name of any real season, just something
+    /// readable in place of an empty title.
+    static let seasonFallbackTitle = NSLocalizedString("season_fallback_title", comment: "Generic title shown when a season supplies no strings for the current locale")
     /// Cleared levels out of the season's length, e.g. "7 / 20".
     static func seasonProgressFormat(_ cleared: Int, _ total: Int) -> String {
         String(format: NSLocalizedString("season_progress_format", comment: "Season progress, %1$d = levels cleared, %2$d = levels in the season"), cleared, total)
+    }
+    /// Spoken form of `seasonProgressFormat`. The visual "7 / 20" is read aloud
+    /// as bare numbers with no idea what they count, so the progress bar gets a
+    /// sentence instead.
+    static func seasonProgressAccessibility(_ cleared: Int, _ total: Int) -> String {
+        String(format: NSLocalizedString("season_progress_accessibility_format", comment: "Accessibility label for the season progress bar, %1$d = levels cleared, %2$d = levels in the season"), cleared, total)
     }
     /// How long the season is still running. Zero means it ends today, and one
     /// gets its own string rather than reading "1 days left".

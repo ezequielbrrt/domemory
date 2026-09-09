@@ -260,11 +260,13 @@
 "settings_section_purchases" = "Achats";
 "settings_section_about" = "À propos";
 
-/* Season levels — English copy pending translation (Phase 4) */
+/* Season levels */
+"season_fallback_title" = "Saison";
 "season_progress_format" = "%1$d / %2$d";
-"season_days_left_format" = "%d days left";
-"season_one_day_left" = "1 day left";
-"season_last_day" = "Last day";
-"season_complete_badge" = "Complete";
-"season_complete_title" = "Season complete!";
-"season_complete_message" = "You cleared every level. Replay any of them to improve its stars.";
+"season_progress_accessibility_format" = "%1$d niveaux réussis sur %2$d";
+"season_days_left_format" = "%d jours restants";
+"season_one_day_left" = "1 jour restant";
+"season_last_day" = "Dernier jour";
+"season_complete_badge" = "Terminée";
+"season_complete_title" = "Saison terminée !";
+"season_complete_message" = "Vous avez réussi tous les niveaux. Rejouez celui que vous voulez pour améliorer ses étoiles.";

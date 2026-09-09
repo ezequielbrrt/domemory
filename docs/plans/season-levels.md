@@ -208,10 +208,29 @@ is reported rather than guessed.
 - **Dependencies:** Phase 3 merged.
 - **Branch:** `feature/season-levels-localization`
 - **Tasks:**
-  - Add `season_ends_in_format`, `season_ends_today`, `season_completed`,
-    `season_progress_format`, `season_fallback_title` and anything Phase 3
-    surfaced, to `Strings.swift` and to all ten `Localizable.strings`.
-  - **Assert 235 + N key parity across all ten files.**
+  - **Corrected task list.** The key names originally written here
+    (`season_ends_in_format`, `season_ends_today`, `season_completed`) were
+    guessed before Phase 3 was written and do not exist. The seven keys Phase 3
+    actually shipped — currently English copy in all ten locales, flagged by a
+    `Season levels — English copy pending translation (Phase 4)` comment at
+    line 263 of each file — are:
+    `season_progress_format` (`"%1$d / %2$d"`), `season_days_left_format`
+    (`"%d days left"`, only ever called with 2+), `season_one_day_left`,
+    `season_last_day`, `season_complete_badge`, `season_complete_title`,
+    `season_complete_message`.
+  - Translate those seven into the nine non-English locales, reusing how each
+    locale already renders "level" and "stars" in the Levels keys so the season
+    UI does not read as a different product. Keep `%1$d` / `%2$d` positional
+    specifiers intact. Remove the pending-translation comment per file as it is
+    completed.
+  - Add `season_fallback_title` in all ten locales and replace the plain constant
+    at `Season.swift:81` that its `// Phase 4:` marker points at.
+  - Add a VoiceOver label key for the season progress bar in
+    `SeasonLevelsView.swift`, whose accessibility label is currently the raw
+    `"7 / 20"` string. Phase 3 deferred it here because it needs ten locales.
+  - **Assert key parity across all ten files.** Verified baseline at the start of
+    Phase 4: **242 keys each** (235 pre-season + Phase 3's 7). Ends at 242 + N.
+    Add a test guarding this invariant — it is now load-bearing and unguarded.
   - Add an optional `seasonID` to the existing `levelStarted` / `levelFinished` /
     `levelUnlocked` events (`AppConfiguration.swift:50-52` and `:241-250`). No
     parallel event set. Phase 2 left `// Phase 4:` markers at each call site.
@@ -231,15 +250,23 @@ is reported rather than guessed.
 ### Phase 5 — Tooling and seeded season
 
 - **Objective:** a repeatable way to publish and kill a season.
-- **Dependencies:** Phase 4 merged.
-- **Branch:** `feature/season-levels-tooling`
+- **Dependencies:** Phase 4 complete.
+- **Branch:** ~~`feature/season-levels-tooling`~~ — **superseded.** By user
+  decision Phases 4 and 5 ship together as one closing PR, so Phase 5 stacks as
+  a separate commit on `feature/season-levels-localization` on top of `789b4a4`.
 - **Tasks:** `Scripts/upload_seasons.py` mirroring `Scripts/upload_games.py`'s
-  `--dry-run` / `--credentials` contract; a seeded `spooky-2026` season; document
-  the `enabled` kill switch.
+  `--dry-run` / `--credentials` contract; `Scripts/seasons.json` (canonical,
+  hand-edited, keyed by season id) as the seeded `spooky-2026` catalog;
+  `Scripts/seasons_data.json` as its generated `--dry-run` output, tracked the
+  same way `Scripts/data.json` already is for games; document the `enabled`
+  kill switch and the still-unpublished `firebase-database.rules.json` rule in
+  the script's own header.
 - **Acceptance criteria:** `--dry-run` validates the seeded season without
-  credentials and rejects a sub-12 emoji pool the same way the app does.
+  credentials and rejects a sub-12 *distinct* emoji pool the same way the app
+  does — including 12 raw entries with a duplicate, which the app also rejects
+  because it deduplicates before measuring.
 - **User-visible:** yes — amends the Phase 3 changelog entry.
-- **PR state:** not opened.
+- **PR state:** not opened; implemented and validated, held local.
 
 ## State ledger
 
@@ -247,9 +274,9 @@ is reported rather than guessed.
 |---|---|---|---|
 | 1 — Model, catalog, progress, board generation | merged (`475106f`) | #27 | `de328f9` |
 | 2 — `LevelProgressStore` + `GameMode` refactor | merged (`f4d75cd`) | #27 | `de328f9` |
-| 3 — UI | validated, held local | — | — |
-| 4 — Localization + analytics | ready | — | — |
-| 5 — Tooling + seeded season | ready | — | — |
+| 3 — UI | merged (`8e10052`, `b0947d9`) | #28 | `2b30d36` |
+| 4 — Localization + analytics | validated, held local | — | — |
+| 5 — Tooling + seeded season | validated, held local (`<uncommitted>`) | — | — |
 
 Overall: approved. Phases 1 and 2 shipped together as PR #27, merged at
 `de328f9` — the user chose to hold Phase 1 rather than deliver it alone, then
@@ -383,6 +410,104 @@ Design decisions worth carrying forward:
   button. The final-level button reuses the existing `Strings.backToLevels`.
 - **Phase 3 entry point:** `LevelContext.season(_:level:progress:)` is the single
   place a season's id, pool, length and store are read together.
+
+### Phase 4 validation evidence
+
+Bound to the staged tree on `feature/season-levels-localization`, base `2b30d36`:
+20 files, 323 insertions, 105 deletions.
+
+- `xcodebuild … -workspace … test` — `** TEST SUCCEEDED **`, exit 0,
+  **170 tests, 0 failures**. Re-run independently by the orchestrator.
+- **All ten locales verified at 244 keys** (242 + `season_fallback_title` +
+  `season_progress_accessibility_format`).
+- All four `// Phase 4:` Swift markers removed; no `pending translation` comment
+  survives in any locale file.
+- `project.pbxproj`: 4 added lines, only the new test file's entries. Still
+  `objectVersion = 55`, no Xcode rewrite signature.
+- Runtime: ja and ko verified in the simulator — the two half-width menu cards,
+  the season map header, and the season-complete banner all render without
+  mojibake or truncation; the ko completion message wraps to two lines inside its
+  card. The `season_fallback_title` path was exercised with an empty `strings`
+  map.
+
+**A note for future runs:** the first independent full-suite run failed all three
+`LocalizationParityTests`, then passed in isolation and in two subsequent full
+runs. The cause was a stale app bundle left on the simulator by the screenshot
+fixture session — the parity tests read the *built* bundle, so they compare
+whatever was last installed. If they fail unexpectedly, rebuild before believing
+it.
+
+### Phase 5 validation evidence
+
+Stacked as a separate commit on `feature/season-levels-localization`, on top of
+`789b4a4`. No new commit hash yet — recorded here, committed together.
+
+- `Scripts/upload_seasons.py` (436 lines), `Scripts/seasons.json` (the canonical,
+  hand-edited catalog — one season, `spooky-2026`), `Scripts/seasons_data.json`
+  (its generated `{"seasons": {...}}` output, tracked the same way
+  `Scripts/data.json` already is for games), plus the `Season.swift`
+  cross-reference comment and the changelog amendment.
+- `python3 Scripts/upload_seasons.py --dry-run` against the seeded catalog —
+  succeeds, exit 0, writes `seasons_data.json`, uploads nothing.
+- **Confirmed `seasons_data.json` is not a redundant duplicate of
+  `seasons.json`**: unwrapping the generated file's `"seasons"` key and
+  comparing produces an identical structure to the canonical input — one is the
+  hand-edited source, the other the build artifact, exactly parallel to
+  `games.csv` → `data.json`.
+- **Rejection path exercised twice, both by hand, not only by reading the code:**
+  a pool truncated to 11 distinct entries is rejected (exit 1, "emojiPool has 11
+  distinct emoji; 12 are required"); separately, a pool of 12 *raw* entries
+  containing one duplicate (11 distinct) is rejected with the same message —
+  confirming the script deduplicates before comparing to the floor, matching the
+  app's rule exactly rather than checking the raw count.
+- `project.pbxproj`: staged diff is 0 lines. Correct — `Scripts/` is outside the
+  Xcode target, so nothing here should touch it.
+- `xcodebuild … -workspace … test` — `** TEST SUCCEEDED **`, exit 0 (checked via
+  redirection, not a pipe, so the exit code is genuinely xcodebuild's — see the
+  Phase 4 note on this trap below). **170 passed, 0 failed, 0 skipped** — identical
+  to the Phase 4 count, as expected: this phase is Python-only, and the one Swift
+  change is a comment.
+
+## Deferred follow-up work
+
+Surfaced during this plan, **explicitly deferred by the user** and deliberately
+not addressed in Phase 5. Recorded here in enough detail to pick up cold.
+
+### 1. Four analytics events carry no `seasonID`
+
+`levelSkipped`, `levelPowerUpUsed`, `levelFailedByMistakes` and
+`levelMistakesForgiven` (declared in `AppConfiguration.swift`) all fire during
+season play but were not extended in Phase 4, which covered only `levelStarted`,
+`levelFinished`, `levelUnlocked` and `levelStarsCredited`.
+
+Consequence: skip-rate, power-up-spend and failure-mode funnels cannot be split
+by mode, so season play is silently mixed into endless-Levels numbers for those
+four events. Everything needed is already in place — `LevelContext.seasonID` is
+in scope at each call site, and `AnalyticsEvent.tagged(_:seasonID:)` already
+omits the key when nil, so endless-Levels event shapes stay unchanged. This is
+a mechanical extension of the Phase 4 pattern, not a design problem.
+
+### 2. `hi` — `levels_lives_remaining_format` swaps its argument roles
+
+`hi.lproj/Localizable.strings` has `"%d में से %d जीवन शेष"` with
+**non-positional** specifiers, while `Strings.livesRemainingFormat(remaining, total)`
+passes `remaining` first. Hindi's "X में से Y" reads as "Y out of X", so with
+2 of 4 lives left the label reads **"4 lives remaining out of 2"** — confirmed
+independently. Fix by making the specifiers positional (`%2$d में से %1$d जीवन शेष`)
+so the total lands in the "out of" slot.
+
+**The Phase 4 format-specifier parity test does not catch this**, and cannot:
+`en` and `hi` use the same specifier set, and only the argument *meaning* is
+reversed. Any future audit of positional correctness has to be done by reading,
+not by that test. Pre-existing Levels copy, unrelated to seasons.
+
+### 3. Menu difficulty pill is untranslated
+
+The difficulty badge on the menu renders the raw `Difficulty.rawValue`
+capitalized (`"Medium"`) rather than the localized `Strings.medium` / `.easy` /
+`.hard` / `.veryHard`, which already exist in all ten locales. Visible in the
+Japanese menu screenshot taken during Phase 4. Pre-existing, unrelated to
+seasons.
 
 ## Conventions
 

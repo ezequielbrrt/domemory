@@ -8,12 +8,14 @@ All notable changes to this project will be documented in this file.
 - Added Season Levels, a limited-time themed progression mode. A season — "Spooky Season", "Christmas Season" — is published from the Firebase Realtime Database `/seasons` node with its own emoji pool, length, icon, accent colour and localized title, and appears in the app only while its date window is open. Its levels unlock in order and are rated 1-3 stars on the same thresholds endless Levels uses, so a 3-star board means the same thing in both modes.
 - Added a season card to the menu, sharing a row with the Daily Challenge while a season is running and showing the season's progress through its levels. With no active season the Daily Challenge card keeps the full-width layout it has always had.
 - Added a season level map with the season's countdown, a progress bar, and a completion state once every level is cleared, so a finished season has somewhere to land instead of ending on a wall of cleared tiles.
+- Added `Scripts/upload_seasons.py` and the seeded Spooky Season 2026 catalog it publishes, so a season can be put live or pulled without an app release. It checks a season against the same rules the app applies before decoding one — the 12-distinct-emoji floor, the date window, a usable English title — so a season that would be silently skipped on device is rejected before it is uploaded. Setting a season's `enabled` to `false` is the kill switch: the season leaves the app on the next menu load.
 
 ### Changed
 - Seasons draw on the same daily lives budget and the same star wallet as endless Levels, rather than granting a second set of free plays. Season stars are deliberately kept out of `levels.lifetimeStars`, which stays the endless-Levels mastery score.
 - Season progress is stored per season, so a season ending cannot disturb endless-Levels progress and a season that returns next year resumes where it left off.
 - Extracted the level map — the tile grid, its styling and its tap rules — out of the Levels screen so both modes render the same map under their own headers. Endless Levels is unchanged.
 - A season whose emoji pool holds fewer than 12 distinct entries is rejected when it is read, because the difficulty curve tops out at 12 pairs and a smaller pool cannot fill its own later boards. The floor is derived from the curve, so retuning the curve moves it. Every other failure — no network, no cached season, the kill switch off, a malformed accent colour — falls back rather than showing a broken season.
+- The season screens read in all ten supported languages rather than falling back to English, and the progress bar now announces "7 of 20 levels cleared" to VoiceOver instead of the bare "7 / 20".
 
 [4.1.0] 01-09-2026
 

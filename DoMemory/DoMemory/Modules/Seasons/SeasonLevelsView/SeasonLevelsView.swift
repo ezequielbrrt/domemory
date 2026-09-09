@@ -158,7 +158,9 @@ struct SeasonLevelsView: View {
         }
         .frame(height: 8)
         .accessibilityElement()
-        .accessibilityLabel(Strings.seasonProgressFormat(viewModel.clearedLevelCount, viewModel.levelCount))
+        // Not the visual "7 / 20": VoiceOver reads that as two bare numbers with
+        // no idea what they count.
+        .accessibilityLabel(Strings.seasonProgressAccessibility(viewModel.clearedLevelCount, viewModel.levelCount))
     }
 
     /// A cleared season needs somewhere to land. Without this the map is just

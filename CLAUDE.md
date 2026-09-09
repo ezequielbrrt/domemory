@@ -60,7 +60,7 @@ The app is a SwiftUI memory-card (memorama) game targeting iOS.
 |-------|------|
 | CoreData (`DoMemory.xcdatamodeld`) | `UserSettings` (difficulty, points); accessed via `UserManageObject` |
 | `UserDefaults` | Custom memoramas (JSON), favorite IDs, per-game stats, purchase state, ad frequency counter |
-| Firebase Realtime Database | Canonical game list (read-only by the app) |
+| Firebase Realtime Database | Canonical game list and the Season Levels catalog (`/data`, `/seasons`; both read-only by the app) |
 
 ### Localization
 
@@ -73,3 +73,5 @@ All user-facing strings go through `Strings.swift` (typed `NSLocalizedString` wr
 `upload_screenshots.sh` / `upload_ipad_screenshots.sh` — upload the exported images via `asc`.
 
 `Scripts/gamesToJson.py` — converts `games.csv` to `data.json` for seeding Firebase.
+
+`Scripts/upload_seasons.py` — validates `Scripts/seasons.json` (the canonical Season Levels catalog) against the same rules `Season.init(from:)` applies and publishes it to Firebase `/seasons`. `--dry-run` validates and writes `Scripts/seasons_data.json` without credentials. A season's `enabled: false` is the kill switch. **`firebase-database.rules.json`'s `/seasons` read rule must be deployed separately** (`firebase deploy --only database`) before any client can read `/seasons` — committing the rules file does not publish it.

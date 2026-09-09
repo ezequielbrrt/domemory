@@ -157,6 +157,7 @@
 		AA54460A533E303026B2AD85 /* FirebaseAuthInternal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05C3C786710D626F32B0308D /* FirebaseAuthInternal.framework */; };
 		AA712CA2E44A830B370AE317 /* LevelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCE293BD90272F723D089F3F /* LevelsView.swift */; };
 		AB0A51A1E9F0B46B963C33A8 /* FirebaseDatabaseInternal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B80C8B1E88CA6415E7F98EBF /* FirebaseDatabaseInternal.framework */; };
+		AC11DD587D1533500443643D /* LocalizationParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFCD34DE7EC456BA7BD79C /* LocalizationParityTests.swift */; };
 		AF10449BFBBD6B25A02B5673 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B9BE8D38345F0B3C9FEE8C /* ContentView.swift */; };
 		B3FA9331D8A16134998B0B00 /* leveldb_leveldb.bundle in Dependencies */ = {isa = PBXBuildFile; fileRef = 0A753029F1437F808D06BD40 /* leveldb_leveldb.bundle */; };
 		B4F4F116D876437AF70E862A /* Promises_Promises.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9D4DF24E0F4CF45E87D5140C /* Promises_Promises.bundle */; };
@@ -458,6 +459,7 @@
 		B80C8B1E88CA6415E7F98EBF /* FirebaseDatabaseInternal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseDatabaseInternal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B87CBCAE688CB9B0F1E2C33F /* LevelsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelsViewModel.swift; sourceTree = "<group>"; };
 		B8B973CFDC9D34E9E85CA95A /* FirebaseCrashlytics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseCrashlytics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BAEFCD34DE7EC456BA7BD79C /* LocalizationParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationParityTests.swift; sourceTree = "<group>"; };
 		BBBA85E0072EADE8AFF6448F /* GoogleUtilities_GoogleUtilities_MethodSwizzler.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GoogleUtilities_GoogleUtilities_MethodSwizzler.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD3E3F826ECA07F76A61954B /* LoseModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoseModal.swift; sourceTree = "<group>"; };
 		BF8382A1974B4ECC76C9DD1B /* ReviewFlow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReviewFlow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1289,6 +1291,7 @@
 				0309EC51A91F7E6966E98006 /* LevelLivesServiceTests.swift */,
 				D322E3D203B117CAFBE372BF /* LevelProgressServiceTests.swift */,
 				D50D2A3085C15742082B0714 /* LevelsIntroGateTests.swift */,
+				BAEFCD34DE7EC456BA7BD79C /* LocalizationParityTests.swift */,
 				5A9DE9F32CAF0B87850C08DC /* MemorizeViewModelTests.swift */,
 				F6ACF9294A68A492E545DA60 /* MemoryGameTests.swift */,
 				7EA877981D5E10DC5E4EA4F1 /* ReviewHistoryMigrationTests.swift */,
@@ -1560,6 +1563,7 @@
 				6B292345B7B5712A1F0E6515 /* LevelLivesServiceTests.swift in Sources */,
 				099C8CCE02DF4A8AE15202D6 /* LevelProgressServiceTests.swift in Sources */,
 				0E276218D2F56149BC963400 /* LevelsIntroGateTests.swift in Sources */,
+				AC11DD587D1533500443643D /* LocalizationParityTests.swift in Sources */,
 				5E14A96E1DEEB582EB116534 /* MemorizeViewModelTests.swift in Sources */,
 				8A6E24BD38735E13906B3029 /* MemoryGameTests.swift in Sources */,
 				78B1A948387E1E49C812F9CB /* ReviewHistoryMigrationTests.swift in Sources */,

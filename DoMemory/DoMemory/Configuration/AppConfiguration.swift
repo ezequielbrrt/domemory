@@ -47,13 +47,17 @@ enum AnalyticsEvent {
     case resultShared(source: String)
     case onboardingIntroCompleted
     case onboardingIntroSkipped
-    case levelStarted(level: Int)
-    case levelFinished(level: Int, result: String, stars: Int)
-    case levelUnlocked(level: Int)
+    // Season play reuses the numbered-level events rather than getting a
+    // parallel set, so the season and endless-Levels funnels stay directly
+    // comparable. `seasonID` is nil for endless Levels and the key is then
+    // omitted entirely, leaving those events exactly the shape they were.
+    case levelStarted(level: Int, seasonID: String? = nil)
+    case levelFinished(level: Int, result: String, stars: Int, seasonID: String? = nil)
+    case levelUnlocked(level: Int, seasonID: String? = nil)
     case levelLifeConsumed(livesRemaining: Int)
     case levelLifeGrantedFromAd(livesRemaining: Int)
     case levelOutOfLivesShown(source: String)
-    case levelStarsCredited(level: Int, amount: Int, balanceAfter: Int)
+    case levelStarsCredited(level: Int, amount: Int, balanceAfter: Int, seasonID: String? = nil)
     case levelPowerUpUsed(powerUp: String, level: Int, cost: Int, balanceAfter: Int)
     case levelLifePurchasedWithStars(cost: Int, balanceAfter: Int)
     case levelSkipped(level: Int, cost: Int, balanceAfter: Int)
@@ -238,28 +242,34 @@ enum AnalyticsEvent {
             return ["source": source]
         case .onboardingIntroCompleted, .onboardingIntroSkipped:
             return [:]
-        case .levelStarted(let level):
-            return ["level": level]
-        case .levelFinished(let level, let result, let stars):
-            return [
-                "level": level,
-                "result": result,
-                "stars": stars
-            ]
-        case .levelUnlocked(let level):
-            return ["level": level]
+        case .levelStarted(let level, let seasonID):
+            return AnalyticsEvent.tagged(["level": level], seasonID: seasonID)
+        case .levelFinished(let level, let result, let stars, let seasonID):
+            return AnalyticsEvent.tagged(
+                [
+                    "level": level,
+                    "result": result,
+                    "stars": stars
+                ],
+                seasonID: seasonID
+            )
+        case .levelUnlocked(let level, let seasonID):
+            return AnalyticsEvent.tagged(["level": level], seasonID: seasonID)
         case .levelLifeConsumed(let livesRemaining):
             return ["lives_remaining": livesRemaining]
         case .levelLifeGrantedFromAd(let livesRemaining):
             return ["lives_remaining": livesRemaining]
         case .levelOutOfLivesShown(let source):
             return ["source": source]
-        case .levelStarsCredited(let level, let amount, let balanceAfter):
-            return [
-                "level": level,
-                "amount": amount,
-                "balance_after": balanceAfter
-            ]
+        case .levelStarsCredited(let level, let amount, let balanceAfter, let seasonID):
+            return AnalyticsEvent.tagged(
+                [
+                    "level": level,
+                    "amount": amount,
+                    "balance_after": balanceAfter
+                ],
+                seasonID: seasonID
+            )
         case .levelPowerUpUsed(let powerUp, let level, let cost, let balanceAfter):
             return [
                 "power_up": powerUp,
@@ -295,6 +305,19 @@ enum AnalyticsEvent {
         case .levelsIntroCompleted, .levelsIntroSkipped:
             return [:]
         }
+    }
+
+    /// Adds the season dimension to a numbered-level event, or returns the
+    /// parameters untouched when there is no season.
+    ///
+    /// The key is omitted rather than sent empty so an endless-Levels event is
+    /// byte-identical to what it was before seasons existed — no historical
+    /// comparison breaks, and `season_id is null` cleanly means "endless".
+    private static func tagged(_ parameters: [String: Any], seasonID: String?) -> [String: Any] {
+        guard let seasonID else { return parameters }
+        var tagged = parameters
+        tagged["season_id"] = seasonID
+        return tagged
     }
 }
 

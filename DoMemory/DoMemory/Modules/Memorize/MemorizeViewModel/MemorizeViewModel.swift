@@ -419,10 +419,11 @@ class MemorizeViewModel {
         if isDailyChallenge {
             AnalyticsService.log(.dailyChallengeStarted(streak: DailyChallengeService.shared.currentStreak))
         }
-        if let levelNumber {
-            // Phase 4 attaches the context's optional seasonID here rather than
-            // adding a parallel season event set.
-            AnalyticsService.log(.levelStarted(level: levelNumber))
+        if let context = levelContext {
+            // One event for both modes, separated by the seasonID dimension
+            // rather than by a parallel season event set, so the two funnels
+            // stay directly comparable.
+            AnalyticsService.log(.levelStarted(level: context.number, seasonID: context.seasonID))
         }
     }
 
@@ -482,9 +483,27 @@ class MemorizeViewModel {
             )
             lastEarnedStars = earnedStars
             starBalance = StarWalletService.shared.balance
-            AnalyticsService.log(.levelFinished(level: levelNumber, result: result, stars: earnedStars))
-            if didWin && !alreadyUnlockedNext {
-                AnalyticsService.log(.levelUnlocked(level: levelNumber + 1))
+            AnalyticsService.log(
+                .levelFinished(
+                    level: levelNumber,
+                    result: result,
+                    stars: earnedStars,
+                    seasonID: context.seasonID
+                )
+            )
+            // `levelUnlocked` means "a new playable level became available", so
+            // it is gated on there actually being one. `recordCompletion` marks
+            // a finished season by storing `levelCount + 1` as its highest
+            // unlocked level, and logging that number would emit one unlock for
+            // a level that does not exist on every completed season — an
+            // unlocks-per-season funnel would overcount by exactly one, and the
+            // seasonID dimension only makes that filterable if you already know
+            // to filter it. Nothing is lost: completion stays derivable from
+            // `levelFinished` with `level == levelCount` and a seasonID.
+            // `nextLevelNumber` is the ceiling Phase 2 already established and
+            // is never nil for endless Levels, which is therefore unaffected.
+            if didWin, !alreadyUnlockedNext, let unlockedLevel = context.nextLevelNumber {
+                AnalyticsService.log(.levelUnlocked(level: unlockedLevel, seasonID: context.seasonID))
             }
             if !didWin {
                 let remaining = LevelLivesService.shared.consumeLife()
@@ -765,7 +784,11 @@ extension MemorizeViewModel {
         AnalyticsService.log(
             .levelSkipped(level: levelNumber, cost: LevelPowerUp.skipLevelCost, balanceAfter: starBalance)
         )
-        AnalyticsService.log(.levelUnlocked(level: levelNumber + 1))
+        // Same ceiling as the win path: buying the skip on a season's final
+        // level completes the season, it does not make a level 21 playable.
+        if let unlockedLevel = context.nextLevelNumber {
+            AnalyticsService.log(.levelUnlocked(level: unlockedLevel, seasonID: context.seasonID))
+        }
         // Return to the map rather than auto-starting the next level, so the
         // lives gate there still decides whether they can play on.
         closeView = true
