@@ -16,6 +16,11 @@ struct SeasonLevelsView: View {
     @State private var viewModel: SeasonLevelsViewModel
     @State private var selectedLevel: Int?
 
+    /// Chooses between a season's light and dark artwork. `RemoteImage` is
+    /// keyed on the URL, so flipping appearance swaps the picture, and both are
+    /// cached after their first load.
+    @Environment(\.colorScheme) private var colorScheme
+
     init(season: Season) {
         self.season = season
         _viewModel = State(initialValue: SeasonLevelsViewModel(season: season))
@@ -37,6 +42,7 @@ struct SeasonLevelsView: View {
                     HapticsService.shared.fire(.select)
                     selectedLevel = tile.level
                 },
+                background: { background },
                 header: { header }
             )
             .navigationDestination(item: $selectedLevel) { level in
@@ -49,10 +55,16 @@ struct SeasonLevelsView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            // The system back button floats over a transparent bar by default,
-            // so tiles scrolled straight under it.
+            // Without artwork the bar stays opaque: the system back button
+            // floats over a transparent bar by default, and tiles scrolled
+            // straight under it.
+            //
+            // With artwork it is hidden, so the image reaches the very top of
+            // the screen instead of stopping at a band of flat colour. The cost
+            // is the original problem coming back — tiles pass under the bar as
+            // they scroll — which is the trade a full-bleed background makes.
             .toolbarBackground(Color.appBackground, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(hasBackgroundArtwork ? .hidden : .visible, for: .navigationBar)
             .onAppear {
                 viewModel.refresh()
                 viewModel.preloadLivesAd()
@@ -69,6 +81,41 @@ struct SeasonLevelsView: View {
                     onDismiss: { viewModel.showOutOfLivesPrompt = false }
                 )
             }
+        }
+    }
+
+    // MARK: - Background
+
+    /// Whether this season has artwork for the current appearance. Drives the
+    /// navigation bar too, not just the map, so a season without art keeps the
+    /// opaque bar it has always had.
+    private var hasBackgroundArtwork: Bool {
+        season.backgroundArtworkURL(for: colorScheme) != nil
+    }
+
+    /// The season's Firebase-supplied artwork behind the map, or the flat app
+    /// background when the season carries none — which is also what a bad URL,
+    /// a transparent PNG and a dead network all degrade to.
+    @ViewBuilder
+    private var background: some View {
+        if let url = season.backgroundArtworkURL(for: colorScheme) {
+            ZStack {
+                // Under the artwork, not merely before it: it also backs a PNG
+                // with transparency and covers the moment before it loads.
+                Color.appBackground
+
+                // Filled to the screen without letting the oversized image
+                // grow the stack around it: `Color.clear` fixes the size, the
+                // overlay cannot enlarge it, and the clip takes the overflow.
+                Color.clear
+                    .overlay {
+                        RemoteImage(url: url) { Color.clear }
+                            .scaledToFill()
+                    }
+                    .clipped()
+            }
+        } else {
+            Color.appBackground
         }
     }
 

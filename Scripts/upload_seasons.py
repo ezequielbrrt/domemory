@@ -76,6 +76,15 @@ Season fields
     levelCount   required int >= 1. A season is finite.
     icon         optional string, the menu card glyph.
     accentColor  optional "#RRGGBB".
+    backgroundImageURL
+                 optional absolute https URL, full-bleed art behind the season's
+                 level map. Blank or absent means the flat app background.
+    backgroundImageURLDark
+                 optional absolute https URL used instead of backgroundImageURL
+                 in dark mode. Blank or absent means both appearances share the
+                 one image.
+    cardImageURL optional absolute https URL, art for the season's menu card.
+                 Blank or absent means the flat accent colour.
     emojiPool    required array of strings, >= 12 *distinct* entries.
     strings      locale code -> {title, subtitle}; needs a usable "en" entry.
 
@@ -113,12 +122,26 @@ MINIMUM_EMOJI_POOL_SIZE = 12
 KNOWN_KEYS = {
     "id", "enabled", "startDate", "endDate", "priority",
     "levelCount", "icon", "accentColor", "emojiPool", "strings",
+    "backgroundImageURL", "backgroundImageURLDark", "cardImageURL",
 }
 
 # Realtime Database forbids these in a key, so they cannot appear in a season id.
 ILLEGAL_KEY_CHARS = ".$#[]/"
 
 ACCENT_COLOR_PATTERN = re.compile(r"^#[0-9A-Fa-f]{6}$")
+
+# Artwork URLs. `Season.artworkURL(from:)` accepts https only — App Transport
+# Security blocks cleartext http, so an http URL would simply fail to load with
+# nothing on screen to explain it — and requires a host.
+ARTWORK_URL_PATTERN = re.compile(r"^https://[^/\s]+", re.IGNORECASE)
+
+# Optional artwork fields, paired with the surface each one falls back to when
+# it is absent or unusable.
+ARTWORK_FIELDS = {
+    "backgroundImageURL": "the level map falls back to the flat app background",
+    "backgroundImageURLDark": "dark mode falls back to backgroundImageURL",
+    "cardImageURL": "the menu card falls back to the flat accent colour",
+}
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -247,6 +270,30 @@ def parse_season(season_id, body, source, warnings):
             "the app falls back to its default accent."
         )
 
+    # Artwork URLs — optional, and a warning rather than an error for the same
+    # reason the app validates instead of throwing: a season with unusable art
+    # still plays perfectly well, so a typo here must not block the publish that
+    # carries the rest of the season.
+    artwork = {}
+    for field, fallback in ARTWORK_FIELDS.items():
+        if field not in body:
+            continue
+        value = body[field]
+        if not isinstance(value, str):
+            errors.append(f'"{field}" must be a string when present')
+            continue
+        trimmed = value.strip()
+        if not trimmed:
+            # Blank is how the checked-in catalog carries an unfilled slot. Not
+            # an error, just nothing to publish.
+            continue
+        if not ARTWORK_URL_PATTERN.match(trimmed):
+            warnings.append(
+                f'season "{season_id}": {field} {trimmed!r} is not an absolute https URL; '
+                f"{fallback}."
+            )
+        artwork[field] = trimmed
+
     # emojiPool — deduplicated first, and the DISTINCT count is what must clear
     # the floor. A repeated emoji would deal two identical pairs (four matching
     # cards), which the matching rules cannot resolve, so the app drops repeats
@@ -328,6 +375,8 @@ def parse_season(season_id, body, source, warnings):
         season["icon"] = body["icon"]
     if "accentColor" in body:
         season["accentColor"] = accent_color
+    for field, value in artwork.items():
+        season[field] = value
     season["emojiPool"] = pool
     if raw_strings:
         season["strings"] = raw_strings

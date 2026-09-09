@@ -108,3 +108,6 @@ iOSInjectionProject/
 .claude/settings.local.json
 DoMemory/.claude/settings.local.json
 **/.claude/settings.local.json
+
+# Firebase CLI deploy cache
+.firebase/

@@ -38,7 +38,7 @@ struct LevelTile: Identifiable, Hashable {
     }
 }
 
-struct LevelMapView<Header: View>: View {
+struct LevelMapView<Header: View, Background: View>: View {
     let tiles: [LevelTile]
     /// Called as each tile scrolls into view. Endless Levels uses it to page
     /// the map lazily; a finite season renders all of its levels at once and
@@ -48,6 +48,9 @@ struct LevelMapView<Header: View>: View {
     /// selectable, so that rule is enforced here rather than in every caller.
     let onSelect: (LevelTile) -> Void
     let header: Header
+    /// What the map is drawn on. Endless Levels uses the flat app background;
+    /// a season passes its own Firebase-supplied artwork.
+    let background: Background
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 18), count: 4)
 
@@ -55,11 +58,13 @@ struct LevelMapView<Header: View>: View {
         tiles: [LevelTile],
         onTileAppear: @escaping (LevelTile) -> Void = { _ in },
         onSelect: @escaping (LevelTile) -> Void,
+        @ViewBuilder background: () -> Background,
         @ViewBuilder header: () -> Header
     ) {
         self.tiles = tiles
         self.onTileAppear = onTileAppear
         self.onSelect = onSelect
+        self.background = background()
         self.header = header()
     }
 
@@ -86,7 +91,30 @@ struct LevelMapView<Header: View>: View {
             }
             .padding(.top, 8)
         }
-        .background(Color.appBackground)
+        // The artwork is fixed while the tiles scroll over it, and reaches
+        // under the safe areas so nothing bands at the top or bottom.
+        .background {
+            background.ignoresSafeArea()
+        }
+    }
+}
+
+extension LevelMapView where Background == Color {
+    /// The map on the flat app background — the endless Levels map, and any
+    /// season that carries no artwork.
+    init(
+        tiles: [LevelTile],
+        onTileAppear: @escaping (LevelTile) -> Void = { _ in },
+        onSelect: @escaping (LevelTile) -> Void,
+        @ViewBuilder header: () -> Header
+    ) {
+        self.init(
+            tiles: tiles,
+            onTileAppear: onTileAppear,
+            onSelect: onSelect,
+            background: { Color.appBackground },
+            header: header
+        )
     }
 }
 
