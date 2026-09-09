@@ -26,6 +26,44 @@ extension Season {
     /// console can never render a season invisible.
     var accent: Color { Season.color(fromHex: accentColor) ?? Color.primaryColor }
 
+    /// Full-bleed artwork for the season's level map in `colorScheme`, or nil
+    /// when the season carries none. The map paints plain `appBackground` in
+    /// that case, exactly as it did before seasons had art.
+    ///
+    /// A season may ship one image or two. With two, dark mode takes
+    /// `backgroundImageURLDark`; with one, both appearances take the same
+    /// picture. A dark URL that is present but unusable falls through to the
+    /// main one rather than leaving dark mode bare.
+    func backgroundArtworkURL(for colorScheme: ColorScheme) -> URL? {
+        if colorScheme == .dark, let dark = Season.artworkURL(from: backgroundImageURLDark) {
+            return dark
+        }
+        return Season.artworkURL(from: backgroundImageURL)
+    }
+
+    /// Artwork for the season's menu card, or nil. The card falls back to the
+    /// flat `accent` fill it has always used.
+    var cardArtworkURL: URL? { Season.artworkURL(from: cardImageURL) }
+
+    /// `https` URL, or nil for anything else.
+    ///
+    /// Validated rather than thrown on, matching `accentColor`: artwork is
+    /// decoration, and a bad string in the console must degrade to the flat
+    /// colour instead of taking the season's levels down with it.
+    ///
+    /// `https` specifically — App Transport Security blocks cleartext `http`,
+    /// so an `http` URL would fail at load time with nothing on screen to say
+    /// why. Rejecting it here at least makes the fallback deliberate.
+    static func artworkURL(from raw: String?) -> URL? {
+        guard let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !trimmed.isEmpty,
+              let url = URL(string: trimmed),
+              url.scheme?.lowercased() == "https",
+              let host = url.host(), !host.isEmpty
+        else { return nil }
+        return url
+    }
+
     /// Whole days from `date` to the season's last day, inclusive — 0 means the
     /// season ends today. Nil when `endDate` is not a parseable `YYYY-MM-DD`.
     ///

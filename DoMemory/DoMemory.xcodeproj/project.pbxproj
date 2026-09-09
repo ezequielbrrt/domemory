@@ -18,6 +18,7 @@
 		0DBD2D85DC585E573987354D /* LevelMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F3FCD01F1E40CF29B52803 /* LevelMapView.swift */; };
 		0E276218D2F56149BC963400 /* LevelsIntroGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50D2A3085C15742082B0714 /* LevelsIntroGateTests.swift */; };
 		0EDD5F6FF6847F7B0F8228AA /* WatchKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3117DD37A128BD5876BEE67 /* WatchKit.framework */; platformFilters = (watchos, ); };
+		0F2D5DB915FE425900A44B2F /* RemoteImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E55D0D11E6EAE1B184F474 /* RemoteImageService.swift */; };
 		0FF23ACC7677E57B231BDD65 /* GoogleUtilities_GoogleUtilities_Logger.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 3D908E0C66CB550D11B5156F /* GoogleUtilities_GoogleUtilities_Logger.bundle */; };
 		1092E9B801AD6E9D2F2B0BB9 /* LevelCurveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C990444D7670DF53DC051D34 /* LevelCurveTests.swift */; };
 		11FB2F11E3EECEF00714B558 /* SeasonProgressService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5E6D0EA61ED7FB54F3F8B3 /* SeasonProgressService.swift */; };
@@ -44,6 +45,7 @@
 		2A7D9EC4DEC534040B0D27ED /* FirebaseInstallations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBE87180FD35D86645C021C /* FirebaseInstallations.framework */; };
 		2AAD5F98D904597B0861D0ED /* FirebaseCoreInternal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CACD36A2DC7F0CED097F5467 /* FirebaseCoreInternal.framework */; };
 		2AB6561C702FEA4BDC29D64F /* DoMemoryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215041780AB9270878E1DCB1 /* DoMemoryApp.swift */; };
+		2D4335AE4482990412EA0CF0 /* RemoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E64C85D3E8090D9C63F98FC9 /* RemoteImage.swift */; };
 		2F3F5ADC28FF4BCD1AA7E9BD /* SeasonCatalogServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB24F59230A66566E2226C83 /* SeasonCatalogServiceTests.swift */; };
 		2F84E673CE0B8E434F9E8ABA /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F69EE3C58CB01698898DD6DB /* AppKit.framework */; platformFilters = (macos, ); };
 		318B91E3F28F4DD5AE5F80F3 /* MemoryGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF59AA736FFEA3CCAB5F129D /* MemoryGame.swift */; };
@@ -119,6 +121,7 @@
 		801898015CFEFEDBF7177538 /* GoogleUtilities_Environment.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 042B563E9610D479C365C418 /* GoogleUtilities_Environment.framework */; };
 		80626B7B8C0DFA6DFE2F26F9 /* MultiplayerRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833253447718C62F69592206 /* MultiplayerRoomView.swift */; };
 		82413CEF6AE993E097FD6A30 /* DailyChallengeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 784269B6F53BDF270F6F74FA /* DailyChallengeService.swift */; };
+		8258136841B3D2ED472D706D /* RemoteImageServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E743AB2239A2350BBB1B35BC /* RemoteImageServiceTests.swift */; };
 		83346ACF08D1E140E55F103A /* GoogleAppMeasurementTarget.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8C23C30CED74E626BCED2EC /* GoogleAppMeasurementTarget.framework */; };
 		835C75796F4A3669DB911276 /* Righteous-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F9E49DC8A9BB4E1468099543 /* Righteous-Regular.ttf */; };
 		838A7A6DC789D76FA9F0974B /* OutOfLivesModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D71F85AB2AC162E493DD3D /* OutOfLivesModal.swift */; };
@@ -393,6 +396,7 @@
 		6752938CAC872A0443927AB7 /* TuistPlists+DoMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistPlists+DoMemory.swift"; sourceTree = "<group>"; };
 		67BA471F3ACC4F3F29066AFA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		692BB71CA84E0C76EE5E4E2E /* UserDefaultsKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsKeys.swift; sourceTree = "<group>"; };
+		69E55D0D11E6EAE1B184F474 /* RemoteImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImageService.swift; sourceTree = "<group>"; };
 		6A4C5047E7671101F4BD3569 /* WinModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinModalViewModel.swift; sourceTree = "<group>"; };
 		6B1D85D1CACDA4F20399A1E0 /* StarWalletService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarWalletService.swift; sourceTree = "<group>"; };
 		6CF8A01822286D0C03EFD6D9 /* Difficulty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Difficulty.swift; sourceTree = "<group>"; };
@@ -501,7 +505,9 @@
 		E488EE58A62495FE475BC040 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		E526E5ED5BF6504BE0A6464B /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		E60241E5697D981A2369DECD /* GoogleUtilities_GoogleUtilities_UserDefaults.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GoogleUtilities_GoogleUtilities_UserDefaults.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		E64C85D3E8090D9C63F98FC9 /* RemoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImage.swift; sourceTree = "<group>"; };
 		E72E135C04E414919D3E2CC7 /* FirebaseDatabase.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseDatabase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E743AB2239A2350BBB1B35BC /* RemoteImageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImageServiceTests.swift; sourceTree = "<group>"; };
 		E8C23C30CED74E626BCED2EC /* GoogleAppMeasurementTarget.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GoogleAppMeasurementTarget.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9254FC734FC769362A75CC3 /* WhatsNewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewManager.swift; sourceTree = "<group>"; };
 		EA299133E2AF446D94617640 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -741,6 +747,7 @@
 				5214A2391104F8E3D0BCE8D9 /* ListWithoutSeparatorAndMargins.swift */,
 				23208942EADDCB284B3DD470 /* LivesRow.swift */,
 				54677F451F09D5AB48B66A01 /* LoaderView.swift */,
+				E64C85D3E8090D9C63F98FC9 /* RemoteImage.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -852,6 +859,14 @@
 			path = SettingsView;
 			sourceTree = "<group>";
 		};
+		77A6DF129B7C6A18134DAB26 /* RemoteImages */ = {
+			isa = PBXGroup;
+			children = (
+				69E55D0D11E6EAE1B184F474 /* RemoteImageService.swift */,
+			);
+			path = RemoteImages;
+			sourceTree = "<group>";
+		};
 		7884AC0CBC0D3C234CC22ED6 /* Purchases */ = {
 			isa = PBXGroup;
 			children = (
@@ -949,6 +964,7 @@
 				8A51E542721888629F68E1B8 /* Levels */,
 				79018FAC065B037AA687DDDA /* Notifications */,
 				7884AC0CBC0D3C234CC22ED6 /* Purchases */,
+				77A6DF129B7C6A18134DAB26 /* RemoteImages */,
 				D6FDE13E7E22B11086958B16 /* ReviewRequest */,
 				A120E8D0DD81FA889A645790 /* Seasons */,
 				A835E8759697239DB581EEF2 /* WhatsNew */,
@@ -1294,6 +1310,7 @@
 				BAEFCD34DE7EC456BA7BD79C /* LocalizationParityTests.swift */,
 				5A9DE9F32CAF0B87850C08DC /* MemorizeViewModelTests.swift */,
 				F6ACF9294A68A492E545DA60 /* MemoryGameTests.swift */,
+				E743AB2239A2350BBB1B35BC /* RemoteImageServiceTests.swift */,
 				7EA877981D5E10DC5E4EA4F1 /* ReviewHistoryMigrationTests.swift */,
 				AB24F59230A66566E2226C83 /* SeasonCatalogServiceTests.swift */,
 				1030A4F9161DB89B9B4ADAE2 /* SeasonGameModeTests.swift */,
@@ -1519,6 +1536,7 @@
 				34A56AAC6F5A9F977A152A87 /* ListWithoutSeparatorAndMargins.swift in Sources */,
 				136A61280411EE32DFF20DA3 /* LivesRow.swift in Sources */,
 				C04D0E60DE2F36AE39A7A323 /* LoaderView.swift in Sources */,
+				2D4335AE4482990412EA0CF0 /* RemoteImage.swift in Sources */,
 				893D1D28E37FEDAEC2435894 /* AdsService.swift in Sources */,
 				82413CEF6AE993E097FD6A30 /* DailyChallengeService.swift in Sources */,
 				A644FFB22246470909281B91 /* DailyChallengeShared.swift in Sources */,
@@ -1538,6 +1556,7 @@
 				C2FA4ED47ADCCAB88B35AAF8 /* NotificationService.swift in Sources */,
 				DF0CC0B8566F1372F1D4E085 /* Notifications.swift in Sources */,
 				527C6822FB2935F38539E337 /* PurchaseService.swift in Sources */,
+				0F2D5DB915FE425900A44B2F /* RemoteImageService.swift in Sources */,
 				CC1F02F484EA9E9E01302AD8 /* AppReviews.swift in Sources */,
 				40CE4133DE3FEC17B586E1C6 /* Season.swift in Sources */,
 				4AD62E24AFBCF6EC326FE232 /* SeasonCatalogService.swift in Sources */,
@@ -1566,6 +1585,7 @@
 				AC11DD587D1533500443643D /* LocalizationParityTests.swift in Sources */,
 				5E14A96E1DEEB582EB116534 /* MemorizeViewModelTests.swift in Sources */,
 				8A6E24BD38735E13906B3029 /* MemoryGameTests.swift in Sources */,
+				8258136841B3D2ED472D706D /* RemoteImageServiceTests.swift in Sources */,
 				78B1A948387E1E49C812F9CB /* ReviewHistoryMigrationTests.swift in Sources */,
 				2F3F5ADC28FF4BCD1AA7E9BD /* SeasonCatalogServiceTests.swift in Sources */,
 				AA392ACA6A9128254097C7AB /* SeasonGameModeTests.swift in Sources */,

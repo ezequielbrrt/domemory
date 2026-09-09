@@ -53,6 +53,26 @@ struct Season: Codable, Identifiable, Hashable {
     /// Optional accent colour as a `#RRGGBB` hex string. Phase 3 owns parsing
     /// and the fallback.
     let accentColor: String?
+    /// Optional full-bleed artwork for the season's level map, as an absolute
+    /// `https` URL.
+    ///
+    /// Remote rather than bundled because a season is published from Firebase
+    /// without an app update: art shipped in the binary would only ever cover
+    /// the seasons that existed at build time, and every player who had not
+    /// updated would see the *previous* season's picture behind the new
+    /// season's levels. `Season+Presentation` owns validation and the fallback.
+    let backgroundImageURL: String?
+    /// Optional dark-appearance replacement for `backgroundImageURL`.
+    ///
+    /// One image cannot serve both appearances: the level tiles are near-white
+    /// in light mode and near-black in dark, so artwork that separates from the
+    /// tiles in one collapses into them in the other. Absent means the season
+    /// has a single image and both appearances use it.
+    let backgroundImageURLDark: String?
+    /// Optional artwork for the season's menu card, under the same contract as
+    /// `backgroundImageURL`. The card is the season's accent colour with white
+    /// text in both appearances, so it takes one image, not a pair.
+    let cardImageURL: String?
     /// Emoji the season's boards are dealt from. Deduplicated at decode time;
     /// see `minimumEmojiPoolSize`.
     let emojiPool: [String]
@@ -101,6 +121,9 @@ struct Season: Codable, Identifiable, Hashable {
         levelCount: Int,
         icon: String?,
         accentColor: String?,
+        backgroundImageURL: String? = nil,
+        backgroundImageURLDark: String? = nil,
+        cardImageURL: String? = nil,
         emojiPool: [String],
         strings: [String: LocalizedText]
     ) {
@@ -112,6 +135,9 @@ struct Season: Codable, Identifiable, Hashable {
         self.levelCount = levelCount
         self.icon = icon
         self.accentColor = accentColor
+        self.backgroundImageURL = backgroundImageURL
+        self.backgroundImageURLDark = backgroundImageURLDark
+        self.cardImageURL = cardImageURL
         self.emojiPool = emojiPool
         self.strings = strings
     }
@@ -129,6 +155,12 @@ struct Season: Codable, Identifiable, Hashable {
         levelCount = try container.decode(Int.self, forKey: .levelCount)
         icon = try container.decodeIfPresent(String.self, forKey: .icon)
         accentColor = try container.decodeIfPresent(String.self, forKey: .accentColor)
+        // Artwork is decoration. A blank or malformed URL resolves to nil in
+        // `Season+Presentation` and the surface falls back to its flat colour,
+        // so a typo in the console never costs the player the season itself.
+        backgroundImageURL = try container.decodeIfPresent(String.self, forKey: .backgroundImageURL)
+        backgroundImageURLDark = try container.decodeIfPresent(String.self, forKey: .backgroundImageURLDark)
+        cardImageURL = try container.decodeIfPresent(String.self, forKey: .cardImageURL)
         strings = try container.decodeIfPresent([String: LocalizedText].self, forKey: .strings) ?? [:]
 
         guard levelCount >= 1 else {

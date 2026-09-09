@@ -4,6 +4,7 @@
 //
 
 import XCTest
+import SwiftUI
 @testable import DoMemory
 
 final class SeasonTests: XCTestCase {
@@ -34,9 +35,10 @@ final class SeasonTests: XCTestCase {
         priority: Int = 10,
         levelCount: Int = 20,
         emojiPool: [String]? = nil,
+        artwork: [String: Any] = [:],
         strings: [String: Any] = ["en": ["title": "Spooky Season", "subtitle": "20 haunted levels"]]
     ) -> [String: Any] {
-        [
+        var body: [String: Any] = [
             "id": id,
             "enabled": enabled,
             "startDate": startDate,
@@ -48,6 +50,8 @@ final class SeasonTests: XCTestCase {
             "emojiPool": emojiPool ?? Self.minimalPool,
             "strings": strings
         ]
+        body.merge(artwork) { _, new in new }
+        return body
     }
 
     // MARK: - Emoji pool validation
@@ -148,6 +152,46 @@ final class SeasonTests: XCTestCase {
         XCTAssertEqual(Season.localeCandidates(for: "zh_Hans_CN"), ["zh-hans-cn", "zh-hans", "zh", "en"])
     }
 
+    /// The catalog in `Scripts/seasons.json` carries one entry per supported
+    /// locale. A key written in a form the resolver does not reach — `pt_BR`
+    /// instead of `pt-BR`, `zh` instead of `zh-Hans` — is invisible: the season
+    /// silently serves English and nothing reports it. This pins the exact key
+    /// spellings against the identifiers iOS actually hands us.
+    func testEverySupportedLocaleReachesItsOwnEntry() throws {
+        let catalogKeys = ["en", "es", "de", "fr", "hi", "it", "ja", "ko", "pt-BR", "zh-Hans", "zh-CN"]
+        var strings: [String: Any] = [:]
+        for key in catalogKeys {
+            strings[key] = ["title": "title-\(key)", "subtitle": "subtitle-\(key)"]
+        }
+        let season = try decodeSeason(payload(strings: strings))
+
+        // Left: the identifier a device reports. Right: the catalog key it must
+        // reach. A key can never be more specific than the identifier, because
+        // the chain only shortens — which is why "es" and "zh-CN" appear here
+        // rather than "es-419" and "zh-Hans" alone.
+        let expected = [
+            ("en_US", "en"),
+            ("es_419", "es"), ("es_MX", "es"), ("es_AR", "es"), ("es_ES", "es"),
+            ("de_DE", "de"), ("fr_FR", "fr"), ("fr_CA", "fr"),
+            ("hi_IN", "hi"), ("it_IT", "it"), ("ja_JP", "ja"), ("ko_KR", "ko"),
+            ("pt_BR", "pt-BR"),
+            // iOS canonicalizes zh_Hans_CN to zh_CN, dropping the script.
+            ("zh_Hans_CN", "zh-CN"), ("zh_CN", "zh-CN"), ("zh_Hans", "zh-Hans")
+        ]
+        for (identifier, key) in expected {
+            let text = season.text(for: Locale(identifier: identifier))
+            XCTAssertEqual(
+                text.title, "title-\(key)",
+                "\(identifier) must resolve to the \"\(key)\" entry, not fall through to English"
+            )
+        }
+
+        // Traditional Chinese is deliberately not covered: the app ships no
+        // zh-Hant UI, so a Simplified season title inside an English screen
+        // would be worse than English throughout.
+        XCTAssertEqual(season.text(for: Locale(identifier: "zh_Hant_TW")).title, "title-en")
+    }
+
     func testLocaleKeysMatchCaseInsensitively() throws {
         let season = try decodeSeason(payload(strings: [
             "PT-br": ["title": "Temporada Assustadora", "subtitle": ""]
@@ -205,12 +249,104 @@ final class SeasonTests: XCTestCase {
         XCTAssertNil(Season.dayKey(fromISODay: "20xx-10-01"))
     }
 
+    // MARK: - Artwork URLs
+
+    private static let backgroundURL = "https://firebasestorage.googleapis.com/v0/b/x/o/bg.png?alt=media"
+    private static let cardURL = "https://firebasestorage.googleapis.com/v0/b/x/o/card.png?alt=media"
+
+    private static let darkURL = "https://firebasestorage.googleapis.com/v0/b/x/o/bg-dark.png"
+
+    func testHTTPSArtworkURLsResolve() throws {
+        let season = try decodeSeason(payload(artwork: [
+            "backgroundImageURL": Self.backgroundURL,
+            "cardImageURL": Self.cardURL
+        ]))
+        XCTAssertEqual(season.backgroundArtworkURL(for: .light)?.absoluteString, Self.backgroundURL)
+        XCTAssertEqual(season.cardArtworkURL?.absoluteString, Self.cardURL)
+    }
+
+    func testAbsentArtworkResolvesToNil() throws {
+        let season = try decodeSeason(payload())
+        XCTAssertNil(season.backgroundArtworkURL(for: .light))
+        XCTAssertNil(season.backgroundArtworkURL(for: .dark))
+        XCTAssertNil(season.cardArtworkURL)
+    }
+
+    func testBlankArtworkResolvesToNil() throws {
+        // How the checked-in catalog carries a slot nobody has filled in yet.
+        let season = try decodeSeason(payload(artwork: [
+            "backgroundImageURL": "",
+            "cardImageURL": "   "
+        ]))
+        XCTAssertNil(season.backgroundArtworkURL(for: .light))
+        XCTAssertNil(season.cardArtworkURL)
+    }
+
+    // MARK: - Light / dark pair
+
+    func testDarkAppearanceUsesTheDarkArtworkWhenPresent() throws {
+        let season = try decodeSeason(payload(artwork: [
+            "backgroundImageURL": Self.backgroundURL,
+            "backgroundImageURLDark": Self.darkURL
+        ]))
+        XCTAssertEqual(season.backgroundArtworkURL(for: .light)?.absoluteString, Self.backgroundURL)
+        XCTAssertEqual(season.backgroundArtworkURL(for: .dark)?.absoluteString, Self.darkURL)
+    }
+
+    func testASingleImageServesBothAppearances() throws {
+        let season = try decodeSeason(payload(artwork: ["backgroundImageURL": Self.backgroundURL]))
+        XCTAssertEqual(season.backgroundArtworkURL(for: .light)?.absoluteString, Self.backgroundURL)
+        XCTAssertEqual(season.backgroundArtworkURL(for: .dark)?.absoluteString, Self.backgroundURL)
+    }
+
+    func testAnUnusableDarkURLFallsBackRatherThanLeavingDarkModeBare() throws {
+        let season = try decodeSeason(payload(artwork: [
+            "backgroundImageURL": Self.backgroundURL,
+            "backgroundImageURLDark": "http://example.com/insecure.png"
+        ]))
+        XCTAssertEqual(season.backgroundArtworkURL(for: .dark)?.absoluteString, Self.backgroundURL)
+    }
+
+    func testNonHTTPSArtworkResolvesToNil() {
+        // App Transport Security blocks cleartext http, so accepting one would
+        // buy a load failure with nothing on screen to explain it.
+        XCTAssertNil(Season.artworkURL(from: "http://example.com/bg.png"))
+        XCTAssertNil(Season.artworkURL(from: "ftp://example.com/bg.png"))
+        XCTAssertNil(Season.artworkURL(from: "example.com/bg.png"))
+        XCTAssertNil(Season.artworkURL(from: "https://"))
+        XCTAssertNil(Season.artworkURL(from: nil))
+    }
+
+    func testArtworkSchemeIsMatchedCaseInsensitively() {
+        XCTAssertEqual(
+            Season.artworkURL(from: "HTTPS://example.com/bg.png")?.host(),
+            "example.com"
+        )
+    }
+
+    func testMalformedArtworkDoesNotFailTheSeason() throws {
+        // Artwork is decoration: a typo in the console must cost the season its
+        // picture, never its levels.
+        let season = try decodeSeason(payload(artwork: ["backgroundImageURL": "not a url at all"]))
+        XCTAssertEqual(season.levelCount, 20)
+        XCTAssertNil(season.backgroundArtworkURL(for: .light))
+    }
+
     // MARK: - Cache round trip
 
     func testSeasonRoundTripsThroughJSONCoding() throws {
-        let season = try decodeSeason(payload())
+        let season = try decodeSeason(payload(artwork: [
+            "backgroundImageURL": Self.backgroundURL,
+            "backgroundImageURLDark": Self.darkURL,
+            "cardImageURL": Self.cardURL
+        ]))
         let data = try JSONEncoder().encode([season])
         let restored = try JSONDecoder().decode([Season].self, from: data)
         XCTAssertEqual(restored, [season])
+        // The catalog is served from this cache on a cold launch with no
+        // network, so artwork has to survive the trip or the first paint of a
+        // known season loses its art.
+        XCTAssertEqual(restored.first?.backgroundArtworkURL(for: .light)?.absoluteString, Self.backgroundURL)
+        XCTAssertEqual(restored.first?.backgroundArtworkURL(for: .dark)?.absoluteString, Self.darkURL)
     }
 }

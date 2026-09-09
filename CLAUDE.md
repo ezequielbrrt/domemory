@@ -52,6 +52,7 @@ The app is a SwiftUI memory-card (memorama) game targeting iOS.
 - **`PurchaseService`** – StoreKit 2; handles the single "Remove Ads" non-consumable IAP (`com.ezequielbrrt.domemory.removeads`). Persists entitlement to `UserDefaults`.
 - **`AdsService`** – Google Mobile Ads; serves banner and interstitial ads. All ad calls are gated on `PurchaseService.shared.hasRemovedAds`.
 - **`GameStatsService`** – Lightweight `UserDefaults`-backed played/won counter per memorama ID.
+- **`RemoteImageService`** – Loads and caches images fetched by URL (memory via `NSCache`, disk via the session's own `URLCache`). Used for season artwork through the `RemoteImage` view. Season art is deliberately **never bundled**: seasons are published from Firebase without an app release, so art in the binary would only cover seasons that existed at build time.
 - **`AnalyticsService`** (`AppConfiguration.swift`) – Thin wrapper over Firebase Analytics; all events are typed via `AnalyticsEvent` enum.
 
 ### Persistence
@@ -74,4 +75,4 @@ All user-facing strings go through `Strings.swift` (typed `NSLocalizedString` wr
 
 `Scripts/gamesToJson.py` — converts `games.csv` to `data.json` for seeding Firebase.
 
-`Scripts/upload_seasons.py` — validates `Scripts/seasons.json` (the canonical Season Levels catalog) against the same rules `Season.init(from:)` applies and publishes it to Firebase `/seasons`. `--dry-run` validates and writes `Scripts/seasons_data.json` without credentials. A season's `enabled: false` is the kill switch. **`firebase-database.rules.json`'s `/seasons` read rule must be deployed separately** (`firebase deploy --only database`) before any client can read `/seasons` — committing the rules file does not publish it.
+`Scripts/upload_seasons.py` — validates `Scripts/seasons.json` (the canonical Season Levels catalog) against the same rules `Season.init(from:)` applies and publishes it to Firebase `/seasons`. `--dry-run` validates and writes `Scripts/seasons_data.json` without credentials. A season's `enabled: false` is the kill switch. A season's optional `backgroundImageURL`, `backgroundImageURLDark` (dark-appearance replacement for the background; absent means one image serves both) and `cardImageURL` must be absolute `https` URLs (ATS blocks cleartext `http`); a blank or malformed value is a warning, not an error, and the app falls back to its flat colours. **`firebase-database.rules.json`'s `/seasons` read rule must be deployed separately** (`firebase deploy --only database`) before any client can read `/seasons` — committing the rules file does not publish it.

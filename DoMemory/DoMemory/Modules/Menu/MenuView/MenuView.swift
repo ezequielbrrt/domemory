@@ -517,6 +517,9 @@ private struct CompactCardLayout<Badge: View>: View {
     let title: String
     let background: Color
     let badge: Badge
+    /// Firebase-supplied artwork drawn over `background`. Declared last and
+    /// defaulted so the daily challenge card, which has none, is unchanged.
+    var artworkURL: URL? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -544,11 +547,39 @@ private struct CompactCardLayout<Badge: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(background)
-                .shadow(color: background.opacity(0.3), radius: 12, x: 0, y: 4)
-        )
+        .background {
+            ZStack {
+                background
+
+                if let artworkURL {
+                    // `Color.clear` takes exactly the card's size and an
+                    // overlay cannot grow its parent, so the filled artwork
+                    // crops to the card instead of stretching the ZStack — and
+                    // with it the rounded corners and the shadow below.
+                    Color.clear
+                        .overlay {
+                            RemoteImage(url: artworkURL) { Color.clear }
+                                .scaledToFill()
+                        }
+                        .clipped()
+
+                    // The title and badge are pure white at 15pt and 12pt with
+                    // no shadow behind them, and the art is authored remotely.
+                    // This keeps the reading side of the card close to the flat
+                    // accent it used to be while the artwork stays legible on
+                    // the trailing edge.
+                    LinearGradient(
+                        colors: [background.opacity(0.85), background.opacity(0.25)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                }
+            }
+            // Clipped first, so the artwork takes the card's corner radius;
+            // shadowed after, so the glow still falls outside it.
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .shadow(color: background.opacity(0.3), radius: 12, x: 0, y: 4)
+        }
     }
 }
 
@@ -616,7 +647,8 @@ private struct SeasonCard: View {
                 ),
                 title: season.displayTitle,
                 background: season.accent,
-                badge: Text(badgeText)
+                badge: Text(badgeText),
+                artworkURL: season.cardArtworkURL
             )
         }
         .buttonStyle(.plain)
