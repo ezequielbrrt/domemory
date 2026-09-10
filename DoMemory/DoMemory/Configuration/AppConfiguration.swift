@@ -66,6 +66,11 @@ enum AnalyticsEvent {
     case levelsIntroShown(source: String)
     case levelsIntroCompleted
     case levelsIntroSkipped
+    /// Fired every time a season's level map appears, including returning to
+    /// it from a level — distinct from the generic `screenView`, which
+    /// carries no season identity. Lets a season's entry funnel be filtered
+    /// on its own in Firebase.
+    case seasonLevelsEntered(seasonID: String)
 
     var name: String {
         switch self {
@@ -117,6 +122,7 @@ enum AnalyticsEvent {
         case .levelsIntroShown: return "levels_intro_shown"
         case .levelsIntroCompleted: return "levels_intro_completed"
         case .levelsIntroSkipped: return "levels_intro_skipped"
+        case .seasonLevelsEntered: return "season_levels_entered"
         }
     }
 
@@ -304,6 +310,8 @@ enum AnalyticsEvent {
             return ["source": source]
         case .levelsIntroCompleted, .levelsIntroSkipped:
             return [:]
+        case .seasonLevelsEntered(let seasonID):
+            return ["season_id": seasonID]
         }
     }
 
