@@ -235,6 +235,16 @@
 "whats_new_powerups_description" = "게임 중 별을 사용해 시간 추가, 판 미리보기, 시간 정지, 무료 짝 공개를 쓸 수 있습니다.";
 "whats_new_lives_title" = "목숨과 실수";
 "whats_new_lives_description" = "하루 4개의 목숨이 주어지고, 레벨마다 허용되는 실수도 정해져 있습니다. 다 떨어지면 광고를 보거나 별을 쓰세요.";
+
+/* What's New v4.2.0 */
+"whats_new_seasons_title" = "시즌 레벨";
+"whats_new_seasons_description" = "스푸키 시즌 같은 기간 한정 시즌을 플레이하세요 — 전용 보상이 있는 테마별 레벨 세트로, 다음 시즌이 시작되기 전까지 몇 주간 진행됩니다.";
+"whats_new_season_artwork_title" = "시즌 아트워크";
+"whats_new_season_artwork_description" = "각 시즌마다 레벨 맵에 고유한 배경과 카드 아트가 추가되어 새로운 시즌마다 분위기가 달라집니다.";
+"whats_new_tap_to_play_title" = "탭해서 플레이";
+"whats_new_tap_to_play_description" = "레벨 맵이 이제 다음에 할 레벨을 알려주기 위해 맥동하며, 모든 타일이 탭에 반응합니다.";
+"whats_new_season_progress_title" = "시즌 진행 상황";
+"whats_new_season_progress_description" = "실시간 진행 바와 카운트다운으로 각 시즌의 진행 상황을 확인하세요 — 시간이 끝나기 전에 모든 레벨을 클리어하세요.";
 "levels_timer_frozen_format" = "시간 정지, %d초 남음";
 
 /* Notification permission primer */

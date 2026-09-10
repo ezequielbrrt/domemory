@@ -235,6 +235,16 @@
 "whats_new_powerups_description" = "Spendi le stelle durante la partita per tempo extra, uno sguardo al tabellone, il tempo congelato o una coppia gratis.";
 "whats_new_lives_title" = "Vite ed Errori";
 "whats_new_lives_description" = "Hai 4 vite al giorno e ogni livello concede solo un certo numero di errori. Finiti? Guarda un annuncio o spendi stelle per continuare.";
+
+/* What's New v4.2.0 */
+"whats_new_seasons_title" = "Livelli stagionali";
+"whats_new_seasons_description" = "Gioca a stagioni a tempo limitato come la Stagione da Brivido — un set di livelli a tema con le proprie ricompense, disponibile per qualche settimana prima che inizi la successiva.";
+"whats_new_season_artwork_title" = "Grafica stagionale";
+"whats_new_season_artwork_description" = "Ogni stagione porta il proprio sfondo e la propria grafica delle carte sulla mappa dei livelli, così una nuova stagione ha sempre un aspetto diverso.";
+"whats_new_tap_to_play_title" = "Tocca per giocare";
+"whats_new_tap_to_play_description" = "La mappa dei livelli ora pulsa per mostrarti cosa viene dopo, e ogni riquadro risponde al tuo tocco.";
+"whats_new_season_progress_title" = "Progressi stagionali";
+"whats_new_season_progress_description" = "Segui i tuoi progressi in ogni stagione con una barra di avanzamento in tempo reale e un conto alla rovescia — completa ogni livello prima che scada il tempo.";
 "levels_timer_frozen_format" = "Tempo congelato, %d secondi rimasti";
 
 /* Notification permission primer */

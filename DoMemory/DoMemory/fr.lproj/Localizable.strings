@@ -235,6 +235,16 @@
 "whats_new_powerups_description" = "Dépensez vos étoiles en cours de partie : temps supplémentaire, aperçu du plateau, chrono gelé ou paire offerte.";
 "whats_new_lives_title" = "Vies et Erreurs";
 "whats_new_lives_description" = "Vous avez 4 vies par jour, et chaque niveau n'autorise qu'un nombre limité d'erreurs. À court ? Regardez une pub ou dépensez des étoiles.";
+
+/* What's New v4.2.0 */
+"whats_new_seasons_title" = "Niveaux saisonniers";
+"whats_new_seasons_description" = "Jouez à des saisons limitées dans le temps comme la Saison Frisson — un ensemble de niveaux à thème avec leurs propres récompenses, disponible quelques semaines avant que la suivante commence.";
+"whats_new_season_artwork_title" = "Décors de saison";
+"whats_new_season_artwork_description" = "Chaque saison apporte son propre arrière-plan et son propre visuel de carte à la carte des niveaux, pour qu'une nouvelle saison ait toujours son propre style.";
+"whats_new_tap_to_play_title" = "Appuyez pour jouer";
+"whats_new_tap_to_play_description" = "La carte des niveaux pulse désormais pour vous montrer où aller, et chaque case répond à votre toucher.";
+"whats_new_season_progress_title" = "Progression saisonnière";
+"whats_new_season_progress_description" = "Suivez votre avancée dans chaque saison grâce à une barre de progression en direct et un compte à rebours — terminez tous les niveaux avant la fin du temps imparti.";
 "levels_timer_frozen_format" = "Chrono gelé, %d secondes restantes";
 
 /* Notification permission primer */

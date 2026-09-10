@@ -235,6 +235,16 @@
 "whats_new_powerups_description" = "Gaste suas estrelas durante a partida em tempo extra, uma espiada no tabuleiro, relógio congelado ou um par grátis.";
 "whats_new_lives_title" = "Vidas e Erros";
 "whats_new_lives_description" = "Você recebe 4 vidas por dia, e cada nível permite apenas um número limitado de erros. Acabou? Veja um anúncio ou gaste estrelas.";
+
+/* What's New v4.2.0 */
+"whats_new_seasons_title" = "Níveis de temporada";
+"whats_new_seasons_description" = "Jogue temporadas por tempo limitado como a Temporada do Susto — um conjunto temático de níveis com recompensas próprias, disponível por algumas semanas antes que a próxima comece.";
+"whats_new_season_artwork_title" = "Arte da temporada";
+"whats_new_season_artwork_description" = "Cada temporada traz seu próprio plano de fundo e arte de carta para o mapa de níveis, para que uma nova temporada sempre tenha a sua cara.";
+"whats_new_tap_to_play_title" = "Toque para jogar";
+"whats_new_tap_to_play_description" = "O mapa de níveis agora pulsa para mostrar o que vem a seguir, e cada bloco responde ao seu toque.";
+"whats_new_season_progress_title" = "Progresso da temporada";
+"whats_new_season_progress_description" = "Acompanhe seu avanço em cada temporada com uma barra de progresso ao vivo e uma contagem regressiva — complete todos os níveis antes que o tempo acabe.";
 "levels_timer_frozen_format" = "Relógio congelado, %d segundos restantes";
 
 /* Notification permission primer */

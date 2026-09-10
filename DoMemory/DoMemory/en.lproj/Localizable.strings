@@ -235,6 +235,16 @@
 "whats_new_powerups_description" = "Spend your stars mid-game on extra time, a peek at the board, a frozen clock, or a free matching pair.";
 "whats_new_lives_title" = "Lives & Mistakes";
 "whats_new_lives_description" = "You get 4 lives a day, and every level allows only so many wrong matches. Out of either? Watch an ad or spend stars to keep going.";
+
+/* What's New v4.2.0 */
+"whats_new_seasons_title" = "Season Levels";
+"whats_new_seasons_description" = "Play limited-time seasons like Spooky Season — a themed set of levels with their own rewards, running for a few weeks before the next one begins.";
+"whats_new_season_artwork_title" = "Themed Artwork";
+"whats_new_season_artwork_description" = "Every season brings its own background and card art to the level map, so a new season always looks the part.";
+"whats_new_tap_to_play_title" = "Tap to Play";
+"whats_new_tap_to_play_description" = "The level map now pulses to show you what's next, and every tile responds to your tap.";
+"whats_new_season_progress_title" = "Season Progress";
+"whats_new_season_progress_description" = "Track your climb through each season with a live progress bar and countdown — clear every level before time runs out.";
 "levels_timer_frozen_format" = "Timer frozen, %d seconds left";
 
 /* Notification permission primer */

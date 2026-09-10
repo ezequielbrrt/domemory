@@ -235,6 +235,16 @@
 "whats_new_powerups_description" = "在游戏中花费星星：延长时间、偷看牌面、冻结时钟，或免费翻开一对。";
 "whats_new_lives_title" = "生命与失误";
 "whats_new_lives_description" = "每天 4 个生命，每关允许的失误次数也有限。用完了？观看广告或花费星星即可继续。";
+
+/* What's New v4.2.0 */
+"whats_new_seasons_title" = "赛季关卡";
+"whats_new_seasons_description" = "畅玩万圣节赛季等限时赛季——拥有专属奖励的主题关卡集，在下一个赛季开始前会持续开放几周。";
+"whats_new_season_artwork_title" = "赛季美术";
+"whats_new_season_artwork_description" = "每个赛季都会为关卡地图带来专属的背景和卡片美术，让新赛季总能焕然一新。";
+"whats_new_tap_to_play_title" = "点击开始游戏";
+"whats_new_tap_to_play_description" = "关卡地图现在会脉动提示你接下来要玩哪一关，每个关卡节点都会响应你的点击。";
+"whats_new_season_progress_title" = "赛季进度";
+"whats_new_season_progress_description" = "通过实时进度条和倒计时追踪你在每个赛季中的进度——在时间耗尽前通关所有关卡。";
 "levels_timer_frozen_format" = "时间已冻结，剩余 %d 秒";
 
 /* Notification permission primer */
