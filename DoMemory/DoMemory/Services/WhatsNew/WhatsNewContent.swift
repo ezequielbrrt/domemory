@@ -41,24 +41,24 @@ extension WhatsNew {
             version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String,
             items: [
                 .init(
-                    symbol: "trophy.fill",
-                    title: Strings.whatsNewLevelsTitle,
-                    description: Strings.whatsNewLevelsDescription
+                    symbol: "gift.fill",
+                    title: Strings.whatsNewSeasonsTitle,
+                    description: Strings.whatsNewSeasonsDescription
                 ),
                 .init(
-                    symbol: "star.fill",
-                    title: Strings.whatsNewStarsTitle,
-                    description: Strings.whatsNewStarsDescription
+                    symbol: "photo.on.rectangle.angled",
+                    title: Strings.whatsNewSeasonArtworkTitle,
+                    description: Strings.whatsNewSeasonArtworkDescription
                 ),
                 .init(
-                    symbol: "wand.and.stars",
-                    title: Strings.whatsNewPowerUpsTitle,
-                    description: Strings.whatsNewPowerUpsDescription
+                    symbol: "hand.tap.fill",
+                    title: Strings.whatsNewTapToPlayTitle,
+                    description: Strings.whatsNewTapToPlayDescription
                 ),
                 .init(
-                    symbol: "heart.fill",
-                    title: Strings.whatsNewLivesTitle,
-                    description: Strings.whatsNewLivesDescription
+                    symbol: "flag.checkered",
+                    title: Strings.whatsNewSeasonProgressTitle,
+                    description: Strings.whatsNewSeasonProgressDescription
                 ),
             ],
             primaryButtonTitle: Strings.whatsNewButton

@@ -235,6 +235,16 @@
 "whats_new_powerups_description" = "Gib deine Sterne im Spiel für Extrazeit, einen Blick aufs Feld, eine eingefrorene Uhr oder ein Gratis-Paar aus.";
 "whats_new_lives_title" = "Leben & Fehler";
 "whats_new_lives_description" = "Du bekommst 4 Leben pro Tag, und jedes Level erlaubt nur eine begrenzte Zahl an Fehlern. Alles aufgebraucht? Sieh ein Video an oder gib Sterne aus.";
+
+/* What's New v4.2.0 */
+"whats_new_seasons_title" = "Saison-Level";
+"whats_new_seasons_description" = "Spiele zeitlich begrenzte Saisons wie die Gruselsaison – ein thematisches Level-Set mit eigenen Belohnungen, das ein paar Wochen läuft, bevor die nächste beginnt.";
+"whats_new_season_artwork_title" = "Saison-Grafiken";
+"whats_new_season_artwork_description" = "Jede Saison bringt ihren eigenen Hintergrund und ihre eigene Kartengrafik auf die Levelkarte, damit eine neue Saison immer passend aussieht.";
+"whats_new_tap_to_play_title" = "Tippen zum Spielen";
+"whats_new_tap_to_play_description" = "Die Levelkarte pulsiert jetzt, um dir zu zeigen, was als Nächstes kommt, und jedes Feld reagiert auf deinen Tipp.";
+"whats_new_season_progress_title" = "Saisonfortschritt";
+"whats_new_season_progress_description" = "Verfolge deinen Fortschritt in jeder Saison mit einer Live-Fortschrittsanzeige und einem Countdown – schließe jedes Level ab, bevor die Zeit abläuft.";
 "levels_timer_frozen_format" = "Zeit eingefroren, noch %d Sekunden";
 
 /* Notification permission primer */

@@ -325,4 +325,14 @@ enum Strings {
     static let whatsNewPowerUpsDescription = NSLocalizedString("whats_new_powerups_description", comment: "Power-ups description in What's New")
     static let whatsNewLivesTitle = NSLocalizedString("whats_new_lives_title", comment: "Daily lives and mistake budget title in What's New")
     static let whatsNewLivesDescription = NSLocalizedString("whats_new_lives_description", comment: "Daily lives and mistake budget description in What's New")
+
+    // What's New sheet (v4.2.0)
+    static let whatsNewSeasonsTitle = NSLocalizedString("whats_new_seasons_title", comment: "Season Levels feature title in What's New")
+    static let whatsNewSeasonsDescription = NSLocalizedString("whats_new_seasons_description", comment: "Season Levels feature description in What's New")
+    static let whatsNewSeasonArtworkTitle = NSLocalizedString("whats_new_season_artwork_title", comment: "Season artwork title in What's New")
+    static let whatsNewSeasonArtworkDescription = NSLocalizedString("whats_new_season_artwork_description", comment: "Season artwork description in What's New")
+    static let whatsNewTapToPlayTitle = NSLocalizedString("whats_new_tap_to_play_title", comment: "Level map tap feedback title in What's New")
+    static let whatsNewTapToPlayDescription = NSLocalizedString("whats_new_tap_to_play_description", comment: "Level map tap feedback description in What's New")
+    static let whatsNewSeasonProgressTitle = NSLocalizedString("whats_new_season_progress_title", comment: "Season progress title in What's New")
+    static let whatsNewSeasonProgressDescription = NSLocalizedString("whats_new_season_progress_description", comment: "Season progress description in What's New")
 }

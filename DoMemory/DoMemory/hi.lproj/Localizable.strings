@@ -235,6 +235,16 @@
 "whats_new_powerups_description" = "खेल के दौरान सितारे खर्च करें — अतिरिक्त समय, बोर्ड की झलक, रुकी हुई घड़ी या एक मुफ़्त जोड़ी।";
 "whats_new_lives_title" = "जीवन और गलतियाँ";
 "whats_new_lives_description" = "हर दिन 4 जीवन मिलते हैं, और हर स्तर में सीमित गलतियाँ ही चलती हैं। खत्म हो गए? विज्ञापन देखें या सितारे खर्च करें।";
+
+/* What's New v4.2.0 */
+"whats_new_seasons_title" = "सीज़न लेवल";
+"whats_new_seasons_description" = "डरावना सीज़न जैसे सीमित समय के सीज़न खेलें — एक थीम वाला लेवल सेट जिसके अपने इनाम हैं, जो अगला शुरू होने से पहले कुछ हफ्तों तक चलता है।";
+"whats_new_season_artwork_title" = "सीज़न आर्टवर्क";
+"whats_new_season_artwork_description" = "हर सीज़न लेवल मैप पर अपना खुद का बैकग्राउंड और कार्ड आर्ट लाता है, ताकि नया सीज़न हमेशा अलग दिखे।";
+"whats_new_tap_to_play_title" = "खेलने के लिए टैप करें";
+"whats_new_tap_to_play_description" = "लेवल मैप अब यह दिखाने के लिए स्पंदित होता है कि आगे क्या है, और हर टाइल आपके टैप पर प्रतिक्रिया देती है।";
+"whats_new_season_progress_title" = "सीज़न प्रगति";
+"whats_new_season_progress_description" = "लाइव प्रोग्रेस बार और काउंटडाउन के साथ हर सीज़न में अपनी प्रगति ट्रैक करें — समय खत्म होने से पहले हर लेवल पूरा करें।";
 "levels_timer_frozen_format" = "घड़ी रुकी है, %d सेकंड बाकी";
 
 /* Notification permission primer */

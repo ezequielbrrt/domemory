@@ -235,6 +235,16 @@
 "whats_new_powerups_description" = "Gasta tus estrellas durante la partida en tiempo extra, un vistazo al tablero, congelar el reloj o un par gratis.";
 "whats_new_lives_title" = "Vidas y Errores";
 "whats_new_lives_description" = "Tienes 4 vidas al día y cada nivel permite un número limitado de fallos. ¿Se te acabaron? Mira un anuncio o gasta estrellas para seguir.";
+
+/* What's New v4.2.0 */
+"whats_new_seasons_title" = "Niveles de temporada";
+"whats_new_seasons_description" = "Juega temporadas por tiempo limitado como la Temporada de Sustos: un conjunto temático de niveles con sus propias recompensas, disponible por unas semanas antes de que empiece la siguiente.";
+"whats_new_season_artwork_title" = "Arte de temporada";
+"whats_new_season_artwork_description" = "Cada temporada trae su propio fondo y arte de tarjeta al mapa de niveles, para que una temporada nueva siempre se vea distinta.";
+"whats_new_tap_to_play_title" = "Toca para jugar";
+"whats_new_tap_to_play_description" = "El mapa de niveles ahora pulsa para mostrarte cuál sigue, y cada casilla responde a tu toque.";
+"whats_new_season_progress_title" = "Progreso de temporada";
+"whats_new_season_progress_description" = "Sigue tu avance en cada temporada con una barra de progreso en vivo y una cuenta regresiva: completa todos los niveles antes de que se acabe el tiempo.";
 "levels_timer_frozen_format" = "Reloj congelado, quedan %d segundos";
 
 /* Notification permission primer */

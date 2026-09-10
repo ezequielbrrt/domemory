@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 [Unreleased]
 
+[4.2.0] 10-09-2026
+
 ### Added
 - Added Season Levels, a limited-time themed progression mode. A season — "Spooky Season", "Christmas Season" — is published from the Firebase Realtime Database `/seasons` node with its own emoji pool, length, icon, accent colour and localized title, and appears in the app only while its date window is open. Its levels unlock in order and are rated 1-3 stars on the same thresholds endless Levels uses, so a 3-star board means the same thing in both modes.
 - Added a season card to the menu, sharing a row with the Daily Challenge while a season is running and showing the season's progress through its levels. With no active season the Daily Challenge card keeps the full-width layout it has always had.
@@ -27,6 +29,7 @@ All notable changes to this project will be documented in this file.
 - Extracted the level map — the tile grid, its styling and its tap rules — out of the Levels screen so both modes render the same map under their own headers. Endless Levels is unchanged.
 - A season whose emoji pool holds fewer than 12 distinct entries is rejected when it is read, because the difficulty curve tops out at 12 pairs and a smaller pool cannot fill its own later boards. The floor is derived from the curve, so retuning the curve moves it. Every other failure — no network, no cached season, the kill switch off, a malformed accent colour — falls back rather than showing a broken season.
 - The season screens read in all ten supported languages rather than falling back to English, and the progress bar now announces "7 of 20 levels cleared" to VoiceOver instead of the bare "7 / 20".
+- Refreshed the in-app What's New sheet for this release — Season Levels, Themed Artwork, Tap to Play, and Season Progress — replacing the stale 4.0.0-era Levels/Star Ratings/Power-Ups/Lives & Mistakes content, and localized the eight new strings into all 10 supported locales. Uploaded matching localized "What's New" and Promotional Text copy to App Store Connect separately. Bumped `MARKETING_VERSION` to 4.2.0 in `Project.swift` and regenerated `project.pbxproj`.
 
 [4.1.0] 01-09-2026
 
