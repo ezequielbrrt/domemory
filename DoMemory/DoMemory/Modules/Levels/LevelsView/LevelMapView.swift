@@ -75,15 +75,17 @@ struct LevelMapView<Header: View, Background: View>: View {
 
                 LazyVGrid(columns: columns, spacing: 22) {
                     ForEach(tiles) { tile in
-                        LevelTileView(tile: tile)
-                            .frame(maxWidth: .infinity)
-                            .onTapGesture {
-                                guard !tile.isLocked else { return }
-                                onSelect(tile)
-                            }
-                            .onAppear {
-                                onTileAppear(tile)
-                            }
+                        Button {
+                            onSelect(tile)
+                        } label: {
+                            LevelTileView(tile: tile)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(TileTapStyle())
+                        .disabled(tile.isLocked)
+                        .onAppear {
+                            onTileAppear(tile)
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -118,20 +120,45 @@ extension LevelMapView where Background == Color {
     }
 }
 
+/// Presses any tile down slightly and springs it back on release, so a tap
+/// reads as physical contact rather than a silent jump to the next screen.
+private struct TileTapStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.92 : 1)
+            .animation(.spring(response: 0.25, dampingFraction: 0.6), value: configuration.isPressed)
+    }
+}
+
 private struct LevelTileView: View {
     let tile: LevelTile
 
     private let nodeSize: CGFloat = 64
 
+    /// Drives the current tile's idle pulse. Only ever animated for
+    /// `.current` — every other state holds it at `false` and pays nothing.
+    @State private var isPulsing = false
+
     var body: some View {
         VStack(spacing: 6) {
             ZStack {
+                if tile.isCurrent {
+                    // A ring that grows and fades outward, independent of the
+                    // tile's own scale below — reads as an outward pulse
+                    // rather than the whole tile breathing in place.
+                    Circle()
+                        .stroke(Color.primaryColor.opacity(0.55), lineWidth: 3)
+                        .scaleEffect(isPulsing ? 1.45 : 1)
+                        .opacity(isPulsing ? 0 : 0.7)
+                }
+
                 Circle()
                     .fill(fillColor)
                     .overlay(
                         Circle().stroke(borderColor, lineWidth: tile.isCurrent ? 3 : 1.5)
                     )
                     .shadow(color: Color.shadowColor, radius: tile.isLocked ? 0 : 8, x: 0, y: 4)
+                    .scaleEffect(tile.isCurrent && isPulsing ? 1.06 : 1)
 
                 content
             }
@@ -140,6 +167,20 @@ private struct LevelTileView: View {
             starsRow
         }
         .opacity(tile.isLocked ? 0.55 : 1)
+        .onAppear(perform: startPulsingIfNeeded)
+        // `tiles` is rebuilt in place after every refresh (finishing a level,
+        // buying a life, ...), so the tile that becomes current was usually
+        // already on screen as `.locked` — mounted, `onAppear` already fired
+        // — rather than freshly appearing. Without this, the pulse would
+        // silently never start on the most common path back to the map.
+        .onChange(of: tile.isCurrent) { _, _ in startPulsingIfNeeded() }
+    }
+
+    private func startPulsingIfNeeded() {
+        guard tile.isCurrent, !isPulsing else { return }
+        withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
+            isPulsing = true
+        }
     }
 
     @ViewBuilder

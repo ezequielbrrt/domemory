@@ -201,6 +201,7 @@ struct SeasonLevelsView: View {
                 Capsule()
                     .fill(season.accent)
                     .frame(width: max(proxy.size.width * fraction, fraction > 0 ? 8 : 0))
+                    .animation(.spring(response: 0.5, dampingFraction: 0.8), value: viewModel.clearedLevelCount)
             }
         }
         .frame(height: 8)
