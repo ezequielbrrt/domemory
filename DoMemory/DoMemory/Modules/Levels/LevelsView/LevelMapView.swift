@@ -167,11 +167,19 @@ private struct LevelTileView: View {
             starsRow
         }
         .opacity(tile.isLocked ? 0.55 : 1)
-        .onAppear {
-            guard tile.isCurrent else { return }
-            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
-                isPulsing = true
-            }
+        .onAppear(perform: startPulsingIfNeeded)
+        // `tiles` is rebuilt in place after every refresh (finishing a level,
+        // buying a life, ...), so the tile that becomes current was usually
+        // already on screen as `.locked` — mounted, `onAppear` already fired
+        // — rather than freshly appearing. Without this, the pulse would
+        // silently never start on the most common path back to the map.
+        .onChange(of: tile.isCurrent) { _, _ in startPulsingIfNeeded() }
+    }
+
+    private func startPulsingIfNeeded() {
+        guard tile.isCurrent, !isPulsing else { return }
+        withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
+            isPulsing = true
         }
     }
 
