@@ -69,6 +69,7 @@ struct SeasonLevelsView: View {
                 viewModel.refresh()
                 viewModel.preloadLivesAd()
                 AnalyticsService.log(.screenView(name: "season_levels", screenClass: "SeasonLevelsView"))
+                AnalyticsService.log(.seasonLevelsEntered(seasonID: season.id))
             }
 
             if viewModel.showOutOfLivesPrompt {
