@@ -133,14 +133,16 @@ Season titles are a separate problem: they come from the Firebase payload, not t
 
 `DoMemory/DoMemoryTests/` — 19 files. The pure logic (curve, stars, lives, wallet, season validation and locale resolution, day boundaries, haptic mapping, review migration) is all testable without a UI and is where the real bugs live. Add to them when changing any of the above.
 
-### Screenshot automation
+### App Store artwork
 
-`export_screenshots.py` / `export_ipad_screenshots.py` — export artboards from a Paper MCP server (running on `localhost:29979`) and resize them for App Store Connect (6.5" and iPad sizes).
+Screenshots live in `ios/screenshots/<device>/<locale>/`. The catalog's App Store artwork agent owns Paper export, validation and upload; the app no longer carries its own export or upload scripts.
 
-`upload_screenshots.sh` / `upload_ipad_screenshots.sh` — upload the exported images via `asc`.
+### Backend (`firebase/`, shared with Android)
 
-`Scripts/gamesToJson.py` — converts `games.csv` to `data.json` for seeding Firebase.
+Firebase config and seed data sit at the repository root, not under `ios/`, because both apps read the same `/data` and `/seasons`. Run every `firebase` command from `firebase/` — `firebase.json` resolves its rules and hosting paths relative to itself.
 
-`Scripts/upload_seasons.py` — validates `Scripts/seasons.json` (the canonical Season Levels catalog) against the same rules `Season.init(from:)` applies and publishes it to Firebase `/seasons`. `--dry-run` validates and writes `Scripts/seasons_data.json` without credentials. A season's `enabled: false` is the kill switch. A season's optional `backgroundImageURL`, `backgroundImageURLDark` (dark-appearance replacement for the background; absent means one image serves both) and `cardImageURL` must be absolute `https` URLs (ATS blocks cleartext `http`); a blank or malformed value is a warning, not an error, and the app falls back to its flat colours. **`firebase-database.rules.json`'s `/seasons` read rule must be deployed separately** (`firebase deploy --only database`) before any client can read `/seasons` — committing the rules file does not publish it.
+`firebase/scripts/gamesToJson.py` — converts `games.csv` to `data.json` for seeding Firebase.
 
-`firebase.json`'s `/seasons/**` hosting path is served with `Cache-Control: public, max-age=31536000, immutable` — a season-art URL is a hard, permanent contract once deployed. Replacing a season's art requires publishing it at a **new** filename/path; never overwrite the bytes at an existing URL, since clients and CDNs are entitled to cache them forever. **This header change must be deployed separately** (`firebase deploy --only hosting`) before it takes effect in production — committing `firebase.json` does not publish it.
+`firebase/scripts/upload_seasons.py` — validates `firebase/scripts/seasons.json` (the canonical Season Levels catalog) against the same rules `Season.init(from:)` applies and publishes it to Firebase `/seasons`. `--dry-run` validates and writes `firebase/scripts/seasons_data.json` without credentials. A season's `enabled: false` is the kill switch. A season's optional `backgroundImageURL`, `backgroundImageURLDark` (dark-appearance replacement for the background; absent means one image serves both) and `cardImageURL` must be absolute `https` URLs (ATS blocks cleartext `http`); a blank or malformed value is a warning, not an error, and the app falls back to its flat colours. **`firebase/firebase-database.rules.json`'s `/seasons` read rule must be deployed separately** (`firebase deploy --only database`) before any client can read `/seasons` — committing the rules file does not publish it.
+
+`firebase/firebase.json`'s `/seasons/**` hosting path is served with `Cache-Control: public, max-age=31536000, immutable` — a season-art URL is a hard, permanent contract once deployed. Replacing a season's art requires publishing it at a **new** filename/path; never overwrite the bytes at an existing URL, since clients and CDNs are entitled to cache them forever. **This header change must be deployed separately** (`firebase deploy --only hosting`) before it takes effect in production — committing `firebase.json` does not publish it.
