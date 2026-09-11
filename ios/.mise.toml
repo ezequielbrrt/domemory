@@ -1,5 +1,5 @@
 # Pins the Tuist version for this repo so the `tuist` mise shim resolves.
-# Must stay in sync with the version used by the release lane in
-# DoMemory/fastlane/Fastfile, so the CLI and CI generate the same project.
+# Everyone generating the project must use this version, so project.pbxproj
+# does not churn between machines.
 [tools]
 tuist = "4.195.6"

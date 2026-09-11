@@ -1,6 +1,0 @@
-app_identifier "com.ezequielbrrt.domemory" # The bundle identifier of your app
-apple_id "ezequielbrrt@gmail.com" # Your Apple email address
-team_id "H5V33368QJ"
-
-# For more information about the Appfile, see:
-#     https://docs.fastlane.tools/advanced/#appfile

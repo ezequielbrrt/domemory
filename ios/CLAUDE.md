@@ -18,11 +18,7 @@ xcodebuild -workspace DoMemory.xcworkspace -scheme DoMemory -sdk iphonesimulator
 
 **Only ever commit the `tuist generate` output of `project.pbxproj`.** Xcode rewrites the file whenever it has the project open — it raises `objectVersion` from 55 to 60, adds an `expectedSignature` to each vendored `.xcframework`, and collapses `OTHER_SWIFT_FLAGS` and `SWIFT_ACTIVE_COMPILATION_CONDITIONS` from arrays into single strings. That produces a ~300-line diff that the next `tuist generate` silently reverts. Before committing a project change, quit Xcode (or rerun `tuist generate --no-open` and stage immediately) and confirm `git diff` shows only what you actually changed. Xcode will re-apply its rewrite as soon as it regains focus, so check the staged diff, not the working tree.
 
-**Fastlane release lane** (from `DoMemory/`):
-```
-bundle exec fastlane release
-```
-This builds the app, increments the build number, and uploads to App Store Connect.
+Releases are built and uploaded from Xcode; there is no automated release lane.
 
 ## Architecture
 
