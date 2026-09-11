@@ -36,6 +36,8 @@ import org.json.JSONObject
  */
 class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
+    data class LevelCompletion(val awardedStars: Int, val improvement: Int, val highestUnlocked: Int)
+
     // -- Onboarding ----------------------------------------------------------------
     //
     // iOS marks "has onboarded" by the mere existence of a one-row CoreData record
@@ -47,6 +49,15 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
     val hasOnboarded: Flow<Boolean> = booleanFlow(Keys.HAS_ONBOARDED, default = false)
 
     suspend fun setHasOnboarded(value: Boolean) = setBoolean(Keys.HAS_ONBOARDED, value)
+
+    /** Commits the first-launch choice as one DataStore transaction. */
+    suspend fun completeOnboarding(difficulty: Difficulty) {
+        dataStore.edit { prefs ->
+            prefs[Keys.PLAYER_DIFFICULTY] = difficulty.key
+            prefs[Keys.ONBOARDING_INTRO_SHOWN] = true
+            prefs[Keys.HAS_ONBOARDED] = true
+        }
+    }
 
     // -- Player difficulty (4, 13.2) --------------------------------------------------
     //
@@ -253,6 +264,26 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { prefs -> prefs[levelStarsKey(level)] = stars }
     }
 
+    /** Applies the endless-level high-water and star-economy rules in one transaction. */
+    suspend fun recordLevelCompletion(level: Int, awardedStars: Int): LevelCompletion {
+        require(level >= 1)
+        require(awardedStars in 1..3)
+        lateinit var result: LevelCompletion
+        dataStore.edit { prefs ->
+            val oldStars = prefs[levelStarsKey(level)] ?: 0
+            val improvement = (awardedStars - oldStars).coerceAtLeast(0)
+            if (improvement > 0) {
+                prefs[levelStarsKey(level)] = awardedStars
+                prefs[Keys.LEVELS_LIFETIME_STARS] = (prefs[Keys.LEVELS_LIFETIME_STARS] ?: 0) + improvement
+                prefs[Keys.LEVELS_WALLET_BALANCE] = (prefs[Keys.LEVELS_WALLET_BALANCE] ?: 0) + improvement
+            }
+            val unlocked = maxOf(prefs[Keys.LEVELS_HIGHEST_UNLOCKED] ?: 1, level + 1)
+            prefs[Keys.LEVELS_HIGHEST_UNLOCKED] = unlocked
+            result = LevelCompletion(awardedStars, improvement, unlocked)
+        }
+        return result
+    }
+
     val levelsLifetimeStars: Flow<Int> = intFlow(Keys.LEVELS_LIFETIME_STARS, default = 0)
 
     suspend fun addLifetimeStars(delta: Int) {
@@ -298,6 +329,40 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setLevelsLivesLastResetDay(dayKey: String) {
         dataStore.edit { prefs -> prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] = dayKey }
+    }
+
+    /** Atomically resets the daily budget when needed, then returns the current balance. */
+    suspend fun levelLivesFor(dayKey: String): Int {
+        var result = 0
+        dataStore.edit { prefs ->
+            if (prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] != dayKey) {
+                prefs[Keys.LEVELS_LIVES_REMAINING] = 4
+                prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] = dayKey
+            }
+            result = prefs[Keys.LEVELS_LIVES_REMAINING] ?: 4
+        }
+        return result
+    }
+
+    suspend fun trySpendLevelLife(dayKey: String): Boolean {
+        var spent = false
+        dataStore.edit { prefs ->
+            val lives = if (prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] != dayKey) 4 else (prefs[Keys.LEVELS_LIVES_REMAINING] ?: 4)
+            prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] = dayKey
+            if (lives > 0) { prefs[Keys.LEVELS_LIVES_REMAINING] = lives - 1; spent = true } else prefs[Keys.LEVELS_LIVES_REMAINING] = 0
+        }
+        return spent
+    }
+
+    suspend fun refillLevelLives(dayKey: String, amount: Int): Int {
+        var result = 0
+        dataStore.edit { prefs ->
+            val lives = if (prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] != dayKey) 4 else (prefs[Keys.LEVELS_LIVES_REMAINING] ?: 4)
+            prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] = dayKey
+            result = (lives + amount).coerceAtMost(4)
+            prefs[Keys.LEVELS_LIVES_REMAINING] = result
+        }
+        return result
     }
 
     // -- Season progress, per season id (9.6, 13.2) --------------------------------------

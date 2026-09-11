@@ -25,6 +25,10 @@ import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaScreen
 import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaViewModel
 import com.ezequielbrrt.domemory.feature.menu.MenuScreen
 import com.ezequielbrrt.domemory.feature.menu.MenuViewModel
+import com.ezequielbrrt.domemory.feature.onboarding.OnboardingScreen
+import com.ezequielbrrt.domemory.feature.onboarding.OnboardingViewModel
+import com.ezequielbrrt.domemory.feature.settings.SettingsScreen
+import com.ezequielbrrt.domemory.feature.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -37,19 +41,31 @@ import kotlinx.coroutines.launch
  */
 private object Routes {
     const val MENU = "menu"
+    const val ONBOARDING = "onboarding"
+    const val SETTINGS = "settings"
     const val CREATE_MEMORAMA = "create_memorama"
+    const val LEVEL_GAME = "level/{level}"
     private const val GAME_PATTERN = "game/{boardId}/{difficultyKey}"
     const val GAME = GAME_PATTERN
 
     fun game(boardId: String, difficulty: Difficulty) = "game/$boardId/${difficulty.key}"
+    fun level(level: Int) = "level/$level"
 }
 
 @Composable
 fun NavGraph(
     container: AppContainer,
+    hasOnboarded: Boolean,
     navController: NavHostController = rememberNavController(),
 ) {
-    NavHost(navController = navController, startDestination = Routes.MENU) {
+    NavHost(navController = navController, startDestination = if (hasOnboarded) Routes.MENU else Routes.ONBOARDING) {
+        composable(Routes.ONBOARDING) {
+            val viewModel: OnboardingViewModel = viewModel(factory = viewModelFactory { initializer { OnboardingViewModel(container.prefs) } })
+            val state by viewModel.state.collectAsState()
+            OnboardingScreen(state, viewModel::next, viewModel::skipIntro, viewModel::selectDifficulty) {
+                viewModel.finish { navController.navigate(Routes.MENU) { popUpTo(Routes.ONBOARDING) { inclusive = true } } }
+            }
+        }
         composable(Routes.MENU) {
             val viewModel: MenuViewModel = viewModel(
                 factory = viewModelFactory {
@@ -67,7 +83,26 @@ fun NavGraph(
                     navController.navigate(Routes.game(board.id, state.difficulty))
                 },
                 onCreateMemorama = { navController.navigate(Routes.CREATE_MEMORAMA) },
+                onSettings = { navController.navigate(Routes.SETTINGS) },
+                levelProgress = container.levelProgress,
+                onLevelSelected = { navController.navigate(Routes.level(it)) },
             )
+        }
+
+        composable(Routes.LEVEL_GAME, arguments = listOf(navArgument("level") { type = NavType.IntType })) { entry ->
+            val level = entry.arguments?.getInt("level") ?: 1
+            val store = container.levelProgress
+            val viewModel: GameViewModel = viewModel(factory = viewModelFactory { initializer { GameViewModel(board = store.board(level), mode = GameMode.Level(com.ezequielbrrt.domemory.core.model.LevelContext(level, store)), stats = UserPreferencesGameStatsRecorder(container.prefs), statsScope = container.applicationScope, levelLives = container.levelLives) } })
+            val state by viewModel.state.collectAsState()
+            GameScreen(state, viewModel::choose, { if (state.isPaused) viewModel.resume() else viewModel.pause() }, { navController.popBackStack() }, viewModel::restart)
+        }
+
+        composable(Routes.SETTINGS) {
+            val viewModel: SettingsViewModel = viewModel(factory = viewModelFactory { initializer { SettingsViewModel(container.prefs) } })
+            val state by viewModel.state.collectAsState()
+            val menuEntry = remember { navController.getBackStackEntry(Routes.MENU) }
+            val menuViewModel: MenuViewModel = viewModel(viewModelStoreOwner = menuEntry, factory = viewModelFactory { initializer { MenuViewModel(container.boardCatalog, container.prefs) } })
+            SettingsScreen(state, onBack = { if (state.difficultyChanged) menuViewModel.onSettingsDifficultyChanged(); navController.popBackStack() }, onDifficulty = viewModel::setDifficulty, onTheme = viewModel::setTheme, onHaptics = viewModel::setHaptics, onReminders = viewModel::setReminders)
         }
 
         composable(Routes.CREATE_MEMORAMA) {

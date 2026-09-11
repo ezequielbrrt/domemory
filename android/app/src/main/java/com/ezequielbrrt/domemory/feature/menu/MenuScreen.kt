@@ -41,6 +41,8 @@ import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.data.repository.CatalogStatus
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
+import com.ezequielbrrt.domemory.feature.levels.LevelsScreen
+import com.ezequielbrrt.domemory.services.levels.LevelProgressService
 
 /**
  * The real menu (spec 2): header, three tabs (`Levels` / `My memoramas` / `All`),
@@ -55,14 +57,17 @@ fun MenuScreen(
     onDeleteCustomMemorama: (String) -> Unit,
     onBoardSelected: (Board) -> Unit,
     onCreateMemorama: () -> Unit,
+    onSettings: () -> Unit,
+    levelProgress: LevelProgressService,
+    onLevelSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val palette = LocalPalette.current
     Column(modifier.fillMaxSize().background(palette.appBackground)) {
-        MenuHeader(onCreateMemorama = onCreateMemorama)
+        MenuHeader(onCreateMemorama = onCreateMemorama, onSettings = onSettings)
         MenuTabRow(selected = state.selectedTab, onSelectTab = onSelectTab)
         when (state.selectedTab) {
-            MenuTab.LEVELS -> LevelsPlaceholderTab()
+            MenuTab.LEVELS -> LevelsScreen(levelProgress, onLevelSelected)
             MenuTab.MINE -> MineTab(
                 state = state,
                 onToggleFavorite = onToggleFavorite,
@@ -81,7 +86,7 @@ fun MenuScreen(
 }
 
 @Composable
-private fun MenuHeader(onCreateMemorama: () -> Unit) {
+private fun MenuHeader(onCreateMemorama: () -> Unit, onSettings: () -> Unit) {
     val palette = LocalPalette.current
     Row(
         Modifier.fillMaxWidth().padding(16.dp),
@@ -93,15 +98,14 @@ private fun MenuHeader(onCreateMemorama: () -> Unit) {
             style = DoMemoryType.display(26),
             color = palette.primary,
         )
-        Text(
-            text = stringResource(R.string.menu_create_title),
-            color = palette.primary,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(text = stringResource(R.string.menu_create_title), color = palette.primary, fontWeight = FontWeight.SemiBold, modifier = Modifier
                 .background(palette.surfaceSecondary, RoundedCornerShape(999.dp))
                 .clickable(onClick = onCreateMemorama)
                 .padding(horizontal = 14.dp, vertical = 8.dp),
-        )
+            )
+            Text(text = "⚙", color = palette.primary, fontSize = 22.sp, modifier = Modifier.size(44.dp).clickable(onClick = onSettings).padding(10.dp))
+        }
     }
 }
 

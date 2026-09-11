@@ -8,6 +8,7 @@ import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.core.model.GameMode
 import com.ezequielbrrt.domemory.core.model.MemoryGame
 import com.ezequielbrrt.domemory.services.levels.LevelCurve
+import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -49,6 +50,7 @@ class GameViewModel(
     private val scope: CoroutineScope? = null,
     /** A longer-lived scope for finish persistence; production passes AppContainer's scope. */
     private val statsScope: CoroutineScope? = null,
+    private val levelLives: LevelLivesService? = null,
 ) : ViewModel() {
 
     private val workScope: CoroutineScope get() = scope ?: viewModelScope
@@ -185,6 +187,18 @@ class GameViewModel(
         tickJob?.cancel()
         flipBackJob?.cancel()
         _state.value = _state.value.copy(outcome = outcome)
+        (mode as? GameMode.Level)?.context?.let { context ->
+            context.store.recordCompletion(
+                level = context.number,
+                didWin = outcome is GameOutcome.Won,
+                timeRemaining = _state.value.timeRemaining,
+                totalTime = _state.value.totalTime,
+                failedTries = _state.value.failedTries,
+            )
+        }
+        if (mode is GameMode.Level && outcome is GameOutcome.Lost) {
+            levelLives?.let { lives -> statsWorkScope.launch { lives.spendOnLoss() } }
+        }
         recordStats(outcome)
     }
 
