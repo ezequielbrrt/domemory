@@ -147,9 +147,9 @@ thresholds, `LevelCurve` interpolation at and between every anchor plus the caps
 RNG determinism.
 **Exit:** a playable game with a working clock, on both board constructors.
 
-### Phase 2 — Catalog and menu *(started)*
-~~Firebase anonymous auth + `/data` read~~ ✅, the menu with its three tabs, difficulty filtering, favourites,
-custom memoramas, per-board stats, onboarding carousel + difficulty picker,
+### Phase 2 — Catalog and menu *(in progress)*
+~~Firebase anonymous auth + `/data` read~~ ✅, ~~the menu with its three tabs, difficulty filtering, favourites,
+custom memoramas, per-board stats~~ ✅, onboarding carousel + difficulty picker,
 Settings, theme switching, DataStore wired for every §13.2 key.
 Silent non-fatal network failure (§13.1) is a **test case**, not an afterthought.
 **Exit:** full free-play loop over the real catalog; app usable offline.
@@ -239,9 +239,9 @@ cross-check for the whole port.
 
 ## 7. Status
 
-**Phase 0 and Phase 1 are complete and green.** `./gradlew testDebugUnitTest` runs 70
-tests with no failures; `./gradlew assembleDebug` produces an APK. Phase 2 has begun:
-the Firebase catalog read is done.
+**Phase 0 and Phase 1 are complete and green.** Phase 2 now has the Firebase catalog,
+DataStore surface, real navigation/menu, favourites, custom memoramas and per-board stats.
+Onboarding and Settings remain the active Phase 2 work.
 
 | Suite | Tests | Pins |
 |---|---|---|
@@ -285,8 +285,7 @@ screens.
 
 ## 8. Immediate next steps
 
-1. Finish Phase 2: the DataStore key surface from §13.2 first, since Phases 3–5 all
-   build on it, then the menu, tabs, favourites, custom memoramas, onboarding and
-   Settings.
+1. Finish Phase 2: onboarding, Settings/theme switching, then verify the full free-play
+   flow on an emulator or device.
 3. Decide **O1** while Phase 2 is in flight — deploying `assetlinks.json` and
    `apple-app-site-association` together is cheaper than doing it twice.

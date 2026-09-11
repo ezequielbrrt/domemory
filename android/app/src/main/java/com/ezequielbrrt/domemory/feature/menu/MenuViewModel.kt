@@ -87,6 +87,15 @@ class MenuViewModel(
         }
     }
 
+    /** Settings changed the difficulty: mirror iOS by re-fetching and re-filtering once. */
+    fun onSettingsDifficultyChanged() {
+        workScope.launch {
+            catalog.refresh()
+            catalog.refreshCustomBoards()
+            refreshFromPrefs()
+        }
+    }
+
     fun board(id: String): Board? = catalog.board(id)
 
     private suspend fun refreshFromPrefs() {

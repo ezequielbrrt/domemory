@@ -48,6 +48,15 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setHasOnboarded(value: Boolean) = setBoolean(Keys.HAS_ONBOARDED, value)
 
+    /** Commits the first-launch choice as one DataStore transaction. */
+    suspend fun completeOnboarding(difficulty: Difficulty) {
+        dataStore.edit { prefs ->
+            prefs[Keys.PLAYER_DIFFICULTY] = difficulty.key
+            prefs[Keys.ONBOARDING_INTRO_SHOWN] = true
+            prefs[Keys.HAS_ONBOARDED] = true
+        }
+    }
+
     // -- Player difficulty (4, 13.2) --------------------------------------------------
     //
     // The player's own chosen difficulty (not a board's — see the two-difficulties
