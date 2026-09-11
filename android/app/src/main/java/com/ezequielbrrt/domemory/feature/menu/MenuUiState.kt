@@ -1,0 +1,30 @@
+package com.ezequielbrrt.domemory.feature.menu
+
+import com.ezequielbrrt.domemory.core.model.Board
+import com.ezequielbrrt.domemory.core.model.Difficulty
+import com.ezequielbrrt.domemory.data.repository.CatalogStatus
+
+/**
+ * The three tabs on the real menu (spec 2): `[Levels] [My memoramas] [All]`, in that
+ * order — the bar itself "opens on Levels". [LEVELS] is a placeholder tile only in this
+ * phase; Phase 3 owns `LevelProgressStore` and the level map.
+ */
+enum class MenuTab { LEVELS, MINE, ALL }
+
+data class MenuUiState(
+    val selectedTab: MenuTab = MenuTab.LEVELS,
+    /** The player's own setting (spec 4) — filters [allBoards] and seeds the game clock. */
+    val difficulty: Difficulty = Difficulty.MEDIUM,
+    val catalogStatus: CatalogStatus = CatalogStatus.IDLE,
+    /** Catalog boards filtered to [difficulty], favourites sorted to the top (spec 13.4). */
+    val allBoards: List<Board> = emptyList(),
+    /** Custom boards, ignoring [difficulty] entirely (spec 13.3), favourites-first. */
+    val myBoards: List<Board> = emptyList(),
+    val favoriteIds: Set<String> = emptySet(),
+) {
+    fun isFavorite(boardId: String): Boolean = boardId in favoriteIds
+}
+
+/** Favourites sort to the top of their tab; stable otherwise (spec 13.4). */
+internal fun List<Board>.favoritesFirst(favoriteIds: Set<String>): List<Board> =
+    sortedByDescending { it.id in favoriteIds }

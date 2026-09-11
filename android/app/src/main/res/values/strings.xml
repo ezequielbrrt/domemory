@@ -110,6 +110,15 @@
     <string name="menu_create_add_emoji">Add emoji</string>
     <string name="menu_create_minimum_hint">Minimum 2</string>
     <string name="menu_create_save">Save</string>
+    <string name="menu_create_rejected">Add at least 2 emoji before saving</string>
+    <string name="menu_levels_coming_soon_title">Levels</string>
+    <string name="menu_levels_coming_soon_subtitle">Coming soon</string>
+    <string name="menu_favorite_add">Add to favourites</string>
+    <string name="menu_favorite_remove">Remove from favourites</string>
+    <string name="menu_delete_memorama">Delete</string>
+    <string name="menu_delete_confirm_title">Delete this memorama?</string>
+    <string name="menu_delete_confirm_message">This also clears its stats.</string>
+    <string name="menu_difficulty_label">Difficulty</string>
     <string name="stats_played_label">played</string>
     <string name="stats_won_label">won</string>
 

@@ -77,6 +77,39 @@ class UserPreferencesTest {
         assertFalse(prefs.notificationsEnabled.first())
     }
 
+    // -- Player difficulty --------------------------------------------------------------
+
+    @Test
+    fun `player difficulty defaults to medium and persists`() = runTest {
+        val prefs = newPrefs()
+        assertEquals(Difficulty.MEDIUM, prefs.playerDifficulty.first())
+
+        prefs.setPlayerDifficulty(Difficulty.VERY_HARD)
+        assertEquals(Difficulty.VERY_HARD, prefs.playerDifficulty.first())
+
+        prefs.setPlayerDifficulty(Difficulty.EASY)
+        assertEquals(Difficulty.EASY, prefs.playerDifficulty.first())
+    }
+
+    @Test
+    fun `player difficulty falls back to medium on a garbage stored value`() = runTest {
+        // Mirrors the themePreference tolerance test: simulate a corrupted/legacy value
+        // already sitting in the file, which UserPreferences has no public API to write.
+        val (prefs, dataStore) = newPrefsWithStore()
+        val difficultyKey = stringPreferencesKey("playerDifficulty")
+        dataStore.edit { it[difficultyKey] = "not-a-real-difficulty" }
+        assertEquals(Difficulty.MEDIUM, prefs.playerDifficulty.first())
+    }
+
+    @Test
+    fun `player difficulty is independent of the legacy iOS dificulty key`() = runTest {
+        // This port deliberately does not resurrect the misspelled `dificulty` key —
+        // it has no bearing on the fresh `playerDifficulty` key at all.
+        val (prefs, dataStore) = newPrefsWithStore()
+        dataStore.edit { it[stringPreferencesKey("dificulty")] = "hard" }
+        assertEquals(Difficulty.MEDIUM, prefs.playerDifficulty.first())
+    }
+
     // -- Favourites -------------------------------------------------------------------
 
     @Test

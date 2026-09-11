@@ -5,13 +5,18 @@ import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.core.model.GameMode
 import com.ezequielbrrt.domemory.core.model.LevelContext
 import com.ezequielbrrt.domemory.feature.game.GameOutcome
+import com.ezequielbrrt.domemory.feature.game.GameStatsRecorder
 import com.ezequielbrrt.domemory.feature.game.GameViewModel
 import com.ezequielbrrt.domemory.feature.game.LoseReason
 import com.ezequielbrrt.domemory.services.levels.LevelCurve
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -31,13 +36,31 @@ class GameViewModelTest {
     private fun TestScope.viewModel(
         mode: GameMode = GameMode.Free,
         playerDifficulty: Difficulty = Difficulty.MEDIUM,
+        stats: GameStatsRecorder? = null,
     ) = GameViewModel(
         board = board,
         mode = mode,
         playerDifficulty = playerDifficulty,
+        stats = stats,
         now = { testScheduler.currentTime },
         scope = this,
     )
+
+    /**
+     * A synchronous in-memory fake — deliberately not a real [androidx.datastore.core.DataStore].
+     * A real one's I/O is genuine cross-thread async work that a virtual-time [TestScope]
+     * cannot fast-forward through [advanceUntilIdle]; [UserPreferencesGameStatsRecorderTest]
+     * covers the real adapter directly instead, by awaiting it in the test's own coroutine.
+     */
+    private class FakeStatsRecorder : GameStatsRecorder {
+        val played = mutableListOf<String>()
+        val won = mutableListOf<String>()
+
+        override suspend fun recordFinished(boardId: String, didWin: Boolean) {
+            played += boardId
+            if (didWin) won += boardId
+        }
+    }
 
     @Test
     fun `free play takes the clock from the player setting, not the board`() = runTest {
@@ -196,6 +219,135 @@ class GameViewModelTest {
         val before = vm.state.value.failedTries
         vm.choose(vm.state.value.cards.first().id)
         assertEquals(before, vm.state.value.failedTries)
+        vm.stop()
+    }
+
+    // --- Per-board stats (spec 13.2) ------------------------------------------
+
+    @Test
+    fun `a win records both played and won`() = runTest {
+        val stats = FakeStatsRecorder()
+        val vm = viewModel(stats = stats)
+        clearBoard(vm)
+        assertEquals(GameOutcome.Won, vm.state.value.outcome)
+        advanceUntilIdle()
+
+        assertEquals(listOf(board.id), stats.played)
+        assertEquals(listOf(board.id), stats.won)
+        vm.stop()
+    }
+
+    @Test
+    fun `a loss records played but not won`() = runTest {
+        val stats = FakeStatsRecorder()
+        val vm = viewModel(stats = stats, playerDifficulty = Difficulty.MEDIUM)
+        advanceTimeBy(61_000)
+        assertEquals(GameOutcome.Lost(LoseReason.OUT_OF_TIME), vm.state.value.outcome)
+        advanceUntilIdle()
+
+        assertEquals(listOf(board.id), stats.played)
+        assertTrue(stats.won.isEmpty())
+        vm.stop()
+    }
+
+    @Test
+    fun `the win guard also stops stats from double-counting`() = runTest {
+        val stats = FakeStatsRecorder()
+        val vm = viewModel(stats = stats)
+        clearBoard(vm)
+        advanceUntilIdle()
+        // Further ticks and taps must not re-fire the win or its stats write.
+        advanceTimeBy(70_000)
+        vm.choose(vm.state.value.cards.first().id)
+        advanceUntilIdle()
+
+        assertEquals(listOf(board.id), stats.played)
+        assertEquals(listOf(board.id), stats.won)
+        vm.stop()
+    }
+
+    @Test
+    fun `with no stats recorder, a finish is a no-op rather than a crash`() = runTest {
+        val vm = viewModel(stats = null)
+        clearBoard(vm)
+        advanceUntilIdle()
+        assertEquals(GameOutcome.Won, vm.state.value.outcome)
+        vm.stop()
+    }
+
+    @Test
+    fun `stats write survives the game screen scope being cancelled after a finish`() = runTest {
+        val screenScope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
+        val stats = FakeStatsRecorder()
+        val vm = GameViewModel(
+            board = board,
+            stats = stats,
+            now = { testScheduler.currentTime },
+            scope = screenScope,
+            statsScope = this,
+        )
+
+        clearBoard(vm)
+        // Mirrors NavController popping the game destination immediately after its end UI.
+        screenScope.cancel()
+        advanceUntilIdle()
+
+        assertEquals(listOf(board.id), stats.played)
+        assertEquals(listOf(board.id), stats.won)
+    }
+
+    // --- restart (the real nav graph's "try again") ---------------------------
+
+    @Test
+    fun `restart resets the clock, the board and the win guard on the same instance`() = runTest {
+        val stats = FakeStatsRecorder()
+        val vm = viewModel(stats = stats, playerDifficulty = Difficulty.MEDIUM)
+        clearBoard(vm)
+        assertEquals(GameOutcome.Won, vm.state.value.outcome)
+        advanceUntilIdle()
+        assertEquals(listOf(board.id), stats.played)
+
+        vm.restart()
+        assertEquals(60.0, vm.state.value.timeRemaining, 0.001)
+        assertNull(vm.state.value.outcome)
+        assertTrue(vm.state.value.cards.none { it.isMatched })
+
+        // A second win after restart must record again, not be swallowed by the old guard.
+        clearBoard(vm)
+        assertEquals(GameOutcome.Won, vm.state.value.outcome)
+        advanceUntilIdle()
+        assertEquals(listOf(board.id, board.id), stats.played)
+        assertEquals(listOf(board.id, board.id), stats.won)
+        vm.stop()
+    }
+
+    @Test
+    fun `restart cancels the previous game's countdown instead of leaving it ticking`() = runTest {
+        val vm = viewModel(playerDifficulty = Difficulty.MEDIUM)
+        advanceTimeBy(10_000)
+        assertEquals(50.0, vm.state.value.timeRemaining, 0.2)
+
+        vm.restart()
+        // If the old tick job survived, this would also apply the pre-restart countdown.
+        advanceTimeBy(5_000)
+        assertEquals(55.0, vm.state.value.timeRemaining, 0.2)
+        vm.stop()
+    }
+
+    @Test
+    fun `restart cancels a deferred mistake loss from the previous game`() = runTest {
+        val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)))
+        val max = requireNotNull(vm.state.value.maxFailures)
+        missPairs(vm, times = max - 1)
+        val (a, b) = mismatchedIds(vm)
+        vm.choose(a)
+        vm.choose(b)
+        assertEquals(max, vm.state.value.failedTries)
+
+        vm.restart()
+        advanceTimeBy(GameViewModel.MISTAKE_LOSS_MILLIS + 100)
+
+        assertNull(vm.state.value.outcome)
         vm.stop()
     }
 
