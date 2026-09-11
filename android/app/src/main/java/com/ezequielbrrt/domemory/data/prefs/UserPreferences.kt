@@ -48,6 +48,23 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setHasOnboarded(value: Boolean) = setBoolean(Keys.HAS_ONBOARDED, value)
 
+    // -- Player difficulty (4, 13.2) --------------------------------------------------
+    //
+    // The player's own chosen difficulty (not a board's — see the two-difficulties
+    // warning on `Difficulty`). Previously `AppContainer.playerDifficulty`, an in-memory
+    // `var` that did not survive process death (menu-rebuild concern flagged in the
+    // Phase 2 PR). Deliberately a fresh, correctly-spelled key — not the legacy iOS
+    // `dificulty` Prefs key, which is CoreData-migration debris with no Android
+    // equivalent (see [hasOnboarded] above).
+
+    val playerDifficulty: Flow<Difficulty> = dataStore.data.map { prefs ->
+        Difficulty.parse(prefs[Keys.PLAYER_DIFFICULTY]) ?: Difficulty.MEDIUM
+    }.distinctUntilChanged()
+
+    suspend fun setPlayerDifficulty(value: Difficulty) {
+        dataStore.edit { prefs -> prefs[Keys.PLAYER_DIFFICULTY] = value.key }
+    }
+
     // -- Favourites (13.4) -----------------------------------------------------------
 
     val favoriteIds: Flow<Set<String>> =
@@ -437,6 +454,7 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 /** All Preferences keys, static and dynamic, live here so no call site builds one by hand. */
 private object Keys {
     val HAS_ONBOARDED = booleanPreferencesKey("hasOnboarded")
+    val PLAYER_DIFFICULTY = stringPreferencesKey("playerDifficulty")
     val FAVORITE_IDS = stringSetPreferencesKey("favoriteIDs")
     val CUSTOM_MEMORAMAS = stringPreferencesKey("customMemoramas")
     val THEME_PREFERENCE = stringPreferencesKey("themePreference")

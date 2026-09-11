@@ -59,9 +59,9 @@ class BoardCatalogRepositoryTest {
     @Test
     fun `custom boards ignore difficulty filtering`() = runTest {
         val custom = board("custom_1", Difficulty.HARD)
-        val repo = BoardCatalogRepository(remote = { remoteBoards })
+        val repo = BoardCatalogRepository(remote = { remoteBoards }, customBoardsSource = { listOf(custom) })
         repo.refresh()
-        repo.setCustomBoards(listOf(custom))
+        repo.refreshCustomBoards()
 
         Difficulty.entries.forEach { difficulty ->
             assertTrue(
@@ -75,21 +75,53 @@ class BoardCatalogRepositoryTest {
 
     @Test
     fun `only custom-prefixed boards are accepted as custom`() = runTest {
-        val repo = BoardCatalogRepository(remote = { remoteBoards })
+        val repo = BoardCatalogRepository(
+            remote = { remoteBoards },
+            customBoardsSource = { listOf(board("not_custom", Difficulty.EASY)) },
+        )
         repo.refresh()
-        repo.setCustomBoards(listOf(board("not_custom", Difficulty.EASY)))
+        repo.refreshCustomBoards()
         assertTrue(repo.customBoards().isEmpty())
     }
 
     @Test
     fun `lookup finds catalog and custom boards, and misses cleanly`() = runTest {
-        val repo = BoardCatalogRepository(remote = { remoteBoards })
+        val repo = BoardCatalogRepository(
+            remote = { remoteBoards },
+            customBoardsSource = { listOf(board("custom_7", Difficulty.EASY)) },
+        )
         repo.refresh()
-        repo.setCustomBoards(listOf(board("custom_7", Difficulty.EASY)))
+        repo.refreshCustomBoards()
 
         assertEquals("2", repo.board("2")?.id)
         assertEquals("custom_7", repo.board("custom_7")?.id)
         assertNull(repo.board("nope"))
+    }
+
+    @Test
+    fun `refreshCustomBoards re-reads the source, reflecting an add or a delete`() = runTest {
+        var source = listOf(board("custom_a", Difficulty.EASY))
+        val repo = BoardCatalogRepository(remote = { remoteBoards }, customBoardsSource = { source })
+        repo.refresh()
+        repo.refreshCustomBoards()
+        assertEquals(listOf("custom_a"), repo.customBoards().map { it.id })
+
+        // Simulate a mutation landing in the backing store between refreshes.
+        source = listOf(board("custom_a", Difficulty.EASY), board("custom_b", Difficulty.EASY))
+        repo.refreshCustomBoards()
+        assertEquals(listOf("custom_a", "custom_b"), repo.customBoards().map { it.id }.sorted())
+
+        source = listOf(board("custom_b", Difficulty.EASY))
+        repo.refreshCustomBoards()
+        assertEquals(listOf("custom_b"), repo.customBoards().map { it.id })
+    }
+
+    @Test
+    fun `custom boards default to empty when no source is provided`() = runTest {
+        val repo = BoardCatalogRepository(remote = { remoteBoards })
+        repo.refresh()
+        assertTrue(repo.customBoards().isEmpty())
+        assertTrue(repo.boards(Difficulty.EASY).none { it.isCustom })
     }
 
     @Test

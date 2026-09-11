@@ -37,13 +37,21 @@ class GameViewModel(
     private val board: Board,
     private val mode: GameMode = GameMode.Free,
     private val playerDifficulty: Difficulty = Difficulty.MEDIUM,
+    /**
+     * Records per-board `stats.<boardId>.played` / `.won` on every finish (spec 13.2),
+     * mirroring iOS's `GameStatsService.recordGameFinished`, which fires unconditionally
+     * whenever a `memorama` id exists — free play, Daily Challenge and Levels alike, all
+     * of which always carry a [board] here. Null (the default) is a no-op, so every
+     * existing plain-Kotlin test that does not care about persistence is unaffected.
+     */
+    private val stats: GameStatsRecorder? = null,
     private val now: () -> Long = System::currentTimeMillis,
     private val scope: CoroutineScope? = null,
 ) : ViewModel() {
 
     private val workScope: CoroutineScope get() = scope ?: viewModelScope
 
-    private val game = MemoryGame(board.buildCards())
+    private var game = MemoryGame(board.buildCards())
 
     private val _state = MutableStateFlow(initialState())
     val state: StateFlow<GameUiState> = _state.asStateFlow()
@@ -51,6 +59,7 @@ class GameViewModel(
     private var tickJob: Job? = null
     private var flipBackJob: Job? = null
     private var hideJob: Job? = null
+    private var mistakeLossJob: Job? = null
 
     /** Wall-clock deadline the countdown is held to; Phase 3 Freeze writes here. */
     private var frozenUntilMillis: Long = 0L
@@ -152,7 +161,8 @@ class GameViewModel(
     private fun checkMistakeBudget() {
         val max = _state.value.maxFailures ?: return
         if (game.failedTries < max) return
-        workScope.launch {
+        mistakeLossJob?.cancel()
+        mistakeLossJob = workScope.launch {
             // Deferred so the player sees the pair that finished them (spec 7.5).
             delay(MISTAKE_LOSS_MILLIS)
             if (_state.value.isPaused) return@launch
@@ -172,6 +182,17 @@ class GameViewModel(
         tickJob?.cancel()
         flipBackJob?.cancel()
         _state.value = _state.value.copy(outcome = outcome)
+        recordStats(outcome)
+    }
+
+    /**
+     * Per-board played/won counters (spec 13.2, 13.3). Fires exactly once per finish,
+     * guarded by the same single-fire path as [finish] itself. A loss still records
+     * "played" without "won" — only [recordBoardWon] is conditioned on the outcome.
+     */
+    private fun recordStats(outcome: GameOutcome) {
+        val recorder = stats ?: return
+        workScope.launch { recorder.recordFinished(board.id, didWin = outcome is GameOutcome.Won) }
     }
 
     fun pause() {
@@ -197,6 +218,23 @@ class GameViewModel(
         tickJob?.cancel()
         flipBackJob?.cancel()
         hideJob?.cancel()
+        mistakeLossJob?.cancel()
+    }
+
+    /**
+     * "Try again": a freshly shuffled board and a reset clock, on the *same* view model
+     * instance. Phase 1's `Phase1Root` built a brand-new [GameViewModel] per retry, kept
+     * alive only by `remember`, with nothing calling [onCleared] on the old one — "try
+     * again" left the previous game's countdown ticking forever. Restarting in place
+     * instead means the real nav graph's `ViewModelStore` only ever tears this down once,
+     * on actually leaving the screen.
+     */
+    fun restart() {
+        stop()
+        winReported = false
+        game = MemoryGame(board.buildCards())
+        _state.value = initialState()
+        start()
     }
 
     override fun onCleared() {
