@@ -8,25 +8,15 @@ import kotlinx.coroutines.flow.first
 /** Shared endless/season daily-life budget. Reset is lazy on the first access each day. */
 class LevelLivesService(private val prefs: UserPreferences, private val dayProvider: DayProvider) {
     suspend fun remaining(): Int {
-        val today = DayKey.of(dayProvider.today())
-        if (prefs.levelsLivesLastResetDay.first() != today) {
-            prefs.setLevelsLivesRemaining(MAX_LIVES)
-            prefs.setLevelsLivesLastResetDay(today)
-        }
-        return prefs.levelsLivesRemaining.first()
+        return prefs.levelLivesFor(DayKey.of(dayProvider.today()))
     }
 
     suspend fun spendOnLoss(): Boolean {
-        val lives = remaining()
-        if (lives == 0) return false
-        prefs.setLevelsLivesRemaining(lives - 1)
-        return true
+        return prefs.trySpendLevelLife(DayKey.of(dayProvider.today()))
     }
 
     suspend fun refill(amount: Int = 1): Int {
-        val updated = (remaining() + amount).coerceAtMost(MAX_LIVES)
-        prefs.setLevelsLivesRemaining(updated)
-        return updated
+        return prefs.refillLevelLives(DayKey.of(dayProvider.today()), amount)
     }
 
     companion object { const val MAX_LIVES = 4 }

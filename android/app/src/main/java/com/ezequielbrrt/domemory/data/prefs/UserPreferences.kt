@@ -331,6 +331,40 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { prefs -> prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] = dayKey }
     }
 
+    /** Atomically resets the daily budget when needed, then returns the current balance. */
+    suspend fun levelLivesFor(dayKey: String): Int {
+        var result = 0
+        dataStore.edit { prefs ->
+            if (prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] != dayKey) {
+                prefs[Keys.LEVELS_LIVES_REMAINING] = 4
+                prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] = dayKey
+            }
+            result = prefs[Keys.LEVELS_LIVES_REMAINING] ?: 4
+        }
+        return result
+    }
+
+    suspend fun trySpendLevelLife(dayKey: String): Boolean {
+        var spent = false
+        dataStore.edit { prefs ->
+            val lives = if (prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] != dayKey) 4 else (prefs[Keys.LEVELS_LIVES_REMAINING] ?: 4)
+            prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] = dayKey
+            if (lives > 0) { prefs[Keys.LEVELS_LIVES_REMAINING] = lives - 1; spent = true } else prefs[Keys.LEVELS_LIVES_REMAINING] = 0
+        }
+        return spent
+    }
+
+    suspend fun refillLevelLives(dayKey: String, amount: Int): Int {
+        var result = 0
+        dataStore.edit { prefs ->
+            val lives = if (prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] != dayKey) 4 else (prefs[Keys.LEVELS_LIVES_REMAINING] ?: 4)
+            prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] = dayKey
+            result = (lives + amount).coerceAtMost(4)
+            prefs[Keys.LEVELS_LIVES_REMAINING] = result
+        }
+        return result
+    }
+
     // -- Season progress, per season id (9.6, 13.2) --------------------------------------
 
     fun seasonHighestUnlocked(seasonId: String): Flow<Int> =

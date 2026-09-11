@@ -10,6 +10,7 @@ import com.ezequielbrrt.domemory.data.remote.FirebaseBoardCatalogSource
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogRepository
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogSource
 import com.ezequielbrrt.domemory.services.levels.LevelProgressService
+import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -47,6 +48,7 @@ class AppContainer(
     )
 
     val levelProgress = LevelProgressService(prefs, applicationScope)
+    val levelLives = LevelLivesService(prefs, dayProvider)
 
     fun todayKey(): String = DayKey.of(dayProvider.today())
 }

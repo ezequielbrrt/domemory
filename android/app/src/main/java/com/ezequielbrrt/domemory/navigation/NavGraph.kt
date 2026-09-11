@@ -92,7 +92,7 @@ fun NavGraph(
         composable(Routes.LEVEL_GAME, arguments = listOf(navArgument("level") { type = NavType.IntType })) { entry ->
             val level = entry.arguments?.getInt("level") ?: 1
             val store = container.levelProgress
-            val viewModel: GameViewModel = viewModel(factory = viewModelFactory { initializer { GameViewModel(board = store.board(level), mode = GameMode.Level(com.ezequielbrrt.domemory.core.model.LevelContext(level, store)), stats = UserPreferencesGameStatsRecorder(container.prefs), statsScope = container.applicationScope) } })
+            val viewModel: GameViewModel = viewModel(factory = viewModelFactory { initializer { GameViewModel(board = store.board(level), mode = GameMode.Level(com.ezequielbrrt.domemory.core.model.LevelContext(level, store)), stats = UserPreferencesGameStatsRecorder(container.prefs), statsScope = container.applicationScope, levelLives = container.levelLives) } })
             val state by viewModel.state.collectAsState()
             GameScreen(state, viewModel::choose, { if (state.isPaused) viewModel.resume() else viewModel.pause() }, { navController.popBackStack() }, viewModel::restart)
         }
