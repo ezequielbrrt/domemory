@@ -12,6 +12,7 @@ import com.ezequielbrrt.domemory.core.model.Board
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.json.JSONArray
 import org.json.JSONObject
@@ -49,7 +50,8 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     // -- Favourites (13.4) -----------------------------------------------------------
 
-    val favoriteIds: Flow<Set<String>> = dataStore.data.map { it[Keys.FAVORITE_IDS].orEmpty() }
+    val favoriteIds: Flow<Set<String>> =
+        dataStore.data.map { it[Keys.FAVORITE_IDS].orEmpty() }.distinctUntilChanged()
 
     suspend fun setFavorite(boardId: String, isFavorite: Boolean) {
         dataStore.edit { prefs ->
@@ -75,26 +77,38 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     val customMemoramas: Flow<List<Board>> = dataStore.data.map { prefs ->
         decodeCustomBoards(prefs[Keys.CUSTOM_MEMORAMAS])
-    }
+    }.distinctUntilChanged()
 
     suspend fun setCustomMemoramas(boards: List<Board>) {
         dataStore.edit { prefs -> prefs[Keys.CUSTOM_MEMORAMAS] = encodeCustomBoards(boards) }
     }
 
-    suspend fun addCustomMemorama(board: Board) {
+    /**
+     * Adds a custom board. Returns `false` without writing anything if [board] has fewer
+     * than two items — [decodeCustomBoard] silently drops such a board on read, so the
+     * creation flow needs to know the add was rejected rather than watching it vanish.
+     */
+    suspend fun addCustomMemorama(board: Board): Boolean {
+        if (board.items.size < 2) return false
         dataStore.edit { prefs ->
             val current = decodeCustomBoards(prefs[Keys.CUSTOM_MEMORAMAS])
             prefs[Keys.CUSTOM_MEMORAMAS] = encodeCustomBoards(current + board)
         }
+        return true
     }
 
-    /** Also clears the board's own stats (spec 13.3: "deleting one also clears its stats"). */
+    /**
+     * Also clears the board's own stats (spec 13.3: "deleting one also clears its stats")
+     * and drops it from favourites — a deleted board must not leave an orphaned favourite
+     * id behind.
+     */
     suspend fun removeCustomMemorama(boardId: String) {
         dataStore.edit { prefs ->
             val current = decodeCustomBoards(prefs[Keys.CUSTOM_MEMORAMAS])
             prefs[Keys.CUSTOM_MEMORAMAS] = encodeCustomBoards(current.filterNot { it.id == boardId })
             prefs.remove(statsPlayedKey(boardId))
             prefs.remove(statsWonKey(boardId))
+            prefs[Keys.FAVORITE_IDS] = prefs[Keys.FAVORITE_IDS].orEmpty() - boardId
         }
     }
 
@@ -102,7 +116,7 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     val themePreference: Flow<ThemePreference> = dataStore.data.map { prefs ->
         parseThemePreference(prefs[Keys.THEME_PREFERENCE])
-    }
+    }.distinctUntilChanged()
 
     suspend fun setThemePreference(value: ThemePreference) {
         dataStore.edit { prefs -> prefs[Keys.THEME_PREFERENCE] = value.name.lowercase() }
@@ -132,7 +146,8 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     // -- What's New (15.1) ----------------------------------------------------------
 
-    val whatsNewLastSeenVersion: Flow<String?> = dataStore.data.map { it[Keys.WHATS_NEW_LAST_SEEN_VERSION] }
+    val whatsNewLastSeenVersion: Flow<String?> =
+        dataStore.data.map { it[Keys.WHATS_NEW_LAST_SEEN_VERSION] }.distinctUntilChanged()
 
     suspend fun setWhatsNewLastSeenVersion(version: String) {
         dataStore.edit { prefs -> prefs[Keys.WHATS_NEW_LAST_SEEN_VERSION] = version }
@@ -154,7 +169,8 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
     // (Phase 4), so this stores and returns the JSON text as-is rather than parsing it
     // — parsing belongs to `SeasonCatalogService` when that phase is built.
 
-    val seasonCatalogJson: Flow<String?> = dataStore.data.map { it[Keys.SEASON_CATALOG] }
+    val seasonCatalogJson: Flow<String?> =
+        dataStore.data.map { it[Keys.SEASON_CATALOG] }.distinctUntilChanged()
 
     suspend fun setSeasonCatalogJson(json: String?) {
         dataStore.edit { prefs ->
@@ -199,7 +215,7 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     /** Null until a game has been recorded on that difficulty at all. */
     fun bestRemaining(difficulty: Difficulty): Flow<Int?> =
-        dataStore.data.map { it[bestRemainingKey(difficulty)] }
+        dataStore.data.map { it[bestRemainingKey(difficulty)] }.distinctUntilChanged()
 
     suspend fun setBestRemaining(difficulty: Difficulty, remaining: Int) {
         dataStore.edit { prefs -> prefs[bestRemainingKey(difficulty)] = remaining }
@@ -260,7 +276,8 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
     }
 
     /** The day key (`DayKey.of`) lives were last reset on; null before the first reset. */
-    val levelsLivesLastResetDay: Flow<String?> = dataStore.data.map { it[Keys.LEVELS_LIVES_LAST_RESET_DAY] }
+    val levelsLivesLastResetDay: Flow<String?> =
+        dataStore.data.map { it[Keys.LEVELS_LIVES_LAST_RESET_DAY] }.distinctUntilChanged()
 
     suspend fun setLevelsLivesLastResetDay(dayKey: String) {
         dataStore.edit { prefs -> prefs[Keys.LEVELS_LIVES_LAST_RESET_DAY] = dayKey }
@@ -300,13 +317,15 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { prefs -> prefs[Keys.DAILY_STREAK_LONGEST] = value }
     }
 
-    val dailyLastCompletedDay: Flow<String?> = dataStore.data.map { it[Keys.DAILY_LAST_COMPLETED_DAY] }
+    val dailyLastCompletedDay: Flow<String?> =
+        dataStore.data.map { it[Keys.DAILY_LAST_COMPLETED_DAY] }.distinctUntilChanged()
 
     suspend fun setDailyLastCompletedDay(dayKey: String) {
         dataStore.edit { prefs -> prefs[Keys.DAILY_LAST_COMPLETED_DAY] = dayKey }
     }
 
-    val dailyLastAttemptDay: Flow<String?> = dataStore.data.map { it[Keys.DAILY_LAST_ATTEMPT_DAY] }
+    val dailyLastAttemptDay: Flow<String?> =
+        dataStore.data.map { it[Keys.DAILY_LAST_ATTEMPT_DAY] }.distinctUntilChanged()
 
     suspend fun setDailyLastAttemptDay(dayKey: String) {
         dataStore.edit { prefs -> prefs[Keys.DAILY_LAST_ATTEMPT_DAY] = dayKey }
@@ -320,7 +339,7 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     /** Epoch millis the rewarded "free ad-free day" expires at; null when none is active. */
     val rewardedRemoveAdsExpirationEpochMillis: Flow<Long?> =
-        dataStore.data.map { it[Keys.PURCHASES_REWARDED_REMOVE_ADS_EXPIRATION] }
+        dataStore.data.map { it[Keys.PURCHASES_REWARDED_REMOVE_ADS_EXPIRATION] }.distinctUntilChanged()
 
     suspend fun setRewardedRemoveAdsExpirationEpochMillis(epochMillis: Long?) {
         dataStore.edit { prefs ->
@@ -346,10 +365,10 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
     // -- Shared helpers ------------------------------------------------------------------
 
     private fun booleanFlow(key: Preferences.Key<Boolean>, default: Boolean): Flow<Boolean> =
-        dataStore.data.map { it[key] ?: default }
+        dataStore.data.map { it[key] ?: default }.distinctUntilChanged()
 
     private fun intFlow(key: Preferences.Key<Int>, default: Int): Flow<Int> =
-        dataStore.data.map { it[key] ?: default }
+        dataStore.data.map { it[key] ?: default }.distinctUntilChanged()
 
     private suspend fun setBoolean(key: Preferences.Key<Boolean>, value: Boolean) {
         dataStore.edit { prefs -> prefs[key] = value }
@@ -409,7 +428,7 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
                 publishedDate = json.optString("publishedDate").takeIf { it.isNotBlank() },
                 items = items,
                 itemType = json.optString("itemType", "String"),
-                isDoubleItem = if (json.has("isDoubleItem")) json.optBoolean("isDoubleItem", true) else true,
+                isDoubleItem = json.optBoolean("isDoubleItem", true),
             )
         }
     }

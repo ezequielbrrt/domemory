@@ -1,6 +1,10 @@
 package com.ezequielbrrt.domemory.data
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.ezequielbrrt.domemory.core.model.Board
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.data.prefs.UserPreferences
@@ -21,11 +25,18 @@ import java.io.File
  */
 class UserPreferencesTest {
 
-    private fun newPrefs(): UserPreferences {
+    private fun newPrefs(): UserPreferences = newPrefsWithStore().first
+
+    /**
+     * Also hands back the raw [DataStore], for the rare test that needs to write a value
+     * [UserPreferences] itself has no public API to write — e.g. an invalid raw string,
+     * to exercise decode-side tolerance rather than assume it.
+     */
+    private fun newPrefsWithStore(): Pair<UserPreferences, DataStore<Preferences>> {
         val file = File.createTempFile("user_preferences_test", ".preferences_pb")
         file.deleteOnExit()
         val dataStore = PreferenceDataStoreFactory.create(produceFile = { file })
-        return UserPreferences(dataStore)
+        return UserPreferences(dataStore) to dataStore
     }
 
     // -- hapticsEnabled: the named risk-register default -----------------------------
@@ -91,7 +102,7 @@ class UserPreferencesTest {
             name = "Road trip",
             items = listOf("🚗", "🚗", "🛣️", "🛣️"),
         )
-        prefs.addCustomMemorama(board)
+        assertTrue(prefs.addCustomMemorama(board))
 
         val loaded = prefs.customMemoramas.first()
         assertEquals(1, loaded.size)
@@ -99,19 +110,34 @@ class UserPreferencesTest {
     }
 
     @Test
-    fun `deleting a custom memorama also clears its stats`() = runTest {
+    fun `addCustomMemorama rejects a board with fewer than two items`() = runTest {
+        // Mirrors the same threshold decodeCustomBoard enforces on read — accepting the
+        // write here would mean it round-trips into nothing, with the caller told it
+        // succeeded.
+        val prefs = newPrefs()
+        val tooFewItems = Board(id = "custom_bad", name = "Bad", items = listOf("only-one"))
+
+        assertFalse(prefs.addCustomMemorama(tooFewItems))
+        assertTrue(prefs.customMemoramas.first().isEmpty())
+    }
+
+    @Test
+    fun `deleting a custom memorama also clears its stats and favourite`() = runTest {
         val prefs = newPrefs()
         val board = Board(id = "custom_delete_me", name = "Gone soon", items = listOf("a", "a", "b", "b"))
         prefs.addCustomMemorama(board)
         prefs.recordBoardPlayed(board.id)
         prefs.recordBoardWon(board.id)
+        prefs.setFavorite(board.id, isFavorite = true)
         assertEquals(1, prefs.boardPlayedCount(board.id).first())
+        assertTrue(board.id in prefs.favoriteIds.first())
 
         prefs.removeCustomMemorama(board.id)
 
         assertTrue(prefs.customMemoramas.first().isEmpty())
         assertEquals(0, prefs.boardPlayedCount(board.id).first())
         assertEquals(0, prefs.boardWonCount(board.id).first())
+        assertFalse(board.id in prefs.favoriteIds.first())
     }
 
     @Test
@@ -151,11 +177,18 @@ class UserPreferencesTest {
 
     @Test
     fun `theme preference defaults to system and is tolerant of garbage`() = runTest {
-        val prefs = newPrefs()
+        val (prefs, dataStore) = newPrefsWithStore()
         assertEquals(ThemePreference.SYSTEM, prefs.themePreference.first())
 
         prefs.setThemePreference(ThemePreference.DARK)
         assertEquals(ThemePreference.DARK, prefs.themePreference.first())
+
+        // UserPreferences has no public API that writes an invalid raw string, so the
+        // tolerance claim can only be exercised by writing through the store directly —
+        // simulating a legacy or corrupted value already sitting in the file on disk.
+        val themeKey = stringPreferencesKey("themePreference")
+        dataStore.edit { it[themeKey] = "not-a-real-theme" }
+        assertEquals(ThemePreference.SYSTEM, prefs.themePreference.first())
     }
 
     // -- Per-board stats: typed accessor, not string concatenation at call sites -------
