@@ -1,0 +1,8 @@
+I Livelli stagionali sono arrivati! Gioca a percorsi a tema disponibili per un periodo limitato, a partire dalla Stagione da Brivido.
+
+• Stagione da Brivido: il nostro primo percorso di Livelli stagionali, con un proprio set di livelli e ricompense.
+• Grafica stagionale: uno sfondo a tema e una grafica delle carte sulla mappa dei livelli, con una versione pensata per la modalità scura.
+• I Livelli stagionali usano le tue solite vite giornaliere e la tua riserva di stelle — niente di nuovo da gestire.
+• Miglioramenti alla mappa dei livelli: il riquadro attuale ora pulsa per mostrarti cosa viene dopo, e ogni riquadro si abbassa e torna su al tocco, sia nei Livelli che nei Livelli stagionali.
+• Corretti i titoli di stagione che non venivano visualizzati correttamente in alcune lingue.
+• Migliorato il supporto VoiceOver per la barra di avanzamento stagionale.

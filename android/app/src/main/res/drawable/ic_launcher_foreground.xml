@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Placeholder mark: two cards, one face down. Replaced by the real icon later. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,32 h24 a4,4 0 0 1 4,4 v36 a4,4 0 0 1 -4,4 h-24 a4,4 0 0 1 -4,-4 v-36 a4,4 0 0 1 4,-4 z" />
+    <path
+        android:fillColor="#FF6340"
+        android:pathData="M52,36 h22 a4,4 0 0 1 4,4 v32 a4,4 0 0 1 -4,4 h-22 a4,4 0 0 1 -4,-4 v-32 a4,4 0 0 1 4,-4 z" />
+</vector>

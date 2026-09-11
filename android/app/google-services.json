@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "43777228882",
+    "firebase_url": "https://domemory-c9211.firebaseio.com",
+    "project_id": "domemory-c9211",
+    "storage_bucket": "domemory-c9211.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:43777228882:android:a2399c871baf46f29f5f8b",
+        "android_client_info": {
+          "package_name": "com.ezequielbrrt.domemory"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgMZiUkTcN6NcQFiWYVN1t1o-YpEmfRj0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

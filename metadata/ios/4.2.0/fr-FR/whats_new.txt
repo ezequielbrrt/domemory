@@ -1,0 +1,8 @@
+Les Niveaux saisonniers sont arrivés ! Jouez à des parcours à thème disponibles pour une durée limitée, à commencer par la Saison Frisson.
+
+• Saison Frisson : notre premier parcours de Niveaux saisonniers, avec son propre ensemble de niveaux et de récompenses.
+• Décors de saison : un arrière-plan à thème et des visuels de cartes sur la carte des niveaux, avec une version pensée pour le mode sombre.
+• Les Niveaux saisonniers utilisent vos vies quotidiennes et votre réserve d'étoiles habituelles — rien de nouveau à gérer.
+• Améliorations de la carte des niveaux : la case en cours pulse désormais pour indiquer la suite, et chaque case s'enfonce puis rebondit au toucher, aussi bien dans Niveaux que dans Niveaux saisonniers.
+• Correction de l'affichage des titres de saison, auparavant incorrect dans certaines langues.
+• Amélioration du support VoiceOver sur la barre de progression de la saison.

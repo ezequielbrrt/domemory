@@ -1,0 +1,37 @@
+# Android / Gradle rules for this project.
+# Cross-cutting rules (.DS_Store, node_modules) live in the repository root
+# .gitignore; iOS rules live in ios/.gitignore.
+
+# Build output
+build/
+.gradle/
+.kotlin/
+captures/
+.cxx/
+.externalNativeBuild/
+
+# Machine-specific: sdk.dir points at a local Android SDK install and breaks
+# every other checkout, including CI.
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Packaged artifacts
+*.apk
+*.aab
+*.ap_
+*.aar
+*.dex
+output-metadata.json
+
+# Signing material — never commit these.
+*.jks
+*.keystore
+keystore.properties
+
+# Note: gradle/wrapper/gradle-wrapper.jar is intentionally NOT ignored — the
+# wrapper is committed so every checkout builds with the pinned Gradle version.
+# app/google-services.json is also committed, matching the iOS project's
+# GoogleService-Info.plist; it is client configuration, not a secret.
