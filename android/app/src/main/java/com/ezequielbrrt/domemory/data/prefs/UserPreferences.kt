@@ -36,6 +36,8 @@ import org.json.JSONObject
  */
 class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
+    data class LevelCompletion(val awardedStars: Int, val improvement: Int, val highestUnlocked: Int)
+
     // -- Onboarding ----------------------------------------------------------------
     //
     // iOS marks "has onboarded" by the mere existence of a one-row CoreData record
@@ -260,6 +262,26 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setLevelStars(level: Int, stars: Int) {
         dataStore.edit { prefs -> prefs[levelStarsKey(level)] = stars }
+    }
+
+    /** Applies the endless-level high-water and star-economy rules in one transaction. */
+    suspend fun recordLevelCompletion(level: Int, awardedStars: Int): LevelCompletion {
+        require(level >= 1)
+        require(awardedStars in 1..3)
+        lateinit var result: LevelCompletion
+        dataStore.edit { prefs ->
+            val oldStars = prefs[levelStarsKey(level)] ?: 0
+            val improvement = (awardedStars - oldStars).coerceAtLeast(0)
+            if (improvement > 0) {
+                prefs[levelStarsKey(level)] = awardedStars
+                prefs[Keys.LEVELS_LIFETIME_STARS] = (prefs[Keys.LEVELS_LIFETIME_STARS] ?: 0) + improvement
+                prefs[Keys.LEVELS_WALLET_BALANCE] = (prefs[Keys.LEVELS_WALLET_BALANCE] ?: 0) + improvement
+            }
+            val unlocked = maxOf(prefs[Keys.LEVELS_HIGHEST_UNLOCKED] ?: 1, level + 1)
+            prefs[Keys.LEVELS_HIGHEST_UNLOCKED] = unlocked
+            result = LevelCompletion(awardedStars, improvement, unlocked)
+        }
+        return result
     }
 
     val levelsLifetimeStars: Flow<Int> = intFlow(Keys.LEVELS_LIFETIME_STARS, default = 0)

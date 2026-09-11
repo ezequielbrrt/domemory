@@ -240,6 +240,23 @@ class UserPreferencesTest {
         assertEquals(0, prefs.boardWonCount("2").first())
     }
 
+    @Test
+    fun `level completion keeps the best rating and credits only the improvement`() = runTest {
+        val prefs = newPrefs()
+        assertEquals(3, prefs.recordLevelCompletion(level = 1, awardedStars = 3).improvement)
+        assertEquals(3, prefs.levelStars(1).first())
+        assertEquals(3, prefs.levelsLifetimeStars.first())
+        assertEquals(3, prefs.levelsWalletBalance.first())
+        assertEquals(2, prefs.levelsHighestUnlocked.first())
+
+        assertEquals(0, prefs.recordLevelCompletion(level = 1, awardedStars = 2).improvement)
+        assertEquals(2, prefs.recordLevelCompletion(level = 2, awardedStars = 2).improvement)
+        assertEquals(1, prefs.recordLevelCompletion(level = 2, awardedStars = 3).improvement)
+        assertEquals(3, prefs.levelStars(1).first())
+        assertEquals(6, prefs.levelsLifetimeStars.first())
+        assertEquals(6, prefs.levelsWalletBalance.first())
+    }
+
     // -- Profile aggregates --------------------------------------------------------------
 
     @Test
