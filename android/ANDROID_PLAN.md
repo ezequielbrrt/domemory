@@ -147,14 +147,14 @@ thresholds, `LevelCurve` interpolation at and between every anchor plus the caps
 RNG determinism.
 **Exit:** a playable game with a working clock, on both board constructors.
 
-### Phase 2 — Catalog and menu *(in progress)*
-~~Firebase anonymous auth + `/data` read~~ ✅, ~~the menu with its three tabs, difficulty filtering, favourites,
-custom memoramas, per-board stats~~ ✅, onboarding carousel + difficulty picker,
-Settings, theme switching, DataStore wired for every §13.2 key.
+### Phase 2 — Catalog and menu ✅
+Firebase anonymous auth + `/data` read, menu/nav graph, tabs, difficulty filtering,
+favourites, custom memoramas, per-board stats, onboarding, Settings/theme switching,
+and the DataStore surface are complete.
 Silent non-fatal network failure (§13.1) is a **test case**, not an afterthought.
 **Exit:** full free-play loop over the real catalog; app usable offline.
 
-### Phase 3 — Levels *(largest phase)*
+### Phase 3 — Levels *(in progress)*
 `LevelProgressStore` **as an interface from the start** (this is what makes Phase 4
 cheap), `LevelProgressService`, the level map with paging and tile states, stars
 with the high-water-mark + improvement-only-credit rules, the two separate star
@@ -164,7 +164,7 @@ budget with its 0.8 s deferral and first-failure-wins rule, the four power-ups
 purchases, skip semantics, the intro carousel gated on the launch sequence.
 **Exit:** the level ladder is fully playable and the star economy balances.
 
-### Phase 4 — Seasons
+### Phase 4 — Seasons *(in progress)*
 `SeasonCatalogService` with synchronous cache read on startup, the §9.3 validation
 table (fail closed on structure, fall back on decoration), the §9.5 locale
 resolution **with an Android-specific test against real `Locale.toLanguageTag()`
@@ -239,9 +239,18 @@ cross-check for the whole port.
 
 ## 7. Status
 
-**Phase 0 and Phase 1 are complete and green.** Phase 2 now has the Firebase catalog,
-DataStore surface, real navigation/menu, favourites, custom memoramas and per-board stats.
-Onboarding and Settings remain the active Phase 2 work.
+**Phases 0–2 are complete and green.** Phase 3 has the initial endless-level map,
+atomic star economy, progress service and daily-lives storage. Phase 4 has a validated,
+cache-first Season decoder/service on `feature/android-seasons`; it has not yet been
+merged or wired to Firebase/UI.
+
+### Handoff ledger (update this with every migration slice)
+
+| Area | State | Branch / commit | Next owner action |
+|---|---|---|---|
+| Phase 2 | merged | `c1faf11` / PR #43 | Device/emulator visual verification. |
+| Phase 3 | merged, incomplete | `c1faf11` / PR #43 | Gate level entry at zero lives; harden `LevelProgressService` cache concurrency; then loss recovery, power-ups and Levels intro. |
+| Phase 4 | in progress | `feature/android-seasons`, `7586c26`, `2d74477` | Add Firebase `/seasons` source, finite `SeasonLevelProgressStore`, then map/card UI. |
 
 | Suite | Tests | Pins |
 |---|---|---|
@@ -285,7 +294,7 @@ screens.
 
 ## 8. Immediate next steps
 
-1. Finish Phase 2: onboarding, Settings/theme switching, then verify the full free-play
-   flow on an emulator or device.
-3. Decide **O1** while Phase 2 is in flight — deploying `assetlinks.json` and
-   `apple-app-site-association` together is cheaper than doing it twice.
+1. Finish the listed Phase 3 correctness gaps before expanding its feature surface.
+2. Continue Phase 4 from the handoff ledger; do not start a Season UI before the remote
+   source and bounded progress store exist.
+3. Verify the merged Android UI on an emulator or device.

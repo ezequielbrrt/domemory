@@ -119,8 +119,7 @@ committing a change to anything under `core/` or `services/`.
 
 ## Status
 
-Phase 0 and Phase 1 are complete. Phase 2 (catalog + menu) is in progress: the
-Firebase read is done, the DataStore key surface and the real menu/nav graph
-are not. See `ANDROID_PLAN.md` §7–8 for the current state and the ordered next
-steps — check there before starting new work rather than guessing from the
-package layout alone.
+Phases 0–2 are merged. Phase 3 (Levels) and Phase 4 (Seasons) are in progress.
+`ANDROID_PLAN.md` §7 contains the required handoff ledger: read it before starting
+Android work, update it when a migration slice changes state, and do not infer a
+feature is complete merely because its type or screen exists.
