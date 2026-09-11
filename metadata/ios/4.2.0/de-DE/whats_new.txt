@@ -1,0 +1,8 @@
+Saison-Level sind da! Spiele zeitlich begrenzte Themenrunden, beginnend mit der Gruselsaison.
+
+• Gruselsaison: unsere erste Saison-Level-Runde mit eigenem Level-Set und eigenen Belohnungen.
+• Saison-Grafiken: ein thematischer Hintergrund und eigene Kartengrafik auf der Levelkarte, inklusive einer Variante für den Dunkelmodus.
+• Saison-Level nutzen deine gewohnten täglichen Leben und deinen Sternevorrat – nichts Neues zu verwalten.
+• Levelkarte poliert: Das aktuelle Feld pulsiert jetzt, um dir zu zeigen, was als Nächstes kommt, und jedes Feld sinkt beim Tippen ein und federt zurück – sowohl bei Level als auch bei Saison-Level.
+• Fehler behoben: Saison-Titel wurden in manchen Sprachen nicht korrekt angezeigt.
+• VoiceOver-Unterstützung für die Saisonfortschrittsanzeige verbessert.

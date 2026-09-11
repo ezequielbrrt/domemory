@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "app": {
+    "name": "DoMemory",
+    "version": "4.2.0",
+    "first_version": false
+  },
+  "base_locale": "en-US",
+  "protected_terms": [
+    "DoMemory",
+    "Levels",
+    "Season Levels",
+    "Spooky Season"
+  ],
+  "english_approved": true,
+  "localizations": {
+    "en-US": {
+      "whats_new": "Season Levels have arrived! Play limited-time themed level runs, starting with Spooky Season.\n\n• Spooky Season: our first Season Levels run, with its own set of levels and rewards.\n• Season art: a themed background and card artwork on the level map, including a dark mode look.\n• Season Levels use your existing daily lives and star wallet — nothing new to manage.\n• Level map polish: the current tile now pulses to show you what's next, and every tile presses down and springs back when tapped, in both Levels and Season Levels.\n• Fixed season titles not displaying correctly in some languages.\n• Improved VoiceOver support for the season progress bar.",
+      "promotional_text": "Season Levels are here — limited-time runs like Spooky Season, with themed art and their own rewards. Dive in before time runs out.",
+      "status": "approved"
+    },
+    "es-MX": {
+      "whats_new": "¡Llegaron los Niveles de temporada! Juega rondas temáticas por tiempo limitado, empezando con la Temporada de Sustos.\n\n• Temporada de Sustos: nuestra primera ronda de Niveles de temporada, con su propio conjunto de niveles y recompensas.\n• Arte de temporada: un fondo temático y arte de cartas en el mapa de niveles, incluido un aspecto para modo oscuro.\n• Los Niveles de temporada usan tus vidas diarias y tu reserva de estrellas de siempre — no hay nada nuevo que administrar.\n• Mejoras en el mapa de niveles: la casilla actual ahora pulsa para mostrarte qué sigue, y cada casilla se hunde y regresa al soltar el toque, tanto en Niveles como en Niveles de temporada.\n• Corregimos que los títulos de temporada no se mostraran correctamente en algunos idiomas.\n• Mejoramos la compatibilidad de VoiceOver en la barra de progreso de temporada.",
+      "promotional_text": "Llegaron los Niveles de temporada: rondas limitadas como la Temporada de Sustos, con arte temático y recompensas propias. Entra antes de que se acabe el tiempo.",
+      "status": "reviewed"
+    },
+    "pt-BR": {
+      "whats_new": "Os Níveis de temporada chegaram! Jogue rodadas temáticas por tempo limitado, começando pela Temporada do Susto.\n\n• Temporada do Susto: nossa primeira rodada de Níveis de temporada, com seu próprio conjunto de níveis e recompensas.\n• Arte da temporada: um plano de fundo temático e arte de carta no mapa de níveis, incluindo uma versão para o modo escuro.\n• Os Níveis de temporada usam suas vidas diárias e sua reserva de estrelas de sempre — nada novo para gerenciar.\n• Melhorias no mapa de níveis: o bloco atual agora pulsa para mostrar o que vem a seguir, e cada bloco afunda e volta ao ser tocado, tanto em Níveis quanto em Níveis de temporada.\n• Corrigimos os títulos de temporada que não apareciam corretamente em alguns idiomas.\n• Melhoramos o suporte a VoiceOver na barra de progresso da temporada.",
+      "promotional_text": "Os Níveis de temporada chegaram: rodadas por tempo limitado como a Temporada do Susto, com arte temática e recompensas próprias. Entre antes que o tempo acabe.",
+      "status": "reviewed"
+    },
+    "fr-FR": {
+      "whats_new": "Les Niveaux saisonniers sont arrivés ! Jouez à des parcours à thème disponibles pour une durée limitée, à commencer par la Saison Frisson.\n\n• Saison Frisson : notre premier parcours de Niveaux saisonniers, avec son propre ensemble de niveaux et de récompenses.\n• Décors de saison : un arrière-plan à thème et des visuels de cartes sur la carte des niveaux, avec une version pensée pour le mode sombre.\n• Les Niveaux saisonniers utilisent vos vies quotidiennes et votre réserve d'étoiles habituelles — rien de nouveau à gérer.\n• Améliorations de la carte des niveaux : la case en cours pulse désormais pour indiquer la suite, et chaque case s'enfonce puis rebondit au toucher, aussi bien dans Niveaux que dans Niveaux saisonniers.\n• Correction de l'affichage des titres de saison, auparavant incorrect dans certaines langues.\n• Amélioration du support VoiceOver sur la barre de progression de la saison.",
+      "promotional_text": "Les Niveaux saisonniers sont arrivés : parcours limités comme la Saison Frisson, avec décors et récompenses propres. Foncez avant la fin du temps imparti.",
+      "status": "reviewed"
+    },
+    "de-DE": {
+      "whats_new": "Saison-Level sind da! Spiele zeitlich begrenzte Themenrunden, beginnend mit der Gruselsaison.\n\n• Gruselsaison: unsere erste Saison-Level-Runde mit eigenem Level-Set und eigenen Belohnungen.\n• Saison-Grafiken: ein thematischer Hintergrund und eigene Kartengrafik auf der Levelkarte, inklusive einer Variante für den Dunkelmodus.\n• Saison-Level nutzen deine gewohnten täglichen Leben und deinen Sternevorrat – nichts Neues zu verwalten.\n• Levelkarte poliert: Das aktuelle Feld pulsiert jetzt, um dir zu zeigen, was als Nächstes kommt, und jedes Feld sinkt beim Tippen ein und federt zurück – sowohl bei Level als auch bei Saison-Level.\n• Fehler behoben: Saison-Titel wurden in manchen Sprachen nicht korrekt angezeigt.\n• VoiceOver-Unterstützung für die Saisonfortschrittsanzeige verbessert.",
+      "promotional_text": "Saison-Level sind da: zeitlich begrenzte Runden wie die Gruselsaison, mit eigener Grafik und eigenen Belohnungen. Schnapp sie dir, bevor die Zeit abläuft.",
+      "status": "reviewed"
+    },
+    "it": {
+      "whats_new": "I Livelli stagionali sono arrivati! Gioca a percorsi a tema disponibili per un periodo limitato, a partire dalla Stagione da Brivido.\n\n• Stagione da Brivido: il nostro primo percorso di Livelli stagionali, con un proprio set di livelli e ricompense.\n• Grafica stagionale: uno sfondo a tema e una grafica delle carte sulla mappa dei livelli, con una versione pensata per la modalità scura.\n• I Livelli stagionali usano le tue solite vite giornaliere e la tua riserva di stelle — niente di nuovo da gestire.\n• Miglioramenti alla mappa dei livelli: il riquadro attuale ora pulsa per mostrarti cosa viene dopo, e ogni riquadro si abbassa e torna su al tocco, sia nei Livelli che nei Livelli stagionali.\n• Corretti i titoli di stagione che non venivano visualizzati correttamente in alcune lingue.\n• Migliorato il supporto VoiceOver per la barra di avanzamento stagionale.",
+      "promotional_text": "I Livelli stagionali sono arrivati: percorsi a tempo limitato come la Stagione da Brivido, con grafica e ricompense proprie. Gioca prima che scada il tempo.",
+      "status": "reviewed"
+    },
+    "hi": {
+      "whats_new": "सीज़न लेवल आ गए हैं! सीमित समय के थीम वाले राउंड खेलें, शुरुआत डरावना सीज़न से।\n\n• डरावना सीज़न: हमारा पहला सीज़न लेवल राउंड, अपने खुद के लेवल सेट और इनामों के साथ।\n• सीज़न आर्टवर्क: लेवल मैप पर थीम वाला बैकग्राउंड और कार्ड आर्ट, डार्क मोड के लिए अलग लुक सहित।\n• सीज़न लेवल आपके मौजूदा रोज़ाना जीवन और सितारों का ही इस्तेमाल करते हैं — कुछ भी नया मैनेज नहीं करना।\n• लेवल मैप में सुधार: मौजूदा टाइल अब यह दिखाने के लिए स्पंदित होती है कि आगे क्या है, और टैप करने पर हर टाइल दब कर वापस उछलती है — यह लेवल और सीज़न लेवल दोनों में लागू है।\n• कुछ भाषाओं में गलत दिख रहे सीज़न टाइटल को ठीक किया।\n• सीज़न प्रगति बार के लिए VoiceOver सपोर्ट बेहतर किया।",
+      "promotional_text": "सीज़न लेवल आ गए हैं — डरावना सीज़न जैसे सीमित समय के राउंड, अपने थीम आर्ट और इनामों के साथ। समय खत्म होने से पहले खेलें।",
+      "status": "reviewed"
+    },
+    "ko": {
+      "whats_new": "시즌 레벨이 찾아왔습니다! 스푸키 시즌을 시작으로, 기간 한정 테마 라운드를 즐겨보세요.\n\n• 스푸키 시즌: 전용 레벨 세트와 보상을 갖춘 첫 번째 시즌 레벨 라운드입니다.\n• 시즌 아트워크: 레벨 맵에 테마 배경과 카드 아트가 추가되며, 다크 모드 전용 모습도 포함됩니다.\n• 시즌 레벨은 기존에 갖고 있던 매일 목숨과 별을 그대로 사용합니다 — 새로 관리할 것이 없습니다.\n• 레벨 맵 개선: 현재 타일이 다음 위치를 알려주기 위해 맥동하며, 탭하면 모든 타일이 눌렸다가 다시 튀어 오릅니다 — 레벨과 시즌 레벨 모두 적용됩니다.\n• 일부 언어에서 시즌 제목이 잘못 표시되던 문제를 수정했습니다.\n• 시즌 진행 바의 VoiceOver 지원을 개선했습니다.",
+      "promotional_text": "시즌 레벨이 찾아왔습니다 — 스푸키 시즌처럼 기간 한정으로 즐기는 테마 아트와 전용 보상. 시간이 끝나기 전에 도전하세요.",
+      "status": "reviewed"
+    },
+    "ja": {
+      "whats_new": "シーズンレベル登場！ハロウィンシーズンを皮切りに、期間限定のテーマラウンドをプレイしよう。\n\n• ハロウィンシーズン: 専用のレベルセットと報酬を備えた、初めてのシーズンレベルラウンド。\n• シーズンアートワーク: レベルマップに専用の背景とカードアートが追加され、ダークモード用の見た目も用意。\n• シーズンレベルは、いつものライフとスターをそのまま使用 — 新しく管理するものはありません。\n• レベルマップを改良: 現在のタイルが次に進む場所を示すように脈動し、タップするとすべてのタイルが沈み込んでから弾むように戻ります。レベルとシーズンレベルの両方に適用。\n• 一部の言語でシーズンのタイトルが正しく表示されない問題を修正しました。\n• シーズンの進行状況バーのVoiceOver対応を改善しました。",
+      "promotional_text": "シーズンレベル登場 — ハロウィンシーズンのような期間限定ラウンドを、専用アートと報酬とともに。時間切れになる前にプレイしよう。",
+      "status": "reviewed"
+    },
+    "zh-Hans": {
+      "whats_new": "赛季关卡上线啦！畅玩限时主题关卡，从万圣节赛季开始。\n\n• 万圣节赛季：我们的首个赛季关卡，拥有专属关卡和奖励。\n• 赛季美术：关卡地图新增主题背景和卡片美术，并为深色模式提供专属效果。\n• 赛季关卡沿用你现有的每日生命和星星——无需额外管理。\n• 关卡地图优化：当前关卡节点会脉动提示接下来该玩哪一关，点击任意关卡节点都会下沉并弹回——普通关卡和赛季关卡均适用。\n• 修复了部分语言下赛季标题显示不正确的问题。\n• 改进了赛季进度条的 VoiceOver 支持。",
+      "promotional_text": "赛季关卡上线——像万圣节赛季这样的限时主题关卡，配有专属美术与奖励。趁着时间还没用完，快来体验吧。",
+      "status": "reviewed"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+Season Levels have arrived! Play limited-time themed level runs, starting with Spooky Season.
+
+• Spooky Season: our first Season Levels run, with its own set of levels and rewards.
+• Season art: a themed background and card artwork on the level map, including a dark mode look.
+• Season Levels use your existing daily lives and star wallet — nothing new to manage.
+• Level map polish: the current tile now pulses to show you what's next, and every tile presses down and springs back when tapped, in both Levels and Season Levels.
+• Fixed season titles not displaying correctly in some languages.
+• Improved VoiceOver support for the season progress bar.

@@ -1,0 +1,8 @@
+¡Llegaron los Niveles de temporada! Juega rondas temáticas por tiempo limitado, empezando con la Temporada de Sustos.
+
+• Temporada de Sustos: nuestra primera ronda de Niveles de temporada, con su propio conjunto de niveles y recompensas.
+• Arte de temporada: un fondo temático y arte de cartas en el mapa de niveles, incluido un aspecto para modo oscuro.
+• Los Niveles de temporada usan tus vidas diarias y tu reserva de estrellas de siempre — no hay nada nuevo que administrar.
+• Mejoras en el mapa de niveles: la casilla actual ahora pulsa para mostrarte qué sigue, y cada casilla se hunde y regresa al soltar el toque, tanto en Niveles como en Niveles de temporada.
+• Corregimos que los títulos de temporada no se mostraran correctamente en algunos idiomas.
+• Mejoramos la compatibilidad de VoiceOver en la barra de progreso de temporada.

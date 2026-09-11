@@ -1,0 +1,8 @@
+Os Níveis de temporada chegaram! Jogue rodadas temáticas por tempo limitado, começando pela Temporada do Susto.
+
+• Temporada do Susto: nossa primeira rodada de Níveis de temporada, com seu próprio conjunto de níveis e recompensas.
+• Arte da temporada: um plano de fundo temático e arte de carta no mapa de níveis, incluindo uma versão para o modo escuro.
+• Os Níveis de temporada usam suas vidas diárias e sua reserva de estrelas de sempre — nada novo para gerenciar.
+• Melhorias no mapa de níveis: o bloco atual agora pulsa para mostrar o que vem a seguir, e cada bloco afunda e volta ao ser tocado, tanto em Níveis quanto em Níveis de temporada.
+• Corrigimos os títulos de temporada que não apareciam corretamente em alguns idiomas.
+• Melhoramos o suporte a VoiceOver na barra de progresso da temporada.
