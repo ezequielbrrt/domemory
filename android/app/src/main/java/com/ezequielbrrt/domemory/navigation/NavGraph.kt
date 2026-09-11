@@ -44,10 +44,12 @@ private object Routes {
     const val ONBOARDING = "onboarding"
     const val SETTINGS = "settings"
     const val CREATE_MEMORAMA = "create_memorama"
+    const val LEVEL_GAME = "level/{level}"
     private const val GAME_PATTERN = "game/{boardId}/{difficultyKey}"
     const val GAME = GAME_PATTERN
 
     fun game(boardId: String, difficulty: Difficulty) = "game/$boardId/${difficulty.key}"
+    fun level(level: Int) = "level/$level"
 }
 
 @Composable
@@ -82,7 +84,17 @@ fun NavGraph(
                 },
                 onCreateMemorama = { navController.navigate(Routes.CREATE_MEMORAMA) },
                 onSettings = { navController.navigate(Routes.SETTINGS) },
+                levelProgress = container.levelProgress,
+                onLevelSelected = { navController.navigate(Routes.level(it)) },
             )
+        }
+
+        composable(Routes.LEVEL_GAME, arguments = listOf(navArgument("level") { type = NavType.IntType })) { entry ->
+            val level = entry.arguments?.getInt("level") ?: 1
+            val store = container.levelProgress
+            val viewModel: GameViewModel = viewModel(factory = viewModelFactory { initializer { GameViewModel(board = store.board(level), mode = GameMode.Level(com.ezequielbrrt.domemory.core.model.LevelContext(level, store)), stats = UserPreferencesGameStatsRecorder(container.prefs), statsScope = container.applicationScope) } })
+            val state by viewModel.state.collectAsState()
+            GameScreen(state, viewModel::choose, { if (state.isPaused) viewModel.resume() else viewModel.pause() }, { navController.popBackStack() }, viewModel::restart)
         }
 
         composable(Routes.SETTINGS) {

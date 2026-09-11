@@ -41,6 +41,8 @@ import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.data.repository.CatalogStatus
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
+import com.ezequielbrrt.domemory.feature.levels.LevelsScreen
+import com.ezequielbrrt.domemory.services.levels.LevelProgressService
 
 /**
  * The real menu (spec 2): header, three tabs (`Levels` / `My memoramas` / `All`),
@@ -56,6 +58,8 @@ fun MenuScreen(
     onBoardSelected: (Board) -> Unit,
     onCreateMemorama: () -> Unit,
     onSettings: () -> Unit,
+    levelProgress: LevelProgressService,
+    onLevelSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val palette = LocalPalette.current
@@ -63,7 +67,7 @@ fun MenuScreen(
         MenuHeader(onCreateMemorama = onCreateMemorama, onSettings = onSettings)
         MenuTabRow(selected = state.selectedTab, onSelectTab = onSelectTab)
         when (state.selectedTab) {
-            MenuTab.LEVELS -> LevelsPlaceholderTab()
+            MenuTab.LEVELS -> LevelsScreen(levelProgress, onLevelSelected)
             MenuTab.MINE -> MineTab(
                 state = state,
                 onToggleFavorite = onToggleFavorite,

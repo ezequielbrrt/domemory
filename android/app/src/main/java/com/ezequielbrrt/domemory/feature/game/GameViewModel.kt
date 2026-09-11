@@ -185,6 +185,15 @@ class GameViewModel(
         tickJob?.cancel()
         flipBackJob?.cancel()
         _state.value = _state.value.copy(outcome = outcome)
+        (mode as? GameMode.Level)?.context?.let { context ->
+            context.store.recordCompletion(
+                level = context.number,
+                didWin = outcome is GameOutcome.Won,
+                timeRemaining = _state.value.timeRemaining,
+                totalTime = _state.value.totalTime,
+                failedTries = _state.value.failedTries,
+            )
+        }
         recordStats(outcome)
     }
 

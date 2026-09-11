@@ -9,6 +9,7 @@ import com.ezequielbrrt.domemory.data.prefs.createUserPreferences
 import com.ezequielbrrt.domemory.data.remote.FirebaseBoardCatalogSource
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogRepository
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogSource
+import com.ezequielbrrt.domemory.services.levels.LevelProgressService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -44,6 +45,8 @@ class AppContainer(
         remote = catalogSource,
         customBoardsSource = { prefs.customMemoramas.first() },
     )
+
+    val levelProgress = LevelProgressService(prefs, applicationScope)
 
     fun todayKey(): String = DayKey.of(dayProvider.today())
 }
