@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 [Unreleased]
 
+### Fixed
+- Fixed the gameplay grid briefly passing negative or non-finite card dimensions to SwiftUI while the screen transitions or an iPad split-view resize settles. Cards now remain at zero size for that transient layout pass and expand normally once geometry is available, eliminating the "Invalid frame dimension" runtime warning.
+
 ### Added
 - Added Lottie as an SPM dependency (`airbnb/lottie-ios`, pinned 4.6.1) and a shared `LottieView` wrapper (`Modules/SharedModules/Views/`) for playing bundled Lottie JSON animations, following the same convention as `RemoteImage`.
 

@@ -154,8 +154,13 @@ struct MemorizeView: View {
                     let rows = max(1, Int(ceil(Double(viewModel.cards.count) / Double(cols))))
                     let spacing: CGFloat = 10
                     let padding: CGFloat = 16
-                    let cardWidth  = (geo.size.width  - padding * 2 - spacing * CGFloat(cols - 1)) / CGFloat(cols)
-                    let cardHeight = (geo.size.height - padding * 2 - spacing * CGFloat(rows - 1)) / CGFloat(rows)
+                    // `geo.size` can briefly be smaller than the padding/spacing budget
+                    // during the transition into this screen (or an iPad split-view
+                    // resize), which would otherwise drive these negative for a frame.
+                    let rawCardWidth  = (geo.size.width  - padding * 2 - spacing * CGFloat(cols - 1)) / CGFloat(cols)
+                    let rawCardHeight = (geo.size.height - padding * 2 - spacing * CGFloat(rows - 1)) / CGFloat(rows)
+                    let cardWidth  = rawCardWidth.isFinite  ? max(0, rawCardWidth)  : 0
+                    let cardHeight = rawCardHeight.isFinite ? max(0, rawCardHeight) : 0
                     LazyVGrid(
                         columns: Array(repeating: GridItem(.fixed(cardWidth)), count: cols),
                         spacing: spacing
