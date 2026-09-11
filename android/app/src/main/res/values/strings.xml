@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from DOMEMORY_ANDROID_SPEC.md section 19 (English base catalog). -->
+<resources>
+    <!-- Common -->
+    <string name="common_accept">Accept</string>
+    <string name="common_app_name">DoMemory</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_ok">OK</string>
+
+    <!-- Difficulty -->
+    <string name="difficulty_easy">Easy</string>
+    <string name="difficulty_easy_subtitle">Relaxed start</string>
+    <string name="difficulty_medium">Medium</string>
+    <string name="difficulty_medium_subtitle">A fair challenge</string>
+    <string name="difficulty_hard">Hard</string>
+    <string name="difficulty_hard_subtitle">Sharpen your memory</string>
+    <string name="difficulty_very_hard">Very hard</string>
+    <string name="difficulty_very_hard_subtitle">Only for experts</string>
+    <string name="home_difficulty_title">Difficulty</string>
+    <string name="home_select_difficulty_prompt">Select difficulty</string>
+
+    <!-- Gameplay -->
+    <string name="game_continue">Continue</string>
+    <string name="game_go_to_menu">Menu</string>
+    <string name="game_lose_message">Sorry, you ran out of time</string>
+    <string name="game_pause_title">Pause</string>
+    <string name="game_pairs_label">pairs</string>
+    <string name="game_points_label">Points</string>
+    <string name="game_quit_confirmation">Are you sure you want to exit?</string>
+    <string name="game_remaining_label">remaining</string>
+    <string name="game_errors_label">errors</string>
+    <string name="game_time_label">Time</string>
+    <string name="game_try_again">Try again</string>
+    <string name="game_win_title">Congratulations!</string>
+    <string name="game_win_description">You finished this memorama in time</string>
+    <string name="game_rewarded_extra_time">Watch ad to add 30s</string>
+    <string name="game_rewarded_hint">Watch ad for a hint</string>
+    <string name="ads_loading">Loading ad...</string>
+    <string name="ads_label">Ad</string>
+
+    <!-- Levels -->
+    <string name="levels_screen_title">Levels</string>
+    <string name="level_title_format">Level %d</string>
+    <string name="levels_current_level_format">Currently on level %d</string>
+    <string name="level_cleared">Level Cleared!</string>
+    <string name="level_next">Next Level</string>
+    <string name="level_back_to_levels">Back to levels</string>
+    <string name="levels_out_of_lives_title">Out of Lives!</string>
+    <string name="levels_out_of_lives_message">Watch an ad for +1 life, or come back tomorrow for a fresh set.</string>
+    <string name="levels_out_of_lives_message_no_ad">Spend stars for another life, or come back tomorrow for a fresh set.</string>
+    <string name="levels_watch_ad_for_life">Watch ad for +1 life</string>
+    <string name="levels_lives_remaining_format">%1$d of %2$d lives remaining</string>
+
+    <!-- Levels star economy -->
+    <string name="levels_powerup_extra_time">+15s</string>
+    <string name="levels_powerup_peek">Peek</string>
+    <string name="levels_powerup_freeze">Freeze</string>
+    <string name="levels_powerup_reveal_pair">Reveal</string>
+    <string name="levels_star_balance_format">%d stars available</string>
+    <string name="levels_powerup_cost_format">%1$s, costs %2$d stars</string>
+    <string name="levels_buy_life_format">Buy a life — %d</string>
+    <string name="levels_skip_level_format">Skip this level — %d</string>
+    <string name="levels_skip_level_confirm_title">Skip this level?</string>
+    <string name="levels_skip_level_confirm_message">You\'ll unlock the next level, but this one stays at zero stars. You can replay it any time.</string>
+    <string name="levels_skip_level_confirm_action">Skip</string>
+
+    <!-- Levels mistake budget -->
+    <string name="levels_lose_too_many_mistakes">Too many mistakes</string>
+    <string name="levels_forgive_ad_format">Watch ad to forgive %d mistakes</string>
+    <string name="levels_forgive_stars_format">Forgive %1$d mistakes — %2$d</string>
+    <string name="levels_mistakes_remaining_format">%1$d of %2$d mistakes used</string>
+    <string name="levels_timer_frozen_format">Timer frozen, %d seconds left</string>
+
+    <!-- Levels intro -->
+    <string name="levels_intro_progress_title">Endless Levels</string>
+    <string name="levels_intro_progress_subtitle">Clear a level to unlock the next. Boards keep growing and the clock keeps tightening — there\'s always one more waiting.</string>
+    <string name="levels_intro_stars_title">Earn Stars</string>
+    <string name="levels_intro_stars_subtitle">Finish fast and clean to earn up to 3 stars a level, then spend them on power-ups, extra lives, or skipping a level you\'re stuck on.</string>
+    <string name="levels_intro_lives_title">Lives Refill Daily</string>
+    <string name="levels_intro_lives_subtitle">You get %d lives a day and lose one whenever a level beats you. Out of lives? Watch an ad or spend stars to keep going.</string>
+    <string name="levels_intro_mistakes_title">Mind Your Mistakes</string>
+    <string name="levels_intro_mistakes_subtitle">Each level allows only so many wrong matches. Hit the limit and the run ends — but you can forgive mistakes and carry on.</string>
+    <string name="levels_intro_done">Got It</string>
+    <string name="levels_intro_info_accessibility">How Levels works</string>
+
+    <!-- Seasons -->
+    <string name="season_fallback_title">Season</string>
+    <string name="season_progress_format">%1$d / %2$d</string>
+    <string name="season_progress_accessibility_format">%1$d of %2$d levels cleared</string>
+    <string name="season_days_left_format">%d days left</string>
+    <string name="season_one_day_left">1 day left</string>
+    <string name="season_last_day">Last day</string>
+    <string name="season_complete_badge">Complete</string>
+    <string name="season_complete_title">Season complete!</string>
+    <string name="season_complete_message">You cleared every level. Replay any of them to improve its stars.</string>
+
+    <!-- Menu -->
+    <string name="menu_tab_levels">Levels</string>
+    <string name="menu_tab_mine">My memoramas</string>
+    <string name="menu_tab_all">All</string>
+    <string name="menu_random_game">Random game</string>
+    <string name="menu_empty_mine_message">You don\'t have any memoramas yet</string>
+    <string name="menu_empty_mine_action">Create one</string>
+    <string name="menu_create_title">New Memorama</string>
+    <string name="menu_create_name_label">Name</string>
+    <string name="menu_create_name_placeholder">E.g. Fruits, Animals...</string>
+    <string name="menu_create_emojis_label">Emojis</string>
+    <string name="menu_create_add">Add</string>
+    <string name="menu_create_add_emoji">Add emoji</string>
+    <string name="menu_create_minimum_hint">Minimum 2</string>
+    <string name="menu_create_save">Save</string>
+    <string name="stats_played_label">played</string>
+    <string name="stats_won_label">won</string>
+
+    <!-- Daily Challenge -->
+    <string name="daily_challenge_title">Daily Challenge</string>
+    <string name="daily_challenge_subtitle">New board every day</string>
+    <string name="daily_challenge_completed">Done for today!</string>
+    <string name="daily_challenge_streak_format">🔥 %d-day streak</string>
+
+    <!-- Multiplayer -->
+    <string name="multiplayer_title">Multiplayer</string>
+    <string name="multiplayer_create_room">Create room</string>
+    <string name="multiplayer_join_room">Join room</string>
+    <string name="multiplayer_join_description">Enter the 6-character room code from your friend.</string>
+    <string name="multiplayer_code_placeholder">ABC123</string>
+    <string name="multiplayer_qr_code">Multiplayer room QR code</string>
+    <string name="multiplayer_start_game">Start game</string>
+    <string name="multiplayer_waiting_for_player">Share this code and wait for another player</string>
+    <string name="multiplayer_ready_to_start">Player joined. Start when ready</string>
+    <string name="multiplayer_waiting_for_host">Waiting for the host to start</string>
+    <string name="multiplayer_your_turn">Your turn</string>
+    <string name="multiplayer_opponent_turn">Opponent\'s turn</string>
+    <string name="multiplayer_reconnecting">Waiting for player to reconnect</string>
+    <string name="multiplayer_you_won">You won</string>
+    <string name="multiplayer_you_lost">You lost</string>
+    <string name="multiplayer_draw">Draw</string>
+    <string name="multiplayer_room_closed">Room closed</string>
+    <string name="multiplayer_you">You</string>
+    <string name="multiplayer_opponent">Opponent</string>
+    <string name="multiplayer_final_score">Final score</string>
+    <string name="multiplayer_play_again">Play again</string>
+    <string name="multiplayer_waiting_for_rematch">Waiting for host</string>
+    <string name="multiplayer_choose_another_game">Choose another game</string>
+    <string name="multiplayer_host_name">Host</string>
+    <string name="multiplayer_guest_name">Guest</string>
+    <string name="multiplayer_invite_friend">Challenge a friend</string>
+    <string name="multiplayer_invite_message">I challenge you to a memory match in DoMemory! Join my room with code %s:</string>
+    <string name="multiplayer_generic_error">Something went wrong. Please try again.</string>
+    <string name="multiplayer_error_firebase_unavailable">Multiplayer is unavailable right now.</string>
+    <string name="multiplayer_error_authentication">Could not connect to multiplayer.</string>
+    <string name="multiplayer_error_room_not_found">Room not found.</string>
+    <string name="multiplayer_error_room_full">This room is already full.</string>
+    <string name="multiplayer_error_room_unavailable">This room is no longer available.</string>
+    <string name="multiplayer_error_invalid_move">That move is not available.</string>
+    <string name="multiplayer_error_permission_denied">Firebase rules are blocking multiplayer rooms.</string>
+    <string name="multiplayer_error_encoding">Could not prepare the room.</string>
+    <string name="multiplayer_error_decoding">Could not read the room.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_description">Adjust your game preferences</string>
+    <string name="settings_section_game">Game</string>
+    <string name="settings_section_preferences">Preferences</string>
+    <string name="settings_section_purchases">Purchases</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_theme_title">Theme</string>
+    <string name="settings_theme_prompt">Choose your preferred appearance</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_haptics_title">Haptics</string>
+    <string name="settings_haptics_description_on">Buttons and card matches give a small vibration.</string>
+    <string name="settings_haptics_description_off">Vibration feedback is turned off.</string>
+    <string name="settings_notifications_title">Reminders</string>
+    <string name="settings_notifications_description_on">You\'ll be reminded if you haven\'t played in 2 days</string>
+    <string name="settings_notifications_description_off">Get notified when you haven\'t played in a while</string>
+    <string name="settings_notifications_denied_title">Notifications Disabled</string>
+    <string name="settings_notifications_denied_message">Enable notifications for DoMemory in iOS Settings to receive reminders.</string>
+    <string name="settings_notifications_open_settings">Open Settings</string>
+    <string name="settings_review_title">Rate DoMemory</string>
+    <string name="settings_review_description">Reviews help other players find the game</string>
+    <string name="settings_whats_new_title">What\'s New</string>
+    <string name="settings_whats_new_description">See what changed in the latest update</string>
+
+    <!-- Purchases -->
+    <string name="settings_remove_ads_title">Remove ads</string>
+    <string name="settings_remove_ads_description">Remove banners and interstitials</string>
+    <string name="settings_remove_ads_action_format">Buy %s</string>
+    <string name="settings_remove_ads_loading">Loading</string>
+    <string name="settings_remove_ads_purchased">Purchased</string>
+    <string name="settings_remove_ads_purchased_description">Ads are disabled on this device</string>
+    <string name="settings_remove_ads_unavailable">Remove Ads is unavailable right now</string>
+    <string name="settings_remove_ads_pending">Purchase pending approval</string>
+    <string name="settings_remove_ads_no_restore">No Remove Ads purchase was found</string>
+    <string name="settings_rewarded_remove_ads_title">Free ad-free day</string>
+    <string name="settings_rewarded_remove_ads_description">Watch an ad to disable ads for 24 hours</string>
+    <string name="settings_rewarded_remove_ads_action">Watch</string>
+    <string name="settings_rewarded_remove_ads_active">Active</string>
+    <string name="settings_rewarded_remove_ads_active_format">Ads are disabled until %s</string>
+    <string name="settings_rewarded_remove_ads_success_title">Ads disabled</string>
+    <string name="settings_rewarded_remove_ads_success_message">Ads are disabled for the next 24 hours.</string>
+    <string name="settings_restore_purchases_title">Restore purchases</string>
+    <string name="settings_restore_purchases_description">Recover a previous purchase</string>
+    <string name="settings_restore_purchases_action">Restore</string>
+    <string name="settings_purchase_success_title">Purchase Successful</string>
+    <string name="settings_purchase_success_message">Ads have been removed. Enjoy the game!</string>
+    <string name="settings_restore_success_title">Purchases Restored</string>
+    <string name="settings_restore_success_message">Your previous purchase has been restored.</string>
+
+    <!-- Achievements -->
+    <string name="achievements_title">Achievements</string>
+    <string name="achievements_subtitle">Track your progress and badges</string>
+    <string name="achievements_stats_section">Your Stats</string>
+    <string name="achievements_badges_section">Badges</string>
+    <string name="stat_total_games">Games Played</string>
+    <string name="stat_total_wins">Wins</string>
+    <string name="stat_win_rate">Win Rate</string>
+    <string name="stat_perfect_games">Perfect Games</string>
+    <string name="stat_longest_streak">Longest Streak</string>
+    <string name="stat_multiplayer_wins">Multiplayer Wins</string>
+    <string name="ach_wins_title_format">%d Wins</string>
+    <string name="ach_wins_detail_format">Win %d games</string>
+    <string name="ach_streak_title_format">%d-Day Streak</string>
+    <string name="ach_streak_detail_format">Reach a %d-day daily streak</string>
+    <string name="ach_perfect_title">Flawless</string>
+    <string name="ach_perfect_detail">Win a game with no mistakes</string>
+    <string name="ach_multiplayer_title">Champion</string>
+    <string name="ach_multiplayer_detail">Win your first multiplayer match</string>
+
+    <!-- Share -->
+    <string name="share_result">Share Result</string>
+    <string name="share_result_caption">I matched %d pairs in DoMemory! Can you beat me?</string>
+
+    <!-- Onboarding intro -->
+    <string name="intro_multiplayer_title">Play with Friends</string>
+    <string name="intro_multiplayer_subtitle">Challenge anyone in real-time multiplayer rooms — just share a 6-digit code or QR.</string>
+    <string name="intro_custom_title">Make It Yours</string>
+    <string name="intro_custom_subtitle">Create your own emoji card sets and play the memoramas you love.</string>
+    <string name="intro_daily_title">Come Back Daily</string>
+    <string name="intro_daily_subtitle">A fresh board every day. Build a streak and keep it alive!</string>
+    <string name="intro_skip">Skip</string>
+    <string name="intro_next">Next</string>
+    <string name="intro_get_started">Get Started</string>
+
+    <!-- Notification primer -->
+    <string name="notification_primer_title">Keep your streak alive</string>
+    <string name="notification_primer_message">Turn on reminders and DoMemory will let you know when:</string>
+    <string name="notification_primer_benefit_streak">Your daily challenge streak is about to end</string>
+    <string name="notification_primer_benefit_inactive">You haven\'t played in a couple of days</string>
+    <string name="notification_primer_benefit_no_spam">That\'s it — just a few nudges, never spam</string>
+    <string name="notification_primer_preview_title">Don\'t break your streak!</string>
+    <string name="notification_primer_preview_message">Your 5-day streak ends tonight. Play today\'s challenge!</string>
+    <string name="notification_primer_enable">Turn On Reminders</string>
+    <string name="notification_primer_later">Maybe Later</string>
+
+    <!-- Notifications -->
+    <string name="notification_reminder_title">Time to play!</string>
+    <string name="notification_reminder_body">You haven\'t played DoMemory in a while. Keep your mind sharp!</string>
+    <string name="notification_streak_risk_title">Don\'t break your streak!</string>
+    <string name="notification_streak_risk_body">Your %d-day streak ends tonight. Play today\'s challenge to keep it alive! 🔥</string>
+
+    <!-- What's New (shell) -->
+    <string name="whats_new_title">What\'s New in DoMemory</string>
+    <string name="whats_new_button">Let\'s Play</string>
+
+    <!-- What's New v3.0.0 (retired content, still in the catalog) -->
+    <string name="whats_new_multiplayer_title">Multiplayer</string>
+    <string name="whats_new_multiplayer_description">Challenge a friend in real-time — create a room, share a 6-digit code or QR scan, and race to find the most matching pairs.</string>
+    <string name="whats_new_reminders_title">Play Reminders</string>
+    <string name="whats_new_reminders_description">Get a nudge if you haven\'t played in a couple of days so your brain stays sharp.</string>
+    <string name="whats_new_theme_title">Light &amp; Dark Mode</string>
+    <string name="whats_new_theme_description">Choose System, Light, or Dark in Settings to match your style.</string>
+    <string name="whats_new_hint_title">Hint</string>
+    <string name="whats_new_hint_description">Stuck? Pause the game and watch a short ad to reveal one hidden pair of cards.</string>
+    <string name="whats_new_games_title">More Games to Play</string>
+    <string name="whats_new_games_description">Dozens of new emoji card sets across every difficulty — over 130 memoramas to master.</string>
+
+    <!-- What's New v4.0.0 (retired content) -->
+    <string name="whats_new_levels_title">Levels</string>
+    <string name="whats_new_levels_description">A brand-new endless mode. Clear a level to unlock the next — boards keep growing and the clock keeps tightening.</string>
+    <string name="whats_new_stars_title">Star Ratings</string>
+    <string name="whats_new_stars_description">Finish fast and clean to earn up to 3 stars on every level. Replay any level to improve your score.</string>
+    <string name="whats_new_powerups_title">Power-Ups</string>
+    <string name="whats_new_powerups_description">Spend your stars mid-game on extra time, a peek at the board, a frozen clock, or a free matching pair.</string>
+    <string name="whats_new_lives_title">Lives &amp; Mistakes</string>
+    <string name="whats_new_lives_description">You get 4 lives a day, and every level allows only so many wrong matches. Out of either? Watch an ad or spend stars to keep going.</string>
+
+    <!-- What's New v4.2.0 (current) -->
+    <string name="whats_new_seasons_title">Season Levels</string>
+    <string name="whats_new_seasons_description">Play limited-time seasons like Spooky Season — a themed set of levels with their own rewards, running for a few weeks before the next one begins.</string>
+    <string name="whats_new_season_artwork_title">Themed Artwork</string>
+    <string name="whats_new_season_artwork_description">Every season brings its own background and card art to the level map, so a new season always looks the part.</string>
+    <string name="whats_new_tap_to_play_title">Tap to Play</string>
+    <string name="whats_new_tap_to_play_description">The level map now pulses to show you what\'s next, and every tile responds to your tap.</string>
+    <string name="whats_new_season_progress_title">Season Progress</string>
+    <string name="whats_new_season_progress_description">Track your climb through each season with a live progress bar and countdown — clear every level before time runs out.</string>
+
+    <!-- Android shell strings with no iOS counterpart -->
+    <string name="common_loading">Loading…</string>
+    <string name="menu_offline_boards">Offline — showing built-in boards</string>
+</resources>
