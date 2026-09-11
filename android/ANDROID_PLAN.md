@@ -239,9 +239,99 @@ cross-check for the whole port.
 
 ## 7. Status
 
-**Phase 0 and Phase 1 are complete and green.** Phase 2 now has the Firebase catalog,
-DataStore surface, real navigation/menu, favourites, custom memoramas and per-board stats.
-Onboarding and Settings remain the active Phase 2 work.
+**Phase 0, Phase 1 and Phase 2 are complete.** Phase 3 (Levels) landed its first cut in
+PR #43 — `LevelCurve`, the initial level map, an atomic star economy at the DataStore
+layer, `LevelProgressService`, `LevelLivesService` and daily-lives storage — and this
+branch (`feature/android-levels-hardening`) closed the correctness gaps that cut left
+open, in the order the handoff called out:
+
+1. **Lives gate at level entry (spec 7.4).** Tapping a level tile with 0 daily lives now
+   goes through `LevelsViewModel.attemptStart(level)`, a suspend gate that checks
+   `LevelLivesService.hasLivesRemaining()` before navigation and surfaces the out-of-lives
+   prompt instead when it's false. Previously `LevelsScreen` navigated on any tap with no
+   check at all.
+2. **`LevelProgressService` cache concurrency.** The old cache was a plain
+   `mutableMapOf<Int, Int>` and a `var highest`, mutated from coroutines launched on
+   `AppContainer.applicationScope` — `Dispatchers.IO`, a real thread pool, not a confined
+   thread. Two bugs followed: every call to `stars(level)` for an unloaded level queued
+   *another* redundant disk read instead of joining the one already in flight, and the
+   backing map was never synchronized against concurrent writers.
+   The fix keeps the original "mutation updates the in-memory cache inline" shape but
+   makes every piece of it safe: `ratings` is a `ConcurrentHashMap`, `highestUnlockedLevel`
+   an `AtomicInteger` raised through a real compare-and-set (`raiseHighestTo`, never a
+   plain read-then-write that a second racing completion could turn into a lost update),
+   and a `loadingLevels` concurrent set makes `stars(level)`'s fetch-on-miss atomic —
+   exactly one disk read is ever in flight per level no matter how many callers ask at
+   once. An init-time warm-up loop also starts loading every already-cleared level's
+   rating at construction, the same way `highestUnlockedLevel` was already eager, so the
+   *first* `stars(level)` call for a previously-cleared level doesn't flash a stale 0.
+   `recordCompletion` also now returns the level's high-water-mark rating after recording
+   (matching iOS), not just this run's own — a real deviation the old code had (a sloppy
+   replay of a 3-star level was reporting 1, not 3).
+   A `StateFlow`-per-key design (DataStore's own flow bridged via
+   `stateIn(scope, SharingStarted.Eagerly, ...)`) was tried first and is architecturally
+   more idiomatic, but proved untestable: its cache update is a *second*,
+   independently-scheduled coroutine (observing DataStore's `data` flow) rather than part
+   of the same coroutine that performed the write, and that update never reliably became
+   visible to a test's `advanceUntilIdle()` — 12 tests failed consistently, not flakily,
+   because there is nothing forcing that second coroutine to run before the assertion.
+   `StarWalletService` hit the identical wall and got the identical fix (mutators update
+   the cache inline; see its class doc). Both classes' docs record this as the reason,
+   so nobody rediscovers it by reintroducing a `stateIn` bridge here.
+3. **Loss recovery.** The biggest behavioral gap: the old `finish()` committed a Level
+   loss (spent a life, recorded progress and stats) the instant `loseReason` would be
+   set, before the player ever saw a rescue option — so a "free" mistake-budget rescue or
+   a star-bought life could never actually be free, because the life was already gone.
+   iOS defers this: `logGameFinishedIfNeeded` for a loss only runs from the lose modal's
+   own "Try Again" / "Go to menu" handlers. `GameViewModel` now mirrors that — reaching a
+   `Lost` outcome only shows the lose screen; `retry()` and `acknowledgeLossAndQuit()` are
+   the "walk away" paths that actually commit it (`commitLossIfNeeded()`, idempotent per
+   attempt), while `forgiveMistakesWithStars()` and `buyLifeWithStars()` undo the loss
+   without ever committing it. `retry()` also refuses to restart when committing the loss
+   leaves the player at 0 lives, the same gate as entry. `skipLevelWithStars()` commits
+   (skipping still counts as a loss) and unlocks the next level without stars. This
+   deferral is Levels-only — free play and the Daily Challenge keep the original
+   immediate-commit behavior, since neither has a lose-screen rescue to protect, and
+   changing that was out of scope here.
+   Separately, `checkMistakeBudget()` had a real exploit: it cancelled-and-rescheduled the
+   0.8 s deferred loss on *every* mismatch once the budget was already busted, so a player
+   who kept mismatching every &lt;0.8 s could postpone the loss forever. It's now armed once
+   per bust and only re-armed by `pause()`/`resume()` (which also fixed a second bug: a
+   pause during the 0.8 s window used to drop the pending loss entirely instead of
+   re-arming it on resume).
+4. **Power-ups.** All four (`LevelPowerUp.EXTRA_TIME` / `PEEK` / `FREEZE` / `REVEAL_PAIR`)
+   are wired into `GameViewModel` (`buyExtraTime` / `buyPeek` / `buyFreeze` /
+   `buyRevealPair`), Levels/Seasons-gated, spent through the new `StarWalletService`, and
+   rendered in a power-up bar under the HUD (`GameScreen`'s `PowerUpBar`). Freeze is a
+   `frozenUntil` deadline the existing tick loop already checked (per this plan's Phase 3
+   note) — buying it just writes the deadline and flips `isFrozen` eagerly for instant
+   feedback. Peek ends itself on `pause()` (spec 7.6's explicit rule) via the same
+   `endPeekIfActive()` the countdown already needed. Reveal pair reuses
+   `MemoryGame.findUnmatchedPair()` (already scaffolded, already tested) plus a new
+   `faceUp(ids, now)` model method, and re-arms the normal 2 s flip-back. The lose-screen
+   purchases from spec 7.7 (buy a life, forgive mistakes, skip level) are also wired, with
+   a confirmation dialog only in front of skip, matching the spec's "no confirmation
+   step" rule for everything else. Rewarded-ad alternatives for lives/mistakes stay a
+   Phase 7 seam — there is no `AdsService` yet.
+5. **Levels intro.** `LevelsIntroGate` (services/levels) ports the one-shot, mark-on-
+   dismiss rule from iOS 1:1, backed by the `levelsIntroShown` DataStore key that was
+   already sitting unused in `UserPreferences`. `LevelsViewModel` presents it on first
+   load and exposes `presentIntro()` for the map's info button. **Deliberately
+   incomplete relative to iOS**: iOS additionally gates the intro on the launch sequence
+   (§11.4 — ATT, ads bring-up, the notification primer all finishing first), because
+   Levels is the landing tab and would otherwise race their covers. Android has none of
+   those surfaces yet (ATT has no Android equivalent decided, ads are a Phase 7 stub, no
+   notification primer exists) — there is no launch sequence to gate on. This is a
+   documented seam, not a missed requirement: wiring in a real `canPresentIntro` flag
+   later is one parameter, the same shape as iOS's `LevelsView.canPresentIntro`.
+
+New/changed services: `StarWalletService` (spendable wallet, `spend`/`credit` go straight
+through `UserPreferences`' atomic transactions rather than deciding off a cache),
+`LevelPowerUp` (costs and tuning constants, ported verbatim from iOS), `LevelsIntroGate`,
+plus `LevelLivesService.hasLivesRemaining()` and `MemoryGame.forgiveFailures` / `.faceUp`.
+`LevelsViewModel` and a rebuilt `LevelsScreen` (header with live lives/star pills, the
+out-of-lives modal, the tile grid, a simple intro dialog) replace the old placeholder grid
+that read `LevelProgressService` directly with no gating and no header at all.
 
 | Suite | Tests | Pins |
 |---|---|---|
@@ -252,9 +342,26 @@ Onboarding and Settings remain the active Phase 2 work.
 | `StarsTest` | 4 | the 3/2/1-star thresholds |
 | `SeededGeneratorTest` | 9 | FNV-1a vectors, RNG determinism, generator pair counts |
 | `DayKeyTest` | 3 | zero-padding and chronological string ordering |
-| `GameViewModelTest` | 12 | the three timers, clock sources, mistake budget, first-failure-wins |
+| `GameViewModelTest` | 42 | the three timers, clock sources, mistake budget, first-failure-wins, mistake-deferral pause/resume re-arming, deferred loss commit, all four power-ups, all three lose-screen purchases |
 | `BoardDecoderTest` | 8 | the live 134-board payload, array/map shapes, tolerant field decoding |
-| `BoardCatalogRepositoryTest` | 7 | difficulty filtering, custom-board rules, silent catalog failure |
+| `BoardCatalogRepositoryTest` | 9 | difficulty filtering, custom-board rules, silent catalog failure |
+| `LevelProgressServiceTest` | 8 | high-water-mark stars, wallet-crediting completion, skip, cache concurrency (cold-start correctness, concurrent readers/writers) |
+| `LevelLivesServiceTest` | 2 | lazy daily reset, loss-only spend, refill cap, the entry gate |
+| `StarWalletServiceTest` | 6 | credit/spend/canAfford, authoritative spend over a stale cache, `refresh()` picking up a credit `LevelProgressService` made directly |
+| `LevelsIntroGateTest` | 2 | one-shot, seen-on-dismiss-not-on-present |
+| `UserPreferencesTest` | 27 | every DataStore key in spec 13.2 |
+| `MenuViewModelTest` | 10 | tabs, favourites, difficulty filtering |
+| `CreateMemoramaViewModelTest` | 6 | custom-board validation and save |
+
+`GameViewModelTest` has a gotcha worth knowing before adding to it: `advanceUntilIdle()`
+is only safe once the game has already reached a terminal outcome — the tick loop is a
+`while (isActive) { delay(100); ... }` coroutine, and if it is still running,
+`advanceUntilIdle()` will drain every scheduled tick, fast-forwarding the level's clock to
+a real timeout instead of just letting a fire-and-forget star spend or life-refill settle.
+This file uses `runCurrent()` for that instead (runs only already-ready work, never
+touches the tick loop's still-pending `delay`), and it is what silently made several of
+this branch's own new tests fail against otherwise-correct production code before the fix
+was to the test, not `GameViewModel`.
 
 **Firebase is live.** `app/google-services.json` is committed for project
 `domemory-c9211` (client `com.ezequielbrrt.domemory`), and the app reads the real
@@ -275,17 +382,36 @@ Two things that came with it:
 **Not verified on a device.** No emulator system image is installed and no device is
 attached, so the UI has been compiled and unit-tested but not seen running. Installing
 an API 37 system image (~1.5 GB, needs `cmdline-tools`) is the next step if you want a
-visual check before Phase 2.
+visual check.
 
-**Deliberately deferred inside Phase 1**, all left as seams rather than gaps: haptics
-(the model already reports what a tap actually did, so the table has somewhere to
-attach), power-ups (the countdown already ticks against a `frozenUntil` deadline),
-analytics, and the win/lose modals, which are placeholders rather than the designed
-screens.
+**Deliberately deferred**, all left as seams rather than gaps:
+
+- **Haptics and analytics** — still absent everywhere, carried over from Phase 1 (the
+  model already reports what a tap actually did, so the haptics table has somewhere to
+  attach; every power-up/purchase call site above is a natural analytics-event site once
+  `AnalyticsService`'s Android counterpart exists).
+- **Rewarded-ad refills** for out-of-lives and the mistake rescue (spec 7.4, 7.5) — both
+  need `AdsService`, a Phase 7 stub today. The star-purchase alternative for each is fully
+  wired; the ad button is simply absent rather than present-and-broken.
+- **The Levels intro's launch-sequence gate** (spec 7.9, §11.4) — see item 5 above.
+  `LevelsIntroGate`'s one-shot rule is complete and tested; the ordering gate against
+  ATT/ads/notification-primer has nothing to gate against yet on Android.
+- **Level-map presentation polish** — the pulsing current tile, the press-to-0.92-scale
+  spring, and the swipeable intro carousel (spec 7.8, 7.9) are all still plain Compose
+  layouts with no animation. `LevelsScreen`'s tile grid and `LevelsIntroDialog` are
+  functionally complete and spec-accurate but visually a placeholder for these.
+- **Seasons** (`SeasonLevelProgressStore`, Phase 4) — `LevelProgressStore` was already an
+  interface for exactly this reason; nothing in this branch touches
+  `feature/android-seasons`, per the ordering constraint that started this branch.
 
 ## 8. Immediate next steps
 
-1. Finish Phase 2: onboarding, Settings/theme switching, then verify the full free-play
-   flow on an emulator or device.
-3. Decide **O1** while Phase 2 is in flight — deploying `assetlinks.json` and
-   `apple-app-site-association` together is cheaper than doing it twice.
+1. Verify the Levels flow (lives gate, power-ups, lose-screen purchases, the intro) on an
+   emulator or device — everything in §7 above is unit-tested but, like the rest of the
+   app, has not been seen running.
+2. Decide **O1** — deploying `assetlinks.json` and `apple-app-site-association` together
+   is cheaper than doing it twice.
+3. Start Phase 4 (Seasons) on `feature/android-seasons`, now that Phase 3's gaps are
+   closed — `LevelProgressStore` and the deferred-loss-commit model in `GameViewModel`
+   are both built so a `SeasonLevelProgressStore` adapter is the only new piece a season
+   attempt needs.

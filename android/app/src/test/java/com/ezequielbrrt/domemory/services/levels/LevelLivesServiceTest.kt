@@ -21,4 +21,18 @@ class LevelLivesServiceTest {
         assertEquals(1, service.refill()); assertEquals(4, service.refill(99))
         day = day.plusDays(1); assertEquals(4, service.remaining())
     }
+
+    @Test fun `hasLivesRemaining gates level entry at zero lives`() = runTest {
+        val file = File.createTempFile("lives_gate", ".preferences_pb").also { it.deleteOnExit() }
+        val day = LocalDate.of(2026, 9, 11)
+        val service = LevelLivesService(UserPreferences(PreferenceDataStoreFactory.create(produceFile = { file })), DayProvider { day })
+
+        assertTrue(service.hasLivesRemaining())
+        repeat(4) { service.spendOnLoss() }
+        assertFalse(service.hasLivesRemaining())
+
+        // Refilling — the only way back in before the next day's reset — re-opens the gate.
+        service.refill(1)
+        assertTrue(service.hasLivesRemaining())
+    }
 }

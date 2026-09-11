@@ -11,6 +11,12 @@ class LevelLivesService(private val prefs: UserPreferences, private val dayProvi
         return prefs.levelLivesFor(DayKey.of(dayProvider.today()))
     }
 
+    /**
+     * Gate for starting a level attempt (spec 7.4): at 0 lives, tapping a level tile must
+     * be refused rather than starting a game the player has no budget for.
+     */
+    suspend fun hasLivesRemaining(): Boolean = remaining() > 0
+
     suspend fun spendOnLoss(): Boolean {
         return prefs.trySpendLevelLife(DayKey.of(dayProvider.today()))
     }
