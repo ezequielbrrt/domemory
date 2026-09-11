@@ -9,3 +9,12 @@
 
 # Node (marketing video tooling)
 node_modules/
+
+# Kept local, by decision — not yet migrated into the monorepo.
+# Marketing source, campaign output, promo renders and brand assets live on
+# the developer's machine for now. Remove these rules when migrating them in;
+# note that ios/artifacts holds large .mp4 renders and ios/my-video is a
+# Remotion project, so migrate sources and leave build output behind.
+ios/marketing/
+ios/my-video/
+ios/artifacts/
