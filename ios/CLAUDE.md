@@ -40,7 +40,7 @@ There are six product surfaces: the **curated board catalog** (Firebase `/data`)
 | `Seasons` | Limited-time themed level runs driven by Firebase `/seasons`; renders `LevelMapView` under its own header and artwork |
 | `Multiplayer` | Two-player turn-based matches over Firebase RTDB: room create/join, 6-char codes, QR, presence, reconnect, invite links |
 | `Settings` | Difficulty, theme, haptics, reminders, purchases, Achievements, What's New, review link |
-| `SharedModules` | `Difficulty`, `UserManageObject` (CoreData), `RemoteImage`, `LivesRow`, `LoaderView`, intro carousel |
+| `SharedModules` | `Difficulty`, `UserManageObject` (CoreData), `RemoteImage`, `LottieView`, `LivesRow`, `LoaderView`, intro carousel |
 
 Also: `DoMemory/DoMemoryWidget/` — a home-screen widget showing the Daily Challenge streak, reading App-Group-shared state via `DailyChallengeShared.swift` (member of **both** targets).
 

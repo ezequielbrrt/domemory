@@ -23,6 +23,14 @@ struct WinModal: View {
     var hasNextLevel: Bool = true
 
     @State private var showShareSheet = false
+    /// How many of the earned stars have been given the go-ahead to start
+    /// their pop-in, and how many have actually finished it. Kept separate so
+    /// a star can be *playing* its animation (started, not yet completed)
+    /// while the next one is still waiting its turn — that gap is what makes
+    /// the row read as a staggered sequence instead of one simultaneous pop.
+    @State private var startedStarCount = 0
+    @State private var completedStarCount = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// A level was cleared *and* there is another to play.
     private var offersNextLevel: Bool { levelNumber != nil && hasNextLevel }
@@ -54,36 +62,59 @@ struct WinModal: View {
         return levelNumber != nil ? Strings.backToLevels : Strings.goToMenu
     }
 
+    /// One slot of the stars-earned row.
+    ///
+    /// A slot beyond `starsEarned` is always the static dim outline — it never
+    /// earned a star, so there is nothing to animate. An earned slot starts
+    /// dim too, waiting its turn; `revealStars()` flips it to the Lottie pop
+    /// once it starts, and its own completion callback flips it to the final
+    /// static filled state. Reduce-motion players skip straight to filled.
+    @ViewBuilder
+    private func starView(for index: Int) -> some View {
+        if index >= starsEarned {
+            Image(systemName: "star")
+                .foregroundStyle(Color.textMuted.opacity(0.3))
+        } else if reduceMotion || index < completedStarCount {
+            Image(systemName: "star.fill")
+                .foregroundStyle(Color.hardAmber)
+        } else if index < startedStarCount {
+            LottieView(name: "star-pop", loopMode: .playOnce) {
+                completedStarCount = max(completedStarCount, index + 1)
+            }
+            .frame(width: 28, height: 28)
+        } else {
+            Image(systemName: "star")
+                .foregroundStyle(Color.textMuted.opacity(0.3))
+        }
+    }
+
+    /// Starts each earned star's pop-in a beat after the previous one, so the
+    /// row reads as a small staggered sequence of rewards instead of three
+    /// stars popping at once. Each star's own Lottie completion callback (see
+    /// `starView(for:)`) is what actually marks it done; this loop only paces
+    /// when the *next* one gets its go-ahead.
+    private func revealStars() async {
+        guard !reduceMotion, starsEarned > 0 else { return }
+        for index in 0..<starsEarned {
+            startedStarCount = index + 1
+            try? await Task.sleep(nanoseconds: 180_000_000)
+        }
+    }
+
     var body: some View {
         ZStack {
             Color.overlayBackdrop
                 .ignoresSafeArea()
                 .background(.ultraThinMaterial)
 
-            Circle()
-                .fill(Color.primaryColor.opacity(0.25))
-                .frame(width: 12, height: 12)
-                .offset(x: -150, y: -340)
-
-            Circle()
-                .fill(Color.secundaryColor.opacity(0.3))
-                .frame(width: 8, height: 8)
-                .offset(x: 130, y: -300)
-
-            Circle()
-                .fill(Color.easyGreen.opacity(0.35))
-                .frame(width: 6, height: 6)
-                .offset(x: -132, y: -220)
-
-            Circle()
-                .fill(Color.hardAmber.opacity(0.3))
-                .frame(width: 10, height: 10)
-                .offset(x: 150, y: 220)
-
-            Circle()
-                .fill(Color.primaryColor.opacity(0.2))
-                .frame(width: 7, height: 7)
-                .offset(x: -145, y: 260)
+            // A one-shot celebratory burst behind the card. Skipped for
+            // reduce-motion players, who see the modal with no motion at all
+            // rather than a burst that plays regardless of the setting.
+            if !reduceMotion {
+                LottieView(name: "confetti-burst", loopMode: .playOnce)
+                    .allowsHitTesting(false)
+                    .frame(width: 400, height: 400)
+            }
 
             VStack(spacing: 6) {
                 Text("😎")
@@ -102,13 +133,13 @@ struct WinModal: View {
 
                     HStack(spacing: 6) {
                         ForEach(0..<3, id: \.self) { index in
-                            Image(systemName: index < starsEarned ? "star.fill" : "star")
-                                .foregroundStyle(index < starsEarned ? Color.hardAmber : Color.textMuted.opacity(0.3))
+                            starView(for: index)
                         }
                     }
                     .font(.system(size: 24))
                     .padding(.top, 4)
                     .padding(.bottom, 8)
+                    .task { await revealStars() }
                 } else {
                     Text(Strings.youWinDescription)
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
@@ -235,6 +266,10 @@ private struct WinStatView: View {
     }
 }
 
-#Preview {
+#Preview("Free play") {
     WinModal()
+}
+
+#Preview("Level cleared, 3 stars") {
+    WinModal(levelNumber: 12, starsEarned: 3)
 }

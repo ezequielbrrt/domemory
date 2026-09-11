@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 [Unreleased]
 
+### Added
+- Added Lottie as an SPM dependency (`airbnb/lottie-ios`, pinned 4.6.1) and a shared `LottieView` wrapper (`Modules/SharedModules/Views/`) for playing bundled Lottie JSON animations, following the same convention as `RemoteImage`.
+
+### Changed
+- The post-game win screen now plays a one-shot confetti burst behind the card as it appears, replacing the previous static decorative circles. On a Levels or Season win, the 3-star row pops in one star at a time (roughly 180ms apart) via a small Lottie animation per star instead of appearing all at once as static icons; stars beyond what was earned stay dim and static, unchanged. Both animations are hand-authored JSON, since no After Effects export pipeline was available, and both respect `accessibilityReduceMotion` — motion-sensitive players see the modal in its final static state immediately, with no animation.
+
 [4.2.0] 10-09-2026
 
 ### Added
