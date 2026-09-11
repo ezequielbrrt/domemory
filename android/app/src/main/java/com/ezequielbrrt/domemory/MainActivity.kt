@@ -15,10 +15,22 @@ import com.ezequielbrrt.domemory.navigation.NavGraph
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryTheme
 
 class MainActivity : ComponentActivity() {
+    private lateinit var container: AppContainer
+
+    /**
+     * Re-evaluates the active season on every foreground (spec 9.4) — otherwise an app
+     * left open across local midnight would keep showing a season that ended yesterday.
+     * `onResume` also fires on first launch, right after `onCreate` constructs [container].
+     */
+    override fun onResume() {
+        super.onResume()
+        if (::container.isInitialized) container.refreshActiveSeason()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        val container = (application as DoMemoryApplication).container
+        container = (application as DoMemoryApplication).container
         setContent {
             val theme by container.prefs.themePreference.collectAsState(initial = com.ezequielbrrt.domemory.ui.theme.ThemePreference.SYSTEM)
             val hasOnboarded by container.prefs.hasOnboarded.collectAsState(initial = null)

@@ -381,6 +381,44 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { prefs -> prefs[seasonStarsKey(seasonId, level)] = stars }
     }
 
+    /**
+     * Applies the season high-water-mark and improvement-only star rules in one
+     * transaction, mirroring [recordLevelCompletion] with two deliberate differences
+     * (spec 9.6): keys are namespaced per season id, and the improvement is credited only
+     * to the shared spendable wallet, **never** to `levels.lifetimeStars` — that value is
+     * the endless-Levels mastery score, and season play must not inflate it.
+     */
+    suspend fun recordSeasonLevelCompletion(seasonId: String, level: Int, awardedStars: Int): LevelCompletion {
+        require(level >= 1)
+        require(awardedStars in 1..3)
+        lateinit var result: LevelCompletion
+        dataStore.edit { prefs ->
+            val starsKey = seasonStarsKey(seasonId, level)
+            val unlockedKey = seasonHighestUnlockedKey(seasonId)
+            val oldStars = prefs[starsKey] ?: 0
+            val improvement = (awardedStars - oldStars).coerceAtLeast(0)
+            if (improvement > 0) {
+                prefs[starsKey] = awardedStars
+                prefs[Keys.LEVELS_WALLET_BALANCE] = (prefs[Keys.LEVELS_WALLET_BALANCE] ?: 0) + improvement
+            }
+            val unlocked = maxOf(prefs[unlockedKey] ?: 1, level + 1)
+            prefs[unlockedKey] = unlocked
+            result = LevelCompletion(awardedStars, improvement, unlocked)
+        }
+        return result
+    }
+
+    /** Atomically raises `season.<id>.highestUnlocked` to at least [level]; never lowers it. */
+    suspend fun unlockSeasonLevelAtLeast(seasonId: String, level: Int): Int {
+        var result = level
+        dataStore.edit { prefs ->
+            val key = seasonHighestUnlockedKey(seasonId)
+            result = maxOf(prefs[key] ?: 1, level)
+            prefs[key] = result
+        }
+        return result
+    }
+
     // -- Daily Challenge (8, 13.2) --------------------------------------------------------
     //
     // Spec 13.2 marks these "Prefs (shared) ... shared with the widget". They stay in

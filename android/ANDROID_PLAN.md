@@ -240,17 +240,22 @@ cross-check for the whole port.
 ## 7. Status
 
 **Phases 0–2 are complete and green.** Phase 3 has the initial endless-level map,
-atomic star economy, progress service and daily-lives storage. Phase 4 has a validated,
-cache-first Season decoder/service on `feature/android-seasons`; it has not yet been
-merged or wired to Firebase/UI.
+atomic star economy, progress service and daily-lives storage — its correctness gaps
+(zero-lives gating, cache concurrency, loss recovery, power-ups, `LevelsIntroGate`,
+`StarWalletService`) landed separately on `feature/android-levels-hardening`
+(`e8f859e`, off `master`, not yet merged into this branch or `master`). Phase 4 now has
+a live Firebase-backed `/seasons` source, a finite per-season progress store, Android's
+own locale-resolution test against real `Locale.toLanguageTag()` output, a season
+card + level-map screen wired into the nav graph, and Coil-backed artwork loading with
+a 64 MB LRU disk cache — all on `feature/android-seasons`, not yet merged.
 
 ### Handoff ledger (update this with every migration slice)
 
 | Area | State | Branch / commit | Next owner action |
 |---|---|---|---|
 | Phase 2 | merged | `c1faf11` / PR #43 | Device/emulator visual verification. |
-| Phase 3 | merged, incomplete | `c1faf11` / PR #43 | Gate level entry at zero lives; harden `LevelProgressService` cache concurrency; then loss recovery, power-ups and Levels intro. |
-| Phase 4 | in progress | `feature/android-seasons`, `7586c26`, `2d74477` | Add Firebase `/seasons` source, finite `SeasonLevelProgressStore`, then map/card UI. |
+| Phase 3 | merged, incomplete here | `c1faf11` / PR #43; hardening on `feature/android-levels-hardening` (`e8f859e`, unmerged) | Merge the hardening branch when ready; expect a conflict in `GameViewModel.kt`/`LevelsScreen.kt`/`NavGraph.kt` against this branch's season routes — resolve by keeping both sets of routes/wiring, not by dropping either. |
+| Phase 4 | feature-complete on this branch, not yet merged | `feature/android-seasons`, this session's commit (uncommitted at hand-off — see below) | Verify on an emulator/device (season card renders, level map plays, expiry at the day boundary); tune the season-card layout once Daily Challenge (Phase 5) exists to share its row per spec 9.1; consider deploying `firebase/firebase-database.rules.json`'s `/seasons` read rule and a real season to Firebase to exercise the exit criterion live. |
 
 | Suite | Tests | Pins |
 |---|---|---|
@@ -264,6 +269,60 @@ merged or wired to Firebase/UI.
 | `GameViewModelTest` | 12 | the three timers, clock sources, mistake budget, first-failure-wins |
 | `BoardDecoderTest` | 8 | the live 134-board payload, array/map shapes, tolerant field decoding |
 | `BoardCatalogRepositoryTest` | 7 | difficulty filtering, custom-board rules, silent catalog failure |
+| `SeasonTest` | 22 | the full §9.3 validation table: fail-closed structure rules and fall-back decoration rules, one test per row |
+| `SeasonCatalogServiceTest` | 6 | cache-before-network, a non-empty remote payload correcting and persisting over the cache, a malformed payload leaving the cache untouched, `activeSeason` priority/id tie-break re-evaluating with no network round trip, and the real `firebase/scripts/seasons.json` fixture decoding end to end |
+| `SeasonProgressServiceTest` | 12 | fresh-season defaults, win/loss, improvement-only wallet credit (never `levels.lifetimeStars`), skip, `levelCount + 1` completion, `nextLevel` null past the end, on-demand bounded `totalStars`, cross-season and cross-mode namespacing |
+| `SeasonLocaleResolutionTest` | 11 | the candidate-shortening algorithm, and real `java.util.Locale.toLanguageTag()` output for `es-419`, `es-MX`, `pt-BR` and `zh-Hans-CN` — the last one is the case where Android's reported identifier (keeps the script subtag) sidesteps the exact iOS bug spec 9.5 documents |
+| `SeasonPayloadJsonTest` | 3 | the pure `DataSnapshot.value` (nested `Map`/`List`) → JSON-text conversion `FirebaseSeasonCatalogSource` depends on, isolated from any live Firebase connection the same way `BoardDecoderTest` is |
+
+**Phase 4 implementation, this session:** `Season.kt` gained the decoration fields
+(`accentColor`, `backgroundImageURL(Dark)`, `cardImageURL`, all validated at decode
+time per §9.3) and `SeasonLocaleResolver` (the §9.5 candidate-shortening lookup, pure
+and Android-resource-free so it stays unit-testable without Robolectric).
+`SeasonCatalogService` gained an `activeSeason: StateFlow<Season?>` re-evaluated by
+`refreshActive()` — called on every `MainActivity.onResume()` so a long-lived
+foreground process doesn't keep showing a season that ended at local midnight (§9.4).
+`FirebaseSeasonCatalogSource` (`data/remote/`) mirrors `FirebaseBoardCatalogSource`
+exactly: anonymous auth warmup, single snapshot, silent non-fatal failure; the
+Map→JSON conversion its `/seasons` (dictionary, not array) shape needs is split into
+the pure, testable `SeasonPayloadJson`. `SeasonProgressService` +
+`SeasonLevelProgressStore` (`services/seasons/`) are the finite twin of
+`LevelProgressService`/its endless store, namespaced `season.<id>.*` via two new
+`UserPreferences` transactions (`recordSeasonLevelCompletion`,
+`unlockSeasonLevelAtLeast`) that mirror `recordLevelCompletion`'s atomicity. A season
+card (`feature/seasons/SeasonCard.kt`) renders above the endless map on the Levels tab
+when a season is active, and `SeasonLevelsScreen.kt` is the finite level map (header
+with icon/title/spring-eased progress bar/star total/countdown/completion state, then
+a bounded `1..levelCount` grid) — both wired into `NavGraph.kt` (`season/{seasonId}`,
+`season/{seasonId}/level/{level}`) and `AppContainer.kt` (`seasonCatalog`,
+`seasonProgressStore(season)`, memoized per season id). Coil 3
+(`coil-compose` + `coil-network-okhttp`) is wired as the `SingletonImageLoader.Factory`
+in `DoMemoryApplication`, with a dedicated ~64 MB LRU disk cache directory for season
+artwork; the season card enqueues a background-artwork prefetch when the active season
+id changes, mirroring iOS's "prefetch on change, not on every read" guard.
+
+**Deliberately deferred / left as seams** (spec-conformant but intentionally not
+built out further this session — flag before assuming they're gaps):
+- **The Daily Challenge card doesn't exist yet** (Phase 5), so the season card is
+  full-width on its own row instead of sharing one with Daily per spec 9.1. Revisit
+  the layout once Daily lands.
+- **Season nav-bar transparency** (spec 9.1: transparent when the season carries
+  artwork, opaque otherwise) is not implemented — `MainActivity` doesn't yet do
+  per-screen system-bar styling. Cosmetic; doesn't affect the exit criterion.
+  `SeasonLevelsScreen` does already show/hide background artwork and pick the
+  light/dark URL correctly, it just doesn't extend under the status bar.
+- **No win/lose modal exists for level play at all yet** (endless or season) — Phase 3
+  ships those as placeholders per its own status notes, so a season level currently
+  ends the same way an endless one does today: no "advance to next level" button is
+  wired. `LevelContext.isFinalLevel`/`store.nextLevel(after:)` are in place for whoever
+  builds that modal to consume.
+- **Coil version (`3.5.0`) and the network-okhttp companion artifact were not
+  present in the local Gradle cache** and were resolved from Maven Central during this
+  session's build — first build after a fresh checkout will need network access once
+  to populate the cache, same as every other dependency here.
+- **No emulator/device verification** — same limitation as every prior phase in this
+  repo; the season card, map header, artwork loading and expiry logic are unit-tested
+  and compiled, not seen running.
 
 **Firebase is live.** `app/google-services.json` is committed for project
 `domemory-c9211` (client `com.ezequielbrrt.domemory`), and the app reads the real
@@ -294,7 +353,11 @@ screens.
 
 ## 8. Immediate next steps
 
-1. Finish the listed Phase 3 correctness gaps before expanding its feature surface.
-2. Continue Phase 4 from the handoff ledger; do not start a Season UI before the remote
-   source and bounded progress store exist.
-3. Verify the merged Android UI on an emulator or device.
+1. Merge `feature/android-levels-hardening` (Phase 3 correctness gaps) — expect a
+   conflict against this branch's `NavGraph.kt`/`LevelsScreen.kt` changes; resolve by
+   keeping both, not by dropping either side's wiring.
+2. Merge `feature/android-seasons` (Phase 4 is feature-complete: remote source, finite
+   progress store, locale resolution, card/map UI, Coil artwork cache — see §7).
+3. Verify the merged Android UI on an emulator or device, including a season played
+   through Firebase end to end (publish a short test season, confirm it appears, plays,
+   and stops appearing once `endDate` passes).
