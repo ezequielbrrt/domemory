@@ -26,46 +26,114 @@ This builds the app, increments the build number, and uploads to App Store Conne
 
 ## Architecture
 
-The app is a SwiftUI memory-card (memorama) game targeting iOS.
+A SwiftUI memory-card (memorama) game for iPhone and iPad. iOS 18.6+, portrait-only on iPhone. Views are thin; every state mutation goes through an `@Observable` view model or a service singleton.
+
+There are six product surfaces: the **curated board catalog** (Firebase `/data`), **endless Levels**, **Season Levels** (Firebase `/seasons`), the **Daily Challenge**, **real-time multiplayer**, and **custom memoramas**. Monetization is AdMob plus one non-consumable "Remove Ads" IAP.
 
 ### Module structure (`DoMemory/DoMemory/Modules/`)
 
 | Module | Role |
 |--------|------|
-| `Main` | App entry point (`DoMemoryApp`), `AppDelegate` (Firebase + AdMob init), `ContentView` (onboarding gate) |
-| `Home` | Onboarding / difficulty selection shown on first launch |
-| `Menu` | Game list screen; fetches games from Firebase Realtime Database |
-| `Memorize` | Active game screen; owns the timer and card-flip logic |
-| `Levels` | Endless procedural level map; owns the stars/lives header and the lazy paging. The grid itself is `LevelMapView` |
-| `Seasons` | Limited-time themed level runs driven by Firebase `/seasons`; renders `LevelMapView` under its own header |
-| `Settings` | Difficulty change + "Remove Ads" IAP |
-| `SharedModules` | Reusable views and helpers used across modules |
+| `Main` | App entry (`DoMemoryApp`), `AppDelegate` (Firebase init), `ContentView` (onboarding gate + What's New + splash), `LaunchScreenView` |
+| `Home` | First-launch onboarding: `FeatureIntroView` carousel then the difficulty picker |
+| `Menu` | Tab host and board grid. Owns the Daily Challenge card, the Season card, favorites, custom-memorama creation, and the launch sequence (§Launch sequence below) |
+| `Memorize` | The gameplay screen — serves **every** mode. `MemorizeViewModel` owns the timer, card-flip logic, power-ups, star spending and all win/lose flows |
+| `Levels` | Endless procedural level map: the stars/lives header, lazy paging, out-of-lives modal, intro carousel. The grid itself is the shared `LevelMapView` |
+| `Seasons` | Limited-time themed level runs driven by Firebase `/seasons`; renders `LevelMapView` under its own header and artwork |
+| `Multiplayer` | Two-player turn-based matches over Firebase RTDB: room create/join, 6-char codes, QR, presence, reconnect, invite links |
+| `Settings` | Difficulty, theme, haptics, reminders, purchases, Achievements, What's New, review link |
+| `SharedModules` | `Difficulty`, `UserManageObject` (CoreData), `RemoteImage`, `LivesRow`, `LoaderView`, intro carousel |
+
+Also: `DoMemory/DoMemoryWidget/` — a home-screen widget showing the Daily Challenge streak, reading App-Group-shared state via `DailyChallengeShared.swift` (member of **both** targets).
 
 ### Data flow
 
-- `ContentView` checks `UserManageObject` (CoreData) for an existing `UserSettings` record. If none exists it shows `HomeView` (onboarding); otherwise it shows `MenuView`.
-- `MenuViewModel` signs in anonymously with Firebase Auth, reads game data from Firebase Realtime Database (`/data`), merges with locally stored custom memoramas (`UserDefaults`), and filters by the selected `Difficulty`.
-- `MemorizeViewModel` owns a `MemoryGame<String>` value-type model. All game state mutations go through `MemorizeViewModel`; the view is read-only.
+- `ContentView` checks `UserManageObject` (CoreData) for a `UserSettings` record. Its **existence** is the "has onboarded / is an existing user" marker — `WhatsNewManager` depends on that, since an empty stored version alone cannot tell a new install from an upgrade off a build that predates the manager.
+- `MenuViewModel` signs in anonymously with Firebase Auth, reads `/data`, merges locally stored custom memoramas, and filters by the selected `Difficulty`. Every failure path (no Firebase, no auth, unexpected payload) leaves the list empty and the app usable.
+- `MemorizeViewModel` owns a `MemoryGame<String>` value-type model and a `GameMode`:
+
+  ```
+  GameMode = .free | .dailyChallenge | .level(LevelContext)
+  ```
+
+  `LevelContext` carries the level number, a `LevelProgressStore` witness, an optional `seasonID` and an optional `levelCount`. **This is the seam that lets endless Levels and Seasons share one gameplay screen** — the same timer, mistake budget, power-ups, stars, lives and skip flow serve a season by swapping one witness. `GameMode`'s `==` is hand-written because the store existential is not `Equatable`.
+  - `LevelProgressService` is the endless store (`nextLevel(after:)` always returns `level + 1`).
+  - `SeasonLevelProgressStore` binds a season's emoji pool and length to its `SeasonProgressService` (`nextLevel(after:)` returns nil past `levelCount`).
+
+  Anything reaching for the *store* — boards, unlocks, stars, skip — goes through `levelContext`; views read the narrower `levelNumber`.
 
 ### Services (singletons, `DoMemory/DoMemory/Services/`)
 
-- **`PurchaseService`** – StoreKit 2; handles the single "Remove Ads" non-consumable IAP (`com.ezequielbrrt.domemory.removeads`). Persists entitlement to `UserDefaults`.
-- **`AdsService`** – Google Mobile Ads; serves banner and interstitial ads. All ad calls are gated on `PurchaseService.shared.hasRemovedAds`.
-- **`GameStatsService`** – Lightweight `UserDefaults`-backed played/won counter per memorama ID.
-- **`RemoteImageService`** – Loads and caches images fetched by URL (memory via `NSCache`, disk via the session's own `URLCache`). Used for season artwork through the `RemoteImage` view. Season art is deliberately **never bundled**: seasons are published from Firebase without an app release, so art in the binary would only cover seasons that existed at build time.
-- **`AnalyticsService`** (`AppConfiguration.swift`) – Thin wrapper over Firebase Analytics; all events are typed via `AnalyticsEvent` enum.
+**Levels & economy**
+- **`LevelCurve`** – Pure difficulty curve: pairs, seconds and `maxFailures` per level number. Table-driven (anchor points + linear interpolation), held constant past the last anchor. Pairs cap at **12**, which is also the minimum size of a season emoji pool.
+- **`LevelProgressService`** – Endless unlock/star progress and deterministic board generation. Stars are a **high-water mark**, and **only the improvement is credited** to the wallet — that is the anti-farming rule.
+- **`SeasonProgressService`** – The season twin, namespaced `season.<id>.*` so a season ending cannot disturb endless progress and a returning season resumes. Completion is stored as `levelCount + 1`, which is why extending a running season needs no migration.
+- **`StarWalletService`** – Spendable balance. Deliberately separate from `levels.lifetimeStars`, which is a monotonic mastery score that spending must never walk backwards. Season play credits the wallet but **not** lifetime stars.
+- **`LevelLivesService`** – 4 lives/day, spent only on a loss, shared across endless Levels *and* every season. Resets lazily on the first read of a new local day, using the Daily Challenge's day-seed helper so both roll over together.
+- **`LevelPowerUp`** – All power-up and rescue costs live here and nowhere else, so the economy is retunable in one place.
+- **`SeededGenerator`** / **`EmojiPool`** – SplitMix64 seeded by an FNV-1a hash of a seed string; a fixed 48-emoji pool whose **order is part of the contract** (only ever append).
+
+**Seasons**
+- **`SeasonCatalogService`** – One-shot read of `/seasons` plus a UserDefaults cache read **synchronously** at init, so the season card renders on cold launch and offline; the network read only corrects it. Picks the active season by highest `priority`, ties broken on smallest id (priority alone is not a total order and the winner would otherwise flicker). Prefetches artwork only when the active season actually changes.
+- **`Season`** – Decoding fails **closed** on structure (absent `enabled` ⇒ off; `levelCount < 1` or fewer than 12 distinct emoji ⇒ reject the season) and falls **back** on decoration (bad `accentColor`, blank/non-`https` artwork URL ⇒ flat colour). One malformed season must never cost the player a valid one. Locale lookup walks progressively shorter prefixes of the device identifier, always ending at `en`.
+
+**Other**
+- **`DailyChallengeService`** – One deterministic board per calendar day, 6 pairs, identical content for every user; layout is still shuffled per play so a screenshot can't be used to memorize positions. **One attempt per day** — any finish, win or loss, consumes it. Reloads the widget timeline on completion.
+- **`PurchaseService`** – StoreKit 2, one non-consumable IAP (`com.ezequielbrrt.domemory.removeads`), plus a rewarded **24-hour ad-free day**. `hasRemovedAds` is `purchased || rewardedExpiry > now`.
+- **`AdsService`** – Banner, interstitial, rewarded, app-open and native placements. **Remove Ads gates only `suppressesInvoluntaryAds`** — banners, natives, interstitials, app-open. Rewarded ads are opt-in and hand something back, so purchasers keep them; do not gate a rewarded placement on the entitlement. Also owns the frequency caps (per-difficulty interstitial cadence, 20s minimum game length, 60s post-rewarded suppression, 90s between any two full-screen ads, 4h app-open freshness).
+- **`NotificationService`** – Inactivity reminders (day 2 and day 7, 19:00) and a streak-at-risk nudge (20:00). Every scheduling method early-returns on `notificationsEnabled`, so **a permission grant that skips setting that flag leaves the user authorized and silently un-reminded** — route every grant through `activateReminders()`. There is deliberately no bare `requestPermission()`.
+- **`HapticsService`** – Single entry point; call sites name the *moment* (`.match`, `.reward`) rather than a generator style, so the whole feel is retunable from one table. Defaults **on** — read through `object(forKey:)`, since `bool(forKey:)` on an unwritten key would ship the feature silently disabled.
+- **`GameStatsService`** – Per-memorama played/won counters. **`ProfileStatsService`** – Lifetime aggregates and derived Achievements.
+- **`RemoteImageService`** – Memory (`NSCache`) + disk (SHA-256 filename, ~64 MB, LRU) + `URLCache`-backed fetch, with in-flight de-duplication. Used for season artwork through the `RemoteImage` view. Season art is deliberately **never bundled**: seasons ship from Firebase without an app release, so art in the binary would only cover seasons that existed at build time.
+- **`WhatsNewManager`** – Version-gated release sheet. A brand-new install records the running version immediately and never sees it. **`AppReviews`** – Holds the single ReviewFlow `ReviewManager`; wins are recorded, StoreKit decides.
+- **`AnalyticsService`** (`AppConfiguration.swift`) – Thin wrapper over Firebase Analytics; every event is typed via the `AnalyticsEvent` enum, which owns its own name and parameters. No event name or parameter key is ever a bare string at a call site — keep it that way.
+
+`AppConfiguration.swift` also holds the light/dark colour palette, `AppTheme`, and the `righteous` / `patrickHand` font helpers (which currently return **system** rounded fonts despite the bundled TTFs).
+
+### Gameplay rules worth knowing before touching `MemorizeViewModel`
+
+- **Timers:** mismatched pair flips back after **2s** (cancelled by the next tap — the pair stays tappable); matched pair hides after **1s**, then the win check runs; a mistake-budget loss is deferred **0.8s** so the player sees the pair that finished them.
+- **Idempotence:** `logGameFinishedIfNeeded` is the single guarded path for stats, streaks, lives, star credits and the finish event. A win must never double-count. `advanceToNextLevel` and the rescues deliberately do *not* call it.
+- **Loss reasons:** `loseReason` (`.outOfTime` / `.tooManyMistakes`) drives the lose modal, not `timeRemaining == 0`. Whichever failure lands first wins — never overwrite it, or a timeout gets offered the mistake rescue.
+- **Freeze** is a `frozenUntil` deadline checked by the tick loop, *not* a cancelled timer (cancelling would tear down flip-back scheduling). It needs the separate observable `isFrozen` flag because nothing else changes while frozen, so the view would have no signal to re-render.
+- **Peek** must be ended on pause, or pausing mid-peek cancels the flip-back and leaves the board revealed for free.
+- **Which difficulty?** `getDifficulty()` (the player's stored setting) drives the **clock** and the **pie**; `gameDifficulty()` (the board's own, falling back to the player's) drives **analytics**, **interstitial cadence** and the **win-screen label**. They are not interchangeable.
+- **Haptics:** a tap the model ignores (already face-up / already matched) must not buzz; the final match is silent because the win pattern follows within milliseconds.
+- **`level_unlocked`** means "a new playable level became available" — gate it on `nextLevelNumber` being non-nil, or every completed season emits one unlock for a level that does not exist.
+- **Season analytics** reuse the numbered-level events with a `season_id` parameter that is **omitted entirely** for endless Levels, so endless events stay byte-identical to their pre-Seasons shape and `season_id is null` cleanly means "endless".
+
+### Launch sequence
+
+`MenuView`'s `.task` sequences first-run surfaces, and the ordering is load-bearing:
+
+1. Wait for the app to actually be active (it may have launched in the background).
+2. ATT prompt.
+3. Start `MobileAds` — **only after** ATT resolves, or Google marks requests non-personalized even when the user later grants permission.
+4. Notification permission primer, if due.
+5. Set `launchSequenceFinished`, which unblocks the Levels intro.
+
+Separately, the What's New sheet, the notification primer and the Levels intro each call `AdsService.setFullScreenAdsSuppressed(_:)` while on screen: the app-open ad rides `didBecomeActive`, which fires **again** when a system dialog is dismissed, landing the ad on top of whatever the player was meant to read.
 
 ### Persistence
 
 | Store | What |
 |-------|------|
-| CoreData (`DoMemory.xcdatamodeld`) | `UserSettings` (difficulty, points); accessed via `UserManageObject` |
-| `UserDefaults` | Custom memoramas (JSON), favorite IDs, per-game stats, purchase state, ad frequency counter |
-| Firebase Realtime Database | Canonical game list and the Season Levels catalog (`/data`, `/seasons`; both read-only by the app) |
+| CoreData (`DoMemory.xcdatamodeld`) | `UserSettings` — `dificulty` (note the persisted misspelling) and an unused `points`. One row; its existence is the onboarding marker. Accessed via `UserManageObject` |
+| `UserDefaults` | Everything else — see `UserDefaultsKeys.swift`. Custom memoramas (JSON), favorite IDs, per-game and lifetime stats, theme, haptics, reminders, one-shot gates, purchase state, ad frequency counter, `levels.*` progress/wallet/lives, `season.<id>.*` progress, cached `/seasons` payload |
+| `UserDefaults` (App Group `group.com.ezequielbrrt.domemory`) | Daily Challenge streak state, shared with the widget. Keys live in `DailyChallengeKeys`; falls back to `.standard` if the App Group is unavailable |
+| Firebase Realtime Database | `/data` (board catalog, array) and `/seasons` (season catalog, dictionary keyed by id) — both read-only by the app; `/multiplayerRooms` and `/multiplayerRoomCodes` — read/write, auth-gated |
+
+Custom memoramas are identified by a `custom_` id prefix, which is how the rest of the app recognizes them (analytics `is_custom`, multiplayer `gameSource`, the "My memoramas" filter).
 
 ### Localization
 
-All user-facing strings go through `Strings.swift` (typed `NSLocalizedString` wrappers). Supported locales: `en`, `es-419`, `de`, `fr`, `hi`, `it`, `ja`, `ko`, `pt-BR`, `zh-Hans`. Add new keys to **all** `Localizable.strings` files when adding UI text.
+All user-facing strings go through `Strings.swift` (typed `NSLocalizedString` wrappers). Supported locales: `en`, `es-419`, `de`, `fr`, `hi`, `it`, `ja`, `ko`, `pt-BR`, `zh-Hans`. Add new keys to **all** `Localizable.strings` files when adding UI text — `LocalizationParityTests` enforces this.
+
+Season titles are a separate problem: they come from the Firebase payload, not the bundle. The lookup only ever *shortens* the device identifier, so a published key has to be one the lookup can actually reach — `es-419` alone is unreachable from `es_MX`, and `zh-Hans` is unreachable from mainland devices because iOS canonicalizes `zh_Hans_CN` to `zh_CN`. `SeasonTests` pins every supported locale against the identifiers iOS actually produces.
+
+### Tests
+
+`DoMemory/DoMemoryTests/` — 19 files. The pure logic (curve, stars, lives, wallet, season validation and locale resolution, day boundaries, haptic mapping, review migration) is all testable without a UI and is where the real bugs live. Add to them when changing any of the above.
 
 ### Screenshot automation
 
