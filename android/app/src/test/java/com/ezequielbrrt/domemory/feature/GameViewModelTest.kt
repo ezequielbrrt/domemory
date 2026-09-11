@@ -9,7 +9,11 @@ import com.ezequielbrrt.domemory.feature.game.GameStatsRecorder
 import com.ezequielbrrt.domemory.feature.game.GameViewModel
 import com.ezequielbrrt.domemory.feature.game.LoseReason
 import com.ezequielbrrt.domemory.services.levels.LevelCurve
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -269,6 +273,27 @@ class GameViewModelTest {
         advanceUntilIdle()
         assertEquals(GameOutcome.Won, vm.state.value.outcome)
         vm.stop()
+    }
+
+    @Test
+    fun `stats write survives the game screen scope being cancelled after a finish`() = runTest {
+        val screenScope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
+        val stats = FakeStatsRecorder()
+        val vm = GameViewModel(
+            board = board,
+            stats = stats,
+            now = { testScheduler.currentTime },
+            scope = screenScope,
+            statsScope = this,
+        )
+
+        clearBoard(vm)
+        // Mirrors NavController popping the game destination immediately after its end UI.
+        screenScope.cancel()
+        advanceUntilIdle()
+
+        assertEquals(listOf(board.id), stats.played)
+        assertEquals(listOf(board.id), stats.won)
     }
 
     // --- restart (the real nav graph's "try again") ---------------------------

@@ -47,9 +47,12 @@ class GameViewModel(
     private val stats: GameStatsRecorder? = null,
     private val now: () -> Long = System::currentTimeMillis,
     private val scope: CoroutineScope? = null,
+    /** A longer-lived scope for finish persistence; production passes AppContainer's scope. */
+    private val statsScope: CoroutineScope? = null,
 ) : ViewModel() {
 
     private val workScope: CoroutineScope get() = scope ?: viewModelScope
+    private val statsWorkScope: CoroutineScope get() = statsScope ?: workScope
 
     private var game = MemoryGame(board.buildCards())
 
@@ -192,7 +195,7 @@ class GameViewModel(
      */
     private fun recordStats(outcome: GameOutcome) {
         val recorder = stats ?: return
-        workScope.launch { recorder.recordFinished(board.id, didWin = outcome is GameOutcome.Won) }
+        statsWorkScope.launch { recorder.recordFinished(board.id, didWin = outcome is GameOutcome.Won) }
     }
 
     fun pause() {

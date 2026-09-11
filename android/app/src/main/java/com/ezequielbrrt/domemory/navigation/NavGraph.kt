@@ -137,6 +137,7 @@ fun NavGraph(
                             mode = GameMode.Free,
                             playerDifficulty = difficulty,
                             stats = UserPreferencesGameStatsRecorder(container.prefs),
+                            statsScope = container.applicationScope,
                         )
                     }
                 },

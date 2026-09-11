@@ -9,6 +9,9 @@ import com.ezequielbrrt.domemory.data.prefs.createUserPreferences
 import com.ezequielbrrt.domemory.data.remote.FirebaseBoardCatalogSource
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogRepository
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogSource
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 
 /**
@@ -27,6 +30,13 @@ class AppContainer(
     val dayProvider: DayProvider = SystemDayProvider,
     catalogSource: BoardCatalogSource = FirebaseBoardCatalogSource(),
 ) {
+    /**
+     * Work that must outlive an individual screen's ViewModel. At present this is only
+     * the completion-stat write started as a player leaves a finished game; keeping it
+     * here prevents NavController teardown from cancelling the DataStore edit.
+     */
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     /** The typed DataStore Preferences surface for every key in spec 13.2. */
     val prefs: UserPreferences = createUserPreferences(context)
 
