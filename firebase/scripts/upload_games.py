@@ -142,7 +142,7 @@ def upload(games, database_url, credentials):
 def main():
     parser = argparse.ArgumentParser(description="Upload DoMemory game cards to Firebase.")
     parser.add_argument("--csv", default=os.path.join(HERE, "games.csv"),
-                        help="Canonical games CSV (default: Scripts/games.csv)")
+                        help="Canonical games CSV (default: firebase/scripts/games.csv)")
     parser.add_argument("--add", action="append", default=[],
                         help="Extra CSV of new cards (repeatable); ids auto-assigned")
     parser.add_argument("--credentials", help="Path to a Firebase service-account JSON")

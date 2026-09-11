@@ -93,7 +93,7 @@ struct Season: Codable, Identifiable, Hashable {
     /// boards, so decoding rejects it outright rather than dealing a short
     /// board at level 25.
     ///
-    /// **Cross-reference — keep in sync.** `Scripts/upload_seasons.py` restates
+    /// **Cross-reference — keep in sync.** `firebase/scripts/upload_seasons.py` restates
     /// this rule as `MINIMUM_EMOJI_POOL_SIZE` so a season is rejected before it
     /// is published rather than skipped after. Python cannot import Swift, so
     /// that script hardcodes 12 and will *not* follow a retuned

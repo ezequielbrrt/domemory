@@ -152,7 +152,7 @@ final class SeasonTests: XCTestCase {
         XCTAssertEqual(Season.localeCandidates(for: "zh_Hans_CN"), ["zh-hans-cn", "zh-hans", "zh", "en"])
     }
 
-    /// The catalog in `Scripts/seasons.json` carries one entry per supported
+    /// The catalog in `firebase/scripts/seasons.json` carries one entry per supported
     /// locale. A key written in a form the resolver does not reach — `pt_BR`
     /// instead of `pt-BR`, `zh` instead of `zh-Hans` — is invisible: the season
     /// silently serves English and nothing reports it. This pins the exact key

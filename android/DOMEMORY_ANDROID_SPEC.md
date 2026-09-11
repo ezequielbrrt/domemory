@@ -730,7 +730,7 @@ Namespaced per season: `season.<id>.highestUnlocked`, `season.<id>.stars.<level>
 
 ### 9.8 Publishing tooling
 
-`Scripts/upload_seasons.py` validates `Scripts/seasons.json` against the **same
+`firebase/scripts/upload_seasons.py` validates `firebase/scripts/seasons.json` against the **same
 rules the app applies** and publishes to Firebase `/seasons`. `--dry-run`
 validates without credentials. This exists so a season that would be silently
 skipped on device is rejected before upload. Android needs no new tooling — the
@@ -1024,7 +1024,7 @@ filtered to the player's difficulty and merged with local custom boards.
 Failure is silent and non-fatal: no Firebase, no auth, or an unexpected payload
 leaves the list empty and the app usable (Levels and custom boards still work).
 
-`Scripts/gamesToJson.py` converts `games.csv` → `data.json` for seeding.
+`firebase/scripts/gamesToJson.py` converts `games.csv` → `data.json` for seeding.
 
 ### 13.2 Local storage
 
@@ -1834,7 +1834,7 @@ DoMemory/DoMemory/
 
 DoMemory/DoMemoryWidget/   DailyChallengeWidget
 DoMemory/DoMemoryTests/    19 test files — start here for exact expected behaviour
-Scripts/                   gamesToJson.py, upload_games.py, upload_seasons.py, seasons.json, data.json
+firebase/scripts/          gamesToJson.py, upload_games.py, upload_seasons.py, seasons.json, data.json
 firebase-database.rules.json, firebase.json
 CHANGELOG.md               full feature history, 3.0.0 → 4.2.0, with the reasoning
 ```

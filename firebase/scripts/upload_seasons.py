@@ -450,7 +450,7 @@ def upload(seasons, database_url, credentials):
 def main():
     parser = argparse.ArgumentParser(description="Upload DoMemory seasons to Firebase.")
     parser.add_argument("--seasons", default=os.path.join(HERE, "seasons.json"),
-                        help="Canonical seasons JSON (default: Scripts/seasons.json)")
+                        help="Canonical seasons JSON (default: firebase/scripts/seasons.json)")
     parser.add_argument("--credentials", help="Path to a Firebase service-account JSON")
     parser.add_argument("--database-url", default=DEFAULT_DATABASE_URL)
     parser.add_argument("--out", default=os.path.join(HERE, "seasons_data.json"),
