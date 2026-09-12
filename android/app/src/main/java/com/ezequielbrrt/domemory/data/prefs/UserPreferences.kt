@@ -10,7 +10,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.ezequielbrrt.domemory.core.model.Board
 import com.ezequielbrrt.domemory.core.model.Difficulty
-import com.ezequielbrrt.domemory.core.time.DayKey
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -382,44 +381,6 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { prefs -> prefs[seasonStarsKey(seasonId, level)] = stars }
     }
 
-    /**
-     * Applies the season high-water-mark and improvement-only star rules in one
-     * transaction, mirroring [recordLevelCompletion] with two deliberate differences
-     * (spec 9.6): keys are namespaced per season id, and the improvement is credited only
-     * to the shared spendable wallet, **never** to `levels.lifetimeStars` — that value is
-     * the endless-Levels mastery score, and season play must not inflate it.
-     */
-    suspend fun recordSeasonLevelCompletion(seasonId: String, level: Int, awardedStars: Int): LevelCompletion {
-        require(level >= 1)
-        require(awardedStars in 1..3)
-        lateinit var result: LevelCompletion
-        dataStore.edit { prefs ->
-            val starsKey = seasonStarsKey(seasonId, level)
-            val unlockedKey = seasonHighestUnlockedKey(seasonId)
-            val oldStars = prefs[starsKey] ?: 0
-            val improvement = (awardedStars - oldStars).coerceAtLeast(0)
-            if (improvement > 0) {
-                prefs[starsKey] = awardedStars
-                prefs[Keys.LEVELS_WALLET_BALANCE] = (prefs[Keys.LEVELS_WALLET_BALANCE] ?: 0) + improvement
-            }
-            val unlocked = maxOf(prefs[unlockedKey] ?: 1, level + 1)
-            prefs[unlockedKey] = unlocked
-            result = LevelCompletion(awardedStars, improvement, unlocked)
-        }
-        return result
-    }
-
-    /** Atomically raises `season.<id>.highestUnlocked` to at least [level]; never lowers it. */
-    suspend fun unlockSeasonLevelAtLeast(seasonId: String, level: Int): Int {
-        var result = level
-        dataStore.edit { prefs ->
-            val key = seasonHighestUnlockedKey(seasonId)
-            result = maxOf(prefs[key] ?: 1, level)
-            prefs[key] = result
-        }
-        return result
-    }
-
     // -- Daily Challenge (8, 13.2) --------------------------------------------------------
     //
     // Spec 13.2 marks these "Prefs (shared) ... shared with the widget". They stay in
@@ -450,46 +411,6 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setDailyLastAttemptDay(dayKey: String) {
         dataStore.edit { prefs -> prefs[Keys.DAILY_LAST_ATTEMPT_DAY] = dayKey }
-    }
-
-    data class DailyCompletion(val streak: Int, val alreadyCompleted: Boolean)
-
-    /**
-     * Applies spec 8's one-attempt-per-day and streak rules in one transaction (mirrors
-     * [recordLevelCompletion]'s atomicity). Any finish — win or loss — consumes the day,
-     * idempotently: a second call for the same [today] is a no-op that just echoes the
-     * already-recorded streak, so a retried or duplicated finish event can never double-count.
-     * A win only continues the streak when [today] is exactly one calendar day after the
-     * last **winning** day ([DAILY_LAST_COMPLETED_DAY]); anything else — first win ever, a
-     * gap, same-day replay — starts a fresh streak of 1. A loss resets the streak to 0 but
-     * still consumes the day.
-     */
-    suspend fun recordDailyCompletion(today: String, didWin: Boolean): DailyCompletion {
-        var result = DailyCompletion(streak = 0, alreadyCompleted = false)
-        dataStore.edit { prefs ->
-            if (prefs[Keys.DAILY_LAST_ATTEMPT_DAY] == today) {
-                result = DailyCompletion(prefs[Keys.DAILY_STREAK_CURRENT] ?: 0, alreadyCompleted = true)
-                return@edit
-            }
-            prefs[Keys.DAILY_LAST_ATTEMPT_DAY] = today
-
-            if (!didWin) {
-                prefs[Keys.DAILY_STREAK_CURRENT] = 0
-                result = DailyCompletion(streak = 0, alreadyCompleted = false)
-                return@edit
-            }
-
-            val lastWinDay = prefs[Keys.DAILY_LAST_COMPLETED_DAY]
-            val continued = lastWinDay != null && DayKey.isConsecutiveDay(previous = lastWinDay, current = today)
-            val newStreak = if (continued) (prefs[Keys.DAILY_STREAK_CURRENT] ?: 0) + 1 else 1
-            prefs[Keys.DAILY_STREAK_CURRENT] = newStreak
-            prefs[Keys.DAILY_LAST_COMPLETED_DAY] = today
-            if (newStreak > (prefs[Keys.DAILY_STREAK_LONGEST] ?: 0)) {
-                prefs[Keys.DAILY_STREAK_LONGEST] = newStreak
-            }
-            result = DailyCompletion(streak = newStreak, alreadyCompleted = false)
-        }
-        return result
     }
 
     // -- Purchases / entitlements (12.3, 13.2) ---------------------------------------------

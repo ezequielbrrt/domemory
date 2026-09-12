@@ -1,29 +1,20 @@
 package com.ezequielbrrt.domemory
 
 import android.content.Context
-import com.ezequielbrrt.domemory.core.deeplink.DeepLinkRouter
 import com.ezequielbrrt.domemory.core.time.DayKey
 import com.ezequielbrrt.domemory.core.time.DayProvider
 import com.ezequielbrrt.domemory.core.time.SystemDayProvider
 import com.ezequielbrrt.domemory.data.prefs.UserPreferences
 import com.ezequielbrrt.domemory.data.prefs.createUserPreferences
 import com.ezequielbrrt.domemory.data.remote.FirebaseBoardCatalogSource
-import com.ezequielbrrt.domemory.data.remote.FirebaseSeasonCatalogSource
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogRepository
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogSource
-import com.ezequielbrrt.domemory.services.daily.DailyChallengeService
 import com.ezequielbrrt.domemory.services.levels.LevelProgressService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
-import com.ezequielbrrt.domemory.services.seasons.Season
-import com.ezequielbrrt.domemory.services.seasons.SeasonCatalogService
-import com.ezequielbrrt.domemory.services.seasons.SeasonCatalogSource
-import com.ezequielbrrt.domemory.services.seasons.SeasonLevelProgressStore
-import com.ezequielbrrt.domemory.services.seasons.SeasonProgressService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 /**
  * Manual DI (decision D4). Every service the app depends on is constructed here and
@@ -40,7 +31,6 @@ class AppContainer(
     context: Context,
     val dayProvider: DayProvider = SystemDayProvider,
     catalogSource: BoardCatalogSource = FirebaseBoardCatalogSource(),
-    seasonCatalogSource: SeasonCatalogSource = FirebaseSeasonCatalogSource(),
 ) {
     /**
      * Work that must outlive an individual screen's ViewModel. At present this is only
@@ -59,40 +49,6 @@ class AppContainer(
 
     val levelProgress = LevelProgressService(prefs, applicationScope)
     val levelLives = LevelLivesService(prefs, dayProvider)
-    val dailyChallenge = DailyChallengeService(prefs, dayProvider)
-    val deepLinkRouter = DeepLinkRouter()
-
-    /**
-     * Cache-first `/seasons` catalog (spec 9.7). [loadCached] is launched immediately below
-     * so the season card has an answer as soon as the cache read finishes, without blocking
-     * app startup on it; [SeasonCatalogService.refresh] then corrects it over the network.
-     */
-    val seasonCatalog = SeasonCatalogService(prefs, seasonCatalogSource)
-
-    /**
-     * One [SeasonProgressService] per season id for the life of the process, so two screens
-     * observing the same season (the card, the map) share one cache and one `revision`
-     * stream rather than each reading DataStore cold.
-     */
-    private val seasonProgressServices = mutableMapOf<String, SeasonProgressService>()
-
-    init {
-        applicationScope.launch {
-            seasonCatalog.loadCached(todayKey())
-            seasonCatalog.refresh(todayKey())
-        }
-    }
-
-    /** Re-evaluates the active season against today with no network round trip (spec 9.4: foreground). */
-    fun refreshActiveSeason() = seasonCatalog.refreshActive(todayKey())
-
-    /** The [SeasonLevelProgressStore] for [season], memoized per season id. */
-    fun seasonProgressStore(season: Season): SeasonLevelProgressStore {
-        val progress = seasonProgressServices.getOrPut(season.id) {
-            SeasonProgressService(season.id, prefs, applicationScope)
-        }
-        return SeasonLevelProgressStore(season, progress)
-    }
 
     fun todayKey(): String = DayKey.of(dayProvider.today())
 }

@@ -65,16 +65,12 @@ graph in the same change.
 | `data/repository` | `BoardCatalogRepository` — holds the catalog for the session, filters by difficulty |
 | `feature/boardpicker`, `feature/game` | The only two real screens that exist today |
 | `services/levels` | `LevelCurve`, `Stars`, `BoardGenerators` — ported, not yet wired into a screen |
-| `services/seasons` | `Season`, `SeasonDecoder`, `SeasonCatalogService`, `SeasonProgressService`, `SeasonLocaleResolver` — Phase 4, feature-complete |
-| `services/daily` | `DailyChallengeService` — deterministic board, streak/milestone tracking (Phase 5) |
-| `core/deeplink` | `DeepLink`, `DeepLinkRouter` — `domemory://daily` and `domemory://join/CODE` parsing (Phase 5); `Join` parses but is not yet routed (Phase 6) |
-| `feature/seasons`, `feature/daily` | `SeasonCard`/`SeasonLevelsScreen` and `DailyChallengeCard` — the menu entry points for Phases 4 and 5 |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
 
-Everything else in the plan's package layout (`ads/`, `purchases/`,
-`notifications/`, `haptics/`, `multiplayer/`) does not exist yet. Check
-`ANDROID_PLAN.md` §4 before assuming a service is missing by accident rather
-than by phase.
+Everything else in the plan's package layout (`seasons/`, `daily/`, `ads/`,
+`purchases/`, `notifications/`, `haptics/`, `multiplayer/`, `navigation/`) does
+not exist yet. Check `ANDROID_PLAN.md` §4 before assuming a service is missing
+by accident rather than by phase.
 
 ### Locked decisions worth knowing before changing behavior
 
@@ -107,17 +103,15 @@ reads, from the same project. `BoardDecoder` is pure and is pinned against
 `app/src/test/resources/data.json`, a value-identical (not byte-identical) copy
 of `firebase/scripts/data.json` — see the root CLAUDE.md before touching either.
 
-`FirebaseSeasonCatalogSource` reads `/seasons` the same way, cache-first through
-`SeasonCatalogService`. `SeasonDecoder` ports the spec's validation rules
-exactly and is pinned against a fixture test — a payload valid on iOS but
-rejected on Android (or the reverse) would silently hide a live season from one
-platform's players with nothing reporting it. The `/seasons` read rule in
-`firebase/firebase-database.rules.json` still needs a separate
-`firebase deploy --only database` before a real season is live (root CLAUDE.md).
+Seasons (`/seasons`) are not wired up yet. When they are, port the validation
+rules in the spec exactly and add a fixture test against
+`firebase/scripts/seasons.json` — a payload valid on iOS but rejected on
+Android (or the reverse) would silently hide a live season from one platform's
+players with nothing reporting it.
 
 ### Tests
 
-`app/src/test/java/` — 25 files, 207 tests, all pure Kotlin against an injected
+`app/src/test/java/` — 10 files, 70 tests, all pure Kotlin against an injected
 clock, no Robolectric or instrumentation. Rule carried over from the spec: every
 constant the spec pins in its §20 table, a test pins here too — that table is
 the cross-check for the whole port. Run `./gradlew testDebugUnitTest` before
@@ -125,11 +119,8 @@ committing a change to anything under `core/` or `services/`.
 
 ## Status
 
-Phases 0–2 and 4 (Seasons) are merged. Phase 3 (Levels) is merged in part —
-correctness hardening (atomic star economy, zero-lives gating, power-ups) sits
-unmerged on `feature/android-levels-hardening`. Phase 5 (Daily Challenge) is
-in progress: the deterministic board, streak/milestone tracking, menu card and
-deep links are merged; the Glance widget and local notifications are not.
-`ANDROID_PLAN.md` §7 contains the required handoff ledger: read it before starting
-Android work, update it when a migration slice changes state, and do not infer a
-feature is complete merely because its type or screen exists.
+Phase 0 and Phase 1 are complete. Phase 2 (catalog + menu) is in progress: the
+Firebase read is done, the DataStore key surface and the real menu/nav graph
+are not. See `ANDROID_PLAN.md` §7–8 for the current state and the ordered next
+steps — check there before starting new work rather than guessing from the
+package layout alone.

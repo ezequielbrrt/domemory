@@ -1,6 +1,5 @@
 package com.ezequielbrrt.domemory
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,29 +15,10 @@ import com.ezequielbrrt.domemory.navigation.NavGraph
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryTheme
 
 class MainActivity : ComponentActivity() {
-    private lateinit var container: AppContainer
-
-    /**
-     * Re-evaluates the active season on every foreground (spec 9.4) — otherwise an app
-     * left open across local midnight would keep showing a season that ended yesterday.
-     * `onResume` also fires on first launch, right after `onCreate` constructs [container].
-     */
-    override fun onResume() {
-        super.onResume()
-        if (::container.isInitialized) container.refreshActiveSeason()
-    }
-
-    /** `singleTop` (manifest) routes a link tapped while already running here instead of a new instance. */
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        container.deepLinkRouter.receive(intent.data?.toString())
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        container = (application as DoMemoryApplication).container
-        container.deepLinkRouter.receive(intent?.data?.toString())
+        val container = (application as DoMemoryApplication).container
         setContent {
             val theme by container.prefs.themePreference.collectAsState(initial = com.ezequielbrrt.domemory.ui.theme.ThemePreference.SYSTEM)
             val hasOnboarded by container.prefs.hasOnboarded.collectAsState(initial = null)
