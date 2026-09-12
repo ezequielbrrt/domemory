@@ -41,8 +41,11 @@ import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.data.repository.CatalogStatus
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
+import com.ezequielbrrt.domemory.feature.daily.DailyChallengeCard
 import com.ezequielbrrt.domemory.feature.levels.LevelsScreen
+import com.ezequielbrrt.domemory.feature.seasons.SeasonCard
 import com.ezequielbrrt.domemory.services.levels.LevelProgressService
+import com.ezequielbrrt.domemory.services.seasons.Season
 
 /**
  * The real menu (spec 2): header, three tabs (`Levels` / `My memoramas` / `All`),
@@ -60,11 +63,35 @@ fun MenuScreen(
     onSettings: () -> Unit,
     levelProgress: LevelProgressService,
     onLevelSelected: (Int) -> Unit,
+    activeSeason: Season? = null,
+    todayKey: String = "",
+    onSeasonSelected: (Season) -> Unit = {},
+    dailyStreak: Int = 0,
+    isDailyChallengeCompletedToday: Boolean = false,
+    onDailyChallengeSelected: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val palette = LocalPalette.current
     Column(modifier.fillMaxSize().background(palette.appBackground)) {
         MenuHeader(onCreateMemorama = onCreateMemorama, onSettings = onSettings)
+        // Spec 9.1: while a season is active it shares this row with the Daily card, which
+        // shrinks; with no active season the Daily card keeps its full-width layout.
+        Row(Modifier.fillMaxWidth()) {
+            DailyChallengeCard(
+                streak = dailyStreak,
+                isCompletedToday = isDailyChallengeCompletedToday,
+                onClick = onDailyChallengeSelected,
+                modifier = if (activeSeason != null) Modifier.weight(1f) else Modifier.fillMaxWidth(),
+            )
+            activeSeason?.let { season ->
+                SeasonCard(
+                    season = season,
+                    todayKey = todayKey,
+                    onClick = { onSeasonSelected(season) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
         MenuTabRow(selected = state.selectedTab, onSelectTab = onSelectTab)
         when (state.selectedTab) {
             MenuTab.LEVELS -> LevelsScreen(levelProgress, onLevelSelected)

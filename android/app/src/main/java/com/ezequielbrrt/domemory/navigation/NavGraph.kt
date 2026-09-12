@@ -16,8 +16,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ezequielbrrt.domemory.AppContainer
+import com.ezequielbrrt.domemory.core.deeplink.DeepLink
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.core.model.GameMode
+import com.ezequielbrrt.domemory.core.model.LevelContext
 import com.ezequielbrrt.domemory.feature.game.GameScreen
 import com.ezequielbrrt.domemory.feature.game.GameViewModel
 import com.ezequielbrrt.domemory.feature.game.UserPreferencesGameStatsRecorder
@@ -27,6 +29,7 @@ import com.ezequielbrrt.domemory.feature.menu.MenuScreen
 import com.ezequielbrrt.domemory.feature.menu.MenuViewModel
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingScreen
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingViewModel
+import com.ezequielbrrt.domemory.feature.seasons.SeasonLevelsScreen
 import com.ezequielbrrt.domemory.feature.settings.SettingsScreen
 import com.ezequielbrrt.domemory.feature.settings.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -45,11 +48,16 @@ private object Routes {
     const val SETTINGS = "settings"
     const val CREATE_MEMORAMA = "create_memorama"
     const val LEVEL_GAME = "level/{level}"
+    const val SEASON_LEVELS = "season/{seasonId}"
+    const val SEASON_GAME = "season/{seasonId}/level/{level}"
+    const val DAILY_GAME = "daily"
     private const val GAME_PATTERN = "game/{boardId}/{difficultyKey}"
     const val GAME = GAME_PATTERN
 
     fun game(boardId: String, difficulty: Difficulty) = "game/$boardId/${difficulty.key}"
     fun level(level: Int) = "level/$level"
+    fun seasonLevels(seasonId: String) = "season/$seasonId"
+    fun seasonGame(seasonId: String, level: Int) = "season/$seasonId/level/$level"
 }
 
 @Composable
@@ -58,6 +66,23 @@ fun NavGraph(
     hasOnboarded: Boolean,
     navController: NavHostController = rememberNavController(),
 ) {
+    // A domemory://daily link can arrive before onboarding resolves (spec 11.1: "links can
+    // arrive before the UI exists"); only route it once there's a Menu to land on, and only
+    // if today isn't already locked — mirrors the no-op DailyChallengeCard tap above.
+    val pendingDeepLink by container.deepLinkRouter.pending.collectAsState()
+    LaunchedEffect(hasOnboarded, pendingDeepLink) {
+        if (!hasOnboarded) return@LaunchedEffect
+        when (container.deepLinkRouter.pending.value) {
+            is DeepLink.Daily -> {
+                val alreadyDone = container.dailyChallenge.isCompletedToday()
+                container.deepLinkRouter.consume()
+                if (!alreadyDone) navController.navigate(Routes.DAILY_GAME)
+            }
+            // Join is parsed but not yet routed — no multiplayer screen exists (Phase 6).
+            is DeepLink.Join, null -> Unit
+        }
+    }
+
     NavHost(navController = navController, startDestination = if (hasOnboarded) Routes.MENU else Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
             val viewModel: OnboardingViewModel = viewModel(factory = viewModelFactory { initializer { OnboardingViewModel(container.prefs) } })
@@ -73,6 +98,10 @@ fun NavGraph(
                 },
             )
             val state by viewModel.state.collectAsState()
+            val activeSeason by container.seasonCatalog.activeSeason.collectAsState()
+            val dailyStreak by container.prefs.dailyStreakCurrent.collectAsState(initial = 0)
+            val dailyLastAttemptDay by container.prefs.dailyLastAttemptDay.collectAsState(initial = null)
+            val isDailyCompletedToday = dailyLastAttemptDay == container.todayKey()
             MenuScreen(
                 state = state,
                 onSelectTab = viewModel::selectTab,
@@ -86,7 +115,95 @@ fun NavGraph(
                 onSettings = { navController.navigate(Routes.SETTINGS) },
                 levelProgress = container.levelProgress,
                 onLevelSelected = { navController.navigate(Routes.level(it)) },
+                activeSeason = activeSeason,
+                todayKey = container.todayKey(),
+                onSeasonSelected = { season -> navController.navigate(Routes.seasonLevels(season.id)) },
+                dailyStreak = dailyStreak,
+                isDailyChallengeCompletedToday = isDailyCompletedToday,
+                onDailyChallengeSelected = {
+                    // Mirrors the domemory://daily deep link: a no-op once today is done,
+                    // since there's no result screen yet to send the player back to (spec 11.1).
+                    if (!isDailyCompletedToday) navController.navigate(Routes.DAILY_GAME)
+                },
             )
+        }
+
+        composable(Routes.DAILY_GAME) {
+            // Daily Challenge takes the *player's* stored difficulty for the clock/pie, not
+            // the board's own — the board always declares medium (spec 8's "medium difficulty"
+            // is the board's, distinct from the player setting that drives the timer).
+            val playerDifficulty by container.prefs.playerDifficulty.collectAsState(initial = Difficulty.MEDIUM)
+            val viewModel: GameViewModel = viewModel(
+                factory = viewModelFactory {
+                    initializer {
+                        GameViewModel(
+                            board = container.dailyChallenge.boardForToday(),
+                            mode = GameMode.DailyChallenge,
+                            playerDifficulty = playerDifficulty,
+                            stats = UserPreferencesGameStatsRecorder(container.prefs),
+                            statsScope = container.applicationScope,
+                            dailyChallenge = container.dailyChallenge,
+                        )
+                    }
+                },
+            )
+            val state by viewModel.state.collectAsState()
+            GameScreen(state, viewModel::choose, { if (state.isPaused) viewModel.resume() else viewModel.pause() }, { navController.popBackStack() }, viewModel::restart)
+        }
+
+        composable(Routes.SEASON_LEVELS, arguments = listOf(navArgument("seasonId") { type = NavType.StringType })) { entry ->
+            val seasonId = entry.arguments?.getString("seasonId").orEmpty()
+            val seasons by container.seasonCatalog.seasons.collectAsState()
+            val season = seasons.firstOrNull { it.id == seasonId }
+            if (season == null) {
+                // The season expired or vanished from the catalog between selection and
+                // this composition (e.g. a foreground re-check dropped it) — bounce back
+                // rather than crash on a null season.
+                LaunchedEffect(Unit) { navController.popBackStack() }
+                return@composable
+            }
+            val store = remember(season.id) { container.seasonProgressStore(season) }
+            SeasonLevelsScreen(
+                season = season,
+                store = store,
+                todayKey = container.todayKey(),
+                onLevelSelected = { level -> navController.navigate(Routes.seasonGame(season.id, level)) },
+            )
+        }
+
+        composable(
+            route = Routes.SEASON_GAME,
+            arguments = listOf(
+                navArgument("seasonId") { type = NavType.StringType },
+                navArgument("level") { type = NavType.IntType },
+            ),
+        ) { entry ->
+            val seasonId = entry.arguments?.getString("seasonId").orEmpty()
+            val level = entry.arguments?.getInt("level") ?: 1
+            val seasons by container.seasonCatalog.seasons.collectAsState()
+            val season = seasons.firstOrNull { it.id == seasonId }
+            if (season == null) {
+                LaunchedEffect(Unit) { navController.popBackStack() }
+                return@composable
+            }
+            val store = remember(season.id) { container.seasonProgressStore(season) }
+            val viewModel: GameViewModel = viewModel(
+                factory = viewModelFactory {
+                    initializer {
+                        GameViewModel(
+                            board = store.board(level),
+                            mode = GameMode.Level(
+                                LevelContext(number = level, store = store, seasonId = season.id, levelCount = season.levelCount),
+                            ),
+                            stats = UserPreferencesGameStatsRecorder(container.prefs),
+                            statsScope = container.applicationScope,
+                            levelLives = container.levelLives,
+                        )
+                    }
+                },
+            )
+            val state by viewModel.state.collectAsState()
+            GameScreen(state, viewModel::choose, { if (state.isPaused) viewModel.resume() else viewModel.pause() }, { navController.popBackStack() }, viewModel::restart)
         }
 
         composable(Routes.LEVEL_GAME, arguments = listOf(navArgument("level") { type = NavType.IntType })) { entry ->

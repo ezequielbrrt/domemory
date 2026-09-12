@@ -18,13 +18,17 @@
             android:exported="true"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.DoMemory">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Phase 6: domemory://join/CODE and domemory://daily -->
+            <!-- domemory://daily (Phase 5, wired) and domemory://join/CODE (Phase 6, parsed
+                 by DeepLink.parse already but not yet routed — no multiplayer screen exists
+                 yet to send it to). singleTop above so a link tapped while the app is already
+                 running reaches MainActivity.onNewIntent instead of stacking a new instance. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

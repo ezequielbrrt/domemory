@@ -1,6 +1,8 @@
 package com.ezequielbrrt.domemory.core.time
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 /**
  * The one place the app decides what day it is (spec 8).
@@ -21,6 +23,18 @@ object DayKey {
         val parsed = LocalDate.parse(isoDate.trim())
         of(parsed)
     }.getOrNull()
+
+    /** The reverse of [of]: a zero-padded `YYYYMMDD` key back to a [LocalDate], or null if malformed. */
+    fun toLocalDate(dayKey: String): LocalDate? = runCatching { LocalDate.parse(dayKey, KEY_FORMAT) }.getOrNull()
+
+    /** True when [current] is exactly one calendar day after [previous] — the Daily Challenge streak rule. */
+    fun isConsecutiveDay(previous: String, current: String): Boolean {
+        val previousDate = toLocalDate(previous) ?: return false
+        val currentDate = toLocalDate(current) ?: return false
+        return ChronoUnit.DAYS.between(previousDate, currentDate) == 1L
+    }
+
+    private val KEY_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
 }
 
 /** Injectable clock so day-boundary behaviour is testable without waiting for midnight. */
