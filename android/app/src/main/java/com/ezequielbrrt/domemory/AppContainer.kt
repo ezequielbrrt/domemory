@@ -10,6 +10,7 @@ import com.ezequielbrrt.domemory.data.remote.FirebaseBoardCatalogSource
 import com.ezequielbrrt.domemory.data.remote.FirebaseSeasonCatalogSource
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogRepository
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogSource
+import com.ezequielbrrt.domemory.services.daily.DailyChallengeService
 import com.ezequielbrrt.domemory.services.levels.LevelProgressService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.seasons.Season
@@ -57,6 +58,7 @@ class AppContainer(
 
     val levelProgress = LevelProgressService(prefs, applicationScope)
     val levelLives = LevelLivesService(prefs, dayProvider)
+    val dailyChallenge = DailyChallengeService(prefs, dayProvider)
 
     /**
      * Cache-first `/seasons` catalog (spec 9.7). [loadCached] is launched immediately below

@@ -49,6 +49,7 @@ private object Routes {
     const val LEVEL_GAME = "level/{level}"
     const val SEASON_LEVELS = "season/{seasonId}"
     const val SEASON_GAME = "season/{seasonId}/level/{level}"
+    const val DAILY_GAME = "daily"
     private const val GAME_PATTERN = "game/{boardId}/{difficultyKey}"
     const val GAME = GAME_PATTERN
 
@@ -80,6 +81,9 @@ fun NavGraph(
             )
             val state by viewModel.state.collectAsState()
             val activeSeason by container.seasonCatalog.activeSeason.collectAsState()
+            val dailyStreak by container.prefs.dailyStreakCurrent.collectAsState(initial = 0)
+            val dailyLastAttemptDay by container.prefs.dailyLastAttemptDay.collectAsState(initial = null)
+            val isDailyCompletedToday = dailyLastAttemptDay == container.todayKey()
             MenuScreen(
                 state = state,
                 onSelectTab = viewModel::selectTab,
@@ -96,7 +100,37 @@ fun NavGraph(
                 activeSeason = activeSeason,
                 todayKey = container.todayKey(),
                 onSeasonSelected = { season -> navController.navigate(Routes.seasonLevels(season.id)) },
+                dailyStreak = dailyStreak,
+                isDailyChallengeCompletedToday = isDailyCompletedToday,
+                onDailyChallengeSelected = {
+                    // Mirrors the domemory://daily deep link: a no-op once today is done,
+                    // since there's no result screen yet to send the player back to (spec 11.1).
+                    if (!isDailyCompletedToday) navController.navigate(Routes.DAILY_GAME)
+                },
             )
+        }
+
+        composable(Routes.DAILY_GAME) {
+            // Daily Challenge takes the *player's* stored difficulty for the clock/pie, not
+            // the board's own — the board always declares medium (spec 8's "medium difficulty"
+            // is the board's, distinct from the player setting that drives the timer).
+            val playerDifficulty by container.prefs.playerDifficulty.collectAsState(initial = Difficulty.MEDIUM)
+            val viewModel: GameViewModel = viewModel(
+                factory = viewModelFactory {
+                    initializer {
+                        GameViewModel(
+                            board = container.dailyChallenge.boardForToday(),
+                            mode = GameMode.DailyChallenge,
+                            playerDifficulty = playerDifficulty,
+                            stats = UserPreferencesGameStatsRecorder(container.prefs),
+                            statsScope = container.applicationScope,
+                            dailyChallenge = container.dailyChallenge,
+                        )
+                    }
+                },
+            )
+            val state by viewModel.state.collectAsState()
+            GameScreen(state, viewModel::choose, { if (state.isPaused) viewModel.resume() else viewModel.pause() }, { navController.popBackStack() }, viewModel::restart)
         }
 
         composable(Routes.SEASON_LEVELS, arguments = listOf(navArgument("seasonId") { type = NavType.StringType })) { entry ->
