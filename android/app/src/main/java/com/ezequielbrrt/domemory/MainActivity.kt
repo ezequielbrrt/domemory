@@ -1,5 +1,6 @@
 package com.ezequielbrrt.domemory
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,10 +28,17 @@ class MainActivity : ComponentActivity() {
         if (::container.isInitialized) container.refreshActiveSeason()
     }
 
+    /** `singleTop` (manifest) routes a link tapped while already running here instead of a new instance. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        container.deepLinkRouter.receive(intent.data?.toString())
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         container = (application as DoMemoryApplication).container
+        container.deepLinkRouter.receive(intent?.data?.toString())
         setContent {
             val theme by container.prefs.themePreference.collectAsState(initial = com.ezequielbrrt.domemory.ui.theme.ThemePreference.SYSTEM)
             val hasOnboarded by container.prefs.hasOnboarded.collectAsState(initial = null)

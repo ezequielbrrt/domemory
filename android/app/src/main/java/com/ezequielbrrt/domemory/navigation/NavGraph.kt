@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ezequielbrrt.domemory.AppContainer
+import com.ezequielbrrt.domemory.core.deeplink.DeepLink
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.core.model.GameMode
 import com.ezequielbrrt.domemory.core.model.LevelContext
@@ -65,6 +66,23 @@ fun NavGraph(
     hasOnboarded: Boolean,
     navController: NavHostController = rememberNavController(),
 ) {
+    // A domemory://daily link can arrive before onboarding resolves (spec 11.1: "links can
+    // arrive before the UI exists"); only route it once there's a Menu to land on, and only
+    // if today isn't already locked — mirrors the no-op DailyChallengeCard tap above.
+    val pendingDeepLink by container.deepLinkRouter.pending.collectAsState()
+    LaunchedEffect(hasOnboarded, pendingDeepLink) {
+        if (!hasOnboarded) return@LaunchedEffect
+        when (container.deepLinkRouter.pending.value) {
+            is DeepLink.Daily -> {
+                val alreadyDone = container.dailyChallenge.isCompletedToday()
+                container.deepLinkRouter.consume()
+                if (!alreadyDone) navController.navigate(Routes.DAILY_GAME)
+            }
+            // Join is parsed but not yet routed — no multiplayer screen exists (Phase 6).
+            is DeepLink.Join, null -> Unit
+        }
+    }
+
     NavHost(navController = navController, startDestination = if (hasOnboarded) Routes.MENU else Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
             val viewModel: OnboardingViewModel = viewModel(factory = viewModelFactory { initializer { OnboardingViewModel(container.prefs) } })

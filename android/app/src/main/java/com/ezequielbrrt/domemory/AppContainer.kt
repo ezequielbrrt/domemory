@@ -1,6 +1,7 @@
 package com.ezequielbrrt.domemory
 
 import android.content.Context
+import com.ezequielbrrt.domemory.core.deeplink.DeepLinkRouter
 import com.ezequielbrrt.domemory.core.time.DayKey
 import com.ezequielbrrt.domemory.core.time.DayProvider
 import com.ezequielbrrt.domemory.core.time.SystemDayProvider
@@ -59,6 +60,7 @@ class AppContainer(
     val levelProgress = LevelProgressService(prefs, applicationScope)
     val levelLives = LevelLivesService(prefs, dayProvider)
     val dailyChallenge = DailyChallengeService(prefs, dayProvider)
+    val deepLinkRouter = DeepLinkRouter()
 
     /**
      * Cache-first `/seasons` catalog (spec 9.7). [loadCached] is launched immediately below
