@@ -35,9 +35,11 @@ import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import java.util.Locale
 
 /**
- * The menu's season entry point (spec 9.1). iOS shares this row with the Daily Challenge
- * card, which does not exist on Android yet (Phase 5) — this renders full-width above the
- * endless-Levels map instead of splitting the row; revisit the layout once Daily lands.
+ * The menu's season entry point (spec 9.1). Shares a row with [com.ezequielbrrt.domemory.feature.daily.DailyChallengeCard]
+ * when a season is active — [com.ezequielbrrt.domemory.feature.menu.MenuScreen] gives each
+ * card equal `weight(1f)` in that row, though neither card's internal layout restyles for
+ * the narrower width yet (spec 9.1's "shrinks to a compact layout" is not implemented —
+ * cosmetic only, see `ANDROID_PLAN.md` §7).
  *
  * The card is the season's accent colour with white text (spec 9.7), overlaid with
  * [Season.cardImageURL] when present. Entering this card is also the trigger to warm the
