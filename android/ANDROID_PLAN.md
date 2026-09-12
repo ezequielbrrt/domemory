@@ -243,19 +243,24 @@ cross-check for the whole port.
 atomic star economy, progress service and daily-lives storage — its correctness gaps
 (zero-lives gating, cache concurrency, loss recovery, power-ups, `LevelsIntroGate`,
 `StarWalletService`) landed separately on `feature/android-levels-hardening`
-(`e8f859e`, off `master`, not yet merged into this branch or `master`). Phase 4 now has
-a live Firebase-backed `/seasons` source, a finite per-season progress store, Android's
-own locale-resolution test against real `Locale.toLanguageTag()` output, a season
-card + level-map screen wired into the nav graph, and Coil-backed artwork loading with
-a 64 MB LRU disk cache — all on `feature/android-seasons`, not yet merged.
+(`e8f859e`, off `master`, not yet merged into this branch or `master`). Phase 4 is
+feature-complete: a live Firebase-backed `/seasons` source, a finite per-season
+progress store, Android's own locale-resolution test against real
+`Locale.toLanguageTag()` output, a season card + level-map screen, and Coil-backed
+artwork loading with a 64 MB LRU disk cache. **Phase 5 is partially done**: Daily
+Challenge (deterministic board, idempotent one-attempt-per-day recording, streaks,
+milestones) and deep links (`domemory://daily`, plus `join/CODE` parsing ready for
+Phase 6) are implemented; the Glance widget and local notifications are not. All of
+this is on `feature/android-seasons`, not yet merged.
 
 ### Handoff ledger (update this with every migration slice)
 
 | Area | State | Branch / commit | Next owner action |
 |---|---|---|---|
 | Phase 2 | merged | `c1faf11` / PR #43 | Device/emulator visual verification. |
-| Phase 3 | merged, incomplete here | `c1faf11` / PR #43; hardening on `feature/android-levels-hardening` (`e8f859e`, unmerged) | Merge the hardening branch when ready; expect a conflict in `GameViewModel.kt`/`LevelsScreen.kt`/`NavGraph.kt` against this branch's season routes — resolve by keeping both sets of routes/wiring, not by dropping either. |
-| Phase 4 | feature-complete on this branch, not yet merged | `feature/android-seasons`, this session's commit (uncommitted at hand-off — see below) | Verify on an emulator/device (season card renders, level map plays, expiry at the day boundary); tune the season-card layout once Daily Challenge (Phase 5) exists to share its row per spec 9.1; consider deploying `firebase/firebase-database.rules.json`'s `/seasons` read rule and a real season to Firebase to exercise the exit criterion live. |
+| Phase 3 | merged, incomplete here | `c1faf11` / PR #43; hardening on `feature/android-levels-hardening` (`e8f859e`, unmerged) | Merge the hardening branch when ready; expect a conflict in `GameViewModel.kt`/`LevelsScreen.kt`/`NavGraph.kt` against this branch's season/daily routes — resolve by keeping both sets of routes/wiring, not by dropping either. |
+| Phase 4 | feature-complete on this branch, not yet merged | `feature/android-seasons` | Verify on an emulator/device (season card renders, level map plays, expiry at the day boundary); consider deploying `firebase/firebase-database.rules.json`'s `/seasons` read rule and a real season to Firebase to exercise the exit criterion live. |
+| Phase 5 | Daily Challenge + deep links done; widget and notifications not started | `feature/android-seasons` | Build the Glance `AppWidget` + `WorkManager` midnight refresh, and the notification permission primer + reminder scheduling (§11.2/11.3) — see the deferred-items note below for why these were left for a follow-up slice rather than rushed here. |
 
 | Suite | Tests | Pins |
 |---|---|---|
@@ -274,6 +279,8 @@ a 64 MB LRU disk cache — all on `feature/android-seasons`, not yet merged.
 | `SeasonProgressServiceTest` | 12 | fresh-season defaults, win/loss, improvement-only wallet credit (never `levels.lifetimeStars`), skip, `levelCount + 1` completion, `nextLevel` null past the end, on-demand bounded `totalStars`, cross-season and cross-mode namespacing |
 | `SeasonLocaleResolutionTest` | 11 | the candidate-shortening algorithm, and real `java.util.Locale.toLanguageTag()` output for `es-419`, `es-MX`, `pt-BR` and `zh-Hans-CN` — the last one is the case where Android's reported identifier (keeps the script subtag) sidesteps the exact iOS bug spec 9.5 documents |
 | `SeasonPayloadJsonTest` | 3 | the pure `DataSnapshot.value` (nested `Map`/`List`) → JSON-text conversion `FirebaseSeasonCatalogSource` depends on, isolated from any live Firebase connection the same way `BoardDecoderTest` is |
+| `DailyChallengeServiceTest` | 9 | deterministic per-day board, idempotent one-attempt-per-day recording, streak continuation/gap/loss rules, longest-streak monotonicity, milestone reporting |
+| `DeepLinkTest` | 10 | every link form in spec 11.1's table, the custom-scheme-only host inclusion rule, code normalization (uppercase, strip non-alphanumerics), the exact-6-characters requirement |
 
 **Phase 4 implementation, this session:** `Season.kt` gained the decoration fields
 (`accentColor`, `backgroundImageURL(Dark)`, `cardImageURL`, all validated at decode
@@ -303,9 +310,11 @@ id changes, mirroring iOS's "prefetch on change, not on every read" guard.
 
 **Deliberately deferred / left as seams** (spec-conformant but intentionally not
 built out further this session — flag before assuming they're gaps):
-- **The Daily Challenge card doesn't exist yet** (Phase 5), so the season card is
-  full-width on its own row instead of sharing one with Daily per spec 9.1. Revisit
-  the layout once Daily lands.
+- **Season/Daily card compacting** (spec 9.1: the Daily card "shrinks to a compact
+  layout" when it shares the row with an active season) is not implemented — both
+  cards now sit in one `Row` with `weight(1f)` each when a season is active (see the
+  Phase 5 note below), which resizes them but doesn't restyle either card's internal
+  layout for the narrower width. Cosmetic; the row itself is correctly wired.
 - **Season nav-bar transparency** (spec 9.1: transparent when the season carries
   artwork, opaque otherwise) is not implemented — `MainActivity` doesn't yet do
   per-screen system-bar styling. Cosmetic; doesn't affect the exit criterion.
@@ -323,6 +332,41 @@ built out further this session — flag before assuming they're gaps):
 - **No emulator/device verification** — same limitation as every prior phase in this
   repo; the season card, map header, artwork loading and expiry logic are unit-tested
   and compiled, not seen running.
+
+**Phase 5 implementation, this session:** `services/daily/DailyChallengeService.kt`
+generates the deterministic 6-pair board (`BoardGenerators.daily`, already ported) and
+wraps a new atomic `UserPreferences.recordDailyCompletion` transaction — same
+one-transaction-per-finish shape as `recordLevelCompletion`/`recordSeasonLevelCompletion`
+— implementing the idempotent one-attempt-per-day lock, streak
+continue/reset/gap rules (`DayKey.isConsecutiveDay`, a new pure helper), and the
+milestone-threshold check (`{3, 7, 14, 30, 100}`; Android has no analytics wiring yet,
+so this only *reports* a hit for a future caller to log). `GameViewModel` gained an
+optional `dailyChallenge` param and records the finish exactly once, from the same
+single-fire `finish()` path Levels already uses. `feature/daily/DailyChallengeCard.kt`
+is the menu entry point, now sharing a `Row` with the season card (moved out of the
+Levels-tab-only placement Phase 4 initially used, to actually match spec 9.1's "one
+row" intent) — tapping it while today is locked is a no-op, matching the deep link's
+own rule below. `core/deeplink/DeepLink.kt` (pure parser, `java.net.URI`-based so it's
+plain-JVM testable) and `DeepLinkRouter.kt` (holds a link that arrives before the nav
+graph can act on it) implement spec 11.1's link table; `MainActivity` now has
+`android:launchMode="singleTop"` and feeds `onCreate`/`onNewIntent` data through the
+router, and `NavGraph` consumes a pending `Daily` link once onboarding resolves.
+`Join(code)` parses correctly (tested against every link form spec 11.1 lists) but is
+not routed anywhere yet — there is no multiplayer screen to send it to (Phase 6).
+
+**Deliberately not attempted this session — flagged explicitly, not silently
+dropped:** the Glance **widget** and **local notifications** (spec 8.1, 11.2, 11.3),
+even though Phase 5's own exit criterion names both ("streak survives a day rollover;
+widget updates at midnight"). Reasoning: both need new Gradle dependencies
+(`glance-appwidget`, `work-runtime`) and Android-framework surfaces this repo cannot
+verify without an emulator (`AppWidgetProvider`/`GlanceAppWidgetReceiver` XML,
+`WorkManager` periodic scheduling, the API 33+ `POST_NOTIFICATIONS` runtime permission
+flow and its OS-authorization-vs-app-flag sync bug iOS already hit once — spec 11.2's
+"the permission bug worth not repeating"). Shipping that untested carries more risk
+than the value of a same-session claim of "done." The exit criterion is therefore
+**not yet met**; the next owner should build the widget and notification scheduler as
+their own slice, verify the midnight refresh and the permission-sync rule on a real
+device or emulator, and only then consider Phase 5 complete.
 
 **Firebase is live.** `app/google-services.json` is committed for project
 `domemory-c9211` (client `com.ezequielbrrt.domemory`), and the app reads the real
@@ -357,7 +401,12 @@ screens.
    conflict against this branch's `NavGraph.kt`/`LevelsScreen.kt` changes; resolve by
    keeping both, not by dropping either side's wiring.
 2. Merge `feature/android-seasons` (Phase 4 is feature-complete: remote source, finite
-   progress store, locale resolution, card/map UI, Coil artwork cache — see §7).
-3. Verify the merged Android UI on an emulator or device, including a season played
+   progress store, locale resolution, card/map UI, Coil artwork cache; Phase 5's Daily
+   Challenge and deep links are also done — see §7).
+3. Finish Phase 5: the Glance widget and local notifications (permission primer,
+   reminder scheduling, the OS-authorization-vs-app-flag sync rule) — deliberately not
+   attempted this session; see the §7 note for why.
+4. Verify the merged Android UI on an emulator or device, including a season played
    through Firebase end to end (publish a short test season, confirm it appears, plays,
-   and stops appearing once `endDate` passes).
+   and stops appearing once `endDate` passes) and a Daily Challenge streak carried
+   across a simulated day rollover.
