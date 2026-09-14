@@ -19,6 +19,8 @@ import com.ezequielbrrt.domemory.services.levels.StarWalletService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -789,6 +791,28 @@ class GameViewModelTest {
 
         assertFalse(vm.buyExtraTime())
         assertEquals(before, vm.state.value.timeRemaining, 0.001)
+        vm.stop()
+    }
+
+    @Test
+    fun `two concurrent buys against one power-up's worth of stars grant exactly one effect`() = runTest {
+        // Regression for the hardening gap this review found: an earlier version applied
+        // a power-up's effect off a cached canAfford() check and spent the stars
+        // afterward without checking the result, so two buys racing the same stale
+        // balance could both apply for the price of one. spendOnPowerUp now spends
+        // through the wallet's atomic transaction *before* applying anything.
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.EXTRA_TIME.cost) // enough for exactly one
+        runCurrent()
+        val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)), starWallet = wallet)
+        val before = vm.state.value.timeRemaining
+
+        val results = listOf(async { vm.buyExtraTime() }, async { vm.buyExtraTime() }).awaitAll()
+        runCurrent()
+
+        assertEquals(1, results.count { it })
+        assertEquals(before + LevelPowerUp.EXTRA_TIME_SECONDS, vm.state.value.timeRemaining, 0.001)
+        assertEquals(0, wallet.balance.value)
         vm.stop()
     }
 

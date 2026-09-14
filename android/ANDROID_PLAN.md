@@ -313,6 +313,15 @@ open, in the order the handoff called out:
    a confirmation dialog only in front of skip, matching the spec's "no confirmation
    step" rule for everything else. Rewarded-ad alternatives for lives/mistakes stay a
    Phase 7 seam — there is no `AdsService` yet.
+   PR review fix: `spendOnPowerUp` originally applied a power-up's effect off a cached
+   `canAfford()` check and fired `StarWalletService.spend()` afterward without checking
+   its result — two buys racing the same stale balance (a double-tap, or two different
+   power-ups tapped back-to-back) could both pass `canAfford` and both apply, with only
+   the first `spend()` actually succeeding against the real, serialized balance. It now
+   awaits `spend()` first and only calls `apply()` once that succeeds, refunding via
+   `credit()` if `apply()` itself then reports failure. Pinned by
+   `GameViewModelTest`'s "two concurrent buys against one power-up's worth of stars grant
+   exactly one effect".
 5. **Levels intro.** `LevelsIntroGate` (services/levels) ports the one-shot, mark-on-
    dismiss rule from iOS 1:1, backed by the `levelsIntroShown` DataStore key that was
    already sitting unused in `UserPreferences`. `LevelsViewModel` presents it on first
@@ -342,7 +351,7 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | `StarsTest` | 4 | the 3/2/1-star thresholds |
 | `SeededGeneratorTest` | 9 | FNV-1a vectors, RNG determinism, generator pair counts |
 | `DayKeyTest` | 3 | zero-padding and chronological string ordering |
-| `GameViewModelTest` | 42 | the three timers, clock sources, mistake budget, first-failure-wins, mistake-deferral pause/resume re-arming, deferred loss commit, all four power-ups, all three lose-screen purchases |
+| `GameViewModelTest` | 43 | the three timers, clock sources, mistake budget, first-failure-wins, mistake-deferral pause/resume re-arming, deferred loss commit, all four power-ups, all three lose-screen purchases, concurrent power-up buys against one power-up's worth of stars |
 | `BoardDecoderTest` | 8 | the live 134-board payload, array/map shapes, tolerant field decoding |
 | `BoardCatalogRepositoryTest` | 9 | difficulty filtering, custom-board rules, silent catalog failure |
 | `LevelProgressServiceTest` | 8 | high-water-mark stars, wallet-crediting completion, skip, cache concurrency (cold-start correctness, concurrent readers/writers) |

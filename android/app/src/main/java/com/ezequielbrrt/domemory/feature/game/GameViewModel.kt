@@ -375,17 +375,17 @@ class GameViewModel(
     }
 
     // --- Power-ups (spec 7.6) — Levels and Seasons only, bought mid-game with no
-    // confirmation step, so every buy applies its effect immediately and fires the star
-    // spend in the background rather than waiting on it. ------------------------------
+    // confirmation step. The star spend is awaited *before* the effect is applied (see
+    // [spendOnPowerUp]) so a purchase can never grant its effect for free. ------------
 
-    fun buyExtraTime(): Boolean = spendOnPowerUp(LevelPowerUp.EXTRA_TIME) {
+    suspend fun buyExtraTime(): Boolean = spendOnPowerUp(LevelPowerUp.EXTRA_TIME) {
         _state.value = _state.value.copy(
             timeRemaining = _state.value.timeRemaining + LevelPowerUp.EXTRA_TIME_SECONDS,
         )
         true
     }
 
-    fun buyPeek(): Boolean = spendOnPowerUp(LevelPowerUp.PEEK) {
+    suspend fun buyPeek(): Boolean = spendOnPowerUp(LevelPowerUp.PEEK) {
         peekJob?.cancel()
         flipBackJob?.cancel()
         flipBackJob = null
@@ -400,13 +400,13 @@ class GameViewModel(
         true
     }
 
-    fun buyFreeze(): Boolean = spendOnPowerUp(LevelPowerUp.FREEZE) {
+    suspend fun buyFreeze(): Boolean = spendOnPowerUp(LevelPowerUp.FREEZE) {
         frozenUntilMillis = now() + (LevelPowerUp.FREEZE_DURATION_SECONDS * 1000).toLong()
         _state.value = _state.value.copy(isFrozen = true)
         true
     }
 
-    fun buyRevealPair(): Boolean = spendOnPowerUp(LevelPowerUp.REVEAL_PAIR) {
+    suspend fun buyRevealPair(): Boolean = spendOnPowerUp(LevelPowerUp.REVEAL_PAIR) {
         val pair = game.findUnmatchedPair()
         if (pair == null) {
             false
@@ -421,16 +421,33 @@ class GameViewModel(
         }
     }
 
-    /** Shared gate for every power-up: Levels/Seasons only, not paused, not finished,
-     * affordable — then applies [apply], only spending the stars if it reports success. */
-    private fun spendOnPowerUp(powerUp: LevelPowerUp, apply: () -> Boolean): Boolean {
+    /**
+     * Shared gate for every power-up: Levels/Seasons only, not paused, not finished —
+     * then spends the stars *first*, through [StarWalletService.spend]'s atomic
+     * DataStore transaction, and only calls [apply] once that spend actually succeeds.
+     *
+     * This ordering matters: an earlier version applied the effect optimistically off a
+     * cached `canAfford` check and fired the spend afterward without checking its
+     * result. Two power-ups (or the same one double-tapped) bought back-to-back, before
+     * either's background spend had completed, could both pass the same stale
+     * `canAfford` check — the second `spend()` would then correctly fail against the
+     * real balance, but its effect had already been granted for free, since nothing
+     * looked at that failure. Spending first closes that window: the real, serialized
+     * balance decides before any effect exists to roll back. If [apply] itself then
+     * reports failure (e.g. reveal pair with no unmatched pair left), the spend is
+     * refunded via [StarWalletService.credit] so a failed power-up never costs stars.
+     */
+    private suspend fun spendOnPowerUp(powerUp: LevelPowerUp, apply: () -> Boolean): Boolean {
         if (mode !is GameMode.Level) return false
-        val current = _state.value
-        if (current.isPaused || current.isFinished) return false
+        if (_state.value.isPaused || _state.value.isFinished) return false
         val wallet = starWallet ?: return false
-        if (!wallet.canAfford(powerUp.cost)) return false
-        if (!apply()) return false
-        statsWorkScope.launch { wallet.spend(powerUp.cost) }
+        if (!wallet.spend(powerUp.cost)) return false
+        // Re-check after the suspending spend: the game could have finished or been
+        // paused while that transaction was in flight.
+        if (_state.value.isPaused || _state.value.isFinished || !apply()) {
+            wallet.credit(powerUp.cost)
+            return false
+        }
         return true
     }
 
