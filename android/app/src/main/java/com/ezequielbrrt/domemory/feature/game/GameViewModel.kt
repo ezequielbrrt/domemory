@@ -7,6 +7,7 @@ import com.ezequielbrrt.domemory.core.model.ChoiceOutcome
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.core.model.GameMode
 import com.ezequielbrrt.domemory.core.model.MemoryGame
+import com.ezequielbrrt.domemory.services.daily.DailyChallengeService
 import com.ezequielbrrt.domemory.services.levels.LevelCurve
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
@@ -66,6 +67,8 @@ class GameViewModel(
     private val levelLives: LevelLivesService? = null,
     /** Levels/Seasons only (spec 7.6, 7.7) — null in every other mode. */
     private val starWallet: StarWalletService? = null,
+    /** Records the Daily Challenge finish (spec 8) when [mode] is [GameMode.DailyChallenge]. */
+    private val dailyChallenge: DailyChallengeService? = null,
 ) : ViewModel() {
 
     private val workScope: CoroutineScope get() = scope ?: viewModelScope
@@ -240,6 +243,13 @@ class GameViewModel(
                 totalTime = _state.value.totalTime,
                 failedTries = _state.value.failedTries,
             )
+        }
+        // Any finish — win or loss — consumes the day (spec 8); recordCompletion is itself
+        // idempotent, but winReported already guards this call to at most once per instance.
+        // The Daily Challenge has no lose-screen rescue to protect (see the class doc), so
+        // it always takes this immediate-commit path, never commitLossIfNeeded.
+        if (mode is GameMode.DailyChallenge) {
+            dailyChallenge?.let { daily -> statsWorkScope.launch { daily.recordCompletion(outcome is GameOutcome.Won) } }
         }
         recordStats(outcome)
     }
