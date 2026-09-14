@@ -239,9 +239,7 @@ cross-check for the whole port.
 
 ## 7. Status
 
-**Phases 0–3 are complete. Phase 4 (Seasons) is complete. Phase 5 (Daily Challenge,
-deep links) is partially complete** (the Glance widget and local notifications are
-not built). Phase 3's hardening merged to `master` as PR #45 (`37f4115`); Phase 4 and
+**Phases 0–5 are complete.** Phase 3's hardening merged to `master` as PR #45 (`37f4115`); Phase 4 and
 part of Phase 5 merged once as PR #44, were reverted directly on `master` with no PR
 (commit `42cc257`, confirmed unintentional), and are being re-landed in this same
 change by reverting that revert on top of the now-merged hardening code and resolving
@@ -356,14 +354,18 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | Phase 2 | merged, **now emulator-verified** | `c1faf11` / PR #43 | none — see verification note below. |
 | Phase 3 | merged, **now emulator-verified** | `c1faf11` / PR #43; hardening `feature/android-levels-hardening` / PR #45 (`37f4115`) | none — see verification note below. |
 | Phase 4 | merged (re-landed), **now emulator-verified against a live Firebase season** | `1f17bb7` / PR #44 originally, reverted (`42cc257`, unintentional), re-integrated against Phase 3's hardening in this change | Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule if not already live (a real "Spooky Season" was already readable during this session's verification, so the rule and a season are in fact already live — confirm before re-deploying). |
-| Phase 5 | Daily Challenge + deep links done (re-landed alongside Phase 4) and **now emulator-verified**; widget and notifications not started | same as Phase 4 | Build the Glance `AppWidget` + `WorkManager` midnight refresh, and the notification permission primer + reminder scheduling (§11.2/11.3) — see the deferred-items note below for why these were left for a follow-up slice rather than rushed here. |
+| Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
 
 1. **`SeasonCard.kt` — season artwork broke the entire menu layout.** `AsyncImage(model = season.cardImageURL, modifier = Modifier.fillMaxWidth())` was a plain top item in the card's `Column`, so Coil sized it to the artwork's own intrinsic pixel height (portrait-ish, ~1500dp+) instead of the card's compact height. That pushed the `Levels` / `My memoramas` / `All` tab row completely off-screen — **the entire menu below the season card was unreachable through the UI whenever a season was active**, which is always true right now since a live season exists in Firebase. iOS avoids this by drawing the artwork as a `.background` layer sized to the text content's own bounds (a `ZStack`), never as foreground content. Fixed by switching the Android card to the equivalent `Box` + `Modifier.matchParentSize()` pattern. This should have been caught by Phase 4's own exit criterion ("a season published to Firebase appears, plays and expires with no app change") — it wasn't, because Phase 4 was never actually run.
 2. **`SettingsScreen.kt` — difficulty/theme labels bypassed the string catalog.** Built labels from the raw enum name (`Difficulty.VERY_HARD.name.lowercase()...` → literal **"Very_hard"** on screen) instead of the existing `R.string.difficulty_*` / `R.string.theme_*` resources, which were already correctly defined and already used elsewhere (`MenuScreen.kt`'s `AllTab`). This silently violated the repo's own "no string is ever hardcoded in a composable" rule from `ANDROID_PLAN.md` §3 and would have failed `LocalizationParityTest`-equivalent coverage once Settings gets one. Fixed by adding the same `labelRes()` mapping pattern already used in `MenuScreen.kt`.
 
-Not exercised this session: multiplayer (Phase 6, doesn't exist), monetization (Phase 7, stubs), What's New/achievements/haptics feel/animations (Phase 8), the Glance widget and notifications (Phase 5's remaining gap), a season's day-boundary expiry, and dark/light theme switching's actual visual effect (Settings toggle was tapped-verified present but not visually confirmed to restyle the app).
+**Follow-up verification pass, same day (2026-09-14), against the merged fixes (PR #48, `edd4bba`).** Exercised the parts of the menu the first pass didn't reach: full custom-memorama lifecycle (create with a name and 2+ items → appears in "My memoramas" → favorite toggled and persisted → played as a free-play board → delete with its confirmation dialog → cleanly removed, including its favourite id, from `favoriteIDs`), the "All" tab's live 134-board Firebase catalog with difficulty filtering, and the Settings Light/Dark theme switch (both directions, confirmed visually on both the Settings screen and the menu — full repaint, no contrast or readability issues in either palette). No new bugs found; everything held up correctly.
+
+One false alarm worth recording so it isn't re-chased: mid-session, a custom board's favorite star appeared to revert after playing the board and backing out. Direct inspection of the on-device DataStore file (`run-as ... cat files/datastore/domemory_prefs.preferences_pb`) at each step — immediately after favoriting, mid-game, and after returning — showed the favorite id present on disk throughout; a clean repeat of the same play-then-back sequence didn't reproduce the apparent loss either. The likely cause was an imprecise test tap landing near the card's Delete control (its clickable bounds sit immediately adjacent to the favorite star's), not an app defect. `toggleFavorite`/`removeCustomMemorama` are DataStore's only writers of `favoriteIDs` in the codebase, which is consistent with this being a test artifact rather than a race.
+
+Not exercised: multiplayer (Phase 6, doesn't exist), monetization (Phase 7, stubs), What's New/achievements/haptics feel/animations (Phase 8), and a season's day-boundary expiry (would need the emulator's system clock advanced past `endDate`, not attempted).
 
 ### Reconciling the two branches (Phase 3 hardening × Phase 4/5 re-land)
 
@@ -528,6 +530,22 @@ than the value of a same-session claim of "done." The exit criterion is therefor
 their own slice, verify the midnight refresh and the permission-sync rule on a real
 device or emulator, and only then consider Phase 5 complete.
 
+**Phase 5 completion follow-up, 2026-09-14.** The deferred slice is now implemented
+and verified against the same `Pixel_10` API 37 emulator. `DailyChallengeGlanceWidget`
+reads the app's shared DataStore through the application container, opens
+`domemory://daily` when tapped, refreshes immediately after a Daily completion, and is
+registered as a home-screen provider. A unique one-time WorkManager chain refreshes it at
+the next local midnight; each run schedules the following local midnight rather than adding
+a fixed 24 hours, so it remains aligned through daylight-saving transitions. The emulator
+reports both the provider and its pending midnight worker.
+
+`NotificationService` schedules the day-2/day-7 19:00 inactivity nudges and the eligible
+same-day 20:00 streak-risk nudge. The custom once-per-install primer and Settings toggle
+share one permission requester; every successful grant reaches `activateReminders()`, which
+sets `notificationsEnabled` before scheduling. Foreground sync turns that flag off and
+cancels all work if the OS permission is later revoked. The reminder-time, permission-sync,
+and midnight-delay rules are unit-tested; `testDebugUnitTest` and `assembleDebug` pass.
+
 **Firebase is live.** `app/google-services.json` is committed for project
 `domemory-c9211` (client `com.ezequielbrrt.domemory`), and the app reads the real
 `/data` catalog — 134 boards — through `FirebaseBoardCatalogSource`, falling back to a
@@ -576,18 +594,13 @@ implementation, integrated, not redone.
 
 ## 8. Immediate next steps
 
-1. Verify the full merged flow on an emulator or device — Levels (lives gate,
-   power-ups, lose-screen purchases, the intro), Seasons (card renders, level map
-   plays, power-ups now work there too per the reconciliation note, expiry at the day
-   boundary), and the Daily Challenge (streak carried across a simulated day rollover).
-   Everything here is unit-tested but has not been seen running.
-2. Build the Glance widget and local notifications — Phase 5's own exit criterion
-   names both and neither is done (see the "deliberately not attempted" note above for
-   why, and mind spec 11.2's permission-sync bug when you do).
-3. Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule and publish a
+1. Verify the remaining boundary cases on an emulator or device — a season's day-boundary
+   expiry and the Daily Challenge's streak rollover. The primary Levels, Seasons and Daily
+   flows are already covered by the 2026-09-14 emulator verification note above.
+2. Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule and publish a
    real season to Firebase to exercise the Phase 4 exit criterion live.
-4. Decide **O1** — deploying `assetlinks.json` and `apple-app-site-association`
+3. Decide **O1** — deploying `assetlinks.json` and `apple-app-site-association`
    together is cheaper than doing it twice.
-5. Build the season-specific out-of-lives prompt the reconciliation note flags as
+4. Build the season-specific out-of-lives prompt the reconciliation note flags as
    deferred (Seasons currently just pops back to the map instead of endless's
    dedicated modal).

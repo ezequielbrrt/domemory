@@ -69,6 +69,22 @@ class GameViewModel(
     private val starWallet: StarWalletService? = null,
     /** Records the Daily Challenge finish (spec 8) when [mode] is [GameMode.DailyChallenge]. */
     private val dailyChallenge: DailyChallengeService? = null,
+    /**
+     * Fired after [dailyChallenge] records a finish (spec 8: "Finishing refreshes the
+     * streak-at-risk reminder ... and the home-screen widget"). Deliberately a bare
+     * `() -> Unit` rather than a `NotificationService`/widget reference — this class has no
+     * Android-framework dependency anywhere else, and `AppContainer.onDailyChallengeFinished`
+     * is what wires the two real side effects together in production.
+     */
+    private val onDailyChallengeFinished: (() -> Unit)? = null,
+    /**
+     * Fired once, from every finish in every mode (spec 11.2: "Both [inactivity tiers] are
+     * rescheduled (cancel + re-add) after every game finish"). Production wires this to
+     * `AppContainer.onGameFinished`, which re-arms the day-2/day-7 inactivity reminders from
+     * "now" — playing at all is itself a sign of activity, so the countdown to "you haven't
+     * played in a while" restarts every time a game ends, win or lose.
+     */
+    private val onGameFinished: (() -> Unit)? = null,
 ) : ViewModel() {
 
     private val workScope: CoroutineScope get() = scope ?: viewModelScope
@@ -222,6 +238,7 @@ class GameViewModel(
         tickJob?.cancel()
         flipBackJob?.cancel()
         _state.value = _state.value.copy(outcome = outcome)
+        onGameFinished?.invoke()
         val isDeferredLevelLoss = mode is GameMode.Level && outcome is GameOutcome.Lost
         if (!isDeferredLevelLoss) {
             commit(outcome)
@@ -249,7 +266,12 @@ class GameViewModel(
         // The Daily Challenge has no lose-screen rescue to protect (see the class doc), so
         // it always takes this immediate-commit path, never commitLossIfNeeded.
         if (mode is GameMode.DailyChallenge) {
-            dailyChallenge?.let { daily -> statsWorkScope.launch { daily.recordCompletion(outcome is GameOutcome.Won) } }
+            dailyChallenge?.let { daily ->
+                statsWorkScope.launch {
+                    daily.recordCompletion(outcome is GameOutcome.Won)
+                    onDailyChallengeFinished?.invoke()
+                }
+            }
         }
         recordStats(outcome)
     }

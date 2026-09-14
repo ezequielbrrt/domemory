@@ -1,5 +1,7 @@
 package com.ezequielbrrt.domemory.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.compose.ui.Modifier
 import com.ezequielbrrt.domemory.AppContainer
 import com.ezequielbrrt.domemory.core.deeplink.DeepLink
 import com.ezequielbrrt.domemory.core.model.Difficulty
@@ -29,6 +32,7 @@ import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaScreen
 import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaViewModel
 import com.ezequielbrrt.domemory.feature.menu.MenuScreen
 import com.ezequielbrrt.domemory.feature.menu.MenuViewModel
+import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingScreen
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingViewModel
 import com.ezequielbrrt.domemory.feature.seasons.SeasonLevelsScreen
@@ -116,30 +120,46 @@ fun NavGraph(
             val dailyStreak by container.prefs.dailyStreakCurrent.collectAsState(initial = 0)
             val dailyLastAttemptDay by container.prefs.dailyLastAttemptDay.collectAsState(initial = null)
             val isDailyCompletedToday = dailyLastAttemptDay == container.todayKey()
-            MenuScreen(
-                state = state,
-                onSelectTab = viewModel::selectTab,
-                onDifficultyChange = viewModel::setDifficulty,
-                onToggleFavorite = viewModel::toggleFavorite,
-                onDeleteCustomMemorama = viewModel::deleteCustomMemorama,
-                onBoardSelected = { board ->
-                    navController.navigate(Routes.game(board.id, state.difficulty))
-                },
-                onCreateMemorama = { navController.navigate(Routes.CREATE_MEMORAMA) },
-                onSettings = { navController.navigate(Routes.SETTINGS) },
-                levelsViewModel = levelsViewModel,
-                onLevelSelected = { navController.navigate(Routes.level(it)) },
-                activeSeason = activeSeason,
-                todayKey = container.todayKey(),
-                onSeasonSelected = { season -> navController.navigate(Routes.seasonLevels(season.id)) },
-                dailyStreak = dailyStreak,
-                isDailyChallengeCompletedToday = isDailyCompletedToday,
-                onDailyChallengeSelected = {
-                    // Mirrors the domemory://daily deep link: a no-op once today is done,
-                    // since there's no result screen yet to send the player back to (spec 11.1).
-                    if (!isDailyCompletedToday) navController.navigate(Routes.DAILY_GAME)
-                },
-            )
+            // Default true so the primer never flashes on screen for one frame before
+            // DataStore's real value (almost always "already shown", after the first
+            // install) arrives — spec 11.3 shows it once per install, not once per launch.
+            val notificationPrimerShown by container.prefs.notificationPrimerShown.collectAsState(initial = true)
+
+            Box(Modifier.fillMaxSize()) {
+                MenuScreen(
+                    state = state,
+                    onSelectTab = viewModel::selectTab,
+                    onDifficultyChange = viewModel::setDifficulty,
+                    onToggleFavorite = viewModel::toggleFavorite,
+                    onDeleteCustomMemorama = viewModel::deleteCustomMemorama,
+                    onBoardSelected = { board ->
+                        navController.navigate(Routes.game(board.id, state.difficulty))
+                    },
+                    onCreateMemorama = { navController.navigate(Routes.CREATE_MEMORAMA) },
+                    onSettings = { navController.navigate(Routes.SETTINGS) },
+                    levelsViewModel = levelsViewModel,
+                    onLevelSelected = { navController.navigate(Routes.level(it)) },
+                    activeSeason = activeSeason,
+                    todayKey = container.todayKey(),
+                    onSeasonSelected = { season -> navController.navigate(Routes.seasonLevels(season.id)) },
+                    dailyStreak = dailyStreak,
+                    isDailyChallengeCompletedToday = isDailyCompletedToday,
+                    onDailyChallengeSelected = {
+                        // Mirrors the domemory://daily deep link: a no-op once today is done,
+                        // since there's no result screen yet to send the player back to (spec 11.1).
+                        if (!isDailyCompletedToday) navController.navigate(Routes.DAILY_GAME)
+                    },
+                )
+
+                // Spec 11.3: "Shown once per install on the menu, and reused by the Settings
+                // toggle" (that reuse is SettingsScreen's own
+                // rememberNotificationPermissionRequester call, not this composable).
+                NotificationPrimerHost(
+                    visible = !notificationPrimerShown,
+                    onEnable = { container.applicationScope.launch { container.notifications.activateReminders() } },
+                    onDismiss = { container.applicationScope.launch { container.prefs.setNotificationPrimerShown(true) } },
+                )
+            }
         }
 
         composable(Routes.DAILY_GAME) {
@@ -157,6 +177,8 @@ fun NavGraph(
                             stats = UserPreferencesGameStatsRecorder(container.prefs),
                             statsScope = container.applicationScope,
                             dailyChallenge = container.dailyChallenge,
+                            onDailyChallengeFinished = container.onDailyChallengeFinished,
+                            onGameFinished = container.onGameFinished,
                         )
                     }
                 },
@@ -216,6 +238,7 @@ fun NavGraph(
                             // Seasons only" (spec 7.6) — season play is a GameMode.Level the
                             // same way endless is, so it needs the same wallet.
                             starWallet = container.starWallet,
+                            onGameFinished = container.onGameFinished,
                         )
                     }
                 },
@@ -275,6 +298,7 @@ fun NavGraph(
                             statsScope = container.applicationScope,
                             levelLives = container.levelLives,
                             starWallet = container.starWallet,
+                            onGameFinished = container.onGameFinished,
                         )
                     }
                 },
@@ -340,11 +364,19 @@ fun NavGraph(
         }
 
         composable(Routes.SETTINGS) {
-            val viewModel: SettingsViewModel = viewModel(factory = viewModelFactory { initializer { SettingsViewModel(container.prefs) } })
+            val viewModel: SettingsViewModel = viewModel(factory = viewModelFactory { initializer { SettingsViewModel(container.prefs, container.notifications) } })
             val state by viewModel.state.collectAsState()
             val menuEntry = remember { navController.getBackStackEntry(Routes.MENU) }
             val menuViewModel: MenuViewModel = viewModel(viewModelStoreOwner = menuEntry, factory = viewModelFactory { initializer { MenuViewModel(container.boardCatalog, container.prefs) } })
-            SettingsScreen(state, onBack = { if (state.difficultyChanged) menuViewModel.onSettingsDifficultyChanged(); navController.popBackStack() }, onDifficulty = viewModel::setDifficulty, onTheme = viewModel::setTheme, onHaptics = viewModel::setHaptics, onReminders = viewModel::setReminders)
+            SettingsScreen(
+                state,
+                onBack = { if (state.difficultyChanged) menuViewModel.onSettingsDifficultyChanged(); navController.popBackStack() },
+                onDifficulty = viewModel::setDifficulty,
+                onTheme = viewModel::setTheme,
+                onHaptics = viewModel::setHaptics,
+                onEnableReminders = viewModel::enableReminders,
+                onDisableReminders = viewModel::disableReminders,
+            )
         }
 
         composable(Routes.CREATE_MEMORAMA) {
@@ -415,6 +447,7 @@ fun NavGraph(
                             playerDifficulty = difficulty,
                             stats = UserPreferencesGameStatsRecorder(container.prefs),
                             statsScope = container.applicationScope,
+                            onGameFinished = container.onGameFinished,
                         )
                     }
                 },

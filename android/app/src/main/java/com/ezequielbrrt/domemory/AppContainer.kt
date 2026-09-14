@@ -1,6 +1,7 @@
 package com.ezequielbrrt.domemory
 
 import android.content.Context
+import androidx.glance.appwidget.updateAll
 import com.ezequielbrrt.domemory.core.deeplink.DeepLinkRouter
 import com.ezequielbrrt.domemory.core.time.DayKey
 import com.ezequielbrrt.domemory.core.time.DayProvider
@@ -12,6 +13,8 @@ import com.ezequielbrrt.domemory.data.remote.FirebaseSeasonCatalogSource
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogRepository
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogSource
 import com.ezequielbrrt.domemory.services.daily.DailyChallengeService
+import com.ezequielbrrt.domemory.services.notifications.NotificationService
+import com.ezequielbrrt.domemory.widget.DailyChallengeGlanceWidget
 import com.ezequielbrrt.domemory.services.levels.LevelProgressService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelsIntroGate
@@ -44,6 +47,8 @@ class AppContainer(
     catalogSource: BoardCatalogSource = FirebaseBoardCatalogSource(),
     seasonCatalogSource: SeasonCatalogSource = FirebaseSeasonCatalogSource(),
 ) {
+    private val appContext = context.applicationContext
+
     /**
      * Work that must outlive an individual screen's ViewModel. At present this is only
      * the completion-stat write started as a player leaves a finished game; keeping it
@@ -65,6 +70,33 @@ class AppContainer(
     val levelsIntroGate = LevelsIntroGate(prefs)
     val dailyChallenge = DailyChallengeService(prefs, dayProvider)
     val deepLinkRouter = DeepLinkRouter()
+
+    /** Local reminders (spec 11.2) — inactivity tiers, the streak-at-risk nudge, permission sync. */
+    val notifications = NotificationService(appContext, prefs, dailyChallenge)
+
+    /**
+     * Spec 8's "finishing refreshes the streak-at-risk reminder and the home-screen widget",
+     * and spec 11.2's "rescheduled ... after every game finish" for the streak reminder
+     * specifically. [com.ezequielbrrt.domemory.feature.game.GameViewModel] is plain Kotlin
+     * with no Android dependency, so it takes this as a bare `() -> Unit` rather than reaching
+     * for [notifications] or the widget itself — wiring the two Android-framework side effects
+     * together is this container's job, not the view model's.
+     */
+    val onDailyChallengeFinished: () -> Unit = {
+        applicationScope.launch {
+            notifications.refreshStreakAtRiskReminder()
+            DailyChallengeGlanceWidget().updateAll(appContext)
+        }
+    }
+
+    /**
+     * Spec 11.2: "Both [inactivity tiers] are rescheduled (cancel + re-add) after every game
+     * finish" — every mode, not just the Daily Challenge (that one additionally gets
+     * [onDailyChallengeFinished] for the streak-specific reminder and the widget).
+     */
+    val onGameFinished: () -> Unit = {
+        applicationScope.launch { notifications.scheduleInactivityReminders() }
+    }
 
     /**
      * Cache-first `/seasons` catalog (spec 9.7). [loadCached] is launched immediately below

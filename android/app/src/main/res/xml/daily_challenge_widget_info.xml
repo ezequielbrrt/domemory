@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AppWidgetProviderInfo for the Daily Challenge widget (spec 8.1). Glance still needs a real
+  provider-info XML the same way a classic RemoteViews widget does — it replaces the content
+  API (androidx.glance.appwidget.GlanceAppWidget), not the OS-level registration.
+
+  updatePeriodMillis is 0: refresh is driven entirely by
+  DailyChallengeWidgetScheduler's WorkManager job (midnight) and AppContainer's
+  onDailyChallengeFinished (every completion), not by the OS's own periodic-update clock,
+  which is capped at a 30-minute minimum anyway and would be both too coarse and redundant
+  with the two triggers above.
+
+  Sizing mirrors iOS's .supportedFamilies([.systemSmall, .systemMedium]): comfortable at a
+  1x1-ish minimum, resizable up to roughly a 2x1 medium widget.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="40dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:maxResizeWidth="250dp"
+    android:maxResizeHeight="180dp"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:previewImage="@mipmap/ic_launcher"
+    android:initialLayout="@layout/daily_challenge_widget_loading"
+    android:updatePeriodMillis="0"
+    android:description="@string/daily_challenge_subtitle" />
