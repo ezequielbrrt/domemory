@@ -239,11 +239,10 @@ cross-check for the whole port.
 
 ## 7. Status
 
-**Phase 0, Phase 1 and Phase 2 are complete.** Phase 3 (Levels) landed its first cut in
-PR #43 — `LevelCurve`, the initial level map, an atomic star economy at the DataStore
-layer, `LevelProgressService`, `LevelLivesService` and daily-lives storage — and this
-branch (`feature/android-levels-hardening`) closed the correctness gaps that cut left
-open, in the order the handoff called out:
+**Phase 0, Phase 1 and Phase 2 are complete. Phase 3 (Levels) is now fully merged to
+`master`** (PR #43 landed the first cut; PR #45, `feature/android-levels-hardening`,
+closed its correctness gaps and is merged as of `37f4115`). What follows documents that
+hardening work, in the order the handoff called it out:
 
 1. **Lives gate at level entry (spec 7.4).** Tapping a level tile with 0 daily lives now
    goes through `LevelsViewModel.attemptStart(level)`, a suspend gate that checks
@@ -413,14 +412,30 @@ visual check.
   interface for exactly this reason; nothing in this branch touches
   `feature/android-seasons`, per the ordering constraint that started this branch.
 
+**Phase 4 (Seasons) and part of Phase 5 (Daily Challenge, deep links) already exist on
+`feature/android-seasons`, but are *not* on `master` right now — read this before
+starting either.** That branch built a live Firebase `/seasons` source, a finite
+per-season progress store, locale resolution, a season card + level map, Coil-backed
+artwork caching, a Daily Challenge service with idempotent streak tracking, a menu card
+for it, and `domemory://` deep-link parsing/routing — merged to `master` once as PR #44,
+then **reverted directly on `master` with no PR and no recorded reason** (commit
+`42cc257`, ~18 minutes after merging). Nobody investigating this repo's history should
+assume that revert means the work was wrong; equally, nobody should assume it's safe to
+just re-merge `feature/android-seasons` as-is without first finding out why it was
+reverted. That branch also predates this hardening work, so it will need to be rebased
+onto (or merged with) current `master` before it can land again — expect the same
+`NavGraph.kt`/`LevelsScreen.kt`/`MenuScreen.kt`/`GameViewModel.kt` overlap called out
+above, now against the merged hardening code instead of against a hypothetical future
+merge of it.
+
 ## 8. Immediate next steps
 
 1. Verify the Levels flow (lives gate, power-ups, lose-screen purchases, the intro) on an
    emulator or device — everything in §7 above is unit-tested but, like the rest of the
    app, has not been seen running.
-2. Decide **O1** — deploying `assetlinks.json` and `apple-app-site-association` together
+2. Find out why PR #44 was reverted before doing anything else with
+   `feature/android-seasons` — see the note above. If the revert was a mistake or is no
+   longer wanted, rebase that branch onto current `master` (post-hardening), resolve the
+   overlap, and re-open a PR through normal review rather than repeating a self-merge.
+3. Decide **O1** — deploying `assetlinks.json` and `apple-app-site-association` together
    is cheaper than doing it twice.
-3. Start Phase 4 (Seasons) on `feature/android-seasons`, now that Phase 3's gaps are
-   closed — `LevelProgressStore` and the deferred-loss-commit model in `GameViewModel`
-   are both built so a `SeasonLevelProgressStore` adapter is the only new piece a season
-   attempt needs.
