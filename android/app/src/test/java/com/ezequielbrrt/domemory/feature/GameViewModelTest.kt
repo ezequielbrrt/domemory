@@ -51,6 +51,7 @@ class GameViewModelTest {
         stats: GameStatsRecorder? = null,
         levelLives: LevelLivesService? = null,
         starWallet: StarWalletService? = null,
+        onCompletionInterstitial: ((Difficulty, Long) -> Unit)? = null,
     ) = GameViewModel(
         board = board,
         mode = mode,
@@ -60,6 +61,7 @@ class GameViewModelTest {
         scope = this,
         levelLives = levelLives,
         starWallet = starWallet,
+        onCompletionInterstitial = onCompletionInterstitial,
     )
 
     private fun TestScope.levelLives(day: LocalDate = LocalDate.of(2026, 9, 11)): LevelLivesService {
@@ -758,6 +760,128 @@ class GameViewModelTest {
         assertFalse(store.completions.single().didWin)
         assertEquals(3, lives.remaining())
         assertEquals(0, wallet.balance.value)
+        vm.stop()
+    }
+
+    // --- Completion interstitial callback (spec: iOS's presentInterstitialEvery) -----
+
+    @Test
+    fun `a win notifies the completion interstitial callback with the recorded difficulty and elapsed duration`() = runTest {
+        var reported: Pair<Difficulty, Long>? = null
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)),
+            onCompletionInterstitial = { difficulty, durationMs -> reported = difficulty to durationMs },
+        )
+        advanceTimeBy(25_000)
+        clearBoard(vm)
+        assertEquals(GameOutcome.Won, vm.state.value.outcome)
+
+        assertEquals(vm.state.value.recordedDifficulty, reported?.first)
+        assertEquals(25_000L, reported?.second)
+        vm.stop()
+    }
+
+    @Test
+    fun `a Level loss only notifies the interstitial callback once committed, not on the lose screen alone`() = runTest {
+        var notifications = 0
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)),
+            levelLives = levelLives(),
+            onCompletionInterstitial = { _, _ -> notifications++ },
+        )
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+        assertTrue(vm.state.value.outcome is GameOutcome.Lost)
+        assertEquals(0, notifications) // lose screen up, nothing committed yet
+
+        vm.retry()
+        runCurrent()
+        assertEquals(1, notifications)
+        vm.stop()
+    }
+
+    @Test
+    fun `skipping a level never notifies the interstitial callback`() = runTest {
+        var notifications = 0
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.SKIP_LEVEL_COST)
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)),
+            levelLives = levelLives(),
+            starWallet = wallet,
+            onCompletionInterstitial = { _, _ -> notifications++ },
+        )
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+
+        vm.skipLevelWithStars()
+        runCurrent()
+
+        assertEquals(0, notifications)
+        vm.stop()
+    }
+
+    @Test
+    fun `free play and the daily challenge also notify on their immediate-commit loss`() = runTest {
+        var notifications = 0
+        val vm = viewModel(onCompletionInterstitial = { _, _ -> notifications++ })
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+        assertTrue(vm.state.value.outcome is GameOutcome.Lost)
+
+        assertEquals(1, notifications) // free play commits immediately, unlike Levels
+        vm.stop()
+    }
+
+    // --- Ad-earned lose-screen rescues (spec 7.7 alternates) --------------------------
+
+    @Test
+    fun `the ad-earned forgive reward mirrors the star rescue without spending anything`() = runTest {
+        val store = RecordingStore()
+        val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = store)))
+        val max = requireNotNull(vm.state.value.maxFailures)
+        missPairs(vm, times = max - 1)
+        val (a, b) = mismatchedIds(vm)
+        vm.choose(a)
+        vm.choose(b)
+        advanceTimeBy(GameViewModel.MISTAKE_LOSS_MILLIS + 100)
+        assertEquals(GameOutcome.Lost(LoseReason.TOO_MANY_MISTAKES), vm.state.value.outcome)
+
+        val rewarded = vm.applyForgiveMistakesReward()
+        runCurrent()
+
+        assertTrue(rewarded)
+        assertNull(vm.state.value.outcome)
+        assertEquals(max - LevelPowerUp.FORGIVE_AMOUNT, vm.state.value.failedTries)
+        assertTrue(store.completions.isEmpty()) // not a game finish, same as the star rescue
+        vm.stop()
+    }
+
+    @Test
+    fun `the ad-earned forgive reward is refused for a timeout loss, same as the star rescue`() = runTest {
+        val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)))
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+        assertEquals(GameOutcome.Lost(LoseReason.OUT_OF_TIME), vm.state.value.outcome)
+
+        assertFalse(vm.applyForgiveMistakesReward())
+        vm.stop()
+    }
+
+    @Test
+    fun `the ad-earned life reward refills a life and restarts without committing, without spending stars`() = runTest {
+        val store = RecordingStore()
+        val lives = levelLives()
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = store)),
+            levelLives = lives,
+        )
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+        assertTrue(vm.state.value.outcome is GameOutcome.Lost)
+
+        val rewarded = vm.applyLifeReward()
+        runCurrent()
+
+        assertTrue(rewarded)
+        assertNull(vm.state.value.outcome)
+        assertTrue(store.completions.isEmpty())
+        assertEquals(4, lives.remaining()) // never spent by this loss, since the rescue undid it
         vm.stop()
     }
 

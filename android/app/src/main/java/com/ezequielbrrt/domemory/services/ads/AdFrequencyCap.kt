@@ -54,3 +54,38 @@ object AdFrequencyCap {
     fun isAppOpenFresh(loadedAtMillis: Long?, nowMillis: Long): Boolean =
         loadedAtMillis != null && nowMillis - loadedAtMillis < APP_OPEN_FRESHNESS_MILLIS
 }
+
+/**
+ * The single call site [AdsService] uses to decide whether a just-finished game should
+ * attempt to present [AdPlacement.GAME_FINISHED_INTERSTITIAL] — combines [AdFrequencyCap]'s
+ * pure cadence decision with the "never after a paid skip" gate (mirrors iOS's
+ * `logGameFinishedIfNeeded(result:allowInterstitial:)`, where charging stars to skip a level
+ * and then serving an ad on the way out would be the worst moment in the app to show one).
+ * Kept separate from the actual AdMob SDK calls so the decision itself stays unit-testable
+ * with an injected clock, the same way [AdFrequencyCap] already is.
+ */
+object GameFinishedInterstitialTrigger {
+    data class Decision(val shouldRequestPresentation: Boolean, val nextState: AdFrequencyState)
+
+    fun evaluate(
+        state: AdFrequencyState,
+        difficulty: Difficulty,
+        gameDurationMillis: Long,
+        nowMillis: Long,
+        allowInterstitial: Boolean,
+        involuntaryAdsSuppressed: Boolean = false,
+    ): Decision {
+        if (!allowInterstitial) return Decision(shouldRequestPresentation = false, nextState = state)
+        val evaluation = AdFrequencyCap.afterGameCompletion(
+            state = state,
+            difficulty = difficulty,
+            gameDurationMillis = gameDurationMillis,
+            nowMillis = nowMillis,
+            involuntaryAdsSuppressed = involuntaryAdsSuppressed,
+        )
+        return Decision(
+            shouldRequestPresentation = evaluation.decision == InterstitialDecision.REQUEST,
+            nextState = evaluation.state,
+        )
+    }
+}

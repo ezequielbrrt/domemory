@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +38,7 @@ import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.services.ads.AdMobBanner
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
+import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import kotlin.math.ceil
@@ -67,8 +69,11 @@ fun GameScreen(
     onBuyLifeWithStars: () -> Unit = {},
     onForgiveMistakesWithStars: () -> Unit = {},
     onSkipLevelWithStars: () -> Unit = {},
+    onWatchAdForLife: () -> Unit = {},
+    onWatchAdToForgive: () -> Unit = {},
 ) {
     val palette = LocalPalette.current
+    val context = LocalContext.current
 
     // Drives the pie only. Repainting on frames is cheap; recomputing the model is not.
     var frameTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -76,6 +81,17 @@ fun GameScreen(
         while (state.showsPie && !state.isPaused && !state.isFinished) {
             withFrameMillis { }
             frameTime = System.currentTimeMillis()
+        }
+    }
+
+    // Preloaded once per game instance so an ad is ready by the time it's actually eligible
+    // (spec: iOS's `trackGameStarted` preloading). Self-heals on a cache miss regardless —
+    // see `AdsService.notifyGameFinished`/`showRewarded`'s own load-on-miss fallback.
+    LaunchedEffect(state.boardName, isLevel) {
+        AdsService.loadInterstitial(context, AdPlacement.GAME_FINISHED_INTERSTITIAL)
+        if (isLevel) {
+            AdsService.loadRewarded(context, AdPlacement.LEVELS_REWARDED_LIFE)
+            AdsService.loadRewarded(context, AdPlacement.LEVELS_REWARDED_FORGIVE)
         }
     }
 
@@ -118,6 +134,10 @@ fun GameScreen(
                 onBuyLifeWithStars = onBuyLifeWithStars,
                 onForgiveMistakesWithStars = onForgiveMistakesWithStars,
                 onSkipLevelWithStars = onSkipLevelWithStars,
+                canWatchAdForLife = isLevel && AdsService.isRewardedConfigured(AdPlacement.LEVELS_REWARDED_LIFE),
+                canWatchAdToForgive = isLevel && AdsService.isRewardedConfigured(AdPlacement.LEVELS_REWARDED_FORGIVE),
+                onWatchAdForLife = onWatchAdForLife,
+                onWatchAdToForgive = onWatchAdToForgive,
             )
         }
     }
@@ -288,6 +308,10 @@ private fun OutcomeOverlay(
     onBuyLifeWithStars: () -> Unit,
     onForgiveMistakesWithStars: () -> Unit,
     onSkipLevelWithStars: () -> Unit,
+    canWatchAdForLife: Boolean = false,
+    canWatchAdToForgive: Boolean = false,
+    onWatchAdForLife: () -> Unit = {},
+    onWatchAdToForgive: () -> Unit = {},
 ) {
     val palette = LocalPalette.current
     var showSkipConfirm by remember { mutableStateOf(false) }
@@ -334,6 +358,14 @@ private fun OutcomeOverlay(
 
                 // Lose-screen star purchases (spec 7.7) — Levels/Seasons only.
                 if (!won && isLevel && starBalance != null) {
+                    if (lostToMistakes && canWatchAdToForgive) {
+                        Button(
+                            onClick = onWatchAdToForgive,
+                            colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
+                        ) {
+                            Text(stringResource(R.string.levels_forgive_ad_format, LevelPowerUp.FORGIVE_AMOUNT))
+                        }
+                    }
                     if (lostToMistakes && starBalance >= LevelPowerUp.FORGIVE_COST) {
                         Button(
                             onClick = onForgiveMistakesWithStars,
@@ -346,6 +378,14 @@ private fun OutcomeOverlay(
                                     LevelPowerUp.FORGIVE_COST,
                                 ),
                             )
+                        }
+                    }
+                    if (canWatchAdForLife) {
+                        Button(
+                            onClick = onWatchAdForLife,
+                            colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
+                        ) {
+                            Text(stringResource(R.string.levels_watch_ad_for_life))
                         }
                     }
                     if (starBalance >= LevelPowerUp.LIFE_COST) {

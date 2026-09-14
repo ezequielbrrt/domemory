@@ -85,6 +85,17 @@ class GameViewModel(
      * played in a while" restarts every time a game ends, win or lose.
      */
     private val onGameFinished: (() -> Unit)? = null,
+    /**
+     * Fired after every finish that actually commits, with the board's [recordedDifficulty]
+     * and the elapsed game duration in milliseconds — the two inputs
+     * [com.ezequielbrrt.domemory.services.ads.AdFrequencyCap.afterGameCompletion] needs
+     * (mirrors iOS's `presentInterstitialEvery` call from `logGameFinishedIfNeeded`). Never
+     * fired for [skipLevelWithStars] (see that function's doc). Production wires this to
+     * `AdsService.notifyGameFinished` from the composable layer, which owns the `Activity` a
+     * full-screen ad needs to present against — this class stays Android-framework-free like
+     * every other callback here.
+     */
+    private val onCompletionInterstitial: ((Difficulty, Long) -> Unit)? = null,
 ) : ViewModel() {
 
     private val workScope: CoroutineScope get() = scope ?: viewModelScope
@@ -107,6 +118,11 @@ class GameViewModel(
 
     /** Guards [commitLossIfNeeded] — a rescue that undoes the loss never sets this. */
     private var lossCommitted = false
+
+    /** Wall-clock start of the current attempt (spec: iOS's `gameStartedAt`) — the elapsed
+     * time [onCompletionInterstitial] reports is measured from here, and it is reset on
+     * every [restart] so a retried attempt is timed from its own start, not the original. */
+    private var gameStartedAtMillis: Long = now()
 
     init {
         start()
@@ -274,6 +290,7 @@ class GameViewModel(
             }
         }
         recordStats(outcome)
+        notifyCompletionInterstitial()
     }
 
     /**
@@ -287,7 +304,7 @@ class GameViewModel(
      * now out of lives. Firing the spend fire-and-forget would let that check race its own
      * write and read the count from *before* this loss's life was spent.
      */
-    private suspend fun commitLossIfNeeded() {
+    private suspend fun commitLossIfNeeded(allowInterstitial: Boolean = true) {
         if (lossCommitted || mode !is GameMode.Level) return
         val outcome = _state.value.outcome as? GameOutcome.Lost ?: return
         lossCommitted = true
@@ -302,6 +319,14 @@ class GameViewModel(
         }
         levelLives?.spendOnLoss()
         recordStats(outcome)
+        notifyCompletionInterstitial(allowInterstitial)
+    }
+
+    /** [commit] and [commitLossIfNeeded]'s shared last step — see [onCompletionInterstitial]. */
+    private fun notifyCompletionInterstitial(allowInterstitial: Boolean = true) {
+        if (!allowInterstitial) return
+        val callback = onCompletionInterstitial ?: return
+        callback(_state.value.recordedDifficulty, now() - gameStartedAtMillis)
     }
 
     /**
@@ -374,6 +399,7 @@ class GameViewModel(
         winReported = false
         lossCommitted = false
         frozenUntilMillis = 0L
+        gameStartedAtMillis = now()
         game = MemoryGame(board.buildCards())
         _state.value = initialState()
         start()
@@ -527,14 +553,51 @@ class GameViewModel(
      * 15★, confirmation required by the caller. Commits the standing loss (skipping buys
      * the unlock, not a clean record) and unlocks the next level without crediting stars.
      * Returns to the map is the caller's job — this only mutates progress.
+     *
+     * Passes `allowInterstitial = false` to [commitLossIfNeeded] — charging stars to skip a
+     * level and then serving an ad on the way out would be the worst moment in the app to
+     * show one (mirrors iOS's `logGameFinishedIfNeeded(result:allowInterstitial: false)`).
      */
     suspend fun skipLevelWithStars(): Boolean {
         val context = (mode as? GameMode.Level)?.context ?: return false
         if (_state.value.outcome !is GameOutcome.Lost) return false
         val wallet = starWallet ?: return false
         if (!wallet.spend(LevelPowerUp.SKIP_LEVEL_COST)) return false
-        commitLossIfNeeded()
+        commitLossIfNeeded(allowInterstitial = false)
         context.store.skipLevel(context.number)
+        return true
+    }
+
+    // --- Ad-earned lose-screen rescues (spec 7.7 alternates) --------------------------
+    // Mirror [forgiveMistakesWithStars] / [buyLifeWithStars] exactly, minus the star spend —
+    // the ad view already paid for the rescue by playing to completion. The composable layer
+    // calls these from a rewarded ad's earned-reward callback (`AdsService.showRewarded`),
+    // never directly from a tap, since presenting the ad itself needs an `Activity` this
+    // class deliberately does not have.
+
+    /** Ad-earned equivalent of [forgiveMistakesWithStars]. */
+    suspend fun applyForgiveMistakesReward(): Boolean {
+        if (mode !is GameMode.Level) return false
+        val outcome = _state.value.outcome as? GameOutcome.Lost ?: return false
+        if (outcome.reason != LoseReason.TOO_MANY_MISTAKES) return false
+        game.forgiveFailures(LevelPowerUp.FORGIVE_AMOUNT)
+        val flooredTime = maxOf(_state.value.timeRemaining, LevelPowerUp.FORGIVE_MINIMUM_SECONDS)
+        _state.value = _state.value.copy(
+            outcome = null,
+            timeRemaining = flooredTime,
+            failedTries = game.failedTries,
+        )
+        start()
+        return true
+    }
+
+    /** Ad-earned equivalent of [buyLifeWithStars]. */
+    suspend fun applyLifeReward(): Boolean {
+        if (mode !is GameMode.Level) return false
+        if (_state.value.outcome !is GameOutcome.Lost) return false
+        val lives = levelLives ?: return false
+        lives.refill(1)
+        restart()
         return true
     }
 

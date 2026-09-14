@@ -353,7 +353,7 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | Phase 4 | merged (re-landed), **now emulator-verified against a live Firebase season** | `1f17bb7` / PR #44 originally, reverted (`42cc257`, unintentional), re-integrated against Phase 3's hardening in this change | Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule if not already live (a real "Spooky Season" was already readable during this session's verification, so the rule and a season are in fact already live — confirm before re-deploying). |
 | Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
 | Phase 6 | in progress — transactional room protocol, menu/deep-link entry (custom scheme and App Link manifest), invite sharing and QR rendering/scanning, lobby, synchronized board, reconnect grace and rematch are implemented and unit-test clean | current worktree | Deploy O1's App Links association file, then run a live Android↔iOS match before declaring it complete. |
-| Phase 7 | in progress — AdMob SDK/app ID and all nine active placement units are configured; home/game banners are live and the pure frequency-cap policy is unit-test clean | current worktree | Wire full-screen/rewarded/native placement presentation. Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
+| Phase 7 | in progress — AdMob SDK/app ID and all nine active placement units are configured; banners, the completion interstitial, `levels_rewarded_life`/`levels_rewarded_forgive`, and the multiplayer-finished native placement are all wired and presenting through `AdsService`; the frequency-cap policy and its presentation-trigger gate are unit-test clean | current worktree | `game_rewarded_extra_time`/`game_rewarded_hint` remain configured but unwired — no pause modal exists on Android to hang the hint button off, and extra-time has no existing star-purchase call site to slot an alternative into (see this section's implementation note below). App-open is unimplemented — no launch-sequence state machine exists yet for it to gate on (O5). Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
 | Phase 8 | in progress — What’s New version gating and release-notes dialog are implemented and unit-test clean | current worktree | Add Settings entry, review prompt, achievements, haptics, animations, accessibility and localization parity. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
@@ -592,6 +592,110 @@ resulting overlap by hand. See "Reconciling the two branches" above for exactly 
 that overlap was and how each spot was resolved. This is the same reviewed
 implementation, integrated, not redone.
 
+**Phase 7 implementation, this session (2026-09-14):** wired full-screen, rewarded and
+native ad *presentation* on top of the foundation (SDK init, app id, all nine placement
+units, banners, the pure `AdFrequencyCap` policy) merged in PRs #51/#52.
+
+`services/ads/AdsService.kt` grew from an SDK-init-only object into the interstitial/
+rewarded adapter: `loadInterstitial`/`notifyGameFinished` cache one interstitial and
+reload it after every presentation or failure; `loadRewarded`/`showRewarded` do the same
+per rewarded placement (one cached ad per `AdPlacement`, since the four rewarded
+placements share one release unit id but are tracked independently so e.g. buying a life
+with an ad doesn't also consume the cached forgive-mistakes ad). `AdUnitConfiguration`
+gained `isConfigured(placement)` (a placement with a blank id must not load/show — every
+Android placement is non-blank today in both build types, pinned by a new
+`AdUnitConfigurationTest` case, so this is a forward guard, not a currently-live one) and
+`AdMobBanner` now checks it before creating an `AdView`, closing a gap the banner
+foundation had left open. `services/ads/AdMobNativeAdView.kt` is new: a manually-built
+`NativeAdView` hierarchy (media, badge, headline, body, a non-interactive CTA label) bound
+through `AndroidView`'s `update` lambda, the same reason iOS's `AdMobNativeAdView` builds
+its native ad view in plain UIKit rather than SwiftUI — neither toolkit has first-class
+native-ad support.
+
+`services/ads/AdFrequencyCap.kt` gained `GameFinishedInterstitialTrigger`, a small pure
+object (own `GameFinishedInterstitialTriggerTest`, injected clock, no SDK) that folds the
+existing `AdFrequencyCap.afterGameCompletion` decision together with the "never after a
+paid skip" gate (mirrors iOS's `logGameFinishedIfNeeded(result:allowInterstitial:)`) — kept
+separate from `AdsService`'s actual SDK calls so the *decision* stays unit-testable the
+same way the underlying cadence policy already was. `AdsService.notifyGameFinished` is the
+only thing that calls it: on a `REQUEST` decision it shows the cached interstitial if one
+is ready, or kicks off a load for the *next* eligible completion if not — the cadence
+counter is only reset by an actual presentation (`AdFrequencyCap.recordInterstitialPresented`),
+so a load-miss doesn't cost the player a full cadence cycle, it just retries next time.
+
+`GameViewModel` gained `gameStartedAtMillis` (reset on `restart()`, mirrors iOS's
+`gameStartedAt`) and an `onCompletionInterstitial: ((Difficulty, Long) -> Unit)?` callback,
+fired from `commit()` unconditionally and from `commitLossIfNeeded(allowInterstitial)`
+only when `allowInterstitial` is true — `skipLevelWithStars()` is the one caller that
+passes `false`, matching iOS's own skip-path exception exactly. This reuses the class's
+existing single-fire commit paths rather than adding a second notification point, so the
+interstitial fires exactly once per real finish (win, immediate-commit loss, or a
+deferred Level loss once `retry()`/`acknowledgeLossAndQuit()` actually commits it) and
+never for a rescue that undoes the loss. `GameViewModel` also gained
+`applyForgiveMistakesReward()`/`applyLifeReward()` — line-for-line mirrors of
+`forgiveMistakesWithStars()`/`buyLifeWithStars()` minus the wallet spend, since the ad
+already paid for the rescue — and `LevelsViewModel` gained the equivalent
+`applyLifeRewardFromAd()` for the out-of-lives modal. None of these four present an ad
+themselves (`GameViewModel`/`LevelsViewModel` stay Android-framework-free, same as every
+other callback in this file); the composable layer (`NavGraph.kt`'s `LEVEL_GAME`/
+`SEASON_GAME` routes, `LevelsScreen.kt`) calls `AdsService.showRewarded(activity,
+placement, onReward = { coroutineScope.launch { viewModel.applyXReward() } })`, resolving
+`activity` once per `NavGraph` composition via a new `Context.findActivity()` extension
+(DoMemory is single-activity, so this is `MainActivity` for the life of the process).
+`GameScreen.kt` preloads the interstitial and (when `isLevel`) both rewarded placements
+once per game instance via `LaunchedEffect`, mirroring iOS's `trackGameStarted` — a cache
+miss at the actual finish still self-heals through `notifyGameFinished`/`showRewarded`'s
+own load-on-miss fallback, so this is a latency optimization, not a correctness dependency.
+
+`OutcomeOverlay` (`GameScreen.kt`) and `OutOfLivesModal` (`LevelsScreen.kt`) both gained a
+"watch ad" button placed above the equivalent star-purchase button, gated on
+`AdsService.isRewardedConfigured(placement)` — three string resources that had sat unused
+since Phase 0's string catalog (`levels_out_of_lives_message`, `levels_watch_ad_for_life`,
+`levels_forgive_ad_format`) are now live; `levels_out_of_lives_message_no_ad` is the
+fallback when the placement isn't configured. `MultiplayerScreen.kt`'s
+`MultiplayerGameBoard` swaps the finished board's card grid for `AdMobNativeAdView`
+entirely (mirrors iOS, which replaces the grid rather than showing both) when the room is
+`FINISHED` and the native placement is configured.
+
+**Deliberately left as a seam, not silently dropped:** `game_rewarded_extra_time`
+("Watch ad to add 30s") and `game_rewarded_hint` ("Watch ad for a hint") are configured
+placements (`AdUnitConfiguration` maps both, `AdPlacement` carries both) with pre-seeded,
+still-unused string resources, but neither has an Android call site to wire ad
+*presentation* into without first building new player-facing UI: iOS's hint button lives
+on a pause modal, and Android's pause is a silent boolean flip with no modal surface at
+all (`GameHud`'s pause button just toggles `state.isPaused`); iOS's extra-time button is
+ad-only with no star-purchase equivalent on either platform, so there is no existing
+"alternative to a star purchase" to slot it beside the way `levelsRewardedLife`/
+`levelsRewardedForgive` had. Building either means designing new UI/UX (a pause modal, or
+a new lose-screen affordance for every mode including free play, since iOS's extra-time
+rescue isn't Levels-gated), which is a product decision beyond "wire ad presentation" —
+left for whoever builds that surface next, same standard this plan already applied to the
+Levels intro's launch-sequence gate and the season out-of-lives prompt.
+
+**App-open is unimplemented**, not merely unwired — `AdPlacement.APP_OPEN` and its unit id
+exist, but there is no Android launch-sequence state machine (ATT-equivalent, ads
+bring-up, notification primer, in that order) for `presentAppOpenAdIfAvailable`-equivalent
+logic to hook into, the same gap `LevelsIntroGate`'s own Phase 3 note already flagged (O5).
+
+**No purchase/entitlement layer exists on Android**, so nothing here reproduces iOS's
+`suppressesInvoluntaryAds` gate on banners/natives/interstitials/app-open — every
+`involuntaryAdsSuppressed` parameter in `AdFrequencyCap`/`GameFinishedInterstitialTrigger`
+defaults to `false` for exactly this reason (there is no entitlement to read), documented
+at the call site rather than silently omitted. Rewarded placements were never gated on
+this on iOS either (they're opt-in), so that half needed no change.
+
+**`AdFrequencyState` is in-memory only, reset on every process start** — iOS persists its
+interstitial qualifying-completion counter in `UserDefaults` so a relaunch mid-cadence
+picks up where it left off; Android does not (`ANDROID_PLAN.md`'s own Phase 7 scope
+called DataStore for this "unlikely" to be needed this phase). A session-visible
+divergence from iOS, not a correctness bug — the cadence itself (per-difficulty interval,
+20 s floor, 60 s rewarded suppression, 90 s global gap) is unaffected within a session.
+
+**No emulator/instrumentation verification** — same limitation as every prior phase.
+`./gradlew testDebugUnitTest` (287 tests, 39 files, all green) and `./gradlew
+assembleDebug` both pass; actual ad fill, click-through and the AdMob mediation/consent
+pipeline are unverifiable without a device or emulator and are not claimed here.
+
 ## 8. Immediate next steps
 
 1. Verify the remaining boundary cases on an emulator or device — a season's day-boundary
@@ -604,3 +708,12 @@ implementation, integrated, not redone.
 4. Build the season-specific out-of-lives prompt the reconciliation note flags as
    deferred (Seasons currently just pops back to the map instead of endless's
    dedicated modal).
+5. On device/emulator, exercise the Phase 7 ad flows end to end — a completion
+   interstitial actually firing at the right cadence, both rewarded rescues, and the
+   multiplayer-finished native ad — none of which a JVM unit test can observe.
+6. Decide whether `game_rewarded_extra_time`/`game_rewarded_hint` are worth their own
+   new UI (a pause modal for the hint, a cross-mode lose-screen affordance for
+   extra-time) before wiring them — see this session's Phase 7 implementation note for
+   why they were left unwired rather than built speculatively.
+7. Build the app-open launch-sequence state machine (O5) before wiring
+   `AdPlacement.APP_OPEN` — there is nothing to gate it on yet.
