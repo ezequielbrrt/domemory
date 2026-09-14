@@ -97,12 +97,34 @@ class MemoryGame(cards: List<Card>) {
         }
     }
 
+    /** Reveal-pair support (spec 7.6): turns up exactly the given unmatched, face-down
+     * cards. Callers flip everything else down first with [flipDownUnmatched] — this
+     * only ever adds face-up cards, it never removes one. */
+    fun faceUp(ids: Set<Int>, now: Long) {
+        cards = cards.map { card ->
+            if (card.id in ids && !card.isMatched && !card.isFaceUp) {
+                card.copy(isFaceUp = true).startUsingBonusTime(now)
+            } else {
+                card
+            }
+        }
+    }
+
     /** The two card ids of one unmatched pair, or null when none is left. */
     fun findUnmatchedPair(): Pair<Int, Int>? {
         val unmatched = cards.filter { !it.isMatched }
         val group = unmatched.groupBy { it.itemId }.values.firstOrNull { it.size >= 2 }
             ?: return null
         return group[0].id to group[1].id
+    }
+
+    /**
+     * Refunds failed matches after a "forgive mistakes" rescue (spec 7.5). Floors at
+     * zero — this must never make `failedTries` negative and read as a bonus budget.
+     */
+    fun forgiveFailures(count: Int) {
+        if (count <= 0) return
+        failedTries = (failedTries - count).coerceAtLeast(0)
     }
 }
 

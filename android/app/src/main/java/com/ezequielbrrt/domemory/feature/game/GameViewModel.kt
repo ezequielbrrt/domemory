@@ -9,6 +9,8 @@ import com.ezequielbrrt.domemory.core.model.GameMode
 import com.ezequielbrrt.domemory.core.model.MemoryGame
 import com.ezequielbrrt.domemory.services.levels.LevelCurve
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
+import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
+import com.ezequielbrrt.domemory.services.levels.StarWalletService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -28,11 +30,22 @@ import kotlin.math.sqrt
  *    tappable and a third tap resolves the board immediately.
  *  - **Matched hide, 1.0 s** — matched cards leave the board, then the win check runs.
  *  - **Countdown** — ticks against a `frozenUntil` deadline rather than being
- *    cancelled, because cancelling would tear down the flip-back scheduling. Phase 3
- *    hangs Freeze off the same deadline.
+ *    cancelled, because cancelling would tear down the flip-back scheduling. The
+ *    Freeze power-up (spec 7.6) hangs off the same deadline.
  *
  * The win fires exactly once on the transition; re-firing would double-count stats and
  * analytics.
+ *
+ * **Loss commit is deferred for Levels (spec 7.5, 7.7).** Reaching a `Lost` outcome only
+ * shows the lose screen — it does not, by itself, spend the day's life or record the
+ * attempt. iOS mirrors this: `logGameFinishedIfNeeded` for a loss is called from the lose
+ * modal's own "Try Again" / "Go to menu" handlers, not from wherever `loseReason` first
+ * gets set, precisely so a rescue (forgive mistakes, buy a life, skip) taken instead can
+ * cost nothing beyond its own star price. [retry] and [acknowledgeLossAndQuit] are the
+ * "walk away" paths that actually commit it; [forgiveMistakesWithStars] and
+ * [buyLifeWithStars] undo the loss without ever committing it. This deferral applies to
+ * Levels only — Free play and the Daily Challenge keep the original immediate-commit
+ * behavior, since neither has a lose-screen rescue to protect.
  */
 class GameViewModel(
     private val board: Board,
@@ -51,6 +64,8 @@ class GameViewModel(
     /** A longer-lived scope for finish persistence; production passes AppContainer's scope. */
     private val statsScope: CoroutineScope? = null,
     private val levelLives: LevelLivesService? = null,
+    /** Levels/Seasons only (spec 7.6, 7.7) — null in every other mode. */
+    private val starWallet: StarWalletService? = null,
 ) : ViewModel() {
 
     private val workScope: CoroutineScope get() = scope ?: viewModelScope
@@ -65,10 +80,14 @@ class GameViewModel(
     private var flipBackJob: Job? = null
     private var hideJob: Job? = null
     private var mistakeLossJob: Job? = null
+    private var peekJob: Job? = null
 
-    /** Wall-clock deadline the countdown is held to; Phase 3 Freeze writes here. */
+    /** Wall-clock deadline the countdown is held to; written by the Freeze power-up. */
     private var frozenUntilMillis: Long = 0L
     private var winReported = false
+
+    /** Guards [commitLossIfNeeded] — a rescue that undoes the loss never sets this. */
+    private var lossCommitted = false
 
     init {
         start()
@@ -163,14 +182,21 @@ class GameViewModel(
         }
     }
 
+    /**
+     * Arms the deferred mistake-budget loss (spec 7.5). Guarded by [mistakeLossJob] so a
+     * player who keeps mismatching after busting the budget can't keep pushing the 0.8 s
+     * window back forever — once one is scheduled, further mismatches are no-ops until it
+     * either fires or [pause] cancels it. [resume] re-arms it from a fresh 0.8 s window,
+     * which is the "re-armed when the timer restarts" rule, not a resumed countdown.
+     */
     private fun checkMistakeBudget() {
         val max = _state.value.maxFailures ?: return
+        if (_state.value.isFinished || mistakeLossJob != null) return
         if (game.failedTries < max) return
-        mistakeLossJob?.cancel()
         mistakeLossJob = workScope.launch {
             // Deferred so the player sees the pair that finished them (spec 7.5).
             delay(MISTAKE_LOSS_MILLIS)
-            if (_state.value.isPaused) return@launch
+            mistakeLossJob = null
             finish(GameOutcome.Lost(LoseReason.TOO_MANY_MISTAKES))
         }
     }
@@ -181,12 +207,31 @@ class GameViewModel(
         finish(GameOutcome.Won)
     }
 
-    /** Whichever failure landed first wins — never overwrite an existing outcome. */
+    /**
+     * Whichever failure landed first wins — never overwrite an existing outcome. A win
+     * commits immediately (via [commit]); a Level loss only shows the lose screen and is
+     * committed later, by [commitLossIfNeeded] (see the class doc). A loss in any other
+     * mode (free play, the Daily Challenge — neither has a lose-screen rescue to protect)
+     * also commits immediately, through the same [commit].
+     */
     private fun finish(outcome: GameOutcome) {
         if (_state.value.outcome != null) return
         tickJob?.cancel()
         flipBackJob?.cancel()
         _state.value = _state.value.copy(outcome = outcome)
+        val isDeferredLevelLoss = mode is GameMode.Level && outcome is GameOutcome.Lost
+        if (!isDeferredLevelLoss) {
+            commit(outcome)
+        }
+    }
+
+    /**
+     * The immediate-commit path: every win, and a loss in a mode with no lose-screen
+     * rescue to protect. Never reached for a Level loss — that always goes through
+     * [commitLossIfNeeded] instead, which is why there is no life-spend here: only Levels
+     * spend lives (spec 7.4), and Level losses never take this path.
+     */
+    private fun commit(outcome: GameOutcome) {
         (mode as? GameMode.Level)?.context?.let { context ->
             context.store.recordCompletion(
                 level = context.number,
@@ -196,9 +241,34 @@ class GameViewModel(
                 failedTries = _state.value.failedTries,
             )
         }
-        if (mode is GameMode.Level && outcome is GameOutcome.Lost) {
-            levelLives?.let { lives -> statsWorkScope.launch { lives.spendOnLoss() } }
+        recordStats(outcome)
+    }
+
+    /**
+     * Commits a standing Level loss exactly once. A no-op when there is nothing standing
+     * to commit (free play, a mid-game quit with no outcome yet, or a loss already
+     * committed) — safe to call from every "walk away" path without its own guard.
+     *
+     * `suspend`, and awaits the life spend directly rather than firing it via
+     * `statsWorkScope.launch` the way [commit] does for the immediate-commit paths: [retry]
+     * calls this and then, in the same coroutine, immediately checks whether the player is
+     * now out of lives. Firing the spend fire-and-forget would let that check race its own
+     * write and read the count from *before* this loss's life was spent.
+     */
+    private suspend fun commitLossIfNeeded() {
+        if (lossCommitted || mode !is GameMode.Level) return
+        val outcome = _state.value.outcome as? GameOutcome.Lost ?: return
+        lossCommitted = true
+        (mode as? GameMode.Level)?.context?.let { context ->
+            context.store.recordCompletion(
+                level = context.number,
+                didWin = false,
+                timeRemaining = _state.value.timeRemaining,
+                totalTime = _state.value.totalTime,
+                failedTries = _state.value.failedTries,
+            )
         }
+        levelLives?.spendOnLoss()
         recordStats(outcome)
     }
 
@@ -214,12 +284,29 @@ class GameViewModel(
 
     fun pause() {
         if (_state.value.isFinished) return
+        // Pausing during the mistake-loss deferral must not let the player play on past
+        // the budget "for free" by never letting the delay elapse — cancelling it here
+        // and re-arming a fresh one from `resume()` is the actual spec 7.5 rule.
+        mistakeLossJob?.cancel()
+        mistakeLossJob = null
+        // A peek left running through a pause would leave the board revealed for free
+        // once resumed (spec 7.6).
+        endPeekIfActive()
         _state.value = _state.value.copy(isPaused = true)
     }
 
     fun resume() {
         if (_state.value.isFinished) return
         _state.value = _state.value.copy(isPaused = false)
+        checkMistakeBudget()
+    }
+
+    private fun endPeekIfActive() {
+        val job = peekJob ?: return
+        peekJob = null
+        job.cancel()
+        game.flipDownUnmatched(now())
+        publishCards()
     }
 
     private fun publishCards() {
@@ -236,6 +323,7 @@ class GameViewModel(
         flipBackJob?.cancel()
         hideJob?.cancel()
         mistakeLossJob?.cancel()
+        peekJob?.cancel()
     }
 
     /**
@@ -245,13 +333,177 @@ class GameViewModel(
      * again" left the previous game's countdown ticking forever. Restarting in place
      * instead means the real nav graph's `ViewModelStore` only ever tears this down once,
      * on actually leaving the screen.
+     *
+     * Does not itself commit a standing loss — see [retry], the lose-screen entry point
+     * that does, then calls this.
      */
     fun restart() {
         stop()
         winReported = false
+        lossCommitted = false
+        frozenUntilMillis = 0L
         game = MemoryGame(board.buildCards())
         _state.value = initialState()
         start()
+    }
+
+    /**
+     * Lose-screen "Try Again" (spec 7.7): commits a standing Level loss — this is the
+     * moment the day's life is actually spent, not the loss itself — then refuses to
+     * restart when that leaves the player at 0 lives, the same gate that guards starting
+     * a fresh level (spec 7.4). Returns false in that case; the caller is expected to show
+     * the out-of-lives prompt instead of navigating into a new attempt. Free play, the
+     * Daily Challenge, and a restart with nothing standing to commit (the pause modal's
+     * reload) always restart.
+     */
+    suspend fun retry(): Boolean {
+        val hadLevelLoss = mode is GameMode.Level && _state.value.outcome is GameOutcome.Lost
+        commitLossIfNeeded()
+        if (hadLevelLoss && levelLives?.hasLivesRemaining() == false) return false
+        restart()
+        return true
+    }
+
+    /**
+     * Lose-screen "Go to menu" (spec 7.7): commits a standing loss without restarting.
+     * Fire-and-forget is fine here — unlike [retry], nothing downstream needs to observe
+     * the post-spend life count, and the caller (a synchronous Compose click handler)
+     * navigates away immediately regardless.
+     */
+    fun acknowledgeLossAndQuit() {
+        statsWorkScope.launch { commitLossIfNeeded() }
+    }
+
+    // --- Power-ups (spec 7.6) — Levels and Seasons only, bought mid-game with no
+    // confirmation step. The star spend is awaited *before* the effect is applied (see
+    // [spendOnPowerUp]) so a purchase can never grant its effect for free. ------------
+
+    suspend fun buyExtraTime(): Boolean = spendOnPowerUp(LevelPowerUp.EXTRA_TIME) {
+        _state.value = _state.value.copy(
+            timeRemaining = _state.value.timeRemaining + LevelPowerUp.EXTRA_TIME_SECONDS,
+        )
+        true
+    }
+
+    suspend fun buyPeek(): Boolean = spendOnPowerUp(LevelPowerUp.PEEK) {
+        peekJob?.cancel()
+        flipBackJob?.cancel()
+        flipBackJob = null
+        game.faceUpAllUnmatched(now())
+        publishCards()
+        peekJob = workScope.launch {
+            delay((LevelPowerUp.PEEK_DURATION_SECONDS * 1000).toLong())
+            peekJob = null
+            game.flipDownUnmatched(now())
+            publishCards()
+        }
+        true
+    }
+
+    suspend fun buyFreeze(): Boolean = spendOnPowerUp(LevelPowerUp.FREEZE) {
+        frozenUntilMillis = now() + (LevelPowerUp.FREEZE_DURATION_SECONDS * 1000).toLong()
+        _state.value = _state.value.copy(isFrozen = true)
+        true
+    }
+
+    suspend fun buyRevealPair(): Boolean = spendOnPowerUp(LevelPowerUp.REVEAL_PAIR) {
+        val pair = game.findUnmatchedPair()
+        if (pair == null) {
+            false
+        } else {
+            flipBackJob?.cancel()
+            game.flipDownUnmatched(now())
+            game.faceUp(setOf(pair.first, pair.second), now())
+            publishCards()
+            // Reveal pair re-arms the normal 2 s flip-back (spec 7.6).
+            scheduleFlipBack()
+            true
+        }
+    }
+
+    /**
+     * Shared gate for every power-up: Levels/Seasons only, not paused, not finished —
+     * then spends the stars *first*, through [StarWalletService.spend]'s atomic
+     * DataStore transaction, and only calls [apply] once that spend actually succeeds.
+     *
+     * This ordering matters: an earlier version applied the effect optimistically off a
+     * cached `canAfford` check and fired the spend afterward without checking its
+     * result. Two power-ups (or the same one double-tapped) bought back-to-back, before
+     * either's background spend had completed, could both pass the same stale
+     * `canAfford` check — the second `spend()` would then correctly fail against the
+     * real balance, but its effect had already been granted for free, since nothing
+     * looked at that failure. Spending first closes that window: the real, serialized
+     * balance decides before any effect exists to roll back. If [apply] itself then
+     * reports failure (e.g. reveal pair with no unmatched pair left), the spend is
+     * refunded via [StarWalletService.credit] so a failed power-up never costs stars.
+     */
+    private suspend fun spendOnPowerUp(powerUp: LevelPowerUp, apply: () -> Boolean): Boolean {
+        if (mode !is GameMode.Level) return false
+        if (_state.value.isPaused || _state.value.isFinished) return false
+        val wallet = starWallet ?: return false
+        if (!wallet.spend(powerUp.cost)) return false
+        // Re-check after the suspending spend: the game could have finished or been
+        // paused while that transaction was in flight.
+        if (_state.value.isPaused || _state.value.isFinished || !apply()) {
+            wallet.credit(powerUp.cost)
+            return false
+        }
+        return true
+    }
+
+    // --- Lose-screen star purchases (spec 7.7) ----------------------------------------
+
+    /**
+     * 8★: forgives 3 mistakes and resumes the *same* board — matched pairs stay matched.
+     * Not a game finish: never commits the loss, so no life is spent and nothing is
+     * recorded, matching spec 7.5's rescue exactly.
+     */
+    suspend fun forgiveMistakesWithStars(): Boolean {
+        if (mode !is GameMode.Level) return false
+        val outcome = _state.value.outcome as? GameOutcome.Lost ?: return false
+        if (outcome.reason != LoseReason.TOO_MANY_MISTAKES) return false
+        val wallet = starWallet ?: return false
+        if (!wallet.spend(LevelPowerUp.FORGIVE_COST)) return false
+        game.forgiveFailures(LevelPowerUp.FORGIVE_AMOUNT)
+        // A floored clock, or the resumed board could restart already expired (spec 7.5).
+        val flooredTime = maxOf(_state.value.timeRemaining, LevelPowerUp.FORGIVE_MINIMUM_SECONDS)
+        _state.value = _state.value.copy(
+            outcome = null,
+            timeRemaining = flooredTime,
+            failedTries = game.failedTries,
+        )
+        start()
+        return true
+    }
+
+    /**
+     * 10★: +1 life (capped at 4) and restarts the level. Never commits the loss itself —
+     * mirrors iOS, which does not log a finish for this path either.
+     */
+    suspend fun buyLifeWithStars(): Boolean {
+        if (mode !is GameMode.Level) return false
+        if (_state.value.outcome !is GameOutcome.Lost) return false
+        val wallet = starWallet ?: return false
+        val lives = levelLives ?: return false
+        if (!wallet.spend(LevelPowerUp.LIFE_COST)) return false
+        lives.refill(1)
+        restart()
+        return true
+    }
+
+    /**
+     * 15★, confirmation required by the caller. Commits the standing loss (skipping buys
+     * the unlock, not a clean record) and unlocks the next level without crediting stars.
+     * Returns to the map is the caller's job — this only mutates progress.
+     */
+    suspend fun skipLevelWithStars(): Boolean {
+        val context = (mode as? GameMode.Level)?.context ?: return false
+        if (_state.value.outcome !is GameOutcome.Lost) return false
+        val wallet = starWallet ?: return false
+        if (!wallet.spend(LevelPowerUp.SKIP_LEVEL_COST)) return false
+        commitLossIfNeeded()
+        context.store.skipLevel(context.number)
+        return true
     }
 
     override fun onCleared() {

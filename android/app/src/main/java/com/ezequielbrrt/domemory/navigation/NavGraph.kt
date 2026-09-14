@@ -1,6 +1,7 @@
 package com.ezequielbrrt.domemory.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,6 +22,7 @@ import com.ezequielbrrt.domemory.core.model.GameMode
 import com.ezequielbrrt.domemory.feature.game.GameScreen
 import com.ezequielbrrt.domemory.feature.game.GameViewModel
 import com.ezequielbrrt.domemory.feature.game.UserPreferencesGameStatsRecorder
+import com.ezequielbrrt.domemory.feature.levels.LevelsViewModel
 import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaScreen
 import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaViewModel
 import com.ezequielbrrt.domemory.feature.menu.MenuScreen
@@ -73,6 +75,18 @@ fun NavGraph(
                 },
             )
             val state by viewModel.state.collectAsState()
+            val levelsViewModel: LevelsViewModel = viewModel(
+                factory = viewModelFactory {
+                    initializer {
+                        LevelsViewModel(
+                            progress = container.levelProgress,
+                            lives = container.levelLives,
+                            wallet = container.starWallet,
+                            introGate = container.levelsIntroGate,
+                        )
+                    }
+                },
+            )
             MenuScreen(
                 state = state,
                 onSelectTab = viewModel::selectTab,
@@ -84,7 +98,7 @@ fun NavGraph(
                 },
                 onCreateMemorama = { navController.navigate(Routes.CREATE_MEMORAMA) },
                 onSettings = { navController.navigate(Routes.SETTINGS) },
-                levelProgress = container.levelProgress,
+                levelsViewModel = levelsViewModel,
                 onLevelSelected = { navController.navigate(Routes.level(it)) },
             )
         }
@@ -92,9 +106,78 @@ fun NavGraph(
         composable(Routes.LEVEL_GAME, arguments = listOf(navArgument("level") { type = NavType.IntType })) { entry ->
             val level = entry.arguments?.getInt("level") ?: 1
             val store = container.levelProgress
-            val viewModel: GameViewModel = viewModel(factory = viewModelFactory { initializer { GameViewModel(board = store.board(level), mode = GameMode.Level(com.ezequielbrrt.domemory.core.model.LevelContext(level, store)), stats = UserPreferencesGameStatsRecorder(container.prefs), statsScope = container.applicationScope, levelLives = container.levelLives) } })
+            val viewModel: GameViewModel = viewModel(
+                factory = viewModelFactory {
+                    initializer {
+                        GameViewModel(
+                            board = store.board(level),
+                            mode = GameMode.Level(com.ezequielbrrt.domemory.core.model.LevelContext(level, store)),
+                            stats = UserPreferencesGameStatsRecorder(container.prefs),
+                            statsScope = container.applicationScope,
+                            levelLives = container.levelLives,
+                            starWallet = container.starWallet,
+                        )
+                    }
+                },
+            )
             val state by viewModel.state.collectAsState()
-            GameScreen(state, viewModel::choose, { if (state.isPaused) viewModel.resume() else viewModel.pause() }, { navController.popBackStack() }, viewModel::restart)
+            val starBalance by container.starWallet.balance.collectAsState()
+            val coroutineScope = rememberCoroutineScope()
+
+            // The same LevelsViewModel instance still on the Menu back-stack entry —
+            // refreshed on the way out so newly-spent lives and stars show up the moment
+            // the player is back on the map (mirrors iOS's `LevelsView.onDisappear`).
+            val menuEntry = remember { navController.getBackStackEntry(Routes.MENU) }
+            val levelsViewModel: LevelsViewModel = viewModel(
+                viewModelStoreOwner = menuEntry,
+                factory = viewModelFactory {
+                    initializer {
+                        LevelsViewModel(
+                            progress = container.levelProgress,
+                            lives = container.levelLives,
+                            wallet = container.starWallet,
+                            introGate = container.levelsIntroGate,
+                        )
+                    }
+                },
+            )
+            DisposableEffect(Unit) {
+                onDispose { levelsViewModel.refresh() }
+            }
+
+            GameScreen(
+                state = state,
+                onChoose = viewModel::choose,
+                onPauseToggle = { if (state.isPaused) viewModel.resume() else viewModel.pause() },
+                onQuit = {
+                    viewModel.acknowledgeLossAndQuit()
+                    navController.popBackStack()
+                },
+                onRetry = {
+                    coroutineScope.launch {
+                        if (!viewModel.retry()) {
+                            // Out of lives after this loss committed — stay put; the
+                            // Levels map's own out-of-lives prompt is where the player
+                            // buys back in, matching iOS's LoseModal that re-renders into
+                            // its out-of-lives state instead of restarting (spec 7.4).
+                            navController.popBackStack()
+                        }
+                    }
+                },
+                isLevel = true,
+                starBalance = starBalance,
+                onBuyExtraTime = { coroutineScope.launch { viewModel.buyExtraTime() } },
+                onBuyPeek = { coroutineScope.launch { viewModel.buyPeek() } },
+                onBuyFreeze = { coroutineScope.launch { viewModel.buyFreeze() } },
+                onBuyRevealPair = { coroutineScope.launch { viewModel.buyRevealPair() } },
+                onBuyLifeWithStars = { coroutineScope.launch { viewModel.buyLifeWithStars() } },
+                onForgiveMistakesWithStars = { coroutineScope.launch { viewModel.forgiveMistakesWithStars() } },
+                onSkipLevelWithStars = {
+                    coroutineScope.launch {
+                        if (viewModel.skipLevelWithStars()) navController.popBackStack()
+                    }
+                },
+            )
         }
 
         composable(Routes.SETTINGS) {

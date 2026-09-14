@@ -11,6 +11,8 @@ import com.ezequielbrrt.domemory.data.repository.BoardCatalogRepository
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogSource
 import com.ezequielbrrt.domemory.services.levels.LevelProgressService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
+import com.ezequielbrrt.domemory.services.levels.LevelsIntroGate
+import com.ezequielbrrt.domemory.services.levels.StarWalletService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -49,6 +51,8 @@ class AppContainer(
 
     val levelProgress = LevelProgressService(prefs, applicationScope)
     val levelLives = LevelLivesService(prefs, dayProvider)
+    val starWallet = StarWalletService(prefs, applicationScope)
+    val levelsIntroGate = LevelsIntroGate(prefs)
 
     fun todayKey(): String = DayKey.of(dayProvider.today())
 }
