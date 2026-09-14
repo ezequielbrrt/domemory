@@ -37,6 +37,8 @@ android {
 
     buildFeatures {
         compose = true
+        // Unit selection must never send debug traffic to production AdMob placements.
+        buildConfig = true
     }
 
     kotlin {
@@ -66,6 +68,7 @@ dependencies {
     implementation(libs.coil.network.okhttp)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.google.mobile.ads)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

@@ -70,15 +70,15 @@ graph in the same change.
 | `services/levels` | `LevelCurve`, `Stars`, `BoardGenerators`, `LevelProgressService`, `LevelLivesService`, `StarWalletService`, `LevelPowerUp`, `LevelsIntroGate` — Phase 3, feature-complete including hardening |
 | `services/seasons` | `Season`, `SeasonDecoder`, `SeasonCatalogService`, `SeasonProgressService`, `SeasonLocaleResolver` — Phase 4, feature-complete |
 | `services/daily` | `DailyChallengeService` — deterministic board, streak/milestone tracking (Phase 5) |
-| `core/deeplink` | `DeepLink`, `DeepLinkRouter` — `domemory://daily` and `domemory://join/CODE` parsing (Phase 5); `Join` parses but is not yet routed (Phase 6) |
+| `core/deeplink` | `DeepLink`, `DeepLinkRouter` — `domemory://daily` and `domemory://join/CODE` parsing and routing |
 | `feature/seasons`, `feature/daily` | `SeasonCard`/`SeasonLevelsScreen` and `DailyChallengeCard` — the menu entry points for Phases 4 and 5 |
 | `services/notifications`, `feature/notifications` | `NotificationService`, reminder workers and the once-per-install permission primer — the three local reminders and their OS-permission sync (Phase 5) |
 | `widget` | `DailyChallengeGlanceWidget`, receiver and calendar-aligned WorkManager refresh — the Daily Challenge home-screen widget (Phase 5) |
-| `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 protocol foundation; UI, sharing and reconnect presentation remain follow-up work |
+| `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 in progress; create/join, invite sharing, gameplay, reconnect grace and rematch exist, while QR rendering and live cross-platform verification remain follow-up work |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
 
 Everything else in the plan's package layout (`ads/`, `purchases/`, `haptics/`,
-`multiplayer/` feature UI) does not exist yet. Check
+full `multiplayer/` feature gameplay UI) does not exist yet. Check
 `ANDROID_PLAN.md` §4 before assuming a service is missing by accident rather
 than by phase.
 
@@ -134,8 +134,9 @@ committing a change to anything under `core/` or `services/`.
 Phases 0–5 (Levels, including its correctness hardening; Seasons; and Daily Challenge)
 are complete in the current worktree. Phase 5 includes the deterministic board,
 streak/milestone tracking, menu card, deep links, Glance widget and local reminders.
-Phase 6 has its tested room-protocol foundation only; do not represent multiplayer as
-shipped until its UI, invite flow and reconnect grace behavior land.
+Phase 6 has create/join, invite, gameplay, reconnect grace and rematch over its tested room
+protocol foundation; do not represent multiplayer as shipped until QR and live Android↔iOS
+verification land.
 `ANDROID_PLAN.md` §7 contains the required handoff ledger: read it before starting
 Android work, update it when a migration slice changes state, and do not infer a feature
 is complete merely because its type or screen exists.

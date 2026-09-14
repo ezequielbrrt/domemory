@@ -14,6 +14,7 @@ import com.ezequielbrrt.domemory.data.repository.BoardCatalogRepository
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogSource
 import com.ezequielbrrt.domemory.services.daily.DailyChallengeService
 import com.ezequielbrrt.domemory.services.notifications.NotificationService
+import com.ezequielbrrt.domemory.services.multiplayer.MultiplayerService
 import com.ezequielbrrt.domemory.widget.DailyChallengeGlanceWidget
 import com.ezequielbrrt.domemory.services.levels.LevelProgressService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
@@ -70,6 +71,7 @@ class AppContainer(
     val levelsIntroGate = LevelsIntroGate(prefs)
     val dailyChallenge = DailyChallengeService(prefs, dayProvider)
     val deepLinkRouter = DeepLinkRouter()
+    val multiplayer = MultiplayerService()
 
     /** Local reminders (spec 11.2) — inactivity tiers, the streak-at-risk nudge, permission sync. */
     val notifications = NotificationService(appContext, prefs, dailyChallenge)

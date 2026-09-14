@@ -47,6 +47,22 @@ data class MultiplayerCard(
     companion object { fun from(card: Card) = MultiplayerCard(card.id, card.itemId, card.content, card.isFaceUp, card.isMatched) }
 }
 
+/** Stable card serialization shared by both native clients; do not shuffle this list. */
+object MultiplayerCards {
+    fun from(board: Board): List<MultiplayerCard> = if (board.isDoubleItem) {
+        board.items.flatMapIndexed { itemId, content ->
+            listOf(
+                MultiplayerCard(id = itemId * 2, itemId = itemId, content = content),
+                MultiplayerCard(id = itemId * 2 + 1, itemId = itemId, content = content),
+            )
+        }
+    } else {
+        board.items.mapIndexed { index, content ->
+            MultiplayerCard(id = index, itemId = if (index % 2 == 0) index else index - 1, content = content)
+        }
+    }
+}
+
 data class MultiplayerRoom(
     val id: String,
     val code: String,

@@ -492,26 +492,6 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
         return result
     }
 
-    // -- Purchases / entitlements (12.3, 13.2) ---------------------------------------------
-
-    val hasRemovedAdsPurchased: Flow<Boolean> = booleanFlow(Keys.PURCHASES_HAS_REMOVED_ADS, default = false)
-
-    suspend fun setHasRemovedAdsPurchased(value: Boolean) = setBoolean(Keys.PURCHASES_HAS_REMOVED_ADS, value)
-
-    /** Epoch millis the rewarded "free ad-free day" expires at; null when none is active. */
-    val rewardedRemoveAdsExpirationEpochMillis: Flow<Long?> =
-        dataStore.data.map { it[Keys.PURCHASES_REWARDED_REMOVE_ADS_EXPIRATION] }.distinctUntilChanged()
-
-    suspend fun setRewardedRemoveAdsExpirationEpochMillis(epochMillis: Long?) {
-        dataStore.edit { prefs ->
-            if (epochMillis == null) {
-                prefs.remove(Keys.PURCHASES_REWARDED_REMOVE_ADS_EXPIRATION)
-            } else {
-                prefs[Keys.PURCHASES_REWARDED_REMOVE_ADS_EXPIRATION] = epochMillis
-            }
-        }
-    }
-
     // -- Ads frequency capping (12.2, 13.2) -------------------------------------------------
 
     val gameFinishedInterstitialCompletionCount: Flow<Int> =
@@ -625,9 +605,6 @@ private object Keys {
     val DAILY_STREAK_LONGEST = intPreferencesKey("dailyStreakLongest")
     val DAILY_LAST_COMPLETED_DAY = stringPreferencesKey("dailyLastCompletedDay")
     val DAILY_LAST_ATTEMPT_DAY = stringPreferencesKey("dailyLastAttemptDay")
-
-    val PURCHASES_HAS_REMOVED_ADS = booleanPreferencesKey("purchases.has_removed_ads")
-    val PURCHASES_REWARDED_REMOVE_ADS_EXPIRATION = longPreferencesKey("purchases.rewarded_remove_ads_expiration_date")
 
     val ADS_INTERSTITIAL_COMPLETION_COUNT = intPreferencesKey("ads.game_finished_interstitial_completion_count")
 }

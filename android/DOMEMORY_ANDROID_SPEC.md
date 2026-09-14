@@ -34,8 +34,8 @@ six things that make it a live product rather than a toy:
    Realtime Database, joined by a 6-character code, QR scan or invite link.
 6. **Custom memoramas** — player-authored emoji card sets stored locally.
 
-Monetization is AdMob (banner / interstitial / rewarded / app-open / native) plus
-a single non-consumable "Remove Ads" IAP.
+Android monetization is currently AdMob (banner / interstitial / rewarded / app-open /
+native). Remove Ads purchases and the temporary rewarded ad-free day are deferred.
 
 ### Platform targets (iOS, for reference)
 
@@ -422,9 +422,6 @@ legacy — skip it.
 - At 0 lives, tapping any level tile is **refused** — a warning haptic fires and
   the Out-of-Lives modal appears instead of starting a game.
 - Refills: **rewarded ad** (+1) or **10 stars** (+1). Both cap at 4.
-- **The daily budget applies to Remove Ads purchasers too.** Losing has to cost
-  something or the levels have no stakes. Both refills stay open to them (see
-  §12.3).
 
 ### 7.5 The mistake budget
 
@@ -946,7 +943,6 @@ landing the ad directly on top of the release announcement.
 | `game_rewarded_hint` | rewarded | pause screen → reveal one pair |
 | `levels_rewarded_life` | rewarded | out of lives → +1 life |
 | `levels_rewarded_forgive` | rewarded | mistake bust → forgive 3 |
-| `settings_rewarded_remove_ads` | rewarded | Settings → 24 h ad-free |
 | `app_open` | app-open | on foreground |
 | `multiplayer_finished_native` | native | multiplayer end screen |
 
@@ -975,26 +971,12 @@ The rules that stop the app feeling like an ad delivery mechanism:
   full-screen ad is presenting, only if no first-run surface is up, and only if
   the cached ad is **fresher than 4 hours**.
 
-### 12.3 Remove Ads
+### 12.3 Remove Ads — deferred on Android
 
-- Single **non-consumable** IAP, `com.ezequielbrrt.domemory.removeads`, $0.99.
-  Entitlement is persisted locally and refreshed from the store's transaction
-  history; a background listener applies updates. "Restore purchases" is a
-  first-class Settings row (it was once unreachable behind a missing scroll view —
-  a real bug that stranded reinstalling customers).
-- **A rewarded "free ad-free day"**: watch one ad in Settings to disable ads for
-  **24 hours**. Stored as an expiry timestamp; `hasRemovedAds` is
-  `purchased || rewardedExpiry > now`.
-- **Remove Ads suppresses involuntary advertising only** — banners, natives,
-  interstitials, app-open: the ones that interrupt without being asked for.
-  **Rewarded ads stay available to purchasers**, because they are opt-in and hand
-  something back. Purchasers keep the extra-time ad, the hint ad, the lives ad and
-  the forgive ad.
-- **Purchasers still spend daily lives.** Losing has to cost something.
-
-**Android:** Google Play Billing Library, one-time (non-consumable) product,
-`acknowledgePurchase` is mandatory within 3 days or the purchase is refunded.
-Query purchases on launch to restore.
+The non-consumable `com.ezequielbrrt.domemory.removeads` product, restore flow, and
+the Settings-only rewarded 24-hour ad-free day are intentionally absent from the
+current Android scope. This deferral does not affect normal opt-in rewarded ads for
+extra time, hints, lives, or mistake forgiveness.
 
 ---
 

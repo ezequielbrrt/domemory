@@ -172,7 +172,6 @@
     <string name="settings_description">Adjust your game preferences</string>
     <string name="settings_section_game">Game</string>
     <string name="settings_section_preferences">Preferences</string>
-    <string name="settings_section_purchases">Purchases</string>
     <string name="settings_section_about">About</string>
     <string name="settings_theme_title">Theme</string>
     <string name="settings_theme_prompt">Choose your preferred appearance</string>
@@ -192,31 +191,6 @@
     <string name="settings_review_description">Reviews help other players find the game</string>
     <string name="settings_whats_new_title">What\'s New</string>
     <string name="settings_whats_new_description">See what changed in the latest update</string>
-
-    <!-- Purchases -->
-    <string name="settings_remove_ads_title">Remove ads</string>
-    <string name="settings_remove_ads_description">Remove banners and interstitials</string>
-    <string name="settings_remove_ads_action_format">Buy %s</string>
-    <string name="settings_remove_ads_loading">Loading</string>
-    <string name="settings_remove_ads_purchased">Purchased</string>
-    <string name="settings_remove_ads_purchased_description">Ads are disabled on this device</string>
-    <string name="settings_remove_ads_unavailable">Remove Ads is unavailable right now</string>
-    <string name="settings_remove_ads_pending">Purchase pending approval</string>
-    <string name="settings_remove_ads_no_restore">No Remove Ads purchase was found</string>
-    <string name="settings_rewarded_remove_ads_title">Free ad-free day</string>
-    <string name="settings_rewarded_remove_ads_description">Watch an ad to disable ads for 24 hours</string>
-    <string name="settings_rewarded_remove_ads_action">Watch</string>
-    <string name="settings_rewarded_remove_ads_active">Active</string>
-    <string name="settings_rewarded_remove_ads_active_format">Ads are disabled until %s</string>
-    <string name="settings_rewarded_remove_ads_success_title">Ads disabled</string>
-    <string name="settings_rewarded_remove_ads_success_message">Ads are disabled for the next 24 hours.</string>
-    <string name="settings_restore_purchases_title">Restore purchases</string>
-    <string name="settings_restore_purchases_description">Recover a previous purchase</string>
-    <string name="settings_restore_purchases_action">Restore</string>
-    <string name="settings_purchase_success_title">Purchase Successful</string>
-    <string name="settings_purchase_success_message">Ads have been removed. Enjoy the game!</string>
-    <string name="settings_restore_success_title">Purchases Restored</string>
-    <string name="settings_restore_success_message">Your previous purchase has been restored.</string>
 
     <!-- Achievements -->
     <string name="achievements_title">Achievements</string>
