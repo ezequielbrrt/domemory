@@ -38,6 +38,7 @@ class DeepLinkTest {
     @Test fun `an unrelated link is not a deep link`() {
         assertNull(DeepLink.parse("domemory://something-else"))
         assertNull(DeepLink.parse("https://example.com/daily-ish"))
+        assertNull(DeepLink.parse("https://example.com/join/AB12CD"))
     }
 
     @Test fun `blank, null and unparseable input all return null`() {

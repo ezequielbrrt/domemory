@@ -21,6 +21,11 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-4297174845441653~9801529431" />
 
+        <!-- Lets Play services prefetch the permission-less QR scanning module for Play installs. -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -41,6 +46,17 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="domemory" />
+            </intent-filter>
+
+            <!-- The parser already accepts https://domemory.app/join/CODE and /daily.
+                 autoVerify takes effect once the O1 assetlinks.json association is hosted. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="domemory.app" />
             </intent-filter>
         </activity>
 
