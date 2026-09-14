@@ -135,6 +135,7 @@
     <string name="multiplayer_join_description">Enter the 6-character room code from your friend.</string>
     <string name="multiplayer_code_placeholder">ABC123</string>
     <string name="multiplayer_qr_code">Multiplayer room QR code</string>
+    <string name="multiplayer_scan_qr_code">Scan QR code</string>
     <string name="multiplayer_start_game">Start game</string>
     <string name="multiplayer_waiting_for_player">Share this code and wait for another player</string>
     <string name="multiplayer_ready_to_start">Player joined. Start when ready</string>

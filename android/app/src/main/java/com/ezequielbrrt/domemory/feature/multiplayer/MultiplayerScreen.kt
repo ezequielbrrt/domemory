@@ -29,6 +29,14 @@ class MultiplayerViewModel(private val service: MultiplayerService) : ViewModel(
     private var reconnectDeadline: kotlinx.coroutines.Job? = null
     fun create(board: Board) = launchRoomAction { service.createRoom(board).id }
     fun join(code: String) = launchRoomAction { service.joinRoom(code) }
+    fun joinScannedInvite(rawValue: String?) {
+        MultiplayerQrScan.roomCode(rawValue)?.let(::join) ?: run {
+            _state.value = _state.value.copy(error = "This QR code is not a DoMemory room.")
+        }
+    }
+    fun reportScanFailure(error: Throwable) {
+        _state.value = _state.value.copy(error = error.message ?: "Could not scan the QR code.")
+    }
     fun start(room: MultiplayerRoom, boards: List<Board>) = launchRoomAction {
         val board = boards.firstOrNull { it.id == room.gameId }
             ?: room.customGamePayload?.asBoard(room.gameId, room.difficulty)
@@ -113,6 +121,7 @@ class MultiplayerViewModel(private val service: MultiplayerService) : ViewModel(
             }
             Text("$message\n${room.code}")
             if (room.status in setOf(MultiplayerRoomStatus.WAITING, MultiplayerRoomStatus.READY)) {
+                MultiplayerQrCode(room.code)
                 Button(
                     onClick = {
                         val caption = context.getString(R.string.multiplayer_invite_message, room.code)
@@ -132,6 +141,17 @@ class MultiplayerViewModel(private val service: MultiplayerService) : ViewModel(
         } ?: run {
             OutlinedTextField(code, { code = it }, label = { Text(stringResource(R.string.multiplayer_code_placeholder)) }, modifier = Modifier.fillMaxWidth())
             Button(onClick = { vm.join(code) }, enabled = code.isNotBlank() && !state.loading, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.multiplayer_join_room)) }
+            OutlinedButton(
+                onClick = {
+                    launchMultiplayerQrScanner(
+                        context = context,
+                        onScanned = vm::joinScannedInvite,
+                        onFailure = vm::reportScanFailure,
+                    )
+                },
+                enabled = !state.loading,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(stringResource(R.string.multiplayer_scan_qr_code)) }
             boards.firstOrNull()?.let { board -> Button(onClick = { vm.create(board) }, enabled = !state.loading, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.multiplayer_create_room)) } }
         }
         if (state.loading) CircularProgressIndicator(color = p.primary)

@@ -21,19 +21,25 @@ sealed interface DeepLink {
     companion object {
         private const val CODE_LENGTH = 6
         private const val CUSTOM_SCHEME = "domemory"
+        private const val APP_LINK_SCHEME = "https"
+        private const val APP_LINK_HOST = "domemory.app"
 
         /** Null for anything unparseable or not one of the accepted forms. */
         fun parse(raw: String?): DeepLink? {
             val trimmed = raw?.trim().orEmpty()
             if (trimmed.isEmpty()) return null
             val uri = runCatching { URI(trimmed) }.getOrNull() ?: return null
+            val isCustomScheme = uri.scheme.equals(CUSTOM_SCHEME, ignoreCase = true)
+            val isAppLink = uri.scheme.equals(APP_LINK_SCHEME, ignoreCase = true) &&
+                uri.host.equals(APP_LINK_HOST, ignoreCase = true)
+            if (!isCustomScheme && !isAppLink) return null
 
             // "Gather the host (custom scheme only) plus path components": for
             // domemory://daily the host *is* "daily" (there's no "//" authority concept a
             // custom scheme needs), but https://domemory.app/daily's host is the real
             // domain and must not be treated as a path segment.
             val segments = buildList {
-                if (uri.scheme.equals(CUSTOM_SCHEME, ignoreCase = true)) {
+                if (isCustomScheme) {
                     uri.host?.takeIf(String::isNotBlank)?.let(::add)
                 }
                 uri.path?.split('/')?.filter(String::isNotBlank)?.let(::addAll)

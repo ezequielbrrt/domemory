@@ -74,7 +74,7 @@ graph in the same change.
 | `feature/seasons`, `feature/daily` | `SeasonCard`/`SeasonLevelsScreen` and `DailyChallengeCard` — the menu entry points for Phases 4 and 5 |
 | `services/notifications`, `feature/notifications` | `NotificationService`, reminder workers and the once-per-install permission primer — the three local reminders and their OS-permission sync (Phase 5) |
 | `widget` | `DailyChallengeGlanceWidget`, receiver and calendar-aligned WorkManager refresh — the Daily Challenge home-screen widget (Phase 5) |
-| `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 in progress; create/join, invite sharing, gameplay, reconnect grace and rematch exist, while QR rendering and live cross-platform verification remain follow-up work |
+| `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 in progress; create/join, invite sharing, QR rendering/scanning, gameplay, reconnect grace and rematch exist, while association deployment and live cross-platform verification remain follow-up work |
 | `services/ads` | AdMob initialization, debug/release placement configuration, frequency-cap policy and Compose banner wrapper — Phase 7 in progress; banners are wired, full-screen/rewarded/native presentation remains follow-up work |
 | `services/whatsnew`, `feature/whatsnew` | Version-aware release-notes gate and dialog — Phase 8 in progress; first installs stay silent and upgrades present once |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
@@ -136,9 +136,9 @@ committing a change to anything under `core/` or `services/`.
 Phases 0–5 (Levels, including its correctness hardening; Seasons; and Daily Challenge)
 are complete in the current worktree. Phase 5 includes the deterministic board,
 streak/milestone tracking, menu card, deep links, Glance widget and local reminders.
-Phase 6 has create/join, invite, gameplay, reconnect grace and rematch over its tested room
-protocol foundation; do not represent multiplayer as shipped until QR and live Android↔iOS
-verification land.
+Phase 6 has create/join, invite, QR rendering/scanning, scheme/App Link routing, gameplay,
+reconnect grace and rematch over its tested room protocol foundation; do not represent
+multiplayer as shipped until association-file deployment and live Android↔iOS verification land.
 `ANDROID_PLAN.md` §7 contains the required handoff ledger: read it before starting
 Android work, update it when a migration slice changes state, and do not infer a feature
 is complete merely because its type or screen exists.
