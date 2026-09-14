@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.google.mobile.ads)
     implementation(libs.google.code.scanner)
     implementation(libs.zxing.core)
+    implementation(libs.google.play.review.ktx)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

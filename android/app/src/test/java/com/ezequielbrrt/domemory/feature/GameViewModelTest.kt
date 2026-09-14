@@ -52,6 +52,7 @@ class GameViewModelTest {
         levelLives: LevelLivesService? = null,
         starWallet: StarWalletService? = null,
         onCompletionInterstitial: ((Difficulty, Long) -> Unit)? = null,
+        onHaptic: ((com.ezequielbrrt.domemory.services.haptics.HapticIntent) -> Unit)? = null,
     ) = GameViewModel(
         board = board,
         mode = mode,
@@ -62,6 +63,7 @@ class GameViewModelTest {
         levelLives = levelLives,
         starWallet = starWallet,
         onCompletionInterstitial = onCompletionInterstitial,
+        onHaptic = onHaptic,
     )
 
     private fun TestScope.levelLives(day: LocalDate = LocalDate.of(2026, 9, 11)): LevelLivesService {
@@ -760,6 +762,46 @@ class GameViewModelTest {
         assertFalse(store.completions.single().didWin)
         assertEquals(3, lives.remaining())
         assertEquals(0, wallet.balance.value)
+        vm.stop()
+    }
+
+    // --- Haptics (spec: iOS's fireChooseHaptic) -------------------------------------
+
+    @Test
+    fun `a non-final match fires the MATCH haptic, then SUCCESS fires separately on the win`() = runTest {
+        val fired = mutableListOf<com.ezequielbrrt.domemory.services.haptics.HapticIntent>()
+        val vm = viewModel(onHaptic = { fired.add(it) })
+
+        val (a1, b1) = matchedIds(vm)
+        vm.choose(a1)
+        vm.choose(b1)
+        // a1's own flip also fires CARD_FLIP first — irrelevant to what this test pins.
+        assertTrue(com.ezequielbrrt.domemory.services.haptics.HapticIntent.MATCH in fired)
+        assertFalse(com.ezequielbrrt.domemory.services.haptics.HapticIntent.SUCCESS in fired)
+        vm.stop()
+    }
+
+    @Test
+    fun `the winning final match fires only SUCCESS, never a MATCH thud in front of it`() = runTest {
+        val fired = mutableListOf<com.ezequielbrrt.domemory.services.haptics.HapticIntent>()
+        val vm = viewModel(onHaptic = { fired.add(it) })
+
+        // Board has 3 pairs; clear the first two normally, then isolate the third.
+        repeat(2) {
+            val (a, b) = matchedIds(vm)
+            vm.choose(a)
+            vm.choose(b)
+        }
+        fired.clear()
+
+        val (a3, b3) = matchedIds(vm)
+        vm.choose(a3)
+        vm.choose(b3)
+
+        // a3's own flip still fires CARD_FLIP — only the MATCH thud is suppressed.
+        assertFalse(com.ezequielbrrt.domemory.services.haptics.HapticIntent.MATCH in fired)
+        assertTrue(com.ezequielbrrt.domemory.services.haptics.HapticIntent.SUCCESS in fired)
+        assertEquals(GameOutcome.Won, vm.state.value.outcome)
         vm.stop()
     }
 

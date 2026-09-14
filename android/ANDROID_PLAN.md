@@ -354,7 +354,7 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
 | Phase 6 | in progress — transactional room protocol, menu/deep-link entry (custom scheme and App Link manifest), invite sharing and QR rendering/scanning, lobby, synchronized board, reconnect grace and rematch are implemented and unit-test clean | current worktree | Deploy O1's App Links association file, then run a live Android↔iOS match before declaring it complete. |
 | Phase 7 | in progress — AdMob SDK/app ID and all nine active placement units are configured; banners, the completion interstitial, `levels_rewarded_life`/`levels_rewarded_forgive`, and the multiplayer-finished native placement are all wired and presenting through `AdsService`; the frequency-cap policy and its presentation-trigger gate are unit-test clean | current worktree | `game_rewarded_extra_time`/`game_rewarded_hint` remain configured but unwired — no pause modal exists on Android to hang the hint button off, and extra-time has no existing star-purchase call site to slot an alternative into (see this section's implementation note below). App-open is unimplemented — no launch-sequence state machine exists yet for it to gate on (O5). Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
-| Phase 8 | in progress — What’s New version gating and release-notes dialog are implemented and unit-test clean | current worktree | Add Settings entry, review prompt, achievements, haptics, animations, accessibility and localization parity. |
+| Phase 8 | in progress — What's New (version gating + dialog), haptics (`HapticsService`, wired into `GameViewModel`'s flip/match/mismatch/win/loss/power-up/rescue moments), Play In-App Review (`AppReviews`, fired on a genuine win) and two Settings rows ("Rate DoMemory", "What's New") are implemented and unit-test clean | current worktree | Achievements, the spoiler-free share card, animations (tile pulse, press spring, progress-bar spring, numeric transitions), accessibility announcements, and the nine translations + localization parity test remain. See this section's Phase 8 implementation note below for exactly what the haptics/review/Settings slice covered and what it deliberately left as a seam. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
 
@@ -696,6 +696,118 @@ divergence from iOS, not a correctness bug — the cadence itself (per-difficult
 assembleDebug` both pass; actual ad fill, click-through and the AdMob mediation/consent
 pipeline are unverifiable without a device or emulator and are not claimed here.
 
+**Phase 8 implementation, this session (2026-09-14): haptics, Play In-App Review, two
+Settings rows.** A first Phase 8 slice on top of the already-complete What's New gate —
+deliberately scoped to exactly these three things; achievements, the share card,
+animations, accessibility announcements and localization are untouched, tracked below.
+
+`services/haptics/HapticIntent.kt` + `services/haptics/HapticsService.kt` port the
+*design* of `ios/.../Services/Haptics/HapticsService.swift`, not its UIKit API: one
+`HapticIntent` enum naming the moment (`TAP`, `SELECT`, `CARD_FLIP`, `MATCH`, `MISMATCH`,
+`SUCCESS`, `FAILURE`, `WARNING`, `REWARD`), one gated `HapticsService.fire(intent)` entry
+point, and a two-step pure mapping (`feedbackFor` then `vibrationSpec`) that mirrors iOS's
+own `Intent` -> `Feedback` -> UIKit-generator split so the *design* stays legible even
+though Android's `VibrationEffect` API has no built-in three-tier notification family or
+named soft/rigid impact styles the way UIKit's generators do — every recipe is a
+hand-tuned `createOneShot`/`createWaveform` call instead of `createPredefined` (whose
+effect ids only arrived in API 29, three levels above this app's `minSdk` 26). The full
+mapping table and the reasoning behind each Android-specific choice live in
+`HapticsService`'s own class doc. `HapticsService` is an `object` (like `AdsService`,
+not a constructed instance held in `AppContainer`) specifically because it must be
+reachable both from `GameViewModel` (a bare `(HapticIntent) -> Unit)?` callback, keeping
+that class free of any Android import — see `HapticIntent`'s own doc) *and* directly from
+`NavGraph.kt`'s composable click handlers ("view-only taps" with no natural view-model
+seam: quitting free play, the two watch-ad buttons). `DoMemoryApplication.onCreate` calls
+`HapticsService.initialize(this, container.prefs, container.applicationScope)` right
+after `AdsService.initialize`; `isEnabled` caches `UserPreferences.hapticsEnabled` (already
+implemented, defaults true) into a `@Volatile var` so `fire` can be called synchronously
+from a non-`suspend` `ViewModel` function or a click handler.
+
+Wired into every named moment in `GameViewModel`: `CARD_FLIP`/`MATCH`/`MISMATCH` from
+`choose()` (silent on `ChoiceOutcome.IGNORED`, i.e. a dead tap, automatically — the early
+return happens before the `when`); `SUCCESS`/`FAILURE` from `finish()`, at the instant the
+outcome is decided, independent of a Level loss's deferred commit; `WARNING` on a
+refused/failed power-up or rescue purchase (`spendOnPowerUp`, `forgiveMistakesWithStars`,
+`buyLifeWithStars`, `skipLevelWithStars` — each now fires it on a failed `spend()` or a
+failed `apply()`); `REWARD` on every power-up/rescue that actually grants something
+(`spendOnPowerUp`'s success path, `forgiveMistakesWithStars`, `buyLifeWithStars`, and the
+two ad-earned equivalents, which fire it unconditionally since the ad already paid) —
+deliberately *not* fired for `skipLevelWithStars`'s success, since skipping spends stars
+to bypass a level rather than granting anything. `TAP` covers `pause()`/`resume()`,
+`retry()` (Levels/Seasons) and `acknowledgeLossAndQuit()`; the two purely-navigational
+free-play/daily "Try Again"/"Go to menu" taps and both watch-ad buttons have no
+`GameViewModel` call to hang off, so they fire directly from `NavGraph.kt` instead — the
+same view-only-vs-view-model-driven split this codebase already uses for the ad-service
+and interstitial callbacks. This is a fuller port of iOS's actual `HapticsService.shared
+.fire(...)` call sites than the task's own minimum list (card flip/match/mismatch/win/
+loss) — a grep of `MemorizeViewModel.swift` showed iOS fires almost all of its haptics
+from inside the view model, including `.reward` on every power-up/rescue and `.tap` on
+every plain button, so extending to those same moments here (still confined to
+`GameViewModel.kt` + a few `NavGraph.kt` call sites) is a closer match to the source of
+truth, not scope creep beyond it.
+
+**Deliberately left as a seam:** `SELECT` has no call site yet — nothing in the current
+Android UI maps cleanly to iOS's "picker change, level tile, turn handover" (level-tile
+taps and multiplayer turn handover are Levels/Multiplayer UI this slice didn't touch).
+Menu, Levels, Seasons, Multiplayer and Settings screens have no haptics wired at all yet
+(only `feature/game/GameViewModel.kt` and its `NavGraph.kt` call sites do) — this was the
+task's explicit scope, not an oversight; a future slice should extend the same
+`HapticsService.fire`/`HapticIntent` pattern to those screens' own buttons and level-tile
+taps rather than inventing a second mechanism. Actual haptic *feel* on a real device is
+unverified — no emulator/device is available in this environment (Android's emulator
+`Vibrator` is a no-op stub in any case), so only the pure `feedbackFor`/`vibrationSpec`
+mapping is test-verified, the same limitation `HapticsServiceTests.swift` has against a
+real Taptic Engine.
+
+`services/review/AppReviews.kt` is a thin wrapper over Play Core's
+`ReviewManagerFactory`/`ReviewManager` — request a review flow, launch it if Play Core
+hands one back, and stop there; Play Core's own contract never reports whether the dialog
+was actually shown, the same opacity `SKStoreReviewController` has. **Deliberate
+divergence from iOS, per this task's own instruction:** iOS's `AppReviews` wraps a
+third-party `ReviewFlow` package with its own local win-count/cooldown/per-version-cap
+eligibility policy, plus a one-time `ReviewHistoryMigration` that carries a retired
+`ReviewRequestService`'s history into that package's store. Neither is ported — Android's
+`ReviewManager` already owns its quota/frequency decision server-side (the app cannot ask
+"am I eligible" the way `ReviewFlow`'s config exposes), so a local policy would just be a
+second, redundant gate in front of one Google already runs; and there is no legacy
+history on Android to migrate from, since nothing has ever prompted for a review before
+this slice. `GameViewModel` gained an `onGameWon: (() -> Unit)?` callback, fired from
+`commit()` only when the outcome is `GameOutcome.Won` (never for a loss, never for
+`skipLevelWithStars`), wired at all four `GameViewModel` construction sites in
+`NavGraph.kt` to `{ AppReviews.recordSuccessfulGameWin(activity) }`. This is a deliberate
+simplification of iOS's actual call site (`WinModalListener.tapOnContinue`, fired when the
+player dismisses the win modal): Android's win overlay has no separate Continue/Next-Level
+split yet (`OutcomeOverlay` only offers "Try Again"/"Go to menu" — a pre-existing,
+already-documented gap, not introduced here), so firing from the commit itself is the
+closest equivalent "genuine success" moment available. Added
+`com.google.android.play:review-ktx` (`libs.versions.toml`/`app/build.gradle.kts`,
+version `2.0.2`), matching this file's own §2 note that anticipated it for Phase 7/8.
+
+Two new Settings rows (`feature/settings/SettingsScreen.kt`), both under a new
+"About" (`settings_section_about`) group — no new string resources needed, since
+`settings_review_title`/`_description` and `settings_whats_new_title`/`_description` were
+already pre-seeded and unused: "Rate DoMemory" opens the Play Store listing directly
+(`market://details?id=<applicationId>` pinned to `com.android.vending` via `setPackage`,
+falling back to the `https://play.google.com` listing URL on `ActivityNotFoundException`)
+— a `<queries>` entry for `com.android.vending` was added to `AndroidManifest.xml` for
+API 30+ package-visibility. This is deliberately separate from, and in addition to, the
+win-triggered in-app review prompt above; a code comment at the Settings row's call site
+notes that the in-app review flow has no "show it now" API, so this manual button can only
+ever be the storefront link, not a way to force the automatic prompt open. "What's New"
+reopens `feature/whatsnew/WhatsNewDialog.kt` — its own doc comment already called out this
+exact reuse ("intentionally reused for automatic and Settings presentation"); `NavGraph.kt`
+now owns a screen-local `showWhatsNew` boolean for the Settings route, separate from
+`MainActivity`'s version-gated one, with no `whatsNewLastSeenVersion` write on dismiss
+(reopening it manually never needs to touch that key, since it is already at the running
+version by the time Settings is reachable at all).
+
+`./gradlew testDebugUnitTest` (293 tests, 40 files, all green — 6 new tests in
+`HapticsServiceTest`, pinning `feedbackFor`/`vibrationSpec` the same way
+`HapticsServiceTests.swift` pins iOS's mapping without a real Taptic Engine) and
+`./gradlew assembleDebug` both pass. No emulator/device verification — same limitation as
+every prior phase; actual haptic feel and the Play Store listing/review-flow behavior are
+unverifiable from this shell and are not claimed here.
+
 ## 8. Immediate next steps
 
 1. Verify the remaining boundary cases on an emulator or device — a season's day-boundary
@@ -717,3 +829,9 @@ pipeline are unverifiable without a device or emulator and are not claimed here.
    why they were left unwired rather than built speculatively.
 7. Build the app-open launch-sequence state machine (O5) before wiring
    `AdPlacement.APP_OPEN` — there is nothing to gate it on yet.
+8. Extend `HapticsService.fire`/`HapticIntent` to Menu, Levels, Seasons, Multiplayer and
+   Settings screens — this Phase 8 slice wired only `feature/game/`. Verify haptic feel on
+   a real device once one is available (the emulator's `Vibrator` is a no-op).
+9. Remaining Phase 8 work: achievements, the spoiler-free share card, animations (tile
+   pulse, press-to-0.92 spring, progress-bar spring, numeric transitions), accessibility
+   announcements, and the nine translations plus the localization parity test.

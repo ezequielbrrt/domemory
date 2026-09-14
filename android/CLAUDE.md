@@ -77,12 +77,14 @@ graph in the same change.
 | `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 in progress; create/join, invite sharing, QR rendering/scanning, gameplay, reconnect grace and rematch exist, while association deployment and live cross-platform verification remain follow-up work |
 | `services/ads` | AdMob initialization, debug/release placement configuration, the frequency-cap policy plus its presentation-trigger gate, and banner/interstitial/rewarded/native presentation — Phase 7 in progress; banners, the completion interstitial, both Levels rewarded rescues and the multiplayer-finished native ad are wired and presenting; `game_rewarded_extra_time`/`game_rewarded_hint` and app-open remain unwired (see `ANDROID_PLAN.md` §7) |
 | `services/whatsnew`, `feature/whatsnew` | Version-aware release-notes gate and dialog — Phase 8 in progress; first installs stay silent and upgrades present once |
+| `services/haptics` | `HapticIntent`, `HapticsService` — Phase 8 in progress; single gated `fire(intent)` entry point wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue moments and a handful of `NavGraph.kt` view-only taps. Menu, Levels, Seasons, Multiplayer and Settings screens have no haptics wired yet |
+| `services/review` | `AppReviews` — Play In-App Review wrapper (Phase 8 in progress); fires on a genuine win via `GameViewModel.onGameWon`, deliberately thin (no local eligibility policy — see `ANDROID_PLAN.md` §7's Phase 8 note for why that diverges from iOS on purpose) |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
 
-Everything else in the plan's package layout (`haptics/`, full `multiplayer/` feature
-gameplay UI) does not exist yet. Check
-`ANDROID_PLAN.md` §4 before assuming a service is missing by accident rather
-than by phase.
+Everything else in the plan's package layout (`services/haptics`/`HapticIntent.fire`
+wiring beyond `feature/game/`'s own call sites, full `multiplayer/` feature gameplay UI)
+does not exist yet. Check `ANDROID_PLAN.md` §4 before assuming a service is missing by
+accident rather than by phase.
 
 ### Locked decisions worth knowing before changing behavior
 
@@ -145,6 +147,14 @@ ad all wired and presenting through `AdsService`; `game_rewarded_extra_time`/
 `game_rewarded_hint` and app-open remain unwired — see `ANDROID_PLAN.md` §7's Phase 7
 implementation note for exactly why, before assuming either is a missed requirement
 rather than a deliberate seam.
+Phase 8 has What's New (version-gated dialog), haptics (`HapticsService`/`HapticIntent`,
+wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue
+moments only — no other screen yet), Play In-App Review (`AppReviews`, fired on a genuine
+win, deliberately thin with no local eligibility policy — Android's `ReviewManager` owns
+that server-side, unlike iOS's `ReviewFlow`), and two Settings rows ("Rate DoMemory",
+"What's New") implemented and unit-test clean; achievements, the share card, animations,
+accessibility announcements and localization remain — see `ANDROID_PLAN.md` §7's Phase 8
+implementation note for the full mapping table and what was deliberately left as a seam.
 `ANDROID_PLAN.md` §7 contains the required handoff ledger: read it before starting
 Android work, update it when a migration slice changes state, and do not infer a feature
 is complete merely because its type or screen exists.
