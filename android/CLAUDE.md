@@ -75,7 +75,7 @@ graph in the same change.
 | `services/notifications`, `feature/notifications` | `NotificationService`, reminder workers and the once-per-install permission primer — the three local reminders and their OS-permission sync (Phase 5) |
 | `widget` | `DailyChallengeGlanceWidget`, receiver and calendar-aligned WorkManager refresh — the Daily Challenge home-screen widget (Phase 5) |
 | `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 in progress; create/join, invite sharing, QR rendering/scanning, gameplay, reconnect grace and rematch exist, while association deployment and live cross-platform verification remain follow-up work |
-| `services/ads` | AdMob initialization, debug/release placement configuration, frequency-cap policy and Compose banner wrapper — Phase 7 in progress; banners are wired, full-screen/rewarded/native presentation remains follow-up work |
+| `services/ads` | AdMob initialization, debug/release placement configuration, the frequency-cap policy plus its presentation-trigger gate, and banner/interstitial/rewarded/native presentation — Phase 7 in progress; banners, the completion interstitial, both Levels rewarded rescues and the multiplayer-finished native ad are wired and presenting; `game_rewarded_extra_time`/`game_rewarded_hint` and app-open remain unwired (see `ANDROID_PLAN.md` §7) |
 | `services/whatsnew`, `feature/whatsnew` | Version-aware release-notes gate and dialog — Phase 8 in progress; first installs stay silent and upgrades present once |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
 
@@ -125,7 +125,7 @@ platform's players with nothing reporting it. The `/seasons` read rule in
 
 ### Tests
 
-`app/src/test/java/` — 25 files, 207 tests, all pure Kotlin against an injected
+`app/src/test/java/` — 39 files, 287 tests, all pure Kotlin against an injected
 clock, no Robolectric or instrumentation. Rule carried over from the spec: every
 constant the spec pins in its §20 table, a test pins here too — that table is
 the cross-check for the whole port. Run `./gradlew testDebugUnitTest` before
@@ -139,6 +139,12 @@ streak/milestone tracking, menu card, deep links, Glance widget and local remind
 Phase 6 has create/join, invite, QR rendering/scanning, scheme/App Link routing, gameplay,
 reconnect grace and rematch over its tested room protocol foundation; do not represent
 multiplayer as shipped until association-file deployment and live Android↔iOS verification land.
+Phase 7 has AdMob init, all nine placement units, banners, the completion interstitial,
+both Levels rewarded rescues (life, forgive-mistakes) and the multiplayer-finished native
+ad all wired and presenting through `AdsService`; `game_rewarded_extra_time`/
+`game_rewarded_hint` and app-open remain unwired — see `ANDROID_PLAN.md` §7's Phase 7
+implementation note for exactly why, before assuming either is a missed requirement
+rather than a deliberate seam.
 `ANDROID_PLAN.md` §7 contains the required handoff ledger: read it before starting
 Android work, update it when a migration slice changes state, and do not infer a feature
 is complete merely because its type or screen exists.

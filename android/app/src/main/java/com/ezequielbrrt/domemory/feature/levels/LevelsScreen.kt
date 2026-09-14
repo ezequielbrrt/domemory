@@ -24,8 +24,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +35,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.services.ads.AdPlacement
+import com.ezequielbrrt.domemory.services.ads.AdsService
+import com.ezequielbrrt.domemory.services.ads.findActivity
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
@@ -52,6 +58,8 @@ fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     val palette = LocalPalette.current
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
 
     val highest = viewModel.highestUnlockedLevel
     val levels = (1..(highest + 20)).toList()
@@ -90,8 +98,21 @@ fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
         }
 
         if (uiState.showOutOfLivesPrompt) {
+            LaunchedEffect(Unit) {
+                if (AdsService.isRewardedConfigured(AdPlacement.LEVELS_REWARDED_LIFE)) {
+                    context.applicationContext.let { AdsService.loadRewarded(it, AdPlacement.LEVELS_REWARDED_LIFE) }
+                }
+            }
             OutOfLivesModal(
                 starBalance = uiState.starBalance,
+                canWatchAd = AdsService.isRewardedConfigured(AdPlacement.LEVELS_REWARDED_LIFE),
+                onWatchAd = {
+                    AdsService.showRewarded(
+                        activity = activity,
+                        placement = AdPlacement.LEVELS_REWARDED_LIFE,
+                        onReward = { viewModel.applyLifeRewardFromAd() },
+                    )
+                },
                 onBuyWithStars = viewModel::buyLifeWithStars,
                 onDismiss = viewModel::dismissOutOfLivesPrompt,
             )
@@ -202,7 +223,13 @@ private fun LevelTile(
 
 /** Shown from the level map when tapping a tile with no lives left today (spec 7.4). */
 @Composable
-private fun OutOfLivesModal(starBalance: Int, onBuyWithStars: () -> Unit, onDismiss: () -> Unit) {
+private fun OutOfLivesModal(
+    starBalance: Int,
+    canWatchAd: Boolean,
+    onWatchAd: () -> Unit,
+    onBuyWithStars: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     val palette = LocalPalette.current
     val canBuyWithStars = starBalance >= LevelPowerUp.LIFE_COST
     Box(Modifier.fillMaxSize().background(palette.overlayBackdrop), contentAlignment = Alignment.Center) {
@@ -223,11 +250,22 @@ private fun OutOfLivesModal(starBalance: Int, onBuyWithStars: () -> Unit, onDism
                     color = palette.textPrimary,
                 )
                 Text(
-                    // A rewarded-ad refill is a Phase 7 seam — there is no AdsService yet
-                    // (ANDROID_PLAN.md §4), so only the star purchase is offered today.
-                    stringResource(R.string.levels_out_of_lives_message_no_ad),
+                    // Message text mirrors whether a rewarded-ad refill is actually on offer
+                    // (spec 7.4) rather than always assuming the star-only wording.
+                    stringResource(
+                        if (canWatchAd) R.string.levels_out_of_lives_message
+                        else R.string.levels_out_of_lives_message_no_ad,
+                    ),
                     color = palette.textSecondary,
                 )
+                if (canWatchAd) {
+                    Button(
+                        onClick = onWatchAd,
+                        colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
+                    ) {
+                        Text(stringResource(R.string.levels_watch_ad_for_life))
+                    }
+                }
                 if (canBuyWithStars) {
                     Button(
                         onClick = onBuyWithStars,

@@ -19,6 +19,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.ezequielbrrt.domemory.AppContainer
 import com.ezequielbrrt.domemory.core.deeplink.DeepLink
 import com.ezequielbrrt.domemory.core.model.Difficulty
@@ -38,6 +39,9 @@ import com.ezequielbrrt.domemory.feature.onboarding.OnboardingViewModel
 import com.ezequielbrrt.domemory.feature.seasons.SeasonLevelsScreen
 import com.ezequielbrrt.domemory.feature.settings.SettingsScreen
 import com.ezequielbrrt.domemory.feature.settings.SettingsViewModel
+import com.ezequielbrrt.domemory.services.ads.AdPlacement
+import com.ezequielbrrt.domemory.services.ads.AdsService
+import com.ezequielbrrt.domemory.services.ads.findActivity
 import kotlinx.coroutines.launch
 
 /**
@@ -74,6 +78,11 @@ fun NavGraph(
     hasOnboarded: Boolean,
     navController: NavHostController = rememberNavController(),
 ) {
+    // Resolved once and captured by every route below — a full-screen ad needs the
+    // Activity to present against; DoMemory is single-activity, so this is MainActivity
+    // for the life of the process.
+    val activity = LocalContext.current.findActivity()
+
     // A domemory://daily link can arrive before onboarding resolves (spec 11.1: "links can
     // arrive before the UI exists"); only route it once there's a Menu to land on, and only
     // if today isn't already locked — mirrors the no-op DailyChallengeCard tap above.
@@ -205,6 +214,9 @@ fun NavGraph(
                             dailyChallenge = container.dailyChallenge,
                             onDailyChallengeFinished = container.onDailyChallengeFinished,
                             onGameFinished = container.onGameFinished,
+                            onCompletionInterstitial = { difficulty, durationMs ->
+                                AdsService.notifyGameFinished(activity, difficulty, durationMs)
+                            },
                         )
                     }
                 },
@@ -265,6 +277,9 @@ fun NavGraph(
                             // same way endless is, so it needs the same wallet.
                             starWallet = container.starWallet,
                             onGameFinished = container.onGameFinished,
+                            onCompletionInterstitial = { difficulty, durationMs ->
+                                AdsService.notifyGameFinished(activity, difficulty, durationMs)
+                            },
                         )
                     }
                 },
@@ -308,6 +323,16 @@ fun NavGraph(
                         if (viewModel.skipLevelWithStars()) navController.popBackStack()
                     }
                 },
+                onWatchAdForLife = {
+                    AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_LIFE, onReward = {
+                        coroutineScope.launch { viewModel.applyLifeReward() }
+                    })
+                },
+                onWatchAdToForgive = {
+                    AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_FORGIVE, onReward = {
+                        coroutineScope.launch { viewModel.applyForgiveMistakesReward() }
+                    })
+                },
             )
         }
 
@@ -325,6 +350,9 @@ fun NavGraph(
                             levelLives = container.levelLives,
                             starWallet = container.starWallet,
                             onGameFinished = container.onGameFinished,
+                            onCompletionInterstitial = { difficulty, durationMs ->
+                                AdsService.notifyGameFinished(activity, difficulty, durationMs)
+                            },
                         )
                     }
                 },
@@ -385,6 +413,16 @@ fun NavGraph(
                     coroutineScope.launch {
                         if (viewModel.skipLevelWithStars()) navController.popBackStack()
                     }
+                },
+                onWatchAdForLife = {
+                    AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_LIFE, onReward = {
+                        coroutineScope.launch { viewModel.applyLifeReward() }
+                    })
+                },
+                onWatchAdToForgive = {
+                    AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_FORGIVE, onReward = {
+                        coroutineScope.launch { viewModel.applyForgiveMistakesReward() }
+                    })
                 },
             )
         }
@@ -474,6 +512,9 @@ fun NavGraph(
                             stats = UserPreferencesGameStatsRecorder(container.prefs),
                             statsScope = container.applicationScope,
                             onGameFinished = container.onGameFinished,
+                            onCompletionInterstitial = { difficulty, durationMs ->
+                                AdsService.notifyGameFinished(activity, difficulty, durationMs)
+                            },
                         )
                     }
                 },

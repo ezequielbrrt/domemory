@@ -15,6 +15,9 @@ import androidx.lifecycle.viewModelScope
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Board
 import com.ezequielbrrt.domemory.feature.game.CardView
+import com.ezequielbrrt.domemory.services.ads.AdMobNativeAdView
+import com.ezequielbrrt.domemory.services.ads.AdPlacement
+import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.multiplayer.*
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import kotlinx.coroutines.flow.*
@@ -183,20 +186,29 @@ private fun MultiplayerGameBoard(room: MultiplayerRoom, vm: MultiplayerViewModel
         Text("${stringResource(R.string.multiplayer_you)}: ${room.players.values.firstOrNull { vm.isCurrentUser(it.id) }?.score ?: 0}")
         Text("${stringResource(R.string.multiplayer_opponent)}: ${room.players.values.firstOrNull { !vm.isCurrentUser(it.id) }?.score ?: 0}")
     }
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        rows.forEach { row ->
-            Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEach { multiplayerCard ->
-                    CardView(
-                        card = multiplayerCard.asCard(),
-                        isHidden = multiplayerCard.isMatched,
-                        showsPie = false,
-                        pieFraction = 0f,
-                        onClick = { vm.choose(room.id, multiplayerCard.id) },
-                        modifier = Modifier.weight(1f).fillMaxSize(),
-                    )
+    // Spec: iOS swaps the finished board for the native ad placement entirely rather than
+    // showing both — a finished room's grid carries no further interaction anyway.
+    if (room.status == MultiplayerRoomStatus.FINISHED && AdsService.isNativeConfigured(AdPlacement.MULTIPLAYER_FINISHED_NATIVE)) {
+        AdMobNativeAdView(
+            placement = AdPlacement.MULTIPLAYER_FINISHED_NATIVE,
+            modifier = modifier.fillMaxWidth().height(270.dp),
+        )
+    } else {
+        Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            rows.forEach { row ->
+                Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    row.forEach { multiplayerCard ->
+                        CardView(
+                            card = multiplayerCard.asCard(),
+                            isHidden = multiplayerCard.isMatched,
+                            showsPie = false,
+                            pieFraction = 0f,
+                            onClick = { vm.choose(room.id, multiplayerCard.id) },
+                            modifier = Modifier.weight(1f).fillMaxSize(),
+                        )
+                    }
+                    repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
                 }
-                repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
     }

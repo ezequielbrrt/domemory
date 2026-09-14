@@ -1,6 +1,7 @@
 package com.ezequielbrrt.domemory.services.ads
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AdUnitConfigurationTest {
@@ -19,5 +20,15 @@ class AdUnitConfigurationTest {
     @Test fun `debug builds use Google demo units`() {
         assertEquals("ca-app-pub-3940256099942544/9214589741", AdUnitConfiguration.unitId(AdPlacement.HOME_BANNER, debug = true))
         assertEquals("ca-app-pub-3940256099942544/5224354917", AdUnitConfiguration.unitId(AdPlacement.GAME_REWARDED_HINT, debug = true))
+    }
+
+    @Test fun `every placement is configured in both build types today`() {
+        // Unconfigured-placement hiding (spec: iOS's `configuredUnitID` returning nil for a
+        // blank release id) has nothing to hide against yet — every Android unit id is
+        // non-blank. This pins that fact so a future blank id is a deliberate, visible change.
+        AdPlacement.entries.forEach {
+            assertTrue(AdUnitConfiguration.isConfigured(it, debug = true))
+            assertTrue(AdUnitConfiguration.isConfigured(it, debug = false))
+        }
     }
 }

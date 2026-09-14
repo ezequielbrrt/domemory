@@ -104,7 +104,7 @@ class LevelsViewModel(
     }
 
     /** Not gated on the Remove-Ads entitlement — the daily budget applies to purchasers
-     * too (spec 7.4); a rewarded-ad refill is a Phase 7 seam (no [AdsService] yet). */
+     * too (spec 7.4). */
     fun buyLifeWithStars() {
         workScope.launch {
             if (wallet.spend(LevelPowerUp.LIFE_COST)) {
@@ -116,6 +116,20 @@ class LevelsViewModel(
                         showOutOfLivesPrompt = false,
                     )
                 }
+            }
+        }
+    }
+
+    /**
+     * Ad-earned equivalent of [buyLifeWithStars] — no star spend, the ad already paid for
+     * it. The composable layer calls this from a rewarded ad's earned-reward callback
+     * (`AdsService.showRewarded`), never directly from a tap.
+     */
+    fun applyLifeRewardFromAd() {
+        workScope.launch {
+            lives.refill(1)
+            _uiState.update {
+                it.copy(livesRemaining = lives.remaining(), showOutOfLivesPrompt = false)
             }
         }
     }
