@@ -17,8 +17,8 @@ class DoMemoryApplication : Application(), SingletonImageLoader.Factory {
         super.onCreate()
         container = AppContainer(context = this)
         // Spec 8.1's midnight refresh. Idempotent across process restarts: KEEP (see the
-        // scheduler's doc) leaves an already-armed job's phase alone rather than resetting it
-        // to "24h from this launch" every time the app starts.
+        // scheduler's doc) leaves an already-armed job's phase alone rather than recomputing
+        // it from every app launch.
         DailyChallengeWidgetScheduler.scheduleMidnightRefresh(this)
     }
 
