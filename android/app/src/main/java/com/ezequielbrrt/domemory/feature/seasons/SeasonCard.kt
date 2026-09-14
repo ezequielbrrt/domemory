@@ -2,13 +2,13 @@ package com.ezequielbrrt.domemory.feature.seasons
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,21 +64,23 @@ fun SeasonCard(season: Season, todayKey: String, onClick: () -> Unit, modifier: 
         }
     }
 
-    Column(
+    // Mirrors iOS's ZStack: the artwork is a background layer sized to the text content's own
+    // bounds (a `Color.clear` the exact size of the card on iOS), never foreground content that
+    // could drive the card's height off the image's own intrinsic pixel size.
+    Box(
         modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 8.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(accentColor)
-            .clickable(onClick = onClick)
-            .wrapContentHeight(),
+            .clickable(onClick = onClick),
     ) {
         season.cardImageURL?.let { url ->
             AsyncImage(
                 model = url,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.matchParentSize(),
             )
         }
         Row(

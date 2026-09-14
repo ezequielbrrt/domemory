@@ -28,9 +28,11 @@ JDK the toolchain targets).
 absolute path to one developer's SDK install. Never commit it; a fresh checkout
 regenerates it from the SDK location Android Studio or the wrapper detects.
 
-**No emulator system image is installed here.** The UI compiles and is unit
-tested but has not been seen running. Installing an API 37 image is a one-time
-~1.5 GB step (`cmdline-tools`), not part of the normal build loop.
+**A `Pixel_10` (API 37) emulator system image is installed on this machine**,
+and the app has had its first real emulator run — see `ANDROID_PLAN.md` §7's
+verification note for what was exercised and the two bugs it found. Installing
+that image elsewhere is a one-time ~1.5 GB step (`cmdline-tools`), not part of
+the normal build loop.
 
 **AGP 9 has built-in Kotlin support** — applying `org.jetbrains.kotlin.android`
 alongside `com.android.application` is now an error. `app/build.gradle.kts`
