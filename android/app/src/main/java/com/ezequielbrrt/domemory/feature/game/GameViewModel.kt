@@ -8,6 +8,7 @@ import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.core.model.GameMode
 import com.ezequielbrrt.domemory.core.model.MemoryGame
 import com.ezequielbrrt.domemory.services.daily.DailyChallengeService
+import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.levels.LevelCurve
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
@@ -96,6 +97,33 @@ class GameViewModel(
      * every other callback here.
      */
     private val onCompletionInterstitial: ((Difficulty, Long) -> Unit)? = null,
+    /**
+     * Fired for every named moment this class decides on its own (card flip, match,
+     * mismatch, win, loss, a power-up/rescue purchase succeeding or being refused) — the
+     * Android counterpart of iOS's `HapticsService.shared.fire(_:)` call sites inside
+     * `MemorizeViewModel`, which fires almost entirely from the view model rather than the
+     * view for exactly this reason: the moment a match or a loss is *decided* lives here,
+     * not in `GameScreen`. A bare `(HapticIntent) -> Unit)?` rather than a
+     * `HapticsService` reference for the same reason as [onCompletionInterstitial] —
+     * `HapticIntent` is a plain, Android-framework-free enum (see its own doc), so taking it
+     * keeps this class free of any Android import, while the composable layer
+     * (`NavGraph.kt`) wires the real `HapticsService.fire` call. A handful of purely
+     * navigational taps (quitting free play, the two watch-ad buttons) have no state change
+     * to hang this off and fire directly from `NavGraph.kt` instead — see that file.
+     */
+    private val onHaptic: ((HapticIntent) -> Unit)? = null,
+    /**
+     * Fired once, only for a genuine win reaching [commit] — never for a loss, and never for
+     * [skipLevelWithStars] (which commits a loss, not a win). The Android counterpart of
+     * iOS's `AppReviews.recordSuccessfulGameWin()`, which iOS calls from the win modal's
+     * "Continue" tap (`WinModalListener.tapOnContinue`). Android's win screen has no
+     * separate Continue/Next-Level split yet (a documented gap in `ANDROID_PLAN.md` — the
+     * win overlay only offers "Try Again" / "Go to menu"), so this fires from the commit
+     * itself rather than a distinct button tap. The object it would call
+     * (`services.review.AppReviews`) needs an `Activity`, which this framework-free class
+     * deliberately doesn't hold — same bare-callback shape as [onCompletionInterstitial].
+     */
+    private val onGameWon: (() -> Unit)? = null,
 ) : ViewModel() {
 
     private val workScope: CoroutineScope get() = scope ?: viewModelScope
@@ -187,8 +215,17 @@ class GameViewModel(
         publishCards()
 
         when (outcome) {
-            ChoiceOutcome.MATCH -> scheduleHideMatched()
+            ChoiceOutcome.FLIPPED_UP -> onHaptic?.invoke(HapticIntent.CARD_FLIP)
+            ChoiceOutcome.MATCH -> {
+                // The final pair is followed within the same call stack by checkWin()'s
+                // SUCCESS haptic (below) — a MATCH thud in front of it reads as a stutter,
+                // so the win is left to speak for itself (mirrors iOS's
+                // `fireChooseHaptic`: `if matchedNow < model.cards.count`).
+                if (!game.isWon) onHaptic?.invoke(HapticIntent.MATCH)
+                scheduleHideMatched()
+            }
             ChoiceOutcome.MISMATCH -> {
+                onHaptic?.invoke(HapticIntent.MISMATCH)
                 scheduleFlipBack()
                 checkMistakeBudget()
             }
@@ -254,6 +291,10 @@ class GameViewModel(
         tickJob?.cancel()
         flipBackJob?.cancel()
         _state.value = _state.value.copy(outcome = outcome)
+        // Fires as soon as the outcome is decided — independent of whether a Level loss's
+        // commit is deferred below, matching iOS's own timing (the lose/win screen appears
+        // at this same instant).
+        onHaptic?.invoke(if (outcome is GameOutcome.Won) HapticIntent.SUCCESS else HapticIntent.FAILURE)
         onGameFinished?.invoke()
         val isDeferredLevelLoss = mode is GameMode.Level && outcome is GameOutcome.Lost
         if (!isDeferredLevelLoss) {
@@ -289,6 +330,7 @@ class GameViewModel(
                 }
             }
         }
+        if (outcome is GameOutcome.Won) onGameWon?.invoke()
         recordStats(outcome)
         notifyCompletionInterstitial()
     }
@@ -341,6 +383,7 @@ class GameViewModel(
 
     fun pause() {
         if (_state.value.isFinished) return
+        onHaptic?.invoke(HapticIntent.TAP)
         // Pausing during the mistake-loss deferral must not let the player play on past
         // the budget "for free" by never letting the delay elapse — cancelling it here
         // and re-arming a fresh one from `resume()` is the actual spec 7.5 rule.
@@ -354,6 +397,7 @@ class GameViewModel(
 
     fun resume() {
         if (_state.value.isFinished) return
+        onHaptic?.invoke(HapticIntent.TAP)
         _state.value = _state.value.copy(isPaused = false)
         checkMistakeBudget()
     }
@@ -415,6 +459,7 @@ class GameViewModel(
      * reload) always restart.
      */
     suspend fun retry(): Boolean {
+        onHaptic?.invoke(HapticIntent.TAP)
         val hadLevelLoss = mode is GameMode.Level && _state.value.outcome is GameOutcome.Lost
         commitLossIfNeeded()
         if (hadLevelLoss && levelLives?.hasLivesRemaining() == false) return false
@@ -429,6 +474,7 @@ class GameViewModel(
      * navigates away immediately regardless.
      */
     fun acknowledgeLossAndQuit() {
+        onHaptic?.invoke(HapticIntent.TAP)
         statsWorkScope.launch { commitLossIfNeeded() }
     }
 
@@ -499,13 +545,18 @@ class GameViewModel(
         if (mode !is GameMode.Level) return false
         if (_state.value.isPaused || _state.value.isFinished) return false
         val wallet = starWallet ?: return false
-        if (!wallet.spend(powerUp.cost)) return false
+        if (!wallet.spend(powerUp.cost)) {
+            onHaptic?.invoke(HapticIntent.WARNING)
+            return false
+        }
         // Re-check after the suspending spend: the game could have finished or been
         // paused while that transaction was in flight.
         if (_state.value.isPaused || _state.value.isFinished || !apply()) {
             wallet.credit(powerUp.cost)
+            onHaptic?.invoke(HapticIntent.WARNING)
             return false
         }
+        onHaptic?.invoke(HapticIntent.REWARD)
         return true
     }
 
@@ -521,7 +572,10 @@ class GameViewModel(
         val outcome = _state.value.outcome as? GameOutcome.Lost ?: return false
         if (outcome.reason != LoseReason.TOO_MANY_MISTAKES) return false
         val wallet = starWallet ?: return false
-        if (!wallet.spend(LevelPowerUp.FORGIVE_COST)) return false
+        if (!wallet.spend(LevelPowerUp.FORGIVE_COST)) {
+            onHaptic?.invoke(HapticIntent.WARNING)
+            return false
+        }
         game.forgiveFailures(LevelPowerUp.FORGIVE_AMOUNT)
         // A floored clock, or the resumed board could restart already expired (spec 7.5).
         val flooredTime = maxOf(_state.value.timeRemaining, LevelPowerUp.FORGIVE_MINIMUM_SECONDS)
@@ -531,6 +585,7 @@ class GameViewModel(
             failedTries = game.failedTries,
         )
         start()
+        onHaptic?.invoke(HapticIntent.REWARD)
         return true
     }
 
@@ -543,9 +598,13 @@ class GameViewModel(
         if (_state.value.outcome !is GameOutcome.Lost) return false
         val wallet = starWallet ?: return false
         val lives = levelLives ?: return false
-        if (!wallet.spend(LevelPowerUp.LIFE_COST)) return false
+        if (!wallet.spend(LevelPowerUp.LIFE_COST)) {
+            onHaptic?.invoke(HapticIntent.WARNING)
+            return false
+        }
         lives.refill(1)
         restart()
+        onHaptic?.invoke(HapticIntent.REWARD)
         return true
     }
 
@@ -562,7 +621,12 @@ class GameViewModel(
         val context = (mode as? GameMode.Level)?.context ?: return false
         if (_state.value.outcome !is GameOutcome.Lost) return false
         val wallet = starWallet ?: return false
-        if (!wallet.spend(LevelPowerUp.SKIP_LEVEL_COST)) return false
+        if (!wallet.spend(LevelPowerUp.SKIP_LEVEL_COST)) {
+            onHaptic?.invoke(HapticIntent.WARNING)
+            return false
+        }
+        // No REWARD here — skipping spends stars to bypass the level, it doesn't grant
+        // anything the way the power-ups and rescues above do.
         commitLossIfNeeded(allowInterstitial = false)
         context.store.skipLevel(context.number)
         return true
@@ -588,6 +652,7 @@ class GameViewModel(
             failedTries = game.failedTries,
         )
         start()
+        onHaptic?.invoke(HapticIntent.REWARD)
         return true
     }
 
@@ -598,6 +663,7 @@ class GameViewModel(
         val lives = levelLives ?: return false
         lives.refill(1)
         restart()
+        onHaptic?.invoke(HapticIntent.REWARD)
         return true
     }
 

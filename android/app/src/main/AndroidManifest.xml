@@ -7,6 +7,12 @@
          implicitly granted below API 33, where this declaration is a no-op (spec 11.2). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- API 30+ package-visibility: lets the "Rate DoMemory" Settings row's market://
+         intent (feature/settings/SettingsScreen.kt) resolve to the real Play Store app. -->
+    <queries>
+        <package android:name="com.android.vending" />
+    </queries>
+
     <application
         android:name=".DoMemoryApplication"
         android:allowBackup="true"

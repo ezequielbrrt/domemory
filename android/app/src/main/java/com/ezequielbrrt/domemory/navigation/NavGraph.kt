@@ -39,9 +39,15 @@ import com.ezequielbrrt.domemory.feature.onboarding.OnboardingViewModel
 import com.ezequielbrrt.domemory.feature.seasons.SeasonLevelsScreen
 import com.ezequielbrrt.domemory.feature.settings.SettingsScreen
 import com.ezequielbrrt.domemory.feature.settings.SettingsViewModel
+import com.ezequielbrrt.domemory.feature.whatsnew.WhatsNewDialog
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.ads.findActivity
+import com.ezequielbrrt.domemory.services.haptics.HapticIntent
+import com.ezequielbrrt.domemory.services.haptics.HapticsService
+import com.ezequielbrrt.domemory.services.review.AppReviews
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 
 /**
@@ -217,12 +223,20 @@ fun NavGraph(
                             onCompletionInterstitial = { difficulty, durationMs ->
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
+                            onHaptic = HapticsService::fire,
+                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
                         )
                     }
                 },
             )
             val state by viewModel.state.collectAsState()
-            GameScreen(state, viewModel::choose, { if (state.isPaused) viewModel.resume() else viewModel.pause() }, { navController.popBackStack() }, viewModel::restart)
+            GameScreen(
+                state,
+                viewModel::choose,
+                { if (state.isPaused) viewModel.resume() else viewModel.pause() },
+                { HapticsService.fire(HapticIntent.TAP); navController.popBackStack() },
+                { HapticsService.fire(HapticIntent.TAP); viewModel.restart() },
+            )
         }
 
         composable(Routes.SEASON_LEVELS, arguments = listOf(navArgument("seasonId") { type = NavType.StringType })) { entry ->
@@ -280,6 +294,8 @@ fun NavGraph(
                             onCompletionInterstitial = { difficulty, durationMs ->
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
+                            onHaptic = HapticsService::fire,
+                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
                         )
                     }
                 },
@@ -295,7 +311,8 @@ fun NavGraph(
                 onQuit = {
                     // A season loss is deferred exactly like an endless one (see
                     // GameViewModel's class doc) — quitting without this would leave the
-                    // life unspent and the attempt unrecorded.
+                    // life unspent and the attempt unrecorded. acknowledgeLossAndQuit()
+                    // fires its own TAP haptic.
                     viewModel.acknowledgeLossAndQuit()
                     navController.popBackStack()
                 },
@@ -324,11 +341,13 @@ fun NavGraph(
                     }
                 },
                 onWatchAdForLife = {
+                    HapticsService.fire(HapticIntent.TAP)
                     AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_LIFE, onReward = {
                         coroutineScope.launch { viewModel.applyLifeReward() }
                     })
                 },
                 onWatchAdToForgive = {
+                    HapticsService.fire(HapticIntent.TAP)
                     AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_FORGIVE, onReward = {
                         coroutineScope.launch { viewModel.applyForgiveMistakesReward() }
                     })
@@ -353,6 +372,8 @@ fun NavGraph(
                             onCompletionInterstitial = { difficulty, durationMs ->
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
+                            onHaptic = HapticsService::fire,
+                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
                         )
                     }
                 },
@@ -415,11 +436,13 @@ fun NavGraph(
                     }
                 },
                 onWatchAdForLife = {
+                    HapticsService.fire(HapticIntent.TAP)
                     AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_LIFE, onReward = {
                         coroutineScope.launch { viewModel.applyLifeReward() }
                     })
                 },
                 onWatchAdToForgive = {
+                    HapticsService.fire(HapticIntent.TAP)
                     AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_FORGIVE, onReward = {
                         coroutineScope.launch { viewModel.applyForgiveMistakesReward() }
                     })
@@ -432,6 +455,12 @@ fun NavGraph(
             val state by viewModel.state.collectAsState()
             val menuEntry = remember { navController.getBackStackEntry(Routes.MENU) }
             val menuViewModel: MenuViewModel = viewModel(viewModelStoreOwner = menuEntry, factory = viewModelFactory { initializer { MenuViewModel(container.boardCatalog, container.prefs) } })
+            // A second, screen-local presentation of the same dialog MainActivity shows
+            // automatically after a version upgrade (WhatsNewDialog's own doc: "intentionally
+            // reused for automatic and Settings presentation"). No prefs write on dismiss here
+            // — reopening it manually never needs to change whatsNewLastSeenVersion, which is
+            // already at the running version by the time this screen is reachable at all.
+            var showWhatsNew by remember { mutableStateOf(false) }
             SettingsScreen(
                 state,
                 onBack = { if (state.difficultyChanged) menuViewModel.onSettingsDifficultyChanged(); navController.popBackStack() },
@@ -440,7 +469,11 @@ fun NavGraph(
                 onHaptics = viewModel::setHaptics,
                 onEnableReminders = viewModel::enableReminders,
                 onDisableReminders = viewModel::disableReminders,
+                onWhatsNew = { showWhatsNew = true },
             )
+            if (showWhatsNew) {
+                WhatsNewDialog(onDismiss = { showWhatsNew = false })
+            }
         }
 
         composable(Routes.CREATE_MEMORAMA) {
@@ -515,6 +548,8 @@ fun NavGraph(
                             onCompletionInterstitial = { difficulty, durationMs ->
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
+                            onHaptic = HapticsService::fire,
+                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
                         )
                     }
                 },
@@ -526,8 +561,8 @@ fun NavGraph(
                 onPauseToggle = {
                     if (state.isPaused) viewModel.resume() else viewModel.pause()
                 },
-                onQuit = { navController.popBackStack() },
-                onRetry = viewModel::restart,
+                onQuit = { HapticsService.fire(HapticIntent.TAP); navController.popBackStack() },
+                onRetry = { HapticsService.fire(HapticIntent.TAP); viewModel.restart() },
             )
         }
     }

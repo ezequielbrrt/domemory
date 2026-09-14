@@ -1,5 +1,9 @@
 package com.ezequielbrrt.domemory.feature.settings
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,9 +19,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.feature.notifications.rememberNotificationPermissionRequester
@@ -34,9 +40,11 @@ fun SettingsScreen(
     onHaptics: (Boolean) -> Unit,
     onEnableReminders: () -> Unit,
     onDisableReminders: () -> Unit,
+    onWhatsNew: () -> Unit,
 ) {
     BackHandler(onBack = onBack)
     val p = LocalPalette.current
+    val context = LocalContext.current
     // Same "one path" discipline as the primer (feature/notifications/NotificationPrimerDialog.kt):
     // turning the toggle on requests the OS permission first (a no-op below API 33) and only
     // calls onEnableReminders — which flips notificationsEnabled — once that resolves.
@@ -50,6 +58,45 @@ fun SettingsScreen(
         SettingToggle(stringResource(R.string.settings_notifications_title), state.remindersEnabled) { turningOn ->
             if (turningOn) requestPermission() else onDisableReminders()
         }
+        SettingGroup(stringResource(R.string.settings_section_about)) {
+            // Opens the Play Store listing directly — the standard manual "rate the app"
+            // entry. This is deliberately separate from the win-triggered Play In-App Review
+            // prompt (AppReviews.recordSuccessfulGameWin, fired from GameViewModel on a real
+            // win): that flow cannot be launched on demand by design — Google's ReviewManager
+            // API has no "show the dialog now" call, only "request a flow, which Play Core
+            // may or may not actually present" — so a manual button can only ever be this
+            // storefront link, never a way to force the in-app prompt open.
+            SettingRow(
+                title = stringResource(R.string.settings_review_title),
+                description = stringResource(R.string.settings_review_description),
+                onClick = { openPlayStoreListing(context) },
+            )
+            SettingRow(
+                title = stringResource(R.string.settings_whats_new_title),
+                description = stringResource(R.string.settings_whats_new_description),
+                onClick = onWhatsNew,
+            )
+        }
+    }
+}
+
+/** `market://details` routes straight into the Play Store app when it's installed (the
+ * common case); `setPackage` pins the intent to Play Store specifically so no other app
+ * that happens to claim the `market` scheme can intercept it. Falls back to the plain
+ * `https://play.google.com` listing URL — resolvable by any browser — when the Play Store
+ * app can't handle it at all (an emulator with no Play Store image, mirrors this repo's own
+ * `Pixel_10` note about `google_apis_playstore` vs plain `google_apis` images). */
+private fun openPlayStoreListing(context: Context) {
+    val appId = context.packageName
+    val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appId")).apply {
+        setPackage("com.android.vending")
+    }
+    try {
+        context.startActivity(marketIntent)
+    } catch (_: ActivityNotFoundException) {
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appId")),
+        )
     }
 }
 
@@ -68,3 +115,13 @@ private fun ThemePreference.labelRes(): Int = when (this) {
 @Composable private fun SettingGroup(title: String, content: @Composable () -> Unit) { val p = LocalPalette.current; Column(Modifier.fillMaxWidth().background(p.surfacePrimary, RoundedCornerShape(16.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Text(title, fontWeight = FontWeight.Bold, color = p.textSecondary); content() } }
 @Composable private fun Choice(label: String, selected: Boolean, click: () -> Unit) { val p = LocalPalette.current; Text(label, color = if (selected) p.primary else p.textPrimary, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.fillMaxWidth().clickable(onClick = click).padding(vertical = 6.dp)) }
 @Composable private fun SettingToggle(label: String, checked: Boolean, change: (Boolean) -> Unit) { val p = LocalPalette.current; Row(Modifier.fillMaxWidth().background(p.surfacePrimary, RoundedCornerShape(16.dp)).padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text(label, fontWeight = FontWeight.SemiBold, color = p.textPrimary); Switch(checked = checked, onCheckedChange = change) } }
+
+/** A tappable info row — the "Rate DoMemory" / "What's New" shape: a title plus a
+ * secondary description line, no switch. */
+@Composable private fun SettingRow(title: String, description: String, onClick: () -> Unit) {
+    val p = LocalPalette.current
+    Column(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp)) {
+        Text(title, fontWeight = FontWeight.SemiBold, color = p.textPrimary)
+        Text(description, color = p.textSecondary, fontSize = 13.sp)
+    }
+}
