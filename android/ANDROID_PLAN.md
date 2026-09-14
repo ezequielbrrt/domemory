@@ -14,7 +14,7 @@ Target: feature parity with iOS 4.2.0.
 | # | Decision | Value | Consequence |
 |---|---|---|---|
 | D1 | Daily Challenge board parity with iOS | **Not required** | Android uses the same seed string (`YYYYMMDD`), the same SplitMix64/FNV-1a RNG and the same 48-emoji pool, but the shuffle is Kotlin's own Fisher–Yates. Boards will be *deterministic per day and identical across all Android devices*, but not necessarily equal to iOS. See §6 Risks — this changes a marketing claim. |
-| D2 | Backend + monetization credentials | **Firebase wired; ads/billing still stubbed** | `app/google-services.json` is in place for `domemory-c9211`, so the real `/data` catalog is read. Ads and Play Billing remain behind interfaces with working fakes. |
+| D2 | Backend + monetization credentials | **Firebase and AdMob wired; Billing deferred** | `app/google-services.json` is in place for `domemory-c9211`, so the real `/data` catalog is read. AdMob's Android app/unit IDs are configured; Remove Ads/Play Billing are deliberately deferred. |
 | D3 | Project structure | **Single `:app` module, package-per-feature** | Mirrors the iOS `Modules/` + `Services/` split. No Gradle module graph to maintain. Boundaries enforced by package discipline and constructor injection, not by the build system. |
 | D4 | Dependency injection | **Manual — an `AppContainer` service locator** | No Hilt/KSP. The iOS app wires services by hand too; this keeps the build fast and removes an annotation-processor version dependency. Revisit if the container exceeds ~25 services. |
 | D5 | Persistence | **DataStore Preferences only. No Room.** | Spec §13.2: CoreData holds one row. `hasOnboarded` becomes an explicit boolean flag rather than "a record exists". |
@@ -28,7 +28,7 @@ Target: feature parity with iOS 4.2.0.
 |---|---|---|
 | O7 | Register a second Firebase Android client for `com.ezequielbrrt.domemory.debug`? Without one, debug and release cannot be installed side by side (see §2). | any time |
 | O1 | Deploy `assetlinks.json` at `domemory.app` for App Links? (iOS's `apple-app-site-association` is also undeployed — cheaper to do both at once.) | Phase 6 |
-| O3 | AdMob: separate Android app id + 10 unit ids. | supplied 2026-09-14; configured in Phase 7 worktree |
+| O3 | AdMob: separate Android app id + 9 active unit ids. | supplied 2026-09-14; configured in Phase 7 worktree |
 | O5 | Consent/UMP dialog on Android in place of ATT? (Affects the launch sequence, §11.4.) | Phase 7 |
 | O6 | Ship the bundled `Righteous`/`PatrickHand` TTFs, or use rounded system faces as iOS effectively does? | Phase 8 |
 
@@ -353,7 +353,8 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | Phase 4 | merged (re-landed), **now emulator-verified against a live Firebase season** | `1f17bb7` / PR #44 originally, reverted (`42cc257`, unintentional), re-integrated against Phase 3's hardening in this change | Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule if not already live (a real "Spooky Season" was already readable during this session's verification, so the rule and a season are in fact already live — confirm before re-deploying). |
 | Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
 | Phase 6 | in progress — transactional room protocol, menu/deep-link entry, invite sharing, lobby, synchronized board, reconnect grace and rematch are implemented and unit-test clean | current worktree | Add QR rendering, then run a live Android↔iOS match before declaring it complete. |
-| Phase 7 | in progress — AdMob SDK/app ID and all nine active placement units are configured; pure frequency-cap policy is unit-test clean | current worktree | Wire placement presentation. Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
+| Phase 7 | in progress — AdMob SDK/app ID and all nine active placement units are configured; home/game banners are live and the pure frequency-cap policy is unit-test clean | current worktree | Wire full-screen/rewarded/native placement presentation. Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
+| Phase 8 | in progress — What’s New version gating and release-notes dialog are implemented and unit-test clean | current worktree | Add Settings entry, review prompt, achievements, haptics, animations, accessibility and localization parity. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
 

@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
+import com.ezequielbrrt.domemory.services.ads.AdMobBanner
+import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import kotlin.math.ceil
@@ -91,6 +93,7 @@ fun GameScreen(
                 onChoose = onChoose,
                 modifier = Modifier.weight(1f),
             )
+            AdMobBanner(AdPlacement.GAME_BANNER, Modifier.fillMaxWidth())
             if (isLevel && starBalance != null && !state.isFinished) {
                 Spacer(Modifier.size(12.dp))
                 PowerUpBar(

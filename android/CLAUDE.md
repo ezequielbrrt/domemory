@@ -75,10 +75,12 @@ graph in the same change.
 | `services/notifications`, `feature/notifications` | `NotificationService`, reminder workers and the once-per-install permission primer — the three local reminders and their OS-permission sync (Phase 5) |
 | `widget` | `DailyChallengeGlanceWidget`, receiver and calendar-aligned WorkManager refresh — the Daily Challenge home-screen widget (Phase 5) |
 | `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 in progress; create/join, invite sharing, gameplay, reconnect grace and rematch exist, while QR rendering and live cross-platform verification remain follow-up work |
+| `services/ads` | AdMob initialization, debug/release placement configuration, frequency-cap policy and Compose banner wrapper — Phase 7 in progress; banners are wired, full-screen/rewarded/native presentation remains follow-up work |
+| `services/whatsnew`, `feature/whatsnew` | Version-aware release-notes gate and dialog — Phase 8 in progress; first installs stay silent and upgrades present once |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
 
-Everything else in the plan's package layout (`ads/`, `purchases/`, `haptics/`,
-full `multiplayer/` feature gameplay UI) does not exist yet. Check
+Everything else in the plan's package layout (`haptics/`, full `multiplayer/` feature
+gameplay UI) does not exist yet. Check
 `ANDROID_PLAN.md` §4 before assuming a service is missing by accident rather
 than by phase.
 
