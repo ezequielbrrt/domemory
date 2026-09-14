@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AppWidgetProviderInfo.initialLayout is a RemoteViews layout shown for one frame before
+  Glance's own composition takes over (androidx.glance.appwidget.GlanceAppWidgetReceiver
+  swaps it out as soon as provideGlance completes) — it is never the widget's real content,
+  just what the OS can render before any of this app's code has run.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFFFF" />

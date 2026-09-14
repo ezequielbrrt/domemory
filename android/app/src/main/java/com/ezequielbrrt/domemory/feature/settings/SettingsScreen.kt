@@ -20,20 +20,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Difficulty
+import com.ezequielbrrt.domemory.feature.notifications.rememberNotificationPermissionRequester
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
 
 @Composable
-fun SettingsScreen(state: SettingsUiState, onBack: () -> Unit, onDifficulty: (Difficulty) -> Unit, onTheme: (ThemePreference) -> Unit, onHaptics: (Boolean) -> Unit, onReminders: (Boolean) -> Unit) {
+fun SettingsScreen(
+    state: SettingsUiState,
+    onBack: () -> Unit,
+    onDifficulty: (Difficulty) -> Unit,
+    onTheme: (ThemePreference) -> Unit,
+    onHaptics: (Boolean) -> Unit,
+    onEnableReminders: () -> Unit,
+    onDisableReminders: () -> Unit,
+) {
     BackHandler(onBack = onBack)
     val p = LocalPalette.current
+    // Same "one path" discipline as the primer (feature/notifications/NotificationPrimerDialog.kt):
+    // turning the toggle on requests the OS permission first (a no-op below API 33) and only
+    // calls onEnableReminders — which flips notificationsEnabled — once that resolves.
+    // Denial leaves the flag untouched, matching spec 11.2's permission-sync rule.
+    val requestPermission = rememberNotificationPermissionRequester(onGranted = onEnableReminders, onDenied = {})
     Column(Modifier.fillMaxSize().background(p.appBackground).padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Text("‹  " + stringResource(R.string.settings_title), style = DoMemoryType.display(26), color = p.primary, modifier = Modifier.clickable(onClick = onBack).padding(vertical = 8.dp))
         SettingGroup(stringResource(R.string.settings_section_game)) { Difficulty.entries.forEach { d -> Choice(stringResource(d.labelRes()), state.difficulty == d) { onDifficulty(d) } } }
         SettingGroup(stringResource(R.string.settings_theme_title)) { ThemePreference.entries.forEach { t -> Choice(stringResource(t.labelRes()), state.theme == t) { onTheme(t) } } }
         SettingToggle(stringResource(R.string.settings_haptics_title), state.hapticsEnabled, onHaptics)
-        SettingToggle(stringResource(R.string.settings_notifications_title), state.remindersEnabled, onReminders)
+        SettingToggle(stringResource(R.string.settings_notifications_title), state.remindersEnabled) { turningOn ->
+            if (turningOn) requestPermission() else onDisableReminders()
+        }
     }
 }
 

@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.ezequielbrrt.domemory.navigation.NavGraph
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private lateinit var container: AppContainer
@@ -25,7 +26,19 @@ class MainActivity : ComponentActivity() {
      */
     override fun onResume() {
         super.onResume()
-        if (::container.isInitialized) container.refreshActiveSeason()
+        if (::container.isInitialized) {
+            container.refreshActiveSeason()
+            // Spec 11.2: "On launch, sync the flag with OS state" — also re-checked on every
+            // foreground (a player can revoke notification access from system Settings
+            // without the app ever seeing an OS callback for it).
+            container.applicationScope.launch {
+                container.notifications.syncAuthorizationStatus()
+                // Spec 11.2: the streak-at-risk reminder is refreshed on launch and every
+                // foreground, so a day rollover while the app was backgrounded cannot leave
+                // yesterday's pending 20:00 notification armed.
+                container.notifications.refreshStreakAtRiskReminder()
+            }
+        }
     }
 
     /** `singleTop` (manifest) routes a link tapped while already running here instead of a new instance. */

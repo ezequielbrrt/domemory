@@ -3,6 +3,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Runtime-requested on API 33+ via feature/notifications/NotificationPermission.kt;
+         implicitly granted below API 33, where this declaration is a no-op (spec 11.2). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".DoMemoryApplication"
@@ -36,5 +39,19 @@
                 <data android:scheme="domemory" />
             </intent-filter>
         </activity>
+
+        <!-- Daily Challenge home-screen widget (spec 8.1). The launcher owns the widget
+             host, so this receiver must be exported for the system to deliver its update
+             broadcasts. Its AppWidget provider metadata limits it to that contract. -->
+        <receiver
+            android:name=".widget.DailyChallengeWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/daily_challenge_widget_info" />
+        </receiver>
     </application>
 </manifest>

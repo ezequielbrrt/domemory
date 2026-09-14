@@ -72,10 +72,12 @@ graph in the same change.
 | `services/daily` | `DailyChallengeService` — deterministic board, streak/milestone tracking (Phase 5) |
 | `core/deeplink` | `DeepLink`, `DeepLinkRouter` — `domemory://daily` and `domemory://join/CODE` parsing (Phase 5); `Join` parses but is not yet routed (Phase 6) |
 | `feature/seasons`, `feature/daily` | `SeasonCard`/`SeasonLevelsScreen` and `DailyChallengeCard` — the menu entry points for Phases 4 and 5 |
+| `services/notifications`, `feature/notifications` | `NotificationService`, reminder workers and the once-per-install permission primer — the three local reminders and their OS-permission sync (Phase 5) |
+| `widget` | `DailyChallengeGlanceWidget`, receiver and calendar-aligned WorkManager refresh — the Daily Challenge home-screen widget (Phase 5) |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
 
-Everything else in the plan's package layout (`ads/`, `purchases/`,
-`notifications/`, `haptics/`, `multiplayer/`) does not exist yet. Check
+Everything else in the plan's package layout (`ads/`, `purchases/`, `haptics/`,
+`multiplayer/`) does not exist yet. Check
 `ANDROID_PLAN.md` §4 before assuming a service is missing by accident rather
 than by phase.
 
@@ -128,9 +130,9 @@ committing a change to anything under `core/` or `services/`.
 
 ## Status
 
-Phases 0–4 (Levels, including its correctness hardening, and Seasons) are merged.
-Phase 5 (Daily Challenge) is in progress: the deterministic board, streak/milestone
-tracking, menu card and deep links are merged; the Glance widget and local
-notifications are not. `ANDROID_PLAN.md` §7 contains the required handoff ledger: read
-it before starting Android work, update it when a migration slice changes state, and
-do not infer a feature is complete merely because its type or screen exists.
+Phases 0–5 (Levels, including its correctness hardening; Seasons; and Daily Challenge)
+are complete in the current worktree. Phase 5 includes the deterministic board,
+streak/milestone tracking, menu card, deep links, Glance widget and local reminders.
+`ANDROID_PLAN.md` §7 contains the required handoff ledger: read it before starting
+Android work, update it when a migration slice changes state, and do not infer a feature
+is complete merely because its type or screen exists.
