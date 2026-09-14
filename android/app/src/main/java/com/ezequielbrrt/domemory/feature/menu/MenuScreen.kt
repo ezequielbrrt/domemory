@@ -60,6 +60,7 @@ fun MenuScreen(
     onDeleteCustomMemorama: (String) -> Unit,
     onBoardSelected: (Board) -> Unit,
     onCreateMemorama: () -> Unit,
+    onMultiplayer: () -> Unit,
     onSettings: () -> Unit,
     levelsViewModel: LevelsViewModel,
     onLevelSelected: (Int) -> Unit,
@@ -73,7 +74,7 @@ fun MenuScreen(
 ) {
     val palette = LocalPalette.current
     Column(modifier.fillMaxSize().background(palette.appBackground)) {
-        MenuHeader(onCreateMemorama = onCreateMemorama, onSettings = onSettings)
+        MenuHeader(onCreateMemorama = onCreateMemorama, onMultiplayer = onMultiplayer, onSettings = onSettings)
         // Spec 9.1: while a season is active it shares this row with the Daily card, which
         // shrinks; with no active season the Daily card keeps its full-width layout.
         Row(Modifier.fillMaxWidth()) {
@@ -113,7 +114,7 @@ fun MenuScreen(
 }
 
 @Composable
-private fun MenuHeader(onCreateMemorama: () -> Unit, onSettings: () -> Unit) {
+private fun MenuHeader(onCreateMemorama: () -> Unit, onMultiplayer: () -> Unit, onSettings: () -> Unit) {
     val palette = LocalPalette.current
     Row(
         Modifier.fillMaxWidth().padding(16.dp),
@@ -126,6 +127,7 @@ private fun MenuHeader(onCreateMemorama: () -> Unit, onSettings: () -> Unit) {
             color = palette.primary,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("♟", color = palette.primary, fontSize = 22.sp, modifier = Modifier.size(44.dp).clickable(onClick = onMultiplayer).padding(10.dp))
             Text(text = stringResource(R.string.menu_create_title), color = palette.primary, fontWeight = FontWeight.SemiBold, modifier = Modifier
                 .background(palette.surfaceSecondary, RoundedCornerShape(999.dp))
                 .clickable(onClick = onCreateMemorama)

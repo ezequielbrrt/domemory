@@ -28,8 +28,7 @@ Target: feature parity with iOS 4.2.0.
 |---|---|---|
 | O7 | Register a second Firebase Android client for `com.ezequielbrrt.domemory.debug`? Without one, debug and release cannot be installed side by side (see §2). | any time |
 | O1 | Deploy `assetlinks.json` at `domemory.app` for App Links? (iOS's `apple-app-site-association` is also undeployed — cheaper to do both at once.) | Phase 6 |
-| O3 | AdMob: separate Android app id + 10 unit ids. | Phase 7 |
-| O4 | Play Console app + `removeads` one-time product. | Phase 7 |
+| O3 | AdMob: separate Android app id + 10 unit ids. | supplied 2026-09-14; configured in Phase 7 worktree |
 | O5 | Consent/UMP dialog on Android in place of ATT? (Affects the launch sequence, §11.4.) | Phase 7 |
 | O6 | Ship the bundled `Righteous`/`PatrickHand` TTFs, or use rounded system faces as iOS effectively does? | Phase 8 |
 
@@ -95,8 +94,7 @@ com.ezequielbrrt.domemory
 │   ├── seasons/      Season, SeasonCatalogService, SeasonProgressService,
 │   │                 SeasonLevelProgressStore
 │   ├── daily/        DailyChallengeService, DailyChallengeShared
-│   ├── ads/          AdsService (+ NoOpAdsService)          [fake until P7]
-│   ├── purchases/    PurchaseService (+ FakePurchaseService)[fake until P7]
+│   ├── ads/          AdsService + AdFrequencyCap
 │   ├── notifications/NotificationService, PrimerContent
 │   ├── haptics/      HapticsService
 │   ├── stats/        GameStatsService, ProfileStatsService
@@ -188,12 +186,11 @@ rules, QR + invite share (**Play Store link**, §10.7), deep links
 **Exit:** an Android device plays an iOS device — the single highest-value
 cross-platform behaviour in the app (§18).
 
-### Phase 7 — Monetization
-AdMob: 10 placements, the full frequency-cap rule set (per-difficulty interval,
+### Phase 7 — Ads
+AdMob: 9 placements, the full frequency-cap rule set (per-difficulty interval,
 20 s floor, 60 s rewarded suppression, 90 s global gap, 4 h app-open freshness),
-unconfigured-placement hiding. Play Billing with mandatory `acknowledgePurchase`,
-restore on launch, the rewarded 24-hour ad-free day, and the two invariants:
-**rewarded ads stay available to purchasers**, **purchasers still spend lives**.
+unconfigured-placement hiding. Remove Ads purchases and the rewarded 24-hour ad-free
+day are deliberately deferred from the Android scope.
 **Exit:** caps verified by test, not by feel.
 
 ### Phase 8 — Engagement polish and localization
@@ -355,6 +352,8 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | Phase 3 | merged, **now emulator-verified** | `c1faf11` / PR #43; hardening `feature/android-levels-hardening` / PR #45 (`37f4115`) | none — see verification note below. |
 | Phase 4 | merged (re-landed), **now emulator-verified against a live Firebase season** | `1f17bb7` / PR #44 originally, reverted (`42cc257`, unintentional), re-integrated against Phase 3's hardening in this change | Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule if not already live (a real "Spooky Season" was already readable during this session's verification, so the rule and a season are in fact already live — confirm before re-deploying). |
 | Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
+| Phase 6 | in progress — transactional room protocol, menu/deep-link entry, invite sharing, lobby, synchronized board, reconnect grace and rematch are implemented and unit-test clean | current worktree | Add QR rendering, then run a live Android↔iOS match before declaring it complete. |
+| Phase 7 | in progress — AdMob SDK/app ID and all nine active placement units are configured; pure frequency-cap policy is unit-test clean | current worktree | Wire placement presentation. Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
 
@@ -365,7 +364,7 @@ that read `LevelProgressService` directly with no gating and no header at all.
 
 One false alarm worth recording so it isn't re-chased: mid-session, a custom board's favorite star appeared to revert after playing the board and backing out. Direct inspection of the on-device DataStore file (`run-as ... cat files/datastore/domemory_prefs.preferences_pb`) at each step — immediately after favoriting, mid-game, and after returning — showed the favorite id present on disk throughout; a clean repeat of the same play-then-back sequence didn't reproduce the apparent loss either. The likely cause was an imprecise test tap landing near the card's Delete control (its clickable bounds sit immediately adjacent to the favorite star's), not an app defect. `toggleFavorite`/`removeCustomMemorama` are DataStore's only writers of `favoriteIDs` in the codebase, which is consistent with this being a test artifact rather than a race.
 
-Not exercised: multiplayer (Phase 6, doesn't exist), monetization (Phase 7, stubs), What's New/achievements/haptics feel/animations (Phase 8), and a season's day-boundary expiry (would need the emulator's system clock advanced past `endDate`, not attempted).
+Not exercised: multiplayer (Phase 6 remains in progress), monetization (Phase 7, stubs), What's New/achievements/haptics feel/animations (Phase 8), and a season's day-boundary expiry (would need the emulator's system clock advanced past `endDate`, not attempted).
 
 ### Reconciling the two branches (Phase 3 hardening × Phase 4/5 re-land)
 
@@ -513,8 +512,8 @@ plain-JVM testable) and `DeepLinkRouter.kt` (holds a link that arrives before th
 graph can act on it) implement spec 11.1's link table; `MainActivity` now has
 `android:launchMode="singleTop"` and feeds `onCreate`/`onNewIntent` data through the
 router, and `NavGraph` consumes a pending `Daily` link once onboarding resolves.
-`Join(code)` parses correctly (tested against every link form spec 11.1 lists) but is
-not routed anywhere yet — there is no multiplayer screen to send it to (Phase 6).
+`Join(code)` parses correctly (tested against every link form spec 11.1 lists) and Phase 6
+now routes it into the multiplayer join lobby.
 
 **Deliberately not attempted this session — flagged explicitly, not silently
 dropped:** the Glance **widget** and **local notifications** (spec 8.1, 11.2, 11.3),

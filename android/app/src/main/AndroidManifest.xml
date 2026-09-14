@@ -16,6 +16,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DoMemory">
 
+        <!-- Registered Android AdMob app ID. Unit IDs remain code-configured by placement. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4297174845441653~9801529431" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -28,9 +33,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- domemory://daily (Phase 5, wired) and domemory://join/CODE (Phase 6, parsed
-                 by DeepLink.parse already but not yet routed — no multiplayer screen exists
-                 yet to send it to). singleTop above so a link tapped while the app is already
+            <!-- domemory://daily (Phase 5) and domemory://join/CODE (Phase 6). singleTop above
+                 so a link tapped while the app is already
                  running reaches MainActivity.onNewIntent instead of stacking a new instance. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

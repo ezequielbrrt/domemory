@@ -7,6 +7,7 @@ import coil3.SingletonImageLoader
 import coil3.disk.DiskCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.ezequielbrrt.domemory.widget.DailyChallengeWidgetScheduler
+import com.ezequielbrrt.domemory.services.ads.AdsService
 import okio.Path.Companion.toOkioPath
 
 class DoMemoryApplication : Application(), SingletonImageLoader.Factory {
@@ -16,6 +17,7 @@ class DoMemoryApplication : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(context = this)
+        AdsService.initialize(this)
         // Spec 8.1's midnight refresh. Idempotent across process restarts: KEEP (see the
         // scheduler's doc) leaves an already-armed job's phase alone rather than recomputing
         // it from every app launch.

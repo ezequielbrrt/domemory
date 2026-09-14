@@ -364,24 +364,6 @@ class UserPreferencesTest {
         assertEquals("20260911", prefs.dailyLastAttemptDay.first())
     }
 
-    // -- Purchases --------------------------------------------------------------------------
-
-    @Test
-    fun `purchase entitlement and rewarded expiry persist independently`() = runTest {
-        val prefs = newPrefs()
-        assertFalse(prefs.hasRemovedAdsPurchased.first())
-        assertNull(prefs.rewardedRemoveAdsExpirationEpochMillis.first())
-
-        prefs.setHasRemovedAdsPurchased(true)
-        prefs.setRewardedRemoveAdsExpirationEpochMillis(1_800_000_000_000L)
-
-        assertTrue(prefs.hasRemovedAdsPurchased.first())
-        assertEquals(1_800_000_000_000L, prefs.rewardedRemoveAdsExpirationEpochMillis.first())
-
-        prefs.setRewardedRemoveAdsExpirationEpochMillis(null)
-        assertNull(prefs.rewardedRemoveAdsExpirationEpochMillis.first())
-    }
-
     // -- Ads frequency capping ----------------------------------------------------------------
 
     @Test

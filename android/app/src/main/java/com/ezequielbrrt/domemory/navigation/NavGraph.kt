@@ -57,6 +57,7 @@ private object Routes {
     const val SEASON_LEVELS = "season/{seasonId}"
     const val SEASON_GAME = "season/{seasonId}/level/{level}"
     const val DAILY_GAME = "daily"
+    const val MULTIPLAYER = "multiplayer?code={code}"
     private const val GAME_PATTERN = "game/{boardId}/{difficultyKey}"
     const val GAME = GAME_PATTERN
 
@@ -64,6 +65,7 @@ private object Routes {
     fun level(level: Int) = "level/$level"
     fun seasonLevels(seasonId: String) = "season/$seasonId"
     fun seasonGame(seasonId: String, level: Int) = "season/$seasonId/level/$level"
+    fun multiplayer(code: String = "") = "multiplayer?code=$code"
 }
 
 @Composable
@@ -84,8 +86,12 @@ fun NavGraph(
                 container.deepLinkRouter.consume()
                 if (!alreadyDone) navController.navigate(Routes.DAILY_GAME)
             }
-            // Join is parsed but not yet routed — no multiplayer screen exists (Phase 6).
-            is DeepLink.Join, null -> Unit
+            is DeepLink.Join -> {
+                val code = (container.deepLinkRouter.pending.value as DeepLink.Join).code
+                container.deepLinkRouter.consume()
+                navController.navigate(Routes.multiplayer(code))
+            }
+            null -> Unit
         }
     }
 
@@ -136,6 +142,7 @@ fun NavGraph(
                         navController.navigate(Routes.game(board.id, state.difficulty))
                     },
                     onCreateMemorama = { navController.navigate(Routes.CREATE_MEMORAMA) },
+                    onMultiplayer = { navController.navigate(Routes.multiplayer()) },
                     onSettings = { navController.navigate(Routes.SETTINGS) },
                     levelsViewModel = levelsViewModel,
                     onLevelSelected = { navController.navigate(Routes.level(it)) },
@@ -160,6 +167,25 @@ fun NavGraph(
                     onDismiss = { container.applicationScope.launch { container.prefs.setNotificationPrimerShown(true) } },
                 )
             }
+        }
+
+        composable(
+            route = Routes.MULTIPLAYER,
+            arguments = listOf(navArgument("code") { type = NavType.StringType; defaultValue = "" }),
+        ) { entry ->
+            val initialCode = entry.arguments?.getString("code").orEmpty()
+            val viewModel: com.ezequielbrrt.domemory.feature.multiplayer.MultiplayerViewModel = viewModel(
+                factory = viewModelFactory {
+                    initializer { com.ezequielbrrt.domemory.feature.multiplayer.MultiplayerViewModel(container.multiplayer) }
+                },
+            )
+            val boards by container.boardCatalog.boards.collectAsState(initial = emptyList())
+            com.ezequielbrrt.domemory.feature.multiplayer.MultiplayerScreen(
+                boards = boards,
+                vm = viewModel,
+                initialCode = initialCode,
+                onBack = { navController.popBackStack() },
+            )
         }
 
         composable(Routes.DAILY_GAME) {
