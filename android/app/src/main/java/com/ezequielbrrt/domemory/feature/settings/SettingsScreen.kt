@@ -15,8 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
@@ -27,12 +29,25 @@ fun SettingsScreen(state: SettingsUiState, onBack: () -> Unit, onDifficulty: (Di
     BackHandler(onBack = onBack)
     val p = LocalPalette.current
     Column(Modifier.fillMaxSize().background(p.appBackground).padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        Text("‹  Settings", style = DoMemoryType.display(26), color = p.primary, modifier = Modifier.clickable(onClick = onBack).padding(vertical = 8.dp))
-        SettingGroup("Game") { Difficulty.entries.forEach { d -> Choice(d.name.lowercase().replaceFirstChar { it.uppercase() }, state.difficulty == d) { onDifficulty(d) } } }
-        SettingGroup("Theme") { ThemePreference.entries.forEach { t -> Choice(t.name.lowercase().replaceFirstChar { it.uppercase() }, state.theme == t) { onTheme(t) } } }
-        SettingToggle("Haptics", state.hapticsEnabled, onHaptics)
-        SettingToggle("Reminders", state.remindersEnabled, onReminders)
+        Text("‹  " + stringResource(R.string.settings_title), style = DoMemoryType.display(26), color = p.primary, modifier = Modifier.clickable(onClick = onBack).padding(vertical = 8.dp))
+        SettingGroup(stringResource(R.string.settings_section_game)) { Difficulty.entries.forEach { d -> Choice(stringResource(d.labelRes()), state.difficulty == d) { onDifficulty(d) } } }
+        SettingGroup(stringResource(R.string.settings_theme_title)) { ThemePreference.entries.forEach { t -> Choice(stringResource(t.labelRes()), state.theme == t) { onTheme(t) } } }
+        SettingToggle(stringResource(R.string.settings_haptics_title), state.hapticsEnabled, onHaptics)
+        SettingToggle(stringResource(R.string.settings_notifications_title), state.remindersEnabled, onReminders)
     }
+}
+
+private fun Difficulty.labelRes(): Int = when (this) {
+    Difficulty.EASY -> R.string.difficulty_easy
+    Difficulty.MEDIUM -> R.string.difficulty_medium
+    Difficulty.HARD -> R.string.difficulty_hard
+    Difficulty.VERY_HARD -> R.string.difficulty_very_hard
+}
+
+private fun ThemePreference.labelRes(): Int = when (this) {
+    ThemePreference.SYSTEM -> R.string.theme_system
+    ThemePreference.LIGHT -> R.string.theme_light
+    ThemePreference.DARK -> R.string.theme_dark
 }
 @Composable private fun SettingGroup(title: String, content: @Composable () -> Unit) { val p = LocalPalette.current; Column(Modifier.fillMaxWidth().background(p.surfacePrimary, RoundedCornerShape(16.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Text(title, fontWeight = FontWeight.Bold, color = p.textSecondary); content() } }
 @Composable private fun Choice(label: String, selected: Boolean, click: () -> Unit) { val p = LocalPalette.current; Text(label, color = if (selected) p.primary else p.textPrimary, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.fillMaxWidth().clickable(onClick = click).padding(vertical = 6.dp)) }
