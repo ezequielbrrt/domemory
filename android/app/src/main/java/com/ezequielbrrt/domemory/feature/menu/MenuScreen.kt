@@ -46,6 +46,8 @@ import com.ezequielbrrt.domemory.feature.levels.LevelsScreen
 import com.ezequielbrrt.domemory.feature.levels.LevelsViewModel
 import com.ezequielbrrt.domemory.feature.seasons.SeasonCard
 import com.ezequielbrrt.domemory.services.seasons.Season
+import com.ezequielbrrt.domemory.services.ads.AdMobBanner
+import com.ezequielbrrt.domemory.services.ads.AdPlacement
 
 /**
  * The real menu (spec 2): header, three tabs (`Levels` / `My memoramas` / `All`),
@@ -93,6 +95,7 @@ fun MenuScreen(
                 )
             }
         }
+        AdMobBanner(AdPlacement.HOME_BANNER, Modifier.fillMaxWidth())
         MenuTabRow(selected = state.selectedTab, onSelectTab = onSelectTab)
         when (state.selectedTab) {
             MenuTab.LEVELS -> LevelsScreen(levelsViewModel, onLevelSelected)
