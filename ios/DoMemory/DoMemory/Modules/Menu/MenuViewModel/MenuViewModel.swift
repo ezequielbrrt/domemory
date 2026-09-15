@@ -42,6 +42,21 @@ class MenuViewModel {
         difficulty?.rawValue ?? Difficulty.medium.rawValue
     }
 
+    var selectedDifficulty: Difficulty {
+        difficulty ?? .medium
+    }
+
+    /// Updates the All-tab catalog immediately while keeping the global setting used by
+    /// subsequent games and the Settings screen in sync.
+    func setDifficulty(_ difficulty: Difficulty) {
+        guard self.difficulty != difficulty else { return }
+
+        self.difficulty = difficulty
+        UserManageObject().updateDifficulty(withDifficulty: difficulty)
+        rebuildMemoramaArray()
+        AnalyticsService.log(.difficultySelected(difficulty: difficulty.rawValue))
+    }
+
     func isFavorite(id: String) -> Bool {
         favoriteIDs.contains(id)
     }

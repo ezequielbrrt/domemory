@@ -27,8 +27,7 @@ Target: feature parity with iOS 4.2.0.
 | # | Question | Needed by |
 |---|---|---|
 | O7 | Register a second Firebase Android client for `com.ezequielbrrt.domemory.debug`? Without one, debug and release cannot be installed side by side (see §2). | any time |
-| O1 | Deploy `assetlinks.json` at `domemory.app` for App Links? (iOS's `apple-app-site-association` is also undeployed — cheaper to do both at once.) | Phase 6 |
-| O3 | AdMob: separate Android app id + 9 active unit ids. | supplied 2026-09-14; configured in Phase 7 worktree |
+| O1 | Register `domemory.app`, deploy `assetlinks.json` plus iOS's `apple-app-site-association`, then verify the shared-link join flow. | deferred Phase 6 follow-up |
 | O5 | Consent/UMP dialog on Android in place of ATT? (Affects the launch sequence, §11.4.) | Phase 7 |
 | O6 | Ship the bundled `Righteous`/`PatrickHand` TTFs, or use rounded system faces as iOS effectively does? | Phase 8 |
 
@@ -236,7 +235,7 @@ cross-check for the whole port.
 
 ## 7. Status
 
-**Phases 0–5 are complete.** Phase 3's hardening merged to `master` as PR #45 (`37f4115`); Phase 4 and
+**Current status: Phases 0–6 and 8 are complete; Phase 7 has the remaining intentional ad/launch-sequence decisions listed in §8.** Phase 3's hardening merged to `master` as PR #45 (`37f4115`); Phase 4 and
 part of Phase 5 merged once as PR #44, were reverted directly on `master` with no PR
 (commit `42cc257`, confirmed unintentional), and are being re-landed in this same
 change by reverting that revert on top of the now-merged hardening code and resolving
@@ -350,11 +349,11 @@ that read `LevelProgressService` directly with no gating and no header at all.
 |---|---|---|---|
 | Phase 2 | merged, **now emulator-verified** | `c1faf11` / PR #43 | none — see verification note below. |
 | Phase 3 | merged, **now emulator-verified** | `c1faf11` / PR #43; hardening `feature/android-levels-hardening` / PR #45 (`37f4115`) | none — see verification note below. |
-| Phase 4 | merged (re-landed), **now emulator-verified against a live Firebase season, including the day-boundary expiry case** | `1f17bb7` / PR #44 originally, reverted (`42cc257`, unintentional), re-integrated against Phase 3's hardening in this change | Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule if not already live (a real "Spooky Season" was already readable during this session's verification, so the rule and a season are in fact already live — confirm before re-deploying). Day-boundary expiry itself is now emulator-verified too — see the 2026-09-15 note below; no further action needed here. |
+| Phase 4 | complete — emulator-verified against a live Firebase season, including day-boundary expiry | `1f17bb7` / PR #44 (re-landed after accidental revert) | none; season-specific out-of-lives presentation is tracked as deferred polish. |
 | Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified, including streak rollover across a day boundary | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
-| Phase 6 | **exit criterion met** — a live Android↔iOS match (manual 6-character code, not App Links) was played to completion 2026-09-15 with correct, consistent state on both devices throughout: join, turn-taking, matches, and the 4-0 win/loss result. Rematch and the 15s reconnect-grace forfeit rule were also exercised live and were correct and consistent on both platforms. See the two 2026-09-15 notes below. | current worktree; the `.read` rule fix is deployed to `domemory-c9211` (not yet committed to git — still a working-tree diff in `firebase/firebase-database.rules.json`) | Commit the rules fix through the normal PR flow. O1 (App Links) remains open but is no longer a Phase 6 blocker — the deep-link path (`domemory://join/CODE`, `domemory.app` universal/app links) is still unverified and needs a registered domain, but the manual-code join path this session verified is a fully supported, already-shipped alternative. |
-| Phase 7 | in progress, **now emulator-verified** — AdMob SDK/app ID and all nine active placement units are configured; banners, the completion interstitial (cadence, the 20s floor, presentation/reload all confirmed live), `levels_rewarded_life`/`levels_rewarded_forgive` (confirmed presenting and granting live), and the multiplayer-finished native placement (confirmed presenting on both clients, confirmed independent of the interstitial frequency cap) are all wired and presenting through `AdsService`; the frequency-cap policy and its presentation-trigger gate are unit-test clean and the 60s rewarded-suppression window is also live-confirmed — see the 2026-09-15 "Phase 7 ad-flow verification session" note below | current worktree | `game_rewarded_extra_time`/`game_rewarded_hint` remain configured but unwired — no pause modal exists on Android to hang the hint button off, and extra-time has no existing star-purchase call site to slot an alternative into (see this section's implementation note below). App-open is unimplemented — no launch-sequence state machine exists yet for it to gate on (O5). Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
-| Phase 8 | complete — What's New, haptics (now wired across every screen: `feature/game/`, Menu, Levels, Seasons, Multiplayer, Settings — see the 2026-09-15 "Haptics expansion" note below), Play In-App Review, achievements, the spoiler-free share card, three Settings rows, four animations, five accessibility content-description rules, all nine translations, and `LocalizationParityTest` are implemented; the parity exit criterion is green across all ten locales | `feature/android-animations-accessibility` / current worktree | Device-only feel/TalkBack verification, and now also real-device haptic *feel* verification (the emulator's `Vibrator` is a no-op), remain follow-ups, not Phase 8 exit blockers. See the implementation notes below for exact scope and seams. |
+| Phase 6 | complete — a live Android↔iOS manual-code match, rematch and reconnect-grace forfeit all passed on 2026-09-15 | PR #53; production room-read-rule fix PR #58 (`beabbbe`) | O1 App Links remains an optional domain-dependent follow-up; manual-code joining is fully supported and verified. |
+| Phase 7 | in progress — configured placements, banners, completion interstitial, both Levels rewarded rescues, `game_rewarded_hint` (now wired from a new pause sheet in every mode) and multiplayer-finished native ad are emulator-verified | PRs #51–#54; verification record PR #60 | `game_rewarded_extra_time` still needs a decision and UI before it can be wired; build launch sequence + decide UMP (O5) before enabling app-open. Billing and temporary rewarded ad-free day remain deferred. |
+| Phase 8 | complete — What's New, review, achievements, share card, animations, accessibility, all translations and app-wide haptics are implemented; localization parity is green | PRs #55–#57, #59 and #61 | real-device haptic feel, TalkBack and animation-feel checks are follow-ups, not exit blockers. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
 
@@ -402,7 +401,7 @@ This is applied locally in this worktree's `firebase/firebase-database.rules.jso
 - Played the match to completion from the Android side (four flips, all matches). Final state was consistent on both devices: Android showed "You won", You: 4, Opponent: 0; iOS showed "You lost", You: 0, Opponent: 4 — the same result from each side's own perspective, which is what "consistent" means for this exit criterion. The multiplayer-finished native ad placement (Phase 7) also presented correctly on iOS at this point, an incidental confirmation of that wiring.
 - Rematch: tapped "Play again" on Android. A new room was created and iOS's listener picked it up automatically (no manual re-join needed) — both devices rendered the new 8-card board. During this step the Android device was briefly backgrounded by an accidental tap into a test ad's Play Store deep link (a test artifact of driving the emulator via `adb`, not a game-UI bug — AdMob's test native ad card is taller than the production placement, so the "Play again" button's approximate on-screen position from the previous state was no longer accurate; re-taps must use `uiautomator dump`-derived exact bounds, not a re-estimated screenshot position). The backgrounding held past the 15-second reconnect grace (`RECONNECT_GRACE_SECONDS`), and the room correctly resolved as a host forfeit: server data (`firebase database:get "/multiplayerRooms/-P1_WtG_EErXs4K0oxjZ"`) shows `status: finished`, `winnerId` set to the guest (iOS), `disconnectPlayerId` set to the host (Android), `players.<host>.connected: false`. Both clients displayed this consistently and correctly — Android (`uiautomator dump`, not a screenshot guess, since the AdMob validator dialog was obscuring part of the text): "You lost", 0-0; iOS (`idb ui describe-all`): "You won", 0-0. This incidentally verifies the reconnect-grace forfeit rule cross-platform, which nothing had exercised live before — not part of the original exit criterion, but a meaningful bonus given how easily a real player could trigger the same thing (backgrounding the app mid-match).
 
-**Phase 6's exit criterion — "an Android device plays an iOS device" — is met.** The remaining gap is App Links (O1): the deep-link join path (`domemory://join/CODE`, tapping a shared link outside the app) is still unverified because `domemory.app` is unregistered, but the manual-code path is a fully supported, already-shipped alternative and was what this session verified. The `.read` rule fix is live in production but still needs a normal git commit/PR — it exists only as a working-tree diff as of this note.
+**Phase 6's exit criterion — "an Android device plays an iOS device" — is met.** The remaining gap is App Links (O1): the deep-link join path (`domemory://join/CODE`, tapping a shared link outside the app) is still unverified because `domemory.app` is unregistered, but the manual-code path is a fully supported, already-shipped alternative and was what this session verified. The `.read` rule fix is live in production and was subsequently committed as PR #58 (`beabbbe`).
 
 Both branches touched `AppContainer.kt`, `GameViewModel.kt`, `MenuScreen.kt` and
 `NavGraph.kt`. `git merge`/`git revert` resolved most of the overlap automatically;
@@ -1355,64 +1354,18 @@ purely a call-site-wiring slice, not an enum change.
 
 ## 8. Immediate next steps
 
-1. ~~Verify the remaining boundary cases on an emulator or device — a season's day-boundary
-   expiry and the Daily Challenge's streak rollover.~~ **Done (2026-09-15)** — see the
-   "Boundary-case verification session" note under §7. Both behaved as designed; no bug found,
-   no source changes made.
-2. ~~Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule and publish a
-   real season to Firebase to exercise the Phase 4 exit criterion live.~~ **Done** — the
-   `/seasons` read rule is live in production (confirmed via `firebase database:get
-   /.settings/rules`) and a real season ("Spooky Season", `endDate` 2026-11-02) is
-   published and was exercised live during the 2026-09-15 boundary-case verification
-   session (§7).
-3. Decide **O1** — deploying `assetlinks.json` and `apple-app-site-association`
-   together is cheaper than doing it twice.
-4. Build the season-specific out-of-lives prompt the reconciliation note flags as
-   deferred (Seasons currently just pops back to the map instead of endless's
-   dedicated modal).
-5. ~~On device/emulator, exercise the Phase 7 ad flows end to end — a completion
-   interstitial actually firing at the right cadence, both rewarded rescues, and the
-   multiplayer-finished native ad — none of which a JVM unit test can observe.~~
-   **Done (2026-09-15)** — see the "Phase 7 ad-flow verification session" note under §7.
-   Cadence, the 20s floor, presentation/reload, both rewarded rescues, the 60s
-   post-rewarded suppression window, and the multiplayer native ad (including its
-   independence from the interstitial frequency cap) were all exercised live and found
-   correct; no bug, no source change. The 90s global gap was exercised only indirectly
-   (the same decision branch's REQUEST path fired correctly once the gap had genuinely
-   elapsed) rather than via a dedicated live SUPPRESSED demonstration — see the note for
-   why, and `AdFrequencyCapTest`'s existing `GLOBAL_GAP` case for the pure-logic pin.
-6. Decide whether `game_rewarded_extra_time`/`game_rewarded_hint` are worth their own
-   new UI (a pause modal for the hint, a cross-mode lose-screen affordance for
-   extra-time) before wiring them — see this session's Phase 7 implementation note for
-   why they were left unwired rather than built speculatively.
-7. Build the app-open launch-sequence state machine (O5) before wiring
-   `AdPlacement.APP_OPEN` — there is nothing to gate it on yet.
-8. ~~Extend `HapticsService.fire`/`HapticIntent` to Menu, Levels, Seasons, Multiplayer and
-   Settings screens — this Phase 8 slice wired only `feature/game/`.~~ **Done (2026-09-15)**
-   — see the "Haptics expansion" note under §7. Every intent needed (`TAP`, `SELECT`,
-   `WARNING`, `REWARD`, `CARD_FLIP`, `MATCH`, `MISMATCH`, `SUCCESS`, `FAILURE`) already
-   existed in `HapticIntent`, so no new case was added. **Still open:** verifying the actual
-   haptic *feel* on a real device — the emulator's `Vibrator` is a no-op and none was run
-   this session either; only the code paths and their unit tests are confirmed.
-9. Phase 8 is complete: all ten locale tables are parity-tested and compile. On a device,
-   verify the tile pulse/press-spring/numeric-transition feel and actual TalkBack
-   announcements — neither was exercised outside compilation and unit tests.
-10. ~~Extend `HapticsService.fire`/`HapticIntent` to Multiplayer specifically before (or
-    alongside) any future multiplayer polish — `MultiplayerViewModel` now has a
-    `profileStats`-recording call site in its room-update collector but still no haptics,
-    unlike `GameViewModel`'s own moments (item 8 above still applies to Menu/Levels/
-    Seasons/Settings too).~~ **Done (2026-09-15)**, folded into the same session as item 8
-    — see the "Haptics expansion" note under §7. `MultiplayerViewModel` now fires the local,
-    optimistic `CARD_FLIP` from `choose()` and every remote room-update haptic (resolved
-    pair, turn handover, finish) via the new `MultiplayerHapticsTracker`.
-11. ~~Resolve whether iOS's `MultiplayerRoomViewModel.hasRecordedMultiplayerWin` is meant to
-    reset on a rematch~~ **Resolved (2026-09-15): Android was right, iOS had the bug.**
-    `MultiplayerRoomViewModel.handleRoomUpdate`'s win latch was never reset when a room left
-    `.finished` (`restartGame`/`startNewGame` put the same room, and the same still-alive view
-    model, back to `.playing`), unlike its sibling `hasFiredFinishHaptic` a few lines above,
-    which already resets in exactly that situation with a comment explaining why — an
-    oversight, not an intentional design choice. This silently under-counted rematch wins in
-    lifetime stats/achievements on iOS since multiplayer shipped in 3.0.0. Fixed on iOS to
-    reset the same way `hasFiredFinishHaptic` does; `MultiplayerWinGuard`'s doc comment updated
-    to stop citing iOS's old behavior as the reason for its own shape. See `ios/CHANGELOG.md`'s
-    `[Unreleased]` entry for the full writeup.
+1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links
+   association files, then verify a shared invite link opens directly into the join flow.
+2. Build the Season-specific out-of-lives prompt so it matches the endless Levels recovery
+   flow rather than returning directly to the map.
+3. `game_rewarded_hint` is now wired from a pause sheet available in every mode (this change).
+   Decide whether `game_rewarded_extra_time` warrants its own UI, then wire it if approved.
+4. Decide UMP consent behavior (O5), build the launch-sequence state machine, and only then
+   enable the configured app-open placement.
+5. Run real-device follow-ups: haptic feel, TalkBack announcements, and animation feel.
+6. Resolve optional cleanup decisions: bundled display fonts (O6), a second Firebase debug
+   client (O7), compact Daily-card layout, and season system-bar transparency.
+
+**Completed since the previous handoff:** season/day-rollover verification, live Phase 7 ad
+flows, app-wide haptics, the Android↔iOS multiplayer match and rematch, the production room-read
+rule repair (PR #58), and the iOS rematch-win accounting repair (PR #59).

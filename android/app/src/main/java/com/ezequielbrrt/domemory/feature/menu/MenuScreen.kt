@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -63,6 +65,7 @@ fun MenuScreen(
     onToggleFavorite: (String) -> Unit,
     onDeleteCustomMemorama: (String) -> Unit,
     onBoardSelected: (Board) -> Unit,
+    onRandomGame: () -> Unit,
     onCreateMemorama: () -> Unit,
     onMultiplayer: () -> Unit,
     onSettings: () -> Unit,
@@ -113,6 +116,7 @@ fun MenuScreen(
                 onDifficultyChange = onDifficultyChange,
                 onToggleFavorite = onToggleFavorite,
                 onBoardSelected = onBoardSelected,
+                onRandomGame = onRandomGame,
             )
         }
     }
@@ -207,6 +211,7 @@ private fun MineTab(
         BoardGrid(
             boards = state.myBoards,
             favoriteIds = state.favoriteIds,
+            boardStats = state.boardStats,
             onToggleFavorite = onToggleFavorite,
             onBoardSelected = onBoardSelected,
             onDelete = { pendingDeleteId = it },
@@ -252,6 +257,7 @@ private fun AllTab(
     onDifficultyChange: (Difficulty) -> Unit,
     onToggleFavorite: (String) -> Unit,
     onBoardSelected: (Board) -> Unit,
+    onRandomGame: () -> Unit,
 ) {
     val palette = LocalPalette.current
     Column(Modifier.fillMaxSize()) {
@@ -293,11 +299,37 @@ private fun AllTab(
                 CatalogStatus.UNAVAILABLE -> Text(stringResource(R.string.menu_offline_boards), color = palette.textSecondary, fontSize = 12.sp)
                 else -> Unit
             }
+            Spacer(Modifier.size(12.dp))
+            // Mirrors iOS's All-tab "Random game" action: pick a board from the current
+            // difficulty-filtered catalog, rather than from every catalog entry.
+            Button(
+                onClick = {
+                    HapticsService.fire(HapticIntent.TAP)
+                    onRandomGame()
+                },
+                enabled = state.allBoards.isNotEmpty(),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("⇄", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = stringResource(R.string.menu_random_game),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
         }
         Spacer(Modifier.size(8.dp))
         BoardGrid(
             boards = state.allBoards,
             favoriteIds = state.favoriteIds,
+            boardStats = state.boardStats,
             onToggleFavorite = onToggleFavorite,
             onBoardSelected = onBoardSelected,
             onDelete = null,
@@ -309,6 +341,7 @@ private fun AllTab(
 private fun BoardGrid(
     boards: List<Board>,
     favoriteIds: Set<String>,
+    boardStats: Map<String, BoardStats>,
     onToggleFavorite: (String) -> Unit,
     onBoardSelected: (Board) -> Unit,
     onDelete: ((String) -> Unit)?,
@@ -323,6 +356,7 @@ private fun BoardGrid(
             BoardCell(
                 board = board,
                 isFavorite = board.id in favoriteIds,
+                stats = boardStats[board.id] ?: BoardStats(),
                 onToggleFavorite = { onToggleFavorite(board.id) },
                 onClick = { onBoardSelected(board) },
                 onDelete = onDelete?.let { { it(board.id) } },
@@ -335,6 +369,7 @@ private fun BoardGrid(
 private fun BoardCell(
     board: Board,
     isFavorite: Boolean,
+    stats: BoardStats,
     onToggleFavorite: () -> Unit,
     onClick: () -> Unit,
     onDelete: (() -> Unit)?,
@@ -384,10 +419,43 @@ private fun BoardCell(
             color = palette.textPrimary,
             maxLines = 1,
         )
+        Spacer(Modifier.size(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            BoardStatBadge(
+                label = stringResource(R.string.stats_played_label),
+                value = stats.played,
+                color = palette.primary,
+            )
+            BoardStatBadge(
+                label = stringResource(R.string.stats_won_label),
+                value = stats.won,
+                color = palette.easyGreen,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BoardStatBadge(label: String, value: Int, color: androidx.compose.ui.graphics.Color) {
+    val palette = LocalPalette.current
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.background(color.copy(alpha = 0.1f), RoundedCornerShape(50)),
+    ) {
         Text(
-            text = "${board.pairCount} ${stringResource(R.string.game_pairs_label)}",
-            fontSize = 12.sp,
+            text = value.toString(),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            color = color,
+            modifier = Modifier.padding(start = 8.dp),
+        )
+        Text(
+            text = label,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.SemiBold,
             color = palette.textSecondary,
+            modifier = Modifier.padding(end = 8.dp, top = 5.dp, bottom = 5.dp),
         )
     }
 }

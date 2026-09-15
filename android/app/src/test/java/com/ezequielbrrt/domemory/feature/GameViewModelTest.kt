@@ -97,7 +97,7 @@ class GameViewModelTest {
     /** Records every call instead of actually persisting anything, so tests can assert
      * *when* (or whether) a Level loss gets committed — the crux of the deferred-commit
      * fix (spec 7.5, 7.7). */
-    private class RecordingStore : LevelProgressStore {
+    private class RecordingStore(private val starsOnWin: Int = 0) : LevelProgressStore {
         data class Completion(
             val level: Int,
             val didWin: Boolean,
@@ -122,7 +122,7 @@ class GameViewModelTest {
             failedTries: Int,
         ): Int {
             completions += Completion(level, didWin, timeRemaining, totalTime, failedTries)
-            return 0
+            return if (didWin) starsOnWin else 0
         }
 
         override fun skipLevel(level: Int) {
@@ -603,13 +603,16 @@ class GameViewModelTest {
 
     @Test
     fun `a win still commits immediately, not deferred like a loss`() = runTest {
-        val store = RecordingStore()
+        val store = RecordingStore(starsOnWin = 3)
         val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = store)))
         clearBoard(vm)
         assertEquals(GameOutcome.Won, vm.state.value.outcome)
 
         assertEquals(1, store.completions.size)
         assertTrue(store.completions.single().didWin)
+        assertEquals(1, vm.state.value.levelNumber)
+        assertEquals(3, vm.state.value.starsEarned)
+        assertTrue(vm.state.value.hasNextLevel)
         vm.stop()
     }
 
@@ -1063,6 +1066,18 @@ class GameViewModelTest {
 
         advanceTimeBy(GameViewModel.FLIP_BACK_MILLIS + 100)
         assertTrue(vm.state.value.cards.none { it.isFaceUp && !it.isMatched })
+        vm.stop()
+    }
+
+    @Test
+    fun `rewarded pause hint reveals one pair without requiring level stars`() = runTest {
+        val vm = viewModel()
+        vm.pause()
+
+        assertTrue(vm.applyHintReward())
+        val faceUp = vm.state.value.cards.filter { it.isFaceUp && !it.isMatched }
+        assertEquals(2, faceUp.size)
+        assertEquals(faceUp[0].itemId, faceUp[1].itemId)
         vm.stop()
     }
 

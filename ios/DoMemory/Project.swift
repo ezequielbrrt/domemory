@@ -128,9 +128,33 @@ let project = Project(
     ],
     schemes: [
         .scheme(
-            name: "DoMemory",
-            shared: true,
-            buildAction: .buildAction(targets: ["DoMemory"]),
+        name: "DoMemory",
+        shared: true,
+        buildAction: .buildAction(
+            targets: ["DoMemory"],
+            preActions: [
+                .executionAction(
+                    title: "Raise generated package simulator targets",
+                    scriptText: """
+                    # Keep every generated package target aligned with DoMemory's iOS 18.6 minimum.
+                    # Tuist regenerates these projects from upstream packages on every generate,
+                    # so patch them immediately before the scheme builds.
+                    for package_projects in \
+                        "$PROJECT_DIR/Tuist/.build/tuist-derived/Projects" \
+                        "$PROJECT_DIR/../Tuist/.build/tuist-derived/Projects" \
+                        "$SRCROOT/Tuist/.build/tuist-derived/Projects" \
+                        "$SRCROOT/../Tuist/.build/tuist-derived/Projects"
+                    do
+                        [ -d "$package_projects" ] || continue
+                        /usr/bin/find "$package_projects" -name project.pbxproj \
+                            -exec /usr/bin/sed -i '' -E \
+                            's/IPHONEOS_DEPLOYMENT_TARGET = [0-9]+(\\.[0-9]+)?;/IPHONEOS_DEPLOYMENT_TARGET = 18.6;/g' {} +
+                    done
+                    """,
+                    target: "DoMemory"
+                ),
+            ]
+        ),
             testAction: .targets(
                 [
                     .testableTarget(target: "DoMemoryTests"),

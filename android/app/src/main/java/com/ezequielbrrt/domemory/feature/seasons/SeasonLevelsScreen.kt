@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.feature.levels.LevelTile
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.seasons.Season
@@ -98,16 +99,20 @@ fun SeasonLevelsScreen(
     )
     val progressDescription = stringResource(R.string.season_progress_accessibility_format, clearedCount, season.levelCount)
 
-    Column(Modifier.fillMaxSize().background(palette.appBackground)) {
-        Box(Modifier.fillMaxWidth()) {
-            backgroundUrl?.let { url ->
-                AsyncImage(
-                    model = url,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxWidth().height(180.dp),
-                )
-            }
+    // Keep the artwork fixed behind the complete map, as LevelMapView does on iOS.
+    // In particular, it must not be a short header-only image: the level grid scrolls
+    // over the same full-screen artwork all the way to the bottom of the season.
+    Box(Modifier.fillMaxSize().background(palette.appBackground)) {
+        backgroundUrl?.let { url ->
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        Column(Modifier.fillMaxSize()) {
             Column(Modifier.padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(season.icon, fontSize = 28.sp)
@@ -159,45 +164,29 @@ fun SeasonLevelsScreen(
                     Text(seasonCountdownLabel(days), color = headerTextColor.copy(alpha = 0.7f), fontSize = 12.sp)
                 }
             }
-        }
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            contentPadding = PaddingValues(20.dp),
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
-            verticalArrangement = Arrangement.spacedBy(22.dp),
-        ) {
-            items((1..season.levelCount).toList()) { level ->
-                val unlocked = store.isUnlocked(level)
-                val stars = store.stars(level)
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .background(if (unlocked) palette.surfacePrimary else palette.surfaceSecondary, RoundedCornerShape(16.dp))
-                        // Same press-to-0.92 spring as the endless map's tiles (iOS's
-                        // `TileTapStyle` is shared by both through `LevelMapView`). No pulse
-                        // here: unlike endless Levels, this screen's progress store has no
-                        // "current level" concept to key a pulse off — see this slice's report
-                        // for why that's a deliberate seam rather than a missed port.
-                        //
-                        // Fires .select unconditionally, matching endless Levels' own tile tap
-                        // — there is no season-specific out-of-lives refusal to distinguish a
-                        // .warning from yet (a locked tile is simply non-clickable via
-                        // `enabled`, same as endless), so this deliberately doesn't replicate
-                        // the .warning branch of iOS's SeasonLevelsView.onSelect.
-                        .pressScaleClickable(enabled = unlocked) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4),
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(20.dp),
+                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                verticalArrangement = Arrangement.spacedBy(22.dp),
+            ) {
+                items((1..season.levelCount).toList()) { level ->
+                    val unlocked = store.isUnlocked(level)
+                    val stars = store.stars(level)
+                    LevelTile(
+                        level = level,
+                        unlocked = unlocked,
+                        // Seasonal progress has no current-level concept, unlike the endless
+                        // map, so its nodes use the cleared/locked variants without a pulse.
+                        isCurrent = false,
+                        stars = stars,
+                        onClick = {
                             HapticsService.fire(HapticIntent.SELECT)
                             onLevelSelected(level)
-                        }
-                        .padding(vertical = 14.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        if (unlocked) level.toString() else "🔒",
-                        fontWeight = FontWeight.Bold,
-                        color = if (unlocked) accentColor else palette.textSecondary,
+                        },
                     )
-                    Text(if (stars > 0) "★".repeat(stars) else "", fontSize = 11.sp, color = palette.hardAmber)
                 }
             }
         }

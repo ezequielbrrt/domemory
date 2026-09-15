@@ -73,6 +73,7 @@ class MenuViewModelTest {
         assertEquals(CatalogStatus.LOADED, vm.state.value.catalogStatus)
         assertEquals(Difficulty.MEDIUM, vm.state.value.difficulty)
         assertEquals(listOf("medium_1", "medium_2"), vm.state.value.allBoards.map { it.id }.sorted())
+        vm.stop()
     }
 
     @Test
@@ -84,6 +85,7 @@ class MenuViewModelTest {
         assertEquals(MenuTab.ALL, vm.state.value.selectedTab)
         vm.selectTab(MenuTab.MINE)
         assertEquals(MenuTab.MINE, vm.state.value.selectedTab)
+        vm.stop()
     }
 
     @Test
@@ -98,6 +100,22 @@ class MenuViewModelTest {
         assertEquals(Difficulty.EASY, vm.state.value.difficulty)
         assertEquals(listOf("easy_1"), vm.state.value.allBoards.map { it.id })
         assertEquals(Difficulty.EASY, prefs.playerDifficulty.first())
+        vm.stop()
+    }
+
+    @Test
+    fun `catalog card stats follow the stored played and won counters`() = runTest {
+        val prefs = newPrefs()
+        val vm = newViewModel(prefs)
+        advanceUntilIdle()
+
+        prefs.recordBoardPlayed("medium_1")
+        prefs.recordBoardPlayed("medium_1")
+        prefs.recordBoardWon("medium_1")
+        advanceUntilIdle()
+
+        assertEquals(BoardStats(played = 2, won = 1), vm.state.value.boardStats["medium_1"])
+        vm.stop()
     }
 
     @Test
@@ -109,6 +127,7 @@ class MenuViewModelTest {
         vm.setDifficulty(Difficulty.MEDIUM) // already the default
         advanceUntilIdle()
         assertEquals(Difficulty.MEDIUM, vm.state.value.difficulty)
+        vm.stop()
     }
 
     @Test
@@ -120,6 +139,7 @@ class MenuViewModelTest {
 
         // Default difficulty is medium, which "custom_1" (hard) would fail if filtered.
         assertEquals(listOf("custom_1"), vm.state.value.myBoards.map { it.id })
+        vm.stop()
     }
 
     @Test
@@ -134,6 +154,7 @@ class MenuViewModelTest {
         assertEquals("medium_2", vm.state.value.allBoards.first().id)
         assertTrue(vm.state.value.isFavorite("medium_2"))
         assertFalse(vm.state.value.isFavorite("medium_1"))
+        vm.stop()
     }
 
     @Test
@@ -148,6 +169,7 @@ class MenuViewModelTest {
         vm.toggleFavorite("medium_1")
         advanceUntilIdle()
         assertFalse(vm.state.value.isFavorite("medium_1"))
+        vm.stop()
     }
 
     @Test
@@ -164,6 +186,7 @@ class MenuViewModelTest {
 
         assertTrue(vm.state.value.myBoards.isEmpty())
         assertEquals(0, prefs.boardPlayedCount("custom_delete_me").first())
+        vm.stop()
     }
 
     @Test
@@ -179,6 +202,7 @@ class MenuViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf("custom_new"), vm.state.value.myBoards.map { it.id })
+        vm.stop()
     }
 
     @Test
@@ -188,5 +212,6 @@ class MenuViewModelTest {
 
         assertEquals("medium_1", vm.board("medium_1")?.id)
         assertNull(vm.board("missing"))
+        vm.stop()
     }
 }

@@ -166,7 +166,8 @@ class GameViewModel(
     }
 
     private fun initialState(): GameUiState {
-        val levelNumber = (mode as? GameMode.Level)?.context?.number
+        val levelContext = (mode as? GameMode.Level)?.context
+        val levelNumber = levelContext?.number
         val totalTime = when {
             levelNumber != null -> LevelCurve.seconds(levelNumber).toDouble()
             // Free play and Daily Challenge both take the *player's* setting, not the
@@ -189,6 +190,8 @@ class GameViewModel(
             totalPairs = board.pairCount,
             showsPie = showsPie,
             recordedDifficulty = board.resolvedDifficulty(playerDifficulty),
+            levelNumber = levelNumber,
+            hasNextLevel = levelContext?.let { it.store.nextLevel(it.number) != null } ?: false,
         )
     }
 
@@ -319,13 +322,16 @@ class GameViewModel(
      */
     private fun commit(outcome: GameOutcome) {
         (mode as? GameMode.Level)?.context?.let { context ->
-            context.store.recordCompletion(
+            val starsEarned = context.store.recordCompletion(
                 level = context.number,
                 didWin = outcome is GameOutcome.Won,
                 timeRemaining = _state.value.timeRemaining,
                 totalTime = _state.value.totalTime,
                 failedTries = _state.value.failedTries,
             )
+            if (outcome is GameOutcome.Won) {
+                _state.value = _state.value.copy(starsEarned = starsEarned)
+            }
         }
         // Any finish — win or loss — consumes the day (spec 8); recordCompletion is itself
         // idempotent, but winReported already guards this call to at most once per instance.
@@ -541,18 +547,26 @@ class GameViewModel(
     }
 
     suspend fun buyRevealPair(): Boolean = spendOnPowerUp(LevelPowerUp.REVEAL_PAIR) {
-        val pair = game.findUnmatchedPair()
-        if (pair == null) {
-            false
-        } else {
-            flipBackJob?.cancel()
-            game.flipDownUnmatched(now())
-            game.faceUp(setOf(pair.first, pair.second), now())
-            publishCards()
-            // Reveal pair re-arms the normal 2 s flip-back (spec 7.6).
-            scheduleFlipBack()
-            true
-        }
+        revealHintPair()
+    }
+
+    /** Rewarded-ad equivalent of [buyRevealPair], available from the pause sheet in every mode. */
+    fun applyHintReward(): Boolean {
+        if (_state.value.isFinished) return false
+        val revealed = revealHintPair()
+        if (revealed) onHaptic?.invoke(HapticIntent.REWARD)
+        return revealed
+    }
+
+    private fun revealHintPair(): Boolean {
+        val pair = game.findUnmatchedPair() ?: return false
+        flipBackJob?.cancel()
+        game.flipDownUnmatched(now())
+        game.faceUp(setOf(pair.first, pair.second), now())
+        publishCards()
+        // Reveal pair re-arms the normal 2 s flip-back (spec 7.6).
+        scheduleFlipBack()
+        return true
     }
 
     /**
