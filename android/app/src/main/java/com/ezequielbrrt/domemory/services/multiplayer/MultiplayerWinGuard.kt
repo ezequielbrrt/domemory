@@ -4,12 +4,15 @@ package com.ezequielbrrt.domemory.services.multiplayer
  * Pure once-per-room decision for whether a room-status update should record a multiplayer
  * win (spec: `com.ezequielbrrt.domemory.services.stats.ProfileStatsRecorder
  * .recordMultiplayerWin`). Mirrors iOS's `MultiplayerRoomViewModel.hasRecordedMultiplayerWin`
- * latch, and — since iOS never resets that latch on its own — follows this codebase's own
- * `hasFiredFinishHaptic` shape instead (`MultiplayerRoomViewModel.fireRoomHaptics`'s `else`
- * branch, "restartGame puts the same room back to .playing ... without clearing the latch
- * here, every game after the first would finish silently"): latch on the first `FINISHED`
- * update with this client as the winner, and clear the latch the moment the room leaves
- * `FINISHED` (a rematch's transition back to `PLAYING`), so a later rematch can record again.
+ * latch, which follows the same shape as this codebase's own `hasFiredFinishHaptic`
+ * (`MultiplayerRoomViewModel.fireRoomHaptics`'s `else` branch, "restartGame puts the same
+ * room back to .playing ... without clearing the latch here, every game after the first
+ * would finish silently"): latch on the first `FINISHED` update with this client as the
+ * winner, and clear the latch the moment the room leaves `FINISHED` (a rematch's transition
+ * back to `PLAYING`), so a later rematch can record again. (Until 2026-09-15, iOS's latch was
+ * never actually reset — a real bug that silently under-counted rematch wins there since
+ * multiplayer shipped in 3.0.0; this class's behavior was correct from the start and iOS was
+ * fixed to match it, not the other way around.)
  *
  * Kept as a small stateful-but-dependency-free class — not a function — because the "once
  * per room, reset on leaving FINISHED" rule needs to remember whether it already fired

@@ -1145,8 +1145,12 @@ unremembered `NavGraph.kt` back-stack entries), which remain outside this slice.
    expiry and the Daily Challenge's streak rollover.~~ **Done (2026-09-15)** — see the
    "Boundary-case verification session" note under §7. Both behaved as designed; no bug found,
    no source changes made.
-2. Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule and publish a
-   real season to Firebase to exercise the Phase 4 exit criterion live.
+2. ~~Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule and publish a
+   real season to Firebase to exercise the Phase 4 exit criterion live.~~ **Done** — the
+   `/seasons` read rule is live in production (confirmed via `firebase database:get
+   /.settings/rules`) and a real season ("Spooky Season", `endDate` 2026-11-02) is
+   published and was exercised live during the 2026-09-15 boundary-case verification
+   session (§7).
 3. Decide **O1** — deploying `assetlinks.json` and `apple-app-site-association`
    together is cheaper than doing it twice.
 4. Build the season-specific out-of-lives prompt the reconciliation note flags as
@@ -1172,8 +1176,14 @@ unremembered `NavGraph.kt` back-stack entries), which remain outside this slice.
     `profileStats`-recording call site in its room-update collector but still no haptics,
     unlike `GameViewModel`'s own moments (item 8 above still applies to Menu/Levels/
     Seasons/Settings too).
-11. Resolve whether iOS's `MultiplayerRoomViewModel.hasRecordedMultiplayerWin` is meant to
-    reset on a rematch — Android's `MultiplayerWinGuard` assumes it should (see this
-    section's second Phase 8 implementation note's "deliberately left as a seam" list) and
-    was not changed to match iOS's own never-reset behavior; confirm against the actual
-    shipping iOS app before treating either side as the bug.
+11. ~~Resolve whether iOS's `MultiplayerRoomViewModel.hasRecordedMultiplayerWin` is meant to
+    reset on a rematch~~ **Resolved (2026-09-15): Android was right, iOS had the bug.**
+    `MultiplayerRoomViewModel.handleRoomUpdate`'s win latch was never reset when a room left
+    `.finished` (`restartGame`/`startNewGame` put the same room, and the same still-alive view
+    model, back to `.playing`), unlike its sibling `hasFiredFinishHaptic` a few lines above,
+    which already resets in exactly that situation with a comment explaining why — an
+    oversight, not an intentional design choice. This silently under-counted rematch wins in
+    lifetime stats/achievements on iOS since multiplayer shipped in 3.0.0. Fixed on iOS to
+    reset the same way `hasFiredFinishHaptic` does; `MultiplayerWinGuard`'s doc comment updated
+    to stop citing iOS's old behavior as the reason for its own shape. See `ios/CHANGELOG.md`'s
+    `[Unreleased]` entry for the full writeup.

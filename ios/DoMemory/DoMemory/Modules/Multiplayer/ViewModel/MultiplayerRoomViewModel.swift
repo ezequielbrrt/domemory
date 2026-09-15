@@ -264,11 +264,16 @@ private extension MultiplayerRoomViewModel {
 
     func handleRoomUpdate(_ room: MultiplayerRoom) {
         fireRoomHaptics(room)
-        if room.status == .finished,
-           room.winnerId == MultiplayerService.currentUserID,
-           !hasRecordedMultiplayerWin {
-            hasRecordedMultiplayerWin = true
-            ProfileStatsService.shared.recordMultiplayerWin()
+        if room.status == .finished {
+            if room.winnerId == MultiplayerService.currentUserID, !hasRecordedMultiplayerWin {
+                hasRecordedMultiplayerWin = true
+                ProfileStatsService.shared.recordMultiplayerWin()
+            }
+        } else {
+            // Same reasoning as hasFiredFinishHaptic above: restartGame/startNewGame put
+            // the same room back to .playing and this view model outlives the rematch, so
+            // without clearing the latch here a later rematch win would never be recorded.
+            hasRecordedMultiplayerWin = false
         }
 
         if room.status == .playing, room.selectedCardIds.count == 2 {
