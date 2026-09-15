@@ -210,6 +210,8 @@ enum Strings {
     static let emptyMyGames = NSLocalizedString("menu_empty_mine_message", comment: "Empty state message for user-created games")
     static let emptyMyGamesAction = NSLocalizedString("menu_empty_mine_action", comment: "CTA button in empty state")
     static let menuRandomGame = NSLocalizedString("menu_random_game", comment: "Button title for starting a random game")
+    static let menuFavoriteAdd = NSLocalizedString("menu_favorite_add", comment: "Accessibility label for adding a memorama to favorites")
+    static let menuFavoriteRemove = NSLocalizedString("menu_favorite_remove", comment: "Accessibility label for removing a memorama from favorites")
 
     // Game stats
     static let statsPlayed = NSLocalizedString("stats_played_label", comment: "Played count label")

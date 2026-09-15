@@ -51,6 +51,8 @@
 "menu_create_title" = "新しいメモラマ";
 "menu_empty_mine_action" = "作成する";
 "menu_empty_mine_message" = "まだ自分のメモラマがありません";
+"menu_favorite_add" = "お気に入りに追加";
+"menu_favorite_remove" = "お気に入りから削除";
 "menu_random_game" = "ランダムゲーム";
 "menu_tab_all" = "すべて";
 "menu_tab_levels" = "レベル";

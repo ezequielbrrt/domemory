@@ -51,6 +51,8 @@
 "menu_create_title" = "नया मेमोरामा";
 "menu_empty_mine_action" = "एक बनाएं";
 "menu_empty_mine_message" = "आपके पास अभी तक अपना कोई मेमोरामा नहीं है";
+"menu_favorite_add" = "पसंदीदा में जोड़ें";
+"menu_favorite_remove" = "पसंदीदा से हटाएँ";
 "menu_random_game" = "रैंडम गेम";
 "menu_tab_all" = "सभी";
 "menu_tab_levels" = "स्तर";
