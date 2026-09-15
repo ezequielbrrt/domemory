@@ -11,6 +11,12 @@ import com.ezequielbrrt.domemory.data.repository.CatalogStatus
  */
 enum class MenuTab { LEVELS, MINE, ALL }
 
+/** Per-board counters displayed on the catalog cards, matching iOS's stat badges. */
+data class BoardStats(
+    val played: Int = 0,
+    val won: Int = 0,
+)
+
 data class MenuUiState(
     val selectedTab: MenuTab = MenuTab.LEVELS,
     /** The player's own setting (spec 4) — filters [allBoards] and seeds the game clock. */
@@ -21,6 +27,7 @@ data class MenuUiState(
     /** Custom boards, ignoring [difficulty] entirely (spec 13.3), favourites-first. */
     val myBoards: List<Board> = emptyList(),
     val favoriteIds: Set<String> = emptySet(),
+    val boardStats: Map<String, BoardStats> = emptyMap(),
 ) {
     fun isFavorite(boardId: String): Boolean = boardId in favoriteIds
 }

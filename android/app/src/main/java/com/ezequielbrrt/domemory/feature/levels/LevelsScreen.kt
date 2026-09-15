@@ -16,11 +16,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,6 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +53,7 @@ import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.ads.findActivity
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
+import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.ui.anim.pressScaleClickable
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
@@ -178,11 +182,41 @@ private fun LevelsHeader(
             )
         }
         Column(horizontalAlignment = Alignment.End) {
-            Pill(text = stringResource(R.string.levels_lives_remaining_format, livesRemaining, 4))
+            LevelLivesRow(livesRemaining)
             Spacer(Modifier.size(6.dp))
             // Spec 14.5: "the star balance announces 'N stars available'" — the visible glyph
             // ("★ 12") stays compact, but a screen reader gets the full sentence instead.
             Pill(text = "★ $starBalance", accessibilityLabel = starBalanceAccessibilityLabel)
+        }
+    }
+}
+
+/** Matches iOS's [LivesRow]: a compact row of filled and outline heart glyphs. */
+@Composable
+private fun LevelLivesRow(
+    remaining: Int,
+    total: Int = LevelLivesService.MAX_LIVES,
+) {
+    val palette = LocalPalette.current
+    val accessibilityLabel = stringResource(R.string.levels_lives_remaining_format, remaining, total)
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.clearAndSetSemantics {
+            contentDescription = accessibilityLabel
+        },
+    ) {
+        repeat(total) { index ->
+            Text(
+                text = if (index < remaining) "♥" else "♡",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = if (index < remaining) {
+                    palette.secondary
+                } else {
+                    palette.textSecondary.copy(alpha = 0.3f)
+                },
+            )
         }
     }
 }
@@ -211,7 +245,8 @@ private fun Pill(text: String, accessibilityLabel: String? = null) {
 }
 
 @Composable
-private fun LevelTile(
+/** Shared circular node used by both the endless and finite season level maps. */
+fun LevelTile(
     level: Int,
     unlocked: Boolean,
     isCurrent: Boolean,
@@ -254,50 +289,55 @@ private fun LevelTile(
         null
     }
 
-    Box(contentAlignment = Alignment.Center) {
-        if (pulseProgress != null) {
-            // The ring: iOS scales a stroked circle 1 -> 1.45 while fading 0.7 -> 0 opacity.
-            // Android's tile is a rounded rect rather than a circle, so the ring is drawn as a
-            // matching rounded-rect border behind it — same growth/fade behavior, adapted shape.
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier.size(64.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (pulseProgress != null) {
+                Box(
+                    Modifier
+                        .matchParentSize()
+                        .graphicsLayer {
+                            val ringScale = 1f + pulseProgress * 0.45f
+                            scaleX = ringScale
+                            scaleY = ringScale
+                            alpha = 0.7f * (1f - pulseProgress)
+                        }
+                        .border(3.dp, palette.primary, CircleShape),
+                )
+            }
+
             Box(
-                Modifier
+                modifier = Modifier
                     .matchParentSize()
                     .graphicsLayer {
-                        val ringScale = 1f + pulseProgress * 0.45f
-                        scaleX = ringScale
-                        scaleY = ringScale
-                        alpha = 0.7f * (1f - pulseProgress)
+                        val tileScale = 1f + (pulseProgress ?: 0f) * 0.06f
+                        scaleX = tileScale
+                        scaleY = tileScale
                     }
-                    .border(3.dp, palette.primary, RoundedCornerShape(16.dp)),
-            )
+                    .background(background, CircleShape)
+                    .border(if (isCurrent) 3.dp else 1.5.dp, if (isCurrent) palette.primary else palette.surfaceBorder, CircleShape)
+                    .pressScaleClickable(enabled = unlocked, onClick = onClick),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = if (unlocked) level.toString() else "🔒",
+                    fontSize = if (isCurrent) 26.sp else 24.sp,
+                    fontWeight = if (isCurrent) FontWeight.Black else FontWeight.Bold,
+                    color = foreground,
+                )
+            }
         }
-
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .graphicsLayer {
-                    // iOS scales the tile itself to 1.06 in sync with the ring above.
-                    val tileScale = 1f + (pulseProgress ?: 0f) * 0.06f
-                    scaleX = tileScale
-                    scaleY = tileScale
-                }
-                .background(background, RoundedCornerShape(16.dp))
-                .border(1.dp, palette.surfaceBorder, RoundedCornerShape(16.dp))
-                .pressScaleClickable(enabled = unlocked, onClick = onClick)
-                .padding(vertical = 14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                if (unlocked) level.toString() else "🔒",
-                fontWeight = FontWeight.Bold,
-                color = foreground,
-            )
-            Text(
-                if (stars > 0) "★".repeat(stars) else "",
-                fontSize = 11.sp,
-                color = palette.hardAmber,
-            )
-        }
+        Text(
+            text = if (stars > 0) "★".repeat(stars) else "",
+            modifier = Modifier.height(14.dp),
+            fontSize = 11.sp,
+            color = palette.hardAmber,
+        )
     }
 }
 

@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
@@ -73,6 +74,7 @@ fun GameScreen(
     onPauseToggle: () -> Unit,
     onQuit: () -> Unit,
     onRetry: () -> Unit,
+    onNextLevel: () -> Unit = onQuit,
     modifier: Modifier = Modifier,
     isLevel: Boolean = false,
     starBalance: Int? = null,
@@ -85,6 +87,8 @@ fun GameScreen(
     onSkipLevelWithStars: () -> Unit = {},
     onWatchAdForLife: () -> Unit = {},
     onWatchAdToForgive: () -> Unit = {},
+    /** Starts the pause-sheet rewarded hint. The callback always runs after the ad closes. */
+    onWatchAdForHint: (onFinished: () -> Unit) -> Unit = { onFinished -> onFinished() },
     /** True only for the Daily Challenge (spec: the share card's title and streak row
      * depend on this — see `feature/share/ShareResultCard.kt`). */
     isDailyChallenge: Boolean = false,
@@ -95,6 +99,7 @@ fun GameScreen(
 ) {
     val palette = LocalPalette.current
     val context = LocalContext.current
+    var isHintAdInProgress by remember { mutableStateOf(false) }
 
     // Drives the pie only. Repainting on frames is cheap; recomputing the model is not.
     var frameTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -114,6 +119,7 @@ fun GameScreen(
             AdsService.loadRewarded(context, AdPlacement.LEVELS_REWARDED_LIFE)
             AdsService.loadRewarded(context, AdPlacement.LEVELS_REWARDED_FORGIVE)
         }
+        AdsService.loadRewarded(context, AdPlacement.GAME_REWARDED_HINT)
     }
 
     Box(
@@ -154,6 +160,7 @@ fun GameScreen(
                 dailyStreak = dailyStreak,
                 onRetry = onRetry,
                 onQuit = onQuit,
+                onNextLevel = onNextLevel,
                 onBuyLifeWithStars = onBuyLifeWithStars,
                 onForgiveMistakesWithStars = onForgiveMistakesWithStars,
                 onSkipLevelWithStars = onSkipLevelWithStars,
@@ -163,6 +170,105 @@ fun GameScreen(
                 onWatchAdToForgive = onWatchAdToForgive,
             )
         }
+
+        if (state.isPaused && state.outcome == null) {
+            PauseOverlay(
+                showRewardedHint = AdsService.isRewardedConfigured(AdPlacement.GAME_REWARDED_HINT),
+                isRewardedHintInProgress = isHintAdInProgress,
+                showRetry = !isDailyChallenge,
+                onRewardedHint = {
+                    isHintAdInProgress = true
+                    onWatchAdForHint { isHintAdInProgress = false }
+                },
+                onRetry = onRetry,
+                onContinue = onPauseToggle,
+            )
+        }
+    }
+}
+
+/** Android counterpart to iOS's PauseModal: hint, retry and continue in a focused card. */
+@Composable
+private fun PauseOverlay(
+    showRewardedHint: Boolean,
+    isRewardedHintInProgress: Boolean,
+    showRetry: Boolean,
+    onRewardedHint: () -> Unit,
+    onRetry: () -> Unit,
+    onContinue: () -> Unit,
+) {
+    val palette = LocalPalette.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(palette.overlayBackdrop),
+        contentAlignment = Alignment.Center,
+    ) {
+        Surface(
+            modifier = Modifier.padding(horizontal = 32.dp),
+            shape = RoundedCornerShape(28.dp),
+            color = palette.surfacePrimary,
+            border = androidx.compose.foundation.BorderStroke(1.dp, palette.surfaceBorder),
+            shadowElevation = 16.dp,
+        ) {
+            Column(
+                modifier = Modifier.padding(28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text("🧐", fontSize = 64.sp)
+                Spacer(Modifier.size(12.dp))
+                Text(
+                    text = stringResource(R.string.game_pause_title),
+                    style = DoMemoryType.display(36),
+                    color = palette.primary,
+                )
+                Spacer(Modifier.size(28.dp))
+
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    if (showRewardedHint) {
+                        PauseActionButton(
+                            text = stringResource(
+                                if (isRewardedHintInProgress) R.string.ads_loading else R.string.game_rewarded_hint,
+                            ),
+                            color = palette.hardAmber,
+                            enabled = !isRewardedHintInProgress,
+                            onClick = onRewardedHint,
+                        )
+                    }
+                    if (showRetry) {
+                        PauseActionButton(
+                            text = stringResource(R.string.game_try_again),
+                            color = palette.secondary,
+                            onClick = onRetry,
+                        )
+                    }
+                    PauseActionButton(
+                        text = stringResource(R.string.game_continue),
+                        color = palette.primary,
+                        onClick = onContinue,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PauseActionButton(
+    text: String,
+    color: androidx.compose.ui.graphics.Color,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(50),
+        colors = ButtonDefaults.buttonColors(containerColor = color),
+    ) {
+        Text(text, fontSize = 17.sp, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -399,6 +505,7 @@ private fun OutcomeOverlay(
     dailyStreak: Int,
     onRetry: () -> Unit,
     onQuit: () -> Unit,
+    onNextLevel: () -> Unit,
     onBuyLifeWithStars: () -> Unit,
     onForgiveMistakesWithStars: () -> Unit,
     onSkipLevelWithStars: () -> Unit,
@@ -453,49 +560,39 @@ private fun OutcomeOverlay(
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(28.dp),
             color = palette.surfacePrimary,
             modifier = Modifier
-                .padding(24.dp)
-                .border(1.dp, palette.surfaceBorder, RoundedCornerShape(16.dp)),
+                .padding(horizontal = 32.dp, vertical = 24.dp)
+                .border(1.dp, palette.surfaceBorder, RoundedCornerShape(28.dp)),
         ) {
-            Column(
-                Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(
-                    text = stringResource(
-                        when {
-                            won -> R.string.game_win_title
-                            lostToMistakes -> R.string.levels_lose_too_many_mistakes
-                            else -> R.string.game_lose_message
-                        },
-                    ),
-                    style = DoMemoryType.display(24),
-                    color = palette.textPrimary,
+            if (won) {
+                WinOutcomeContent(
+                    state = state,
+                    onShare = { coroutineScope.launch { shareResultCard(context, shareCardLayer, shareData) } },
+                    onNextLevel = onNextLevel,
+                    onQuit = onQuit,
                 )
-                if (won) {
+            } else {
+                Column(
+                    Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
                     Text(
-                        text = stringResource(R.string.game_win_description),
+                        text = stringResource(
+                            if (lostToMistakes) R.string.levels_lose_too_many_mistakes else R.string.game_lose_message,
+                        ),
+                        style = DoMemoryType.display(24),
+                        color = palette.textPrimary,
+                    )
+                    Text(
+                        text = "${stringResource(R.string.game_errors_label)}: ${state.failedTries}",
                         color = palette.textSecondary,
                     )
-                }
-                Text(
-                    text = "${stringResource(R.string.game_errors_label)}: ${state.failedTries}",
-                    color = palette.textSecondary,
-                )
 
-                if (won) {
-                    TextButton(onClick = {
-                        coroutineScope.launch { shareResultCard(context, shareCardLayer, shareData) }
-                    }) {
-                        Text(stringResource(R.string.share_result), color = palette.primary, fontWeight = FontWeight.SemiBold)
-                    }
-                }
-
-                // Lose-screen star purchases (spec 7.7) — Levels/Seasons only.
-                if (!won && isLevel && starBalance != null) {
+                    // Lose-screen star purchases (spec 7.7) — Levels/Seasons only.
+                    if (isLevel && starBalance != null) {
                     if (lostToMistakes && canWatchAdToForgive) {
                         Button(
                             onClick = onWatchAdToForgive,
@@ -542,19 +639,20 @@ private fun OutcomeOverlay(
                             )
                         }
                     }
-                }
+                    }
 
-                Button(
-                    onClick = onRetry,
-                    colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
-                ) {
-                    Text(stringResource(R.string.game_try_again))
-                }
-                TextButton(onClick = onQuit) {
-                    Text(
-                        text = stringResource(R.string.game_go_to_menu),
-                        color = palette.textSecondary,
-                    )
+                    Button(
+                        onClick = onRetry,
+                        colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
+                    ) {
+                        Text(stringResource(R.string.game_try_again))
+                    }
+                    TextButton(onClick = onQuit) {
+                        Text(
+                            text = stringResource(R.string.game_go_to_menu),
+                            color = palette.textSecondary,
+                        )
+                    }
                 }
             }
         }
@@ -581,5 +679,113 @@ private fun OutcomeOverlay(
                 }
             },
         )
+    }
+}
+
+/** Android counterpart to iOS's WinModal, including level stars and completion stats. */
+@Composable
+private fun WinOutcomeContent(
+    state: GameUiState,
+    onShare: () -> Unit,
+    onNextLevel: () -> Unit,
+    onQuit: () -> Unit,
+) {
+    val palette = LocalPalette.current
+    val levelNumber = state.levelNumber
+    val offersNextLevel = levelNumber != null && state.hasNextLevel
+    val primaryTitle = when {
+        offersNextLevel -> stringResource(R.string.level_next)
+        levelNumber != null -> stringResource(R.string.level_back_to_levels)
+        else -> stringResource(R.string.game_go_to_menu)
+    }
+
+    Column(
+        modifier = Modifier.padding(top = 32.dp, start = 28.dp, end = 28.dp, bottom = 28.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("😎", fontSize = 68.sp)
+        Spacer(Modifier.size(8.dp))
+        Text(
+            text = stringResource(if (levelNumber != null) R.string.level_cleared else R.string.game_win_title),
+            style = DoMemoryType.display(36),
+            color = palette.primary,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+        )
+        if (levelNumber != null) {
+            Text(
+                text = stringResource(R.string.level_title_format, levelNumber),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = palette.textSecondary,
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
+            ) {
+                repeat(3) { index ->
+                    Text(
+                        text = if (index < state.starsEarned) "★" else "☆",
+                        fontSize = 24.sp,
+                        color = if (index < state.starsEarned) palette.hardAmber else palette.textSecondary.copy(alpha = 0.3f),
+                    )
+                }
+            }
+        } else {
+            Text(
+                text = stringResource(R.string.game_win_description),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = palette.textSecondary,
+                modifier = Modifier.padding(top = 6.dp, bottom = 12.dp),
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(bottom = 16.dp),
+        ) {
+            WinStat(value = state.totalPairs.toString(), label = stringResource(R.string.game_pairs_label), color = palette.primary)
+            WinStat(value = "${ceil(state.timeRemaining).toInt()}s", label = stringResource(R.string.game_remaining_label), color = palette.easyGreen)
+            WinStat(value = state.failedTries.toString(), label = stringResource(R.string.game_errors_label), color = palette.secondary)
+        }
+
+        Button(
+            onClick = onShare,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(50),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = palette.surfacePrimary,
+                contentColor = palette.primary,
+            ),
+            border = androidx.compose.foundation.BorderStroke(1.5.dp, palette.primary.copy(alpha = 0.45f)),
+        ) {
+            Text(stringResource(R.string.share_result), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        }
+        Spacer(Modifier.size(10.dp))
+        PauseActionButton(
+            text = primaryTitle,
+            color = palette.primary,
+            onClick = if (offersNextLevel) onNextLevel else onQuit,
+        )
+        if (offersNextLevel) {
+            TextButton(onClick = onQuit) {
+                Text(stringResource(R.string.level_back_to_levels), color = palette.textSecondary, fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun WinStat(value: String, label: String, color: androidx.compose.ui.graphics.Color) {
+    val palette = LocalPalette.current
+    Column(
+        modifier = Modifier
+            .background(color.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(value, fontSize = 20.sp, fontWeight = FontWeight.Black, color = color)
+        Text(label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = palette.textSecondary)
     }
 }

@@ -176,23 +176,22 @@ struct MenuView: View {
                                 .padding(.bottom, 8)
                             }
 
-                            // Difficulty badge (All tab only)
-                            if selectedTab == .all,
-                               let first = displayedGames.first {
-                                let difficultyEnum = Difficulty(rawValue: first.difficulty) ?? .medium
-                                HStack(spacing: 5) {
-                                    Image(systemName: "brain.head.profile")
-                                        .font(.system(size: 12, weight: .semibold))
-                                    Text(difficultyEnum.rawValue.capitalized)
+                            // The Android All tab makes the active catalog difficulty directly
+                            // selectable. Keep iOS at the same entry point instead of exposing a
+                            // read-only badge that sends players to Settings to change it.
+                            if selectedTab == .all {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(Strings.difficulty)
                                         .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(Color.textMuted)
+
+                                    MenuDifficultyPicker(selectedDifficulty: viewModel.selectedDifficulty) { difficulty in
+                                        HapticsService.shared.fire(.select)
+                                        viewModel.setDifficulty(difficulty)
+                                    }
                                 }
-                                .foregroundStyle(Color.primaryColor)
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 6)
-                                .background(Capsule().fill(Color.primaryColor.opacity(0.1)))
                                 .padding(.horizontal, 16)
                                 .padding(.bottom, 8)
-                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
 
                             if !displayedGames.isEmpty {

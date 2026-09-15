@@ -27,6 +27,12 @@ data class GameUiState(
     val showsPie: Boolean = false,
     /** The difficulty reported to analytics and shown on the win screen (spec 4). */
     val recordedDifficulty: Difficulty = Difficulty.MEDIUM,
+    /** Non-null only for endless or season levels, which receive iOS-style win treatment. */
+    val levelNumber: Int? = null,
+    /** The rating from this completed level attempt, 0 outside a level or before a win. */
+    val starsEarned: Int = 0,
+    /** Seasons can end; endless Levels always has another board. */
+    val hasNextLevel: Boolean = false,
     val outcome: GameOutcome? = null,
 ) {
     val isFinished: Boolean get() = outcome != null

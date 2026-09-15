@@ -19,4 +19,13 @@ enum Difficulty: String, CaseIterable, Identifiable {
     case medium
     case hard
     case veryHard
+
+    var displayName: String {
+        switch self {
+        case .easy: Strings.easy
+        case .medium: Strings.medium
+        case .hard: Strings.hard
+        case .veryHard: Strings.veryHard
+        }
+    }
 }

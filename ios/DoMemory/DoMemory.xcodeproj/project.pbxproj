@@ -212,6 +212,7 @@
 		D95CEF8E4409237FF9059590 /* PauseModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74D7C0E2D38275CEF21BFC18 /* PauseModalViewModel.swift */; };
 		D965D41EF13D904954ACCA30 /* GoogleDataTransport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D835B045B37D3747427E4EAF /* GoogleDataTransport.framework */; };
 		DB8DC74EFE04AA2EC832344A /* UserMessagingPlatform.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D10B9A4ED7D9F1714BB8ED8 /* UserMessagingPlatform.xcframework */; };
+		DC569BF56254AA9A924FA016 /* MenuDifficultyPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F7FDDBD6A3DE130C019A481 /* MenuDifficultyPicker.swift */; };
 		DD4381BCEB0392B05AEFA274 /* MemoryDataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29064A22F609A3B4658FD28 /* MemoryDataType.swift */; };
 		DE77C2B6D3D765BAF11B4966 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F992BEFFC4EA6E521ADF8968 /* QRCodeView.swift */; };
 		DE87816362B63C1616025526 /* MultiplayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607E57326F2CE57BE643D353 /* MultiplayerService.swift */; };
@@ -429,6 +430,7 @@
 		7D7E6F6F09F9317DF21DEC92 /* FirebaseAnalyticsWrapper.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseAnalyticsWrapper.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DDBEF624F5E7188BFE8F420 /* TuistAssets+DoMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+DoMemory.swift"; sourceTree = "<group>"; };
 		7EA877981D5E10DC5E4EA4F1 /* ReviewHistoryMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewHistoryMigrationTests.swift; sourceTree = "<group>"; };
+		7F7FDDBD6A3DE130C019A481 /* MenuDifficultyPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuDifficultyPicker.swift; sourceTree = "<group>"; };
 		80D0C6ABBF008A6A5A6D7DFE /* Array+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
 		82DE35B0B6507FF1497088DC /* GoogleAdsOnDeviceConversionTarget.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GoogleAdsOnDeviceConversionTarget.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		833253447718C62F69592206 /* MultiplayerRoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerRoomView.swift; sourceTree = "<group>"; };
@@ -717,6 +719,7 @@
 		2C25DE6AC72677686AC6A605 /* MenuView */ = {
 			isa = PBXGroup;
 			children = (
+				7F7FDDBD6A3DE130C019A481 /* MenuDifficultyPicker.swift */,
 				4A9094A81C968674F7AA7806 /* MenuView.swift */,
 			);
 			path = MenuView;
@@ -1544,6 +1547,7 @@
 				D5F34D331CAEA22358398D4A /* MemorizeViewModel.swift in Sources */,
 				DD4381BCEB0392B05AEFA274 /* MemoryDataType.swift in Sources */,
 				318B91E3F28F4DD5AE5F80F3 /* MemoryGame.swift in Sources */,
+				DC569BF56254AA9A924FA016 /* MenuDifficultyPicker.swift in Sources */,
 				9CB67CC204F367A0C4AD4451 /* MenuView.swift in Sources */,
 				3DC9CABD3DA4DDF64F32F0FC /* MenuViewModel.swift in Sources */,
 				42C0D7A3453453F8AD20FCB8 /* Memorama.swift in Sources */,

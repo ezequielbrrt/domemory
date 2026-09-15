@@ -199,9 +199,10 @@ object AdsService {
         return true
     }
 
-    // --- Rewarded (spec: levels_rewarded_life, levels_rewarded_forgive, and the
-    // game_rewarded_extra_time/hint placements — the latter two are configured but have no
-    // Android call site yet; see android/ANDROID_PLAN.md Phase 7 for why) ------------------
+    // --- Rewarded (spec: levels_rewarded_life, levels_rewarded_forgive, game_rewarded_hint
+    // — wired from the pause sheet in every mode — and game_rewarded_extra_time, which is
+    // configured but still has no Android call site; see android/ANDROID_PLAN.md Phase 7
+    // for why) --------------------------------------------------------------------------
 
     /** Loads the next rewarded ad for [placement]. A no-op while one is already cached. */
     fun loadRewarded(context: Context, placement: AdPlacement) {

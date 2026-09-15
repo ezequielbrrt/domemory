@@ -4,8 +4,10 @@
 # macOS
 .DS_Store
 
-# Claude Code local settings
-**/.claude/settings.local.json
+# Coding agent local config and instructions — developer's machine only
+.claude/
+.codex/
+AGENTS.md
 
 # Node (marketing video tooling)
 node_modules/
@@ -13,11 +15,15 @@ node_modules/
 # Kept local, by decision — not yet migrated into the monorepo.
 # Marketing source, campaign output, promo renders and brand assets live on
 # the developer's machine for now. Remove these rules when migrating them in;
-# note that ios/artifacts holds large .mp4 renders and ios/my-video is a
-# Remotion project, so migrate sources and leave build output behind.
+# note that ios/artifacts and assets/videos hold large .mp4 renders, and
+# ios/my-video and assets/my-video are Remotion projects, so migrate sources
+# and leave build output behind.
 ios/marketing/
 ios/my-video/
 ios/artifacts/
+marketing/
+assets/my-video/
+assets/videos/
 
 # Firebase CLI deploy cache
 firebase/.firebase/

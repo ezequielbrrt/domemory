@@ -161,6 +161,11 @@ fun NavGraph(
                     onBoardSelected = { board ->
                         navController.navigate(Routes.game(board.id, state.difficulty))
                     },
+                    onRandomGame = {
+                        viewModel.randomGame()?.let { board ->
+                            navController.navigate(Routes.game(board.id, state.difficulty))
+                        }
+                    },
                     onCreateMemorama = { navController.navigate(Routes.CREATE_MEMORAMA) },
                     onMultiplayer = { navController.navigate(Routes.multiplayer()) },
                     onSettings = { navController.navigate(Routes.SETTINGS) },
@@ -254,6 +259,21 @@ fun NavGraph(
                 { if (state.isPaused) viewModel.resume() else viewModel.pause() },
                 { HapticsService.fire(HapticIntent.TAP); navController.popBackStack() },
                 { HapticsService.fire(HapticIntent.TAP); viewModel.restart() },
+                onWatchAdForHint = { onFinished ->
+                    HapticsService.fire(HapticIntent.TAP)
+                    AdsService.showRewarded(
+                        activity,
+                        AdPlacement.GAME_REWARDED_HINT,
+                        onReward = {},
+                        onDismissed = { rewarded ->
+                            if (rewarded) {
+                                viewModel.applyHintReward()
+                                viewModel.resume()
+                            }
+                            onFinished()
+                        },
+                    )
+                },
                 isDailyChallenge = true,
                 dailyStreak = dailyStreak,
             )
@@ -348,6 +368,10 @@ fun NavGraph(
                         }
                     }
                 },
+                onNextLevel = {
+                    navController.popBackStack()
+                    navController.navigate(Routes.seasonGame(seasonId, level + 1))
+                },
                 isLevel = true,
                 starBalance = starBalance,
                 onBuyExtraTime = { coroutineScope.launch { viewModel.buyExtraTime() } },
@@ -372,6 +396,21 @@ fun NavGraph(
                     AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_FORGIVE, onReward = {
                         coroutineScope.launch { viewModel.applyForgiveMistakesReward() }
                     })
+                },
+                onWatchAdForHint = { onFinished ->
+                    HapticsService.fire(HapticIntent.TAP)
+                    AdsService.showRewarded(
+                        activity,
+                        AdPlacement.GAME_REWARDED_HINT,
+                        onReward = {},
+                        onDismissed = { rewarded ->
+                            if (rewarded) {
+                                viewModel.applyHintReward()
+                                viewModel.resume()
+                            }
+                            onFinished()
+                        },
+                    )
                 },
             )
         }
@@ -445,6 +484,10 @@ fun NavGraph(
                         }
                     }
                 },
+                onNextLevel = {
+                    navController.popBackStack()
+                    navController.navigate(Routes.level(level + 1))
+                },
                 isLevel = true,
                 starBalance = starBalance,
                 onBuyExtraTime = { coroutineScope.launch { viewModel.buyExtraTime() } },
@@ -469,6 +512,21 @@ fun NavGraph(
                     AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_FORGIVE, onReward = {
                         coroutineScope.launch { viewModel.applyForgiveMistakesReward() }
                     })
+                },
+                onWatchAdForHint = { onFinished ->
+                    HapticsService.fire(HapticIntent.TAP)
+                    AdsService.showRewarded(
+                        activity,
+                        AdPlacement.GAME_REWARDED_HINT,
+                        onReward = {},
+                        onDismissed = { rewarded ->
+                            if (rewarded) {
+                                viewModel.applyHintReward()
+                                viewModel.resume()
+                            }
+                            onFinished()
+                        },
+                    )
                 },
             )
         }
@@ -596,6 +654,21 @@ fun NavGraph(
                 },
                 onQuit = { HapticsService.fire(HapticIntent.TAP); navController.popBackStack() },
                 onRetry = { HapticsService.fire(HapticIntent.TAP); viewModel.restart() },
+                onWatchAdForHint = { onFinished ->
+                    HapticsService.fire(HapticIntent.TAP)
+                    AdsService.showRewarded(
+                        activity,
+                        AdPlacement.GAME_REWARDED_HINT,
+                        onReward = {},
+                        onDismissed = { rewarded ->
+                            if (rewarded) {
+                                viewModel.applyHintReward()
+                                viewModel.resume()
+                            }
+                            onFinished()
+                        },
+                    )
+                },
             )
         }
     }

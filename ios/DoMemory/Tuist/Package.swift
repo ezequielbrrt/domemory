@@ -4,7 +4,16 @@ import PackageDescription
 #if TUIST
     import ProjectDescription
 
-    let packageSettings = PackageSettings()
+    // Xcode's iOS 27 Simulator SDK rejects the iOS 12/13 deployment targets
+    // declared by several generated third-party package projects. Keep their
+    // generated projects aligned with DoMemory's real iOS 18.6 minimum.
+    let packageSettings = PackageSettings(
+        baseSettings: .settings(
+            base: [
+                "IPHONEOS_DEPLOYMENT_TARGET": "18.6",
+            ]
+        )
+    )
 #endif
 
 let package = Package(

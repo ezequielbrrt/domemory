@@ -6,10 +6,12 @@ import com.ezequielbrrt.domemory.core.model.Board
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.data.prefs.UserPreferences
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -41,6 +43,7 @@ class MenuViewModel(
 
     private val _state = MutableStateFlow(MenuUiState())
     val state: StateFlow<MenuUiState> = _state.asStateFlow()
+    private var boardStatsJob: Job? = null
 
     init {
         workScope.launch {
@@ -98,15 +101,52 @@ class MenuViewModel(
 
     fun board(id: String): Board? = catalog.board(id)
 
+    /** iOS parity: choose from the All tab's currently difficulty-filtered catalog. */
+    fun randomGame(): Board? = _state.value.allBoards.randomOrNull()
+
+    /** Cancels the board-stats collector. Called on teardown, and directly by tests. */
+    fun stop() {
+        boardStatsJob?.cancel()
+    }
+
+    override fun onCleared() {
+        stop()
+        super.onCleared()
+    }
+
     private suspend fun refreshFromPrefs() {
         val favoriteIds = prefs.favoriteIds.first()
         val difficulty = prefs.playerDifficulty.first()
+        val allBoards = catalog.catalogBoards(difficulty).favoritesFirst(favoriteIds)
+        val myBoards = catalog.customBoards().favoritesFirst(favoriteIds)
         _state.value = _state.value.copy(
             difficulty = difficulty,
             catalogStatus = catalog.status.value,
-            allBoards = catalog.catalogBoards(difficulty).favoritesFirst(favoriteIds),
-            myBoards = catalog.customBoards().favoritesFirst(favoriteIds),
+            allBoards = allBoards,
+            myBoards = myBoards,
             favoriteIds = favoriteIds,
         )
+        observeBoardStats((allBoards + myBoards).map { it.id })
+    }
+
+    /** Keep catalog badges current when a game records its played/won result on return. */
+    private fun observeBoardStats(boardIds: List<String>) {
+        boardStatsJob?.cancel()
+        if (boardIds.isEmpty()) {
+            _state.value = _state.value.copy(boardStats = emptyMap())
+            return
+        }
+
+        boardStatsJob = workScope.launch {
+            val statsFlows = boardIds.distinct().map { boardId ->
+                combine(prefs.boardPlayedCount(boardId), prefs.boardWonCount(boardId)) { played, won ->
+                    boardId to BoardStats(played = played, won = won)
+                }
+            }
+            combine(statsFlows) { stats -> stats.toMap() }
+                .collect { stats ->
+                    _state.value = _state.value.copy(boardStats = stats)
+                }
+        }
     }
 }
