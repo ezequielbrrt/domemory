@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FileProvider paths for feature/share/ShareResultCard.kt — the rendered share card is
+     written to <cacheDir>/share/ and exposed to the OS share sheet through this path,
+     never a raw file:// Uri. -->
+<paths>
+    <cache-path name="share_images" path="share/" />
+</paths>

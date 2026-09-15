@@ -354,7 +354,7 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
 | Phase 6 | in progress — transactional room protocol, menu/deep-link entry (custom scheme and App Link manifest), invite sharing and QR rendering/scanning, lobby, synchronized board, reconnect grace and rematch are implemented and unit-test clean | current worktree | Deploy O1's App Links association file, then run a live Android↔iOS match before declaring it complete. |
 | Phase 7 | in progress — AdMob SDK/app ID and all nine active placement units are configured; banners, the completion interstitial, `levels_rewarded_life`/`levels_rewarded_forgive`, and the multiplayer-finished native placement are all wired and presenting through `AdsService`; the frequency-cap policy and its presentation-trigger gate are unit-test clean | current worktree | `game_rewarded_extra_time`/`game_rewarded_hint` remain configured but unwired — no pause modal exists on Android to hang the hint button off, and extra-time has no existing star-purchase call site to slot an alternative into (see this section's implementation note below). App-open is unimplemented — no launch-sequence state machine exists yet for it to gate on (O5). Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
-| Phase 8 | in progress — What's New (version gating + dialog), haptics (`HapticsService`, wired into `GameViewModel`'s flip/match/mismatch/win/loss/power-up/rescue moments), Play In-App Review (`AppReviews`, fired on a genuine win) and two Settings rows ("Rate DoMemory", "What's New") are implemented and unit-test clean | current worktree | Achievements, the spoiler-free share card, animations (tile pulse, press spring, progress-bar spring, numeric transitions), accessibility announcements, and the nine translations + localization parity test remain. See this section's Phase 8 implementation note below for exactly what the haptics/review/Settings slice covered and what it deliberately left as a seam. |
+| Phase 8 | in progress — What's New (version gating + dialog), haptics (`HapticsService`, wired into `GameViewModel`'s flip/match/mismatch/win/loss/power-up/rescue moments), Play In-App Review (`AppReviews`, fired on a genuine win), achievements (`services/stats/ProfileStatsService`, recording wired into every `GameViewModel` finish and multiplayer via `MultiplayerWinGuard`, `feature/settings/AchievementsScreen.kt`), the spoiler-free share card (`feature/share/ShareResultCard.kt`, win overlay only), and three Settings rows ("Achievements", "Rate DoMemory", "What's New") are implemented and unit-test clean | current worktree | Animations (tile pulse, press spring, progress-bar spring, numeric transitions), accessibility announcements, and the nine translations + localization parity test remain. See this section's Phase 8 implementation notes below for exactly what each slice covered and what it deliberately left as a seam. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
 
@@ -808,6 +808,151 @@ version by the time Settings is reachable at all).
 every prior phase; actual haptic feel and the Play Store listing/review-flow behavior are
 unverifiable from this shell and are not claimed here.
 
+**Phase 8 implementation, second slice (2026-09-14): achievements and the spoiler-free
+share card.** Scoped to exactly these two things, same discipline as the first slice —
+animations, accessibility announcements and localization are untouched.
+
+*Achievements.* `services/stats/ProfileStatsRecorder.kt` (interface, the same seam shape as
+`feature/game/GameStatsRecorder`) and `UserPreferencesProfileStatsRecorder.kt` (its
+production implementation) wire the DataStore accessors `UserPreferences` already had —
+`incrementTotalPlayed()`/`incrementTotalWon()`/`incrementPerfectGames()`/`setBestRemaining`
+— with zero callers before this slice. `services/stats/ProfileStatsService.kt` holds
+`ProfileStats` (a suspend `stats()` snapshot, since `UserPreferences` has no synchronous
+read the way iOS's `UserDefaults` does) and the pure `achievements(ProfileStats)`
+derivation — three win tiers (10/50/100), two streak tiers (7/30, sourced from
+`DailyChallengeService.longestStreak()`), one perfect-game badge (`perfectGames > 0`), one
+multiplayer badge (`multiplayerWins > 0`) — a line-for-line port of iOS's
+`ProfileStatsService.achievements()`'s `isUnlocked`/`progress` rules. `Achievement` carries
+string-resource ids (`titleRes`/`detailRes`/`formatArg`) rather than raw text, and an emoji
+(`🏅`/`🔥`/`✨`/`🏆`, locked state 🔒) standing in for iOS's SF Symbol — this codebase's own
+rule (`ANDROID_PLAN.md` §3, root `CLAUDE.md`) is no icon library, emoji only, matching the
+Daily Challenge streak's existing 🔥.
+
+Recording is wired at `GameViewModel`'s two single-fire commit points — `commit()` (every
+win, and every loss in a mode with no lose-screen rescue: free play, Daily Challenge) and
+`commitLossIfNeeded()` (a deferred Level/Season loss, once `retry()`/
+`acknowledgeLossAndQuit()`/`skipLevelWithStars()` actually commits it) — the same two call
+sites `recordStats(outcome)` (the per-board recorder) already used, right alongside it. This
+was the deliberate choice over adding a third notification path: `GameViewModel` already
+guards these two points against double-firing (`winReported`/`lossCommitted`), so profile
+stats inherit that guarantee for free rather than needing their own. `isPerfect` reads
+`_state.value.failedTries == 0` at the win instant (the field `GameUiState` already carries,
+kept in sync by `publishCards()` on every choice, not a fresh read off the model). Wired at
+all four `GameViewModel` construction sites in `NavGraph.kt` (free play, Daily Challenge,
+endless Levels, Seasons) via `profileStats = UserPreferencesProfileStatsRecorder
+(container.prefs)`, matching the existing `stats = UserPreferencesGameStatsRecorder
+(container.prefs)` precedent of constructing the recorder inline per call site rather than
+storing it in `AppContainer`.
+
+Multiplayer wins are a separate call site with a separate once-per-room, reset-on-rematch
+problem iOS's own `MultiplayerRoomViewModel.hasRecordedMultiplayerWin` latch never actually
+solves — iOS's field is set on the first `FINISHED`-with-this-client-as-winner update and is
+never reset anywhere in that file, unlike its neighboring `hasFiredFinishHaptic`, which *is*
+explicitly reset the moment `room.status != .finished` (`fireRoomHaptics`'s own comment:
+"restartGame puts the same room back to .playing ... without clearing the latch here, every
+game after the first would finish silently"). Rather than port the seemingly-unintentional
+never-reset shape, `services/multiplayer/MultiplayerWinGuard.kt` follows the
+`hasFiredFinishHaptic` pattern instead — a small, dependency-free class
+(`shouldRecordWin(status, winnerId, isCurrentUser)`) that latches once on
+`FINISHED`-with-a-win and clears on any non-`FINISHED` status, so a rematch (which the
+existing `restart(roomId)` flow puts back to `PLAYING`) can record a win again while a
+duplicate `FINISHED` room-update event (recomposition, a redundant Firebase snapshot) never
+double-counts. `MultiplayerViewModel` (`feature/multiplayer/MultiplayerScreen.kt`) gained a
+`profileStats: ProfileStatsRecorder? = null` constructor param and calls the guard from
+inside `observe()`'s existing room-update collector, alongside the pre-existing
+`scheduleMismatchClear`/`reconcilePresence` calls at that same site — not the "similar
+once-only guards for haptics/interstitial" the task description expected to already exist
+there (none do yet; Multiplayer has no haptics wired at all, per the first Phase 8 slice's
+own status note), so this guard is new, not an extension of an existing one.
+
+`feature/settings/AchievementsScreen.kt` + `AchievementsViewModel.kt` port
+`AchievementsView.swift`: a "Your Stats" 2-column grid (games played, wins, win rate as a
+rounded percentage, perfect games, longest streak, multiplayer wins) then a "Badges" list,
+each row showing locked (🔒, dimmed text) vs. unlocked (its own emoji, a trailing ✅) state
+and a `LinearProgressIndicator` only while locked and `progress > 0f` — same rule as iOS.
+`AchievementsViewModel` loads one `ProfileStats` snapshot per screen visit into a
+`StateFlow<AchievementsUiState>`; the state's `loading` flag covers the one frame visible
+here and never on iOS (a documented, deliberate seam from the async DataStore read, not a
+missed requirement). Reached from a new "Achievements" Settings row (`SettingsScreen.kt`,
+reusing the already-pre-seeded `achievements_title`/`achievements_subtitle` strings) above
+"Rate DoMemory"/"What's New", and a new `Routes.ACHIEVEMENTS` route in `NavGraph.kt`.
+
+*Spoiler-free share card.* `feature/share/ShareResultCard.kt` ports
+`ShareResultCard.swift`: the pure `resultGridString(pairs, failedTries)` (green squares
+capped at 12, an amber row only when `failedTries > 0`, also capped at 12) is a standalone
+function with no Compose/Android dependency, unit-tested directly. `ShareResultCardView`
+is the rendered card (brand-primary background, literal white text regardless of the
+viewer's theme — mirrors iOS's own literal `.white`/`.white.opacity`, a deliberate exception
+to this app's usual `LocalPalette` adaptive tokens, since the card is meant to look the same
+on every device it's shared to): app name, 😎, "You Win" (`game_win_title`) or the Daily
+Challenge title depending on mode, the grid, then a stats block (difficulty/pairs/remaining/
+errors, reusing the pre-existing `menu_difficulty_label`/`game_pairs_label`/
+`game_remaining_label`/`game_errors_label` strings) plus a 🔥 streak row shown only for a
+Daily Challenge win with `streak > 0`.
+
+Compose has no `ImageRenderer` analogue; `shareResultCard()` uses the current idiomatic
+approach — `rememberGraphicsLayer()` + `Modifier.drawWithContent { graphicsLayer.record {
+... }; drawLayer(graphicsLayer) }`, then `graphicsLayer.toImageBitmap().asAndroidBitmap()`
+— over standing up an offscreen `ComposeView`/window. `GameScreen.kt`'s `OutcomeOverlay`
+hosts one alpha-0, correctly-sized (320×440dp) instance of `ShareResultCardView` whenever
+the outcome is a win, purely so the graphics layer has real drawn content to capture; a
+`Box` stacks children without reflowing siblings, so this has no effect on the rest of the
+overlay's layout. A new "Share Result" button (the pre-existing `share_result` string,
+placed only in the win branch, above "Try again"/"Menu") launches a coroutine that renders
+the bitmap, writes it to `<cacheDir>/share/result_share.png`, and starts an
+`Intent.ACTION_SEND` chooser (`type = "image/*"`, `EXTRA_STREAM` + `EXTRA_TEXT`, read URI
+permission granted) built from the just-finished game's own `GameUiState` (pairs, remaining
+time, failed tries, recorded difficulty) plus new `isDailyChallenge`/`dailyStreak` params
+threaded into `GameScreen` from `NavGraph.kt`'s `DAILY_GAME` route only (every other route
+keeps the `false`/`0` defaults).
+
+Sharing a `content://` image needed a `FileProvider` — none existed in this codebase
+(`AndroidManifest.xml` had no `<provider>`). Added the standard AndroidX pattern: `res/xml/
+file_paths.xml` (one `<cache-path>` entry for `share/`), and an `androidx.core.content
+.FileProvider` `<provider>` block with authority `${applicationId}.fileprovider`, `exported
+= false`, `grantUriPermissions = true` — no new dependency, `FileProvider` ships inside
+`androidx.core:core`, already transitively present via `androidx-core-ktx`. Both the
+"Rate DoMemory" row's `market://` fallback and the share caption's closing link (port of
+iOS's `ResultShare.caption`, whose final line is `InviteLink.appStoreURL.absoluteString`)
+now build their URL through one new shared helper, `services/share/PlayStoreLinks.kt`,
+rather than each duplicating `"https://play.google.com/store/apps/details?id=$appId"`.
+
+New tests: `ResultGridStringTest` (7 cases — greens-only, greens+amber, the empty/negative
+edge, both caps), `ProfileStatsServiceTest` (11 cases — the full `achievements()` derivation
+table: unlock-at-threshold-not-before, progress-as-a-fraction-capped-at-1, the two
+any-count-above-zero badges, `winRate`'s divide-by-zero guard, `formatArg` presence), and
+`MultiplayerWinGuardTest` (7 cases — the once-per-room latch, opponent/draw non-events, the
+non-`FINISHED`-resets-the-latch rule, a later winner-bearing update after a draw snapshot).
+All three are plain Kotlin against no `DataStore`/coroutine/Robolectric, matching this
+repo's existing test style.
+
+`./gradlew testDebugUnitTest` (320 tests, 43 files, all green) and `./gradlew assembleDebug`
+both pass. **Unverifiable from this shell, same limitation as every prior phase:** actual
+bitmap rendering output, the real OS share sheet, `FileProvider` URI resolution by a
+receiving app, and the Achievements screen's visual layout are compiled and unit-tested but
+not seen running — no emulator/device is available in this environment.
+
+**Deliberately left as a seam, not silently dropped:**
+- Achievements has no navigation entry point on iOS's own Settings screen shown anywhere
+  but a plain row — Android's placement (a new "Achievements" row under the existing
+  "About" Settings group, alongside "Rate DoMemory"/"What's New") is a reasonable but
+  undictated choice; nothing in the spec pins which Settings section it belongs to.
+- The share card is reachable only from the win overlay (`GameScreen.kt`), matching iOS's
+  own placement inside `Modals/WinModal/`. Levels' lose-screen rescues and the out-of-lives
+  modal have no share affordance, by design — there is nothing spoiler-free to share about
+  a loss.
+- `MultiplayerWinGuard`'s reset-on-non-`FINISHED` behavior is a deliberate divergence from
+  iOS's own `hasRecordedMultiplayerWin`, which — as far as this session's reading of
+  `MultiplayerRoomViewModel.swift` shows — is never reset at all, meaning a rematch on iOS
+  today may not actually re-record a win. Flagged here rather than silently replicated,
+  since the task's own requirement ("a room that restarts for a rematch must be able to
+  record a win again") only holds with the reset; if iOS's behavior turns out to be
+  intentional rather than an oversight, this is the one deliberate cross-platform
+  divergence in this slice and should be reconciled explicitly, not silently.
+- No emoji was invented for anything: every achievement's emoji and the locked-state 🔒
+  reuse this app's existing visual language (🔥 already used for the Daily Challenge
+  streak); no new icon-library dependency was added or considered.
+
 ## 8. Immediate next steps
 
 1. Verify the remaining boundary cases on an emulator or device — a season's day-boundary
@@ -832,6 +977,17 @@ unverifiable from this shell and are not claimed here.
 8. Extend `HapticsService.fire`/`HapticIntent` to Menu, Levels, Seasons, Multiplayer and
    Settings screens — this Phase 8 slice wired only `feature/game/`. Verify haptic feel on
    a real device once one is available (the emulator's `Vibrator` is a no-op).
-9. Remaining Phase 8 work: achievements, the spoiler-free share card, animations (tile
-   pulse, press-to-0.92 spring, progress-bar spring, numeric transitions), accessibility
-   announcements, and the nine translations plus the localization parity test.
+9. Remaining Phase 8 work: animations (tile pulse, press-to-0.92 spring, progress-bar
+   spring, numeric transitions), accessibility announcements, and the nine translations
+   plus the localization parity test. Achievements and the spoiler-free share card are
+   now implemented — see this section's second Phase 8 implementation note above.
+10. Extend `HapticsService.fire`/`HapticIntent` to Multiplayer specifically before (or
+    alongside) any future multiplayer polish — `MultiplayerViewModel` now has a
+    `profileStats`-recording call site in its room-update collector but still no haptics,
+    unlike `GameViewModel`'s own moments (item 8 above still applies to Menu/Levels/
+    Seasons/Settings too).
+11. Resolve whether iOS's `MultiplayerRoomViewModel.hasRecordedMultiplayerWin` is meant to
+    reset on a rematch — Android's `MultiplayerWinGuard` assumes it should (see this
+    section's second Phase 8 implementation note's "deliberately left as a seam" list) and
+    was not changed to match iOS's own never-reset behavior; confirm against the actual
+    shipping iOS app before treating either side as the bug.

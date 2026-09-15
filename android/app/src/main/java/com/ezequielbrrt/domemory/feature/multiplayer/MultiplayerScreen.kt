@@ -19,6 +19,7 @@ import com.ezequielbrrt.domemory.services.ads.AdMobNativeAdView
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.multiplayer.*
+import com.ezequielbrrt.domemory.services.stats.ProfileStatsRecorder
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -26,10 +27,22 @@ import kotlinx.coroutines.delay
 import kotlin.math.ceil
 
 data class MultiplayerUiState(val room: MultiplayerRoom? = null, val error: String? = null, val loading: Boolean = false)
-class MultiplayerViewModel(private val service: MultiplayerService) : ViewModel() {
+
+/**
+ * [profileStats] is null-default (like [com.ezequielbrrt.domemory.feature.game
+ * .GameViewModel]'s own `stats`/`profileStats` params) so every existing test/preview call
+ * site is unaffected. Wiring it records a multiplayer win exactly once per room, only for
+ * the actual winner, guarded by [MultiplayerWinGuard] — see that class's doc for why the
+ * guard is a separate, dependency-free object rather than a boolean field here.
+ */
+class MultiplayerViewModel(
+    private val service: MultiplayerService,
+    private val profileStats: ProfileStatsRecorder? = null,
+) : ViewModel() {
     private val _state = MutableStateFlow(MultiplayerUiState()); val state = _state.asStateFlow()
     private var observer: kotlinx.coroutines.Job? = null
     private var reconnectDeadline: kotlinx.coroutines.Job? = null
+    private val winGuard = MultiplayerWinGuard()
     fun create(board: Board) = launchRoomAction { service.createRoom(board).id }
     fun join(code: String) = launchRoomAction { service.joinRoom(code) }
     fun joinScannedInvite(rawValue: String?) {
@@ -69,6 +82,7 @@ class MultiplayerViewModel(private val service: MultiplayerService) : ViewModel(
                     _state.value = _state.value.copy(room = room, loading = false)
                     scheduleMismatchClear(room)
                     reconcilePresence(room)
+                    recordMultiplayerWinIfNeeded(room)
                 }.onFailure(::fail)
             }
         }
@@ -101,6 +115,14 @@ class MultiplayerViewModel(private val service: MultiplayerService) : ViewModel(
         }
     }
     private fun fail(t: Throwable) { _state.value = _state.value.copy(error = t.message ?: "Multiplayer is unavailable.", loading = false) }
+
+    /** Spec: iOS's `MultiplayerRoomViewModel.handleRoomUpdate` (`hasRecordedMultiplayerWin`).
+     * See [MultiplayerWinGuard] for the once-per-room, reset-on-rematch shape. */
+    private fun recordMultiplayerWinIfNeeded(room: MultiplayerRoom) {
+        if (!winGuard.shouldRecordWin(room.status, room.winnerId, service::isCurrentUser)) return
+        val recorder = profileStats ?: return
+        viewModelScope.launch { recorder.recordMultiplayerWin() }
+    }
 
     companion object { private const val MISMATCH_VISIBLE_MS = 2_000L }
 }

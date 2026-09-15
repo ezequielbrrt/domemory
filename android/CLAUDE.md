@@ -79,6 +79,9 @@ graph in the same change.
 | `services/whatsnew`, `feature/whatsnew` | Version-aware release-notes gate and dialog — Phase 8 in progress; first installs stay silent and upgrades present once |
 | `services/haptics` | `HapticIntent`, `HapticsService` — Phase 8 in progress; single gated `fire(intent)` entry point wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue moments and a handful of `NavGraph.kt` view-only taps. Menu, Levels, Seasons, Multiplayer and Settings screens have no haptics wired yet |
 | `services/review` | `AppReviews` — Play In-App Review wrapper (Phase 8 in progress); fires on a genuine win via `GameViewModel.onGameWon`, deliberately thin (no local eligibility policy — see `ANDROID_PLAN.md` §7's Phase 8 note for why that diverges from iOS on purpose) |
+| `services/stats` | `ProfileStats`, `Achievement`, `ProfileStatsService` (lifetime aggregates + the pure `achievements()` derivation), `ProfileStatsRecorder`/`UserPreferencesProfileStatsRecorder` (the write side, mirroring `GameStatsRecorder`'s seam shape) — Phase 8 in progress; recording is wired into `GameViewModel.commit()`/`.commitLossIfNeeded()` (every mode) and `MultiplayerViewModel` (guarded by `services/multiplayer/MultiplayerWinGuard`), reading into `feature/settings/AchievementsScreen.kt` |
+| `feature/share` | `ShareResultCard.kt` — the pure `resultGridString`/`resultShareCaption`, the `ShareResultCardView` composable, and `shareResultCard()` (renders it to a `Bitmap` via `GraphicsLayer.toImageBitmap()` and launches an `ACTION_SEND` chooser through a new `FileProvider`) — Phase 8 in progress; reached from `GameScreen.kt`'s win overlay only (Levels/Seasons out-of-lives and lose-screen surfaces have no share affordance, matching iOS's own Win-Modal-only placement) |
+| `services/share` | `PlayStoreLinks` — the one place the Play Store listing URL is built, shared by the Settings "Rate DoMemory" row and the share-card caption |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
 
 Everything else in the plan's package layout (`services/haptics`/`HapticIntent.fire`
@@ -127,7 +130,7 @@ platform's players with nothing reporting it. The `/seasons` read rule in
 
 ### Tests
 
-`app/src/test/java/` — 39 files, 287 tests, all pure Kotlin against an injected
+`app/src/test/java/` — 43 files, 320 tests, all pure Kotlin against an injected
 clock, no Robolectric or instrumentation. Rule carried over from the spec: every
 constant the spec pins in its §20 table, a test pins here too — that table is
 the cross-check for the whole port. Run `./gradlew testDebugUnitTest` before
@@ -151,10 +154,14 @@ Phase 8 has What's New (version-gated dialog), haptics (`HapticsService`/`Haptic
 wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue
 moments only — no other screen yet), Play In-App Review (`AppReviews`, fired on a genuine
 win, deliberately thin with no local eligibility policy — Android's `ReviewManager` owns
-that server-side, unlike iOS's `ReviewFlow`), and two Settings rows ("Rate DoMemory",
-"What's New") implemented and unit-test clean; achievements, the share card, animations,
-accessibility announcements and localization remain — see `ANDROID_PLAN.md` §7's Phase 8
-implementation note for the full mapping table and what was deliberately left as a seam.
+that server-side, unlike iOS's `ReviewFlow`), three Settings rows ("Achievements", "Rate
+DoMemory", "What's New"), achievements (`services/stats/ProfileStatsService`, recording
+wired into every `GameViewModel` finish and into multiplayer via `MultiplayerWinGuard`,
+reading into `feature/settings/AchievementsScreen.kt`), and the spoiler-free share card
+(`feature/share/ShareResultCard.kt`, reached from the win overlay only) implemented and
+unit-test clean; animations, accessibility announcements and localization remain — see
+`ANDROID_PLAN.md` §7's Phase 8 implementation note for the full mapping table and what was
+deliberately left as a seam.
 `ANDROID_PLAN.md` §7 contains the required handoff ledger: read it before starting
 Android work, update it when a migration slice changes state, and do not infer a feature
 is complete merely because its type or screen exists.

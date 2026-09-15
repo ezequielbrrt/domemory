@@ -79,5 +79,18 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/daily_challenge_widget_info" />
         </receiver>
+
+        <!-- Exposes the win-screen "Share Result" card image (written to the app's cache
+             dir by feature/share/ShareResultCard.kt) to the OS share sheet without granting
+             a raw file:// Uri. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 </manifest>
