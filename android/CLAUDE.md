@@ -142,8 +142,13 @@ Phases 0–5 (Levels, including its correctness hardening; Seasons; and Daily Ch
 are complete in the current worktree. Phase 5 includes the deterministic board,
 streak/milestone tracking, menu card, deep links, Glance widget and local reminders.
 Phase 6 has create/join, invite, QR rendering/scanning, scheme/App Link routing, gameplay,
-reconnect grace and rematch over its tested room protocol foundation; do not represent
-multiplayer as shipped until association-file deployment and live Android↔iOS verification land.
+reconnect grace and rematch over its tested room protocol foundation. Its exit criterion —
+a live Android↔iOS match — is now verified (2026-09-15, via the in-app manual 6-character
+code; see `ANDROID_PLAN.md` §7), including a full match to completion with a consistent
+win/loss result on both platforms and the reconnect-grace forfeit rule. The only remaining
+gap is App Links (O1): `domemory.app` is unregistered, so the deep-link join path
+(tapping a shared link outside the app) is unverified, but the manual-code path this
+session used is a fully supported, already-shipped alternative.
 Phase 7 has AdMob init, all nine placement units, banners, the completion interstitial,
 both Levels rewarded rescues (life, forgive-mistakes) and the multiplayer-finished native
 ad all wired and presenting through `AdsService`; `game_rewarded_extra_time`/

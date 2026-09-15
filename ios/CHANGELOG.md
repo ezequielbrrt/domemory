@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 [Unreleased]
 
 ### Fixed
+- Fixed multiplayer room joins being silently rejected, likely since the feature shipped in 3.0.0. `firebase/firebase-database.rules.json`'s `/multiplayerRooms/$roomId` `.read` rule only permitted a room's existing host, existing guest, or a nonexistent room to be read — but `MultiplayerService.joinRoom(code:)` reads the room before writing to it to check eligibility, and a prospective new guest is neither host nor guest yet, so that preflight read always failed and surfaced as the generic "Something went wrong" error. The rule now carries the same "room still open, no guest yet" exception `.write` already had. Found and verified via a live cross-platform match with the in-progress Android app, whose join path was unaffected because it validates against `.write` instead.
 - Fixed the gameplay grid briefly passing negative or non-finite card dimensions to SwiftUI while the screen transitions or an iPad split-view resize settles. Cards now remain at zero size for that transient layout pass and expand normally once geometry is available, eliminating the "Invalid frame dimension" runtime warning.
 
 ### Added

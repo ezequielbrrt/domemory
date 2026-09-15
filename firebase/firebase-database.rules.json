@@ -10,7 +10,7 @@
     },
     "multiplayerRooms": {
       "$roomId": {
-        ".read": "auth != null && (data.child('hostId').val() === auth.uid || data.child('guestId').val() === auth.uid || !data.exists())",
+        ".read": "auth != null && (data.child('hostId').val() === auth.uid || data.child('guestId').val() === auth.uid || !data.child('guestId').exists() || !data.exists())",
         ".write": "auth != null && (!data.exists() || data.child('hostId').val() === auth.uid || data.child('guestId').val() === auth.uid || (!data.child('guestId').exists() && newData.child('guestId').val() === auth.uid))"
       }
     },
