@@ -5,24 +5,6 @@
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES">
-      <PreActions>
-         <ExecutionAction
-            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
-            <ActionContent
-               title = "Raise generated package simulator targets"
-               scriptText = "# Keep every generated package target aligned with DoMemory&apos;s iOS 18.6 minimum.&#10;# Tuist regenerates these projects from upstream packages on every generate,&#10;# so patch them immediately before the scheme builds.&#10;for package_projects in     &quot;$PROJECT_DIR/Tuist/.build/tuist-derived/Projects&quot;     &quot;$PROJECT_DIR/../Tuist/.build/tuist-derived/Projects&quot;     &quot;$SRCROOT/Tuist/.build/tuist-derived/Projects&quot;     &quot;$SRCROOT/../Tuist/.build/tuist-derived/Projects&quot;&#10;do&#10;    [ -d &quot;$package_projects&quot; ] || continue&#10;    /usr/bin/find &quot;$package_projects&quot; -name project.pbxproj         -exec /usr/bin/sed -i &apos;&apos; -E         &apos;s/IPHONEOS_DEPLOYMENT_TARGET = [0-9]+(\.[0-9]+)?;/IPHONEOS_DEPLOYMENT_TARGET = 18.6;/g&apos; {} +&#10;done">
-               <EnvironmentBuildable>
-                  <BuildableReference
-                     BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "43A98D955D8BED4212F9F688"
-                     BuildableName = "DoMemory.app"
-                     BlueprintName = "DoMemory"
-                     ReferencedContainer = "container:DoMemory.xcodeproj">
-                  </BuildableReference>
-               </EnvironmentBuildable>
-            </ActionContent>
-         </ExecutionAction>
-      </PreActions>
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
