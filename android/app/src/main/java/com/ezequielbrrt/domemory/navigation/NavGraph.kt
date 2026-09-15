@@ -137,6 +137,7 @@ fun NavGraph(
                             lives = container.levelLives,
                             wallet = container.starWallet,
                             introGate = container.levelsIntroGate,
+                            onHaptic = HapticsService::fire,
                         )
                     }
                 },
@@ -173,7 +174,12 @@ fun NavGraph(
                     onDailyChallengeSelected = {
                         // Mirrors the domemory://daily deep link: a no-op once today is done,
                         // since there's no result screen yet to send the player back to (spec 11.1).
-                        if (!isDailyCompletedToday) navController.navigate(Routes.DAILY_GAME)
+                        // Matches iOS's DailyChallengeCard/CompactDailyChallengeCard buttons,
+                        // which only fire .tap inside the same !isCompleted guard.
+                        if (!isDailyCompletedToday) {
+                            HapticsService.fire(HapticIntent.TAP)
+                            navController.navigate(Routes.DAILY_GAME)
+                        }
                     },
                 )
 
@@ -199,6 +205,7 @@ fun NavGraph(
                         com.ezequielbrrt.domemory.feature.multiplayer.MultiplayerViewModel(
                             container.multiplayer,
                             UserPreferencesProfileStatsRecorder(container.prefs),
+                            onHaptic = HapticsService::fire,
                         )
                     }
                 },
@@ -410,6 +417,7 @@ fun NavGraph(
                             lives = container.levelLives,
                             wallet = container.starWallet,
                             introGate = container.levelsIntroGate,
+                            onHaptic = HapticsService::fire,
                         )
                     }
                 },

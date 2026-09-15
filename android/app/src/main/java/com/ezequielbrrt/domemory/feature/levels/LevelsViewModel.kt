@@ -2,6 +2,7 @@ package com.ezequielbrrt.domemory.feature.levels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.services.levels.LevelProgressService
@@ -26,6 +27,12 @@ class LevelsViewModel(
     private val wallet: StarWalletService,
     private val introGate: LevelsIntroGate,
     private val scope: CoroutineScope? = null,
+    // Android counterpart of iOS's `LevelsView.onSelect` (`.select`/`.warning`) and
+    // `LevelsViewModel.buyLifeWithStars`/`watchAdForLife` (`.reward`) — see this class's own
+    // call sites below for the exact mapping. Bare callback, not a `HapticsService` reference,
+    // for the same reason `GameViewModel.onHaptic` is: this class stays Android-framework-free
+    // so it can be constructed and tested with no `HapticsService.initialize` ever having run.
+    private val onHaptic: ((HapticIntent) -> Unit)? = null,
 ) : ViewModel() {
 
     data class UiState(
@@ -93,9 +100,13 @@ class LevelsViewModel(
         val remaining = lives.remaining()
         _uiState.update { it.copy(livesRemaining = remaining) }
         if (remaining <= 0) {
+            // Refusal, not a selection — mirrors iOS's LevelsView.onSelect: "the modal
+            // that follows is bad news."
+            onHaptic?.invoke(HapticIntent.WARNING)
             _uiState.update { it.copy(showOutOfLivesPrompt = true) }
             return false
         }
+        onHaptic?.invoke(HapticIntent.SELECT)
         return true
     }
 
@@ -108,6 +119,10 @@ class LevelsViewModel(
     fun buyLifeWithStars() {
         workScope.launch {
             if (wallet.spend(LevelPowerUp.LIFE_COST)) {
+                // Mirrors iOS's own comment on the equivalent button: "emits .reward on the
+                // spend; a .tap here would double-buzz" — the composable's Buy-with-stars
+                // button fires nothing of its own.
+                onHaptic?.invoke(HapticIntent.REWARD)
                 lives.refill(1)
                 _uiState.update {
                     it.copy(
@@ -127,6 +142,10 @@ class LevelsViewModel(
      */
     fun applyLifeRewardFromAd() {
         workScope.launch {
+            // Mirrors iOS's watchAdForLife rewardHandler: fires .reward the moment the ad
+            // actually pays out, not on the watch-ad button tap itself (that TAP lives at
+            // the composable call site, before the ad even starts).
+            onHaptic?.invoke(HapticIntent.REWARD)
             lives.refill(1)
             _uiState.update {
                 it.copy(livesRemaining = lives.remaining(), showOutOfLivesPrompt = false)

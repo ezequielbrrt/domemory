@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.feature.notifications.rememberNotificationPermissionRequester
+import com.ezequielbrrt.domemory.services.haptics.HapticIntent
+import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.share.PlayStoreLinks
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
@@ -54,17 +56,40 @@ fun SettingsScreen(
     val requestPermission = rememberNotificationPermissionRequester(onGranted = onEnableReminders, onDenied = {})
     Column(Modifier.fillMaxSize().background(p.appBackground).padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Text("‹  " + stringResource(R.string.settings_title), style = DoMemoryType.display(26), color = p.primary, modifier = Modifier.clickable(onClick = onBack).padding(vertical = 8.dp))
-        SettingGroup(stringResource(R.string.settings_section_game)) { Difficulty.entries.forEach { d -> Choice(stringResource(d.labelRes()), state.difficulty == d) { onDifficulty(d) } } }
-        SettingGroup(stringResource(R.string.settings_theme_title)) { ThemePreference.entries.forEach { t -> Choice(stringResource(t.labelRes()), state.theme == t) { onTheme(t) } } }
-        SettingToggle(stringResource(R.string.settings_haptics_title), state.hapticsEnabled, onHaptics)
+        SettingGroup(stringResource(R.string.settings_section_game)) {
+            Difficulty.entries.forEach { d ->
+                Choice(stringResource(d.labelRes()), state.difficulty == d) {
+                    HapticsService.fire(HapticIntent.TAP)
+                    onDifficulty(d)
+                }
+            }
+        }
+        SettingGroup(stringResource(R.string.settings_theme_title)) {
+            ThemePreference.entries.forEach { t ->
+                Choice(stringResource(t.labelRes()), state.theme == t) {
+                    HapticsService.fire(HapticIntent.TAP)
+                    onTheme(t)
+                }
+            }
+        }
+        // Fires before flipping the flag (matches iOS's own SettingsToggleRow comment: "so
+        // turning haptics OFF still confirms the tap; turning them on is confirmed by the
+        // next interaction") — HapticsService.isEnabled is read synchronously off the value
+        // in effect *before* this toggle's own write lands, the same way iOS's isEnabled
+        // reads UserDefaults before its own binding setter writes the new value.
+        SettingToggle(stringResource(R.string.settings_haptics_title), state.hapticsEnabled) { turningOn ->
+            HapticsService.fire(HapticIntent.TAP)
+            onHaptics(turningOn)
+        }
         SettingToggle(stringResource(R.string.settings_notifications_title), state.remindersEnabled) { turningOn ->
+            HapticsService.fire(HapticIntent.TAP)
             if (turningOn) requestPermission() else onDisableReminders()
         }
         SettingGroup(stringResource(R.string.settings_section_about)) {
             SettingRow(
                 title = stringResource(R.string.achievements_title),
                 description = stringResource(R.string.achievements_subtitle),
-                onClick = onAchievements,
+                onClick = { HapticsService.fire(HapticIntent.TAP); onAchievements() },
             )
             // Opens the Play Store listing directly — the standard manual "rate the app"
             // entry. This is deliberately separate from the win-triggered Play In-App Review
@@ -76,12 +101,12 @@ fun SettingsScreen(
             SettingRow(
                 title = stringResource(R.string.settings_review_title),
                 description = stringResource(R.string.settings_review_description),
-                onClick = { openPlayStoreListing(context) },
+                onClick = { HapticsService.fire(HapticIntent.TAP); openPlayStoreListing(context) },
             )
             SettingRow(
                 title = stringResource(R.string.settings_whats_new_title),
                 description = stringResource(R.string.settings_whats_new_description),
-                onClick = onWhatsNew,
+                onClick = { HapticsService.fire(HapticIntent.TAP); onWhatsNew() },
             )
         }
     }

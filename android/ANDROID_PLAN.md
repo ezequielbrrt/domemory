@@ -354,7 +354,7 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified, including streak rollover across a day boundary | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
 | Phase 6 | **exit criterion met** — a live Android↔iOS match (manual 6-character code, not App Links) was played to completion 2026-09-15 with correct, consistent state on both devices throughout: join, turn-taking, matches, and the 4-0 win/loss result. Rematch and the 15s reconnect-grace forfeit rule were also exercised live and were correct and consistent on both platforms. See the two 2026-09-15 notes below. | current worktree; the `.read` rule fix is deployed to `domemory-c9211` (not yet committed to git — still a working-tree diff in `firebase/firebase-database.rules.json`) | Commit the rules fix through the normal PR flow. O1 (App Links) remains open but is no longer a Phase 6 blocker — the deep-link path (`domemory://join/CODE`, `domemory.app` universal/app links) is still unverified and needs a registered domain, but the manual-code join path this session verified is a fully supported, already-shipped alternative. |
 | Phase 7 | in progress, **now emulator-verified** — AdMob SDK/app ID and all nine active placement units are configured; banners, the completion interstitial (cadence, the 20s floor, presentation/reload all confirmed live), `levels_rewarded_life`/`levels_rewarded_forgive` (confirmed presenting and granting live), and the multiplayer-finished native placement (confirmed presenting on both clients, confirmed independent of the interstitial frequency cap) are all wired and presenting through `AdsService`; the frequency-cap policy and its presentation-trigger gate are unit-test clean and the 60s rewarded-suppression window is also live-confirmed — see the 2026-09-15 "Phase 7 ad-flow verification session" note below | current worktree | `game_rewarded_extra_time`/`game_rewarded_hint` remain configured but unwired — no pause modal exists on Android to hang the hint button off, and extra-time has no existing star-purchase call site to slot an alternative into (see this section's implementation note below). App-open is unimplemented — no launch-sequence state machine exists yet for it to gate on (O5). Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
-| Phase 8 | complete — What's New, haptics, Play In-App Review, achievements, the spoiler-free share card, three Settings rows, four animations, five accessibility content-description rules, all nine translations, and `LocalizationParityTest` are implemented; the parity exit criterion is green across all ten locales | `feature/android-animations-accessibility` / current worktree | Device-only feel/TalkBack verification and the intentionally deferred haptics expansion remain follow-ups, not Phase 8 exit blockers. See the four implementation notes below for exact scope and seams. |
+| Phase 8 | complete — What's New, haptics (now wired across every screen: `feature/game/`, Menu, Levels, Seasons, Multiplayer, Settings — see the 2026-09-15 "Haptics expansion" note below), Play In-App Review, achievements, the spoiler-free share card, three Settings rows, four animations, five accessibility content-description rules, all nine translations, and `LocalizationParityTest` are implemented; the parity exit criterion is green across all ten locales | `feature/android-animations-accessibility` / current worktree | Device-only feel/TalkBack verification, and now also real-device haptic *feel* verification (the emulator's `Vibrator` is a no-op), remain follow-ups, not Phase 8 exit blockers. See the implementation notes below for exact scope and seams. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
 
@@ -1260,6 +1260,99 @@ installs (both emulators, this session). Left unfixed here per this task's expli
 boundary against combining unrelated cleanup with the requested ads verification; flagged
 for a future session.
 
+**Haptics expansion, 2026-09-15.** Closed out §8 items 8 and 10 together: `HapticsService.fire`/
+`HapticIntent` was wired into `feature/game/GameViewModel.kt` and a handful of `NavGraph.kt`
+taps only (per the Phase 8 note above); every other screen — Menu, Levels, Seasons,
+Multiplayer, Settings — had none. Read against iOS's actual call sites (`ios/DoMemory/DoMemory/
+Services/Haptics/HapticsService.swift` and its usages across `Modules/Menu/`, `Levels/`,
+`Seasons/`, `Multiplayer/`, `Settings/`) rather than guessed from names. Android's `HapticIntent`
+enum already had all nine cases iOS's `Intent` enum does (`TAP`/`SELECT`/`CARD_FLIP`/`MATCH`/
+`MISMATCH`/`SUCCESS`/`FAILURE`/`WARNING`/`REWARD`), so **no new case was needed** — this was
+purely a call-site-wiring slice, not an enum change.
+
+- **Menu** (`feature/menu/MenuScreen.kt`): `TAP` on the multiplayer/create/settings header
+  buttons, the season card, board cells (tap-to-play and the favorite star), and the empty-
+  "My memoramas" create button — all match an explicit iOS `.tap` call site in `MenuView.swift`.
+  The Daily Challenge card's tap (`NavGraph.kt`'s `onDailyChallengeSelected`) fires `TAP` inside
+  the same `!isDailyChallengeCompletedToday` guard iOS's own `DailyChallengeCard`/
+  `CompactDailyChallengeCard` use. One deliberate non-parity addition: the "All" tab's
+  difficulty-filter chips fire `SELECT` — iOS's Menu has no such filter at all (it only shows a
+  read-only difficulty badge), so there was no call site to match; `SELECT` was chosen because
+  it's exactly `HapticIntent`'s own documented "picker change" case, not an invented one.
+  `AchievementsScreen.kt` and `CreateMemoramaScreen.kt` were left untouched — neither is one of
+  the five named screens, and iOS's own `AchievementsView.swift` has no `HapticsService` call at
+  all.
+- **Levels** (`feature/levels/LevelsViewModel.kt` + `LevelsScreen.kt`): `LevelsViewModel` gained
+  an `onHaptic: ((HapticIntent) -> Unit)? = null` constructor param, the same bare-callback shape
+  `GameViewModel.onHaptic` already uses (Android-framework-free, wired to `HapticsService::fire`
+  only from `NavGraph.kt`). `attemptStart(level)` fires `SELECT` on a successful start and
+  `WARNING` on the out-of-lives refusal — mirrors `LevelsView.swift`'s `onSelect` exactly.
+  `buyLifeWithStars()` fires `REWARD` only after `wallet.spend()` actually succeeds (iOS's own
+  comment on that exact button: "a .tap here would double-buzz"), and `applyLifeRewardFromAd()`
+  fires `REWARD` when the ad payout lands, not on the watch-ad tap. The composable layer
+  (`LevelsScreen.kt`) fires `TAP` on the intro info button and the `OutOfLivesModal`'s watch-ad
+  and dismiss buttons, matching `OutOfLivesModal.swift` line for line — including *not* wrapping
+  the buy-with-stars button, per that same double-buzz comment.
+- **Seasons** (`feature/seasons/SeasonLevelsScreen.kt`): tile taps fire `SELECT`, matching iOS's
+  `SeasonLevelsView.onSelect`. iOS's sibling `.warning` branch (a lives-based refusal) was **not**
+  ported — Android's season map has no out-of-lives gate at all yet (locked tiles are simply
+  `enabled = false`; the season-specific out-of-lives prompt is a separate, still-open item, §8
+  item 4). Building that gate was out of this slice's scope; wiring its `WARNING` haptic is one
+  line once it exists.
+- **Multiplayer** (`services/multiplayer/MultiplayerHapticsTracker.kt`, new;
+  `services/multiplayer/MultiplayerModels.kt`'s new `MultiplayerRoom.canFlipNow`;
+  `feature/multiplayer/MultiplayerScreen.kt`): the highest-value screen per this task's own
+  framing, since it's real-time and a player may not be looking at the screen when something
+  happens. `MultiplayerHapticsTracker` is a pure, stateful class — the same shape as
+  `MultiplayerWinGuard` and deliberately built with the identical rematch-reset fix from the
+  start (its `hasFiredFinishHaptic` latch clears the moment a room leaves `FINISHED`, so a
+  rematch's `SUCCESS`/`FAILURE` isn't silently swallowed the way iOS's own win-recording latch
+  was buggy until this same day's earlier `MultiplayerWinGuard` fix — see §8 item 11 above).
+  It ports `MultiplayerRoomViewModel.fireRoomHaptics` case for case: `MATCH`/`MISMATCH` on a
+  newly-resolved selected pair (latched on a signature so a duplicate snapshot doesn't re-fire),
+  `SELECT` once on the edge of a turn landing on this player, and `SUCCESS`/`FAILURE` once per
+  `FINISHED` streak (a draw reads as `FAILURE`, matching iOS's own `winnerId == currentUserID`
+  comparison, which is also false for a draw — not a chosen design, a preserved one).
+  `MultiplayerViewModel.choose()` fires the one *local*, optimistic haptic (`CARD_FLIP`) itself,
+  gated by the new `MultiplayerRoom.canFlipNow(isCurrentUser)` — a pure port of iOS's
+  `isInteractionEnabled` (playing, my turn, fewer than two cards already selected) — so a tap
+  that can't actually flip anything (wrong turn, already two selected) stays silent, matching
+  iOS's own guard in front of its `.cardFlip` fire. The composable layer additionally fires `TAP`
+  on the back/leave button, join/create/scan-QR/start-game buttons, and the rematch button —
+  each matches an explicit iOS `.tap` (`JoinMultiplayerRoomView.swift`'s Join button,
+  `MultiplayerRoomView.swift`'s Start Game/Play Again/header-leave buttons) except the QR-scanner
+  button, which has no iOS analog at all (iOS never scans a code; it relies on the system camera/
+  universal links) and was given `TAP` anyway as an ordinary button under `HapticIntent`'s own
+  "any button or row" definition. iOS's invite-share button was deliberately **not** ported to
+  fire a haptic — its iOS counterpart is a native `ShareLink` with only an analytics
+  `simultaneousGesture`, no `HapticsService.fire` call at all.
+- **Settings** (`feature/settings/SettingsScreen.kt`): unlike the "maybe nothing" the task
+  flagged as a live possibility, iOS's `SettingsView.swift` actually fires `.tap` on nearly every
+  row. Android's difficulty/theme `Choice` rows and the Achievements/Rate-DoMemory/What's-New
+  `SettingRow`s all fire `TAP`, matching iOS's `SettingsNavigationRow`/`SettingsActionRow`
+  equivalents. The haptics and notifications toggles fire `TAP` **before** calling their own
+  `onHaptics`/`onDisableReminders`/`requestPermission` callback — this ordering is load-bearing,
+  not cosmetic: it mirrors iOS's own comment ("fire before flipping the flag so turning haptics
+  OFF still confirms the tap") and Android's own subtlety flagged for this task — `HapticsService
+  .isEnabled` is a synchronously-cached `Boolean` updated *asynchronously* by a `Flow` collector
+  in `HapticsService.initialize`, so firing after the DataStore write could race the cache update
+  and silently swallow the very tap that turns haptics off. iOS's IAP-only rows (Remove Ads,
+  restore purchases, rewarded remove-ads) have no Android counterpart at all (D2: Billing is
+  deferred) and were correctly left unported. `AchievementsScreen.kt` again gets nothing, per
+  iOS's own silence there.
+- **Verification.** `./gradlew testDebugUnitTest assembleDebug` is clean (348 tests, 0 failed).
+  Nineteen new tests were added: `MultiplayerHapticsTrackerTest` (the tracker's full state
+  -machine — resolved-pair latching, turn-edge `SELECT`, finish-latch reset on rematch, a draw
+  reading as `FAILURE`, multiple intents in one snapshot), `MultiplayerRoomCanFlipNowTest` (the
+  new gating method), and `LevelsViewModelHapticsTest` (the `SELECT`/`WARNING`/`REWARD` call
+  sites, built the same way `LevelProgressServiceTest`/`LevelLivesServiceTest` are — real
+  services over a temp-file `UserPreferences`, no mocking framework). **Not verified:** actual
+  haptic *feel* on a real device. No emulator was running this session (`adb` wasn't even on
+  `PATH`), and per this task's own explicit allowance and the precedent set by every prior
+  device-only Phase 8 follow-up, this was not chased — only the code paths and their unit tests
+  are confirmed. Wiring correctness (which screen fires which intent, in what order, gated
+  correctly) is what's actually verified here, not the vibration motor.
+
 ## 8. Immediate next steps
 
 1. ~~Verify the remaining boundary cases on an emulator or device — a season's day-boundary
@@ -1294,17 +1387,24 @@ for a future session.
    why they were left unwired rather than built speculatively.
 7. Build the app-open launch-sequence state machine (O5) before wiring
    `AdPlacement.APP_OPEN` — there is nothing to gate it on yet.
-8. Extend `HapticsService.fire`/`HapticIntent` to Menu, Levels, Seasons, Multiplayer and
-   Settings screens — this Phase 8 slice wired only `feature/game/`. Verify haptic feel on
-   a real device once one is available (the emulator's `Vibrator` is a no-op).
+8. ~~Extend `HapticsService.fire`/`HapticIntent` to Menu, Levels, Seasons, Multiplayer and
+   Settings screens — this Phase 8 slice wired only `feature/game/`.~~ **Done (2026-09-15)**
+   — see the "Haptics expansion" note under §7. Every intent needed (`TAP`, `SELECT`,
+   `WARNING`, `REWARD`, `CARD_FLIP`, `MATCH`, `MISMATCH`, `SUCCESS`, `FAILURE`) already
+   existed in `HapticIntent`, so no new case was added. **Still open:** verifying the actual
+   haptic *feel* on a real device — the emulator's `Vibrator` is a no-op and none was run
+   this session either; only the code paths and their unit tests are confirmed.
 9. Phase 8 is complete: all ten locale tables are parity-tested and compile. On a device,
    verify the tile pulse/press-spring/numeric-transition feel and actual TalkBack
    announcements — neither was exercised outside compilation and unit tests.
-10. Extend `HapticsService.fire`/`HapticIntent` to Multiplayer specifically before (or
+10. ~~Extend `HapticsService.fire`/`HapticIntent` to Multiplayer specifically before (or
     alongside) any future multiplayer polish — `MultiplayerViewModel` now has a
     `profileStats`-recording call site in its room-update collector but still no haptics,
     unlike `GameViewModel`'s own moments (item 8 above still applies to Menu/Levels/
-    Seasons/Settings too).
+    Seasons/Settings too).~~ **Done (2026-09-15)**, folded into the same session as item 8
+    — see the "Haptics expansion" note under §7. `MultiplayerViewModel` now fires the local,
+    optimistic `CARD_FLIP` from `choose()` and every remote room-update haptic (resolved
+    pair, turn handover, finish) via the new `MultiplayerHapticsTracker`.
 11. ~~Resolve whether iOS's `MultiplayerRoomViewModel.hasRecordedMultiplayerWin` is meant to
     reset on a rematch~~ **Resolved (2026-09-15): Android was right, iOS had the bug.**
     `MultiplayerRoomViewModel.handleRoomUpdate`'s win latch was never reset when a room left
