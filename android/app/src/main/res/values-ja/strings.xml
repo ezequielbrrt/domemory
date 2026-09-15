@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from DOMEMORY_ANDROID_SPEC.md section 19 (English base catalog). -->
+<resources>
+    <!-- Common -->
+    <string name="common_accept">承認</string>
+    <string name="common_app_name">DoMemory</string>
+    <string name="common_cancel">キャンセル</string>
+    <string name="common_delete">削除</string>
+    <string name="common_ok">OK</string>
+
+    <!-- Difficulty -->
+    <string name="difficulty_easy">かんたん</string>
+    <string name="difficulty_easy_subtitle">気軽にスタート</string>
+    <string name="difficulty_medium">ふつう</string>
+    <string name="difficulty_medium_subtitle">ちょうどいい挑戦</string>
+    <string name="difficulty_hard">むずかしい</string>
+    <string name="difficulty_hard_subtitle">記憶力を鍛えよう</string>
+    <string name="difficulty_very_hard">とてもむずかしい</string>
+    <string name="difficulty_very_hard_subtitle">上級者向け</string>
+    <string name="home_difficulty_title">難易度</string>
+    <string name="home_select_difficulty_prompt">難易度を選択</string>
+
+    <!-- Gameplay -->
+    <string name="game_continue">続ける</string>
+    <string name="game_go_to_menu">メニューへ</string>
+    <string name="game_lose_message">時間切れです</string>
+    <string name="game_pause_title">一時停止</string>
+    <string name="game_pairs_label">ペア</string>
+    <string name="game_points_label">ポイント</string>
+    <string name="game_quit_confirmation">本当に終了しますか？</string>
+    <string name="game_remaining_label">残り</string>
+    <string name="game_errors_label">ミス</string>
+    <string name="game_time_label">時間</string>
+    <string name="game_try_again">もう一度</string>
+    <string name="game_win_title">おめでとう！</string>
+    <string name="game_win_description">このメモラマを時間内にクリアしました</string>
+    <string name="game_rewarded_extra_time">広告を見て30秒追加する</string>
+    <string name="game_rewarded_hint">広告を見てヒント</string>
+    <string name="ads_loading">広告を読み込み中...</string>
+    <string name="ads_label">広告</string>
+
+    <!-- Levels -->
+    <string name="levels_screen_title">レベル</string>
+    <string name="level_title_format">レベル %d</string>
+    <string name="levels_current_level_format">現在レベル %d</string>
+    <string name="level_cleared">レベルクリア!</string>
+    <string name="level_next">次のレベル</string>
+    <string name="level_back_to_levels">レベル一覧に戻る</string>
+    <string name="levels_out_of_lives_title">ライフがありません!</string>
+    <string name="levels_out_of_lives_message">広告を見てライフを+1するか、明日また新しいライフでお越しください。</string>
+    <string name="levels_out_of_lives_message_no_ad">スターを使ってライフを補充するか、明日また挑戦しましょう。</string>
+    <string name="levels_watch_ad_for_life">広告を見てライフ+1</string>
+    <string name="levels_lives_remaining_format">ライフ残り %1$d / %2$d</string>
+
+    <!-- Levels star economy -->
+    <string name="levels_powerup_extra_time">+15秒</string>
+    <string name="levels_powerup_peek">チラ見</string>
+    <string name="levels_powerup_freeze">フリーズ</string>
+    <string name="levels_powerup_reveal_pair">ペア公開</string>
+    <string name="levels_star_balance_format">スター%d個</string>
+    <string name="levels_powerup_cost_format">%1$s、スター%2$d個</string>
+    <string name="levels_buy_life_format">ライフを購入 — %d</string>
+    <string name="levels_skip_level_format">このレベルをスキップ — %d</string>
+    <string name="levels_skip_level_confirm_title">このレベルをスキップしますか？</string>
+    <string name="levels_skip_level_confirm_message">次のレベルが解放されますが、このレベルはスター0のままです。いつでも再挑戦できます。</string>
+    <string name="levels_skip_level_confirm_action">スキップ</string>
+
+    <!-- Levels mistake budget -->
+    <string name="levels_lose_too_many_mistakes">ミスが多すぎます</string>
+    <string name="levels_forgive_ad_format">広告を見てミスを%d回取り消す</string>
+    <string name="levels_forgive_stars_format">ミスを%1$d回取り消す — %2$d</string>
+    <string name="levels_mistakes_remaining_format">ミス %1$d / %2$d</string>
+    <string name="levels_timer_frozen_format">時間停止中、残り%d秒</string>
+
+    <!-- Levels intro -->
+    <string name="levels_intro_progress_title">無限のレベル</string>
+    <string name="levels_intro_progress_subtitle">レベルをクリアすると次が解放されます。盤面は大きく、制限時間は短くなり、次のレベルが必ず待っています。</string>
+    <string name="levels_intro_stars_title">スターを集めよう</string>
+    <string name="levels_intro_stars_subtitle">速くミスなくクリアすると1レベルで最大3つのスターを獲得。パワーアップ、ライフの追加、レベルのスキップに使えます。</string>
+    <string name="levels_intro_lives_title">ライフは毎日回復</string>
+    <string name="levels_intro_lives_subtitle">ライフは1日%d個。レベルに負けるたびに1つ減ります。なくなったら広告を見るか、スターを使って続行できます。</string>
+    <string name="levels_intro_mistakes_title">ミスに注意</string>
+    <string name="levels_intro_mistakes_subtitle">各レベルで許されるミスの数は決まっています。上限に達すると終了ですが、ミスを取り消して続けることもできます。</string>
+    <string name="levels_intro_done">OK</string>
+    <string name="levels_intro_info_accessibility">レベルの遊び方</string>
+
+    <!-- Seasons -->
+    <string name="season_fallback_title">シーズン</string>
+    <string name="season_progress_format">%1$d / %2$d</string>
+    <string name="season_progress_accessibility_format">%1$dレベル中%2$dレベルクリア</string>
+    <string name="season_days_left_format">残り%d日</string>
+    <string name="season_one_day_left">残り1日</string>
+    <string name="season_last_day">最終日</string>
+    <string name="season_complete_badge">クリア</string>
+    <string name="season_complete_title">シーズンクリア!</string>
+    <string name="season_complete_message">すべてのレベルをクリアしました。どのレベルでも再挑戦してスターを増やせます。</string>
+
+    <!-- Menu -->
+    <string name="menu_tab_levels">レベル</string>
+    <string name="menu_tab_mine">マイメモラマ</string>
+    <string name="menu_tab_all">すべて</string>
+    <string name="menu_random_game">ランダムゲーム</string>
+    <string name="menu_empty_mine_message">まだ自分のメモラマがありません</string>
+    <string name="menu_empty_mine_action">作成する</string>
+    <string name="menu_create_title">新しいメモラマ</string>
+    <string name="menu_create_name_label">名前</string>
+    <string name="menu_create_name_placeholder">例: フルーツ、動物...</string>
+    <string name="menu_create_emojis_label">絵文字</string>
+    <string name="menu_create_add">追加</string>
+    <string name="menu_create_add_emoji">絵文字を追加</string>
+    <string name="menu_create_minimum_hint">最低2つ</string>
+    <string name="menu_create_save">保存</string>
+    <string name="menu_create_rejected">保存する前に絵文字を2つ以上追加してください</string>
+    <string name="menu_levels_coming_soon_title">レベル</string>
+    <string name="menu_levels_coming_soon_subtitle">近日公開</string>
+    <string name="menu_favorite_add">お気に入りに追加</string>
+    <string name="menu_favorite_remove">お気に入りから削除</string>
+    <string name="menu_delete_memorama">削除</string>
+    <string name="menu_delete_confirm_title">このメモラマを削除しますか？</string>
+    <string name="menu_delete_confirm_message">このメモラマの統計も消去されます。</string>
+    <string name="menu_difficulty_label">難易度</string>
+    <string name="stats_played_label">プレイ</string>
+    <string name="stats_won_label">勝利</string>
+
+    <!-- Daily Challenge -->
+    <string name="daily_challenge_title">デイリーチャレンジ</string>
+    <string name="daily_challenge_subtitle">毎日新しいボード</string>
+    <string name="daily_challenge_completed">今日は完了！</string>
+    <string name="daily_challenge_streak_format">🔥 %d日連続</string>
+
+    <!-- Multiplayer -->
+    <string name="multiplayer_title">マルチプレイ</string>
+    <string name="multiplayer_create_room">ルーム作成</string>
+    <string name="multiplayer_join_room">参加</string>
+    <string name="multiplayer_join_description">友だちの6文字のルームコードを入力してください。</string>
+    <string name="multiplayer_code_placeholder">ABC123</string>
+    <string name="multiplayer_qr_code">マルチプレイルームのQRコード</string>
+    <string name="multiplayer_scan_qr_code">QRコードをスキャン</string>
+    <string name="multiplayer_start_game">ゲーム開始</string>
+    <string name="multiplayer_waiting_for_player">このコードを共有して相手を待ちます</string>
+    <string name="multiplayer_ready_to_start">相手が参加しました。準備できたら開始</string>
+    <string name="multiplayer_waiting_for_host">ホストの開始を待っています</string>
+    <string name="multiplayer_your_turn">あなたの番</string>
+    <string name="multiplayer_opponent_turn">相手の番</string>
+    <string name="multiplayer_reconnecting">再接続を待っています</string>
+    <string name="multiplayer_you_won">勝ちました</string>
+    <string name="multiplayer_you_lost">負けました</string>
+    <string name="multiplayer_draw">引き分け</string>
+    <string name="multiplayer_room_closed">ルーム終了</string>
+    <string name="multiplayer_you">あなた</string>
+    <string name="multiplayer_opponent">相手</string>
+    <string name="multiplayer_final_score">最終スコア</string>
+    <string name="multiplayer_play_again">もう一度</string>
+    <string name="multiplayer_waiting_for_rematch">ホストを待っています</string>
+    <string name="multiplayer_choose_another_game">別のゲームを選択</string>
+    <string name="multiplayer_host_name">ホスト</string>
+    <string name="multiplayer_guest_name">ゲスト</string>
+    <string name="multiplayer_invite_friend">友達に挑戦</string>
+    <string name="multiplayer_invite_message">DoMemoryで記憶力対決だ！コード %s で僕のルームに参加してね:</string>
+    <string name="multiplayer_generic_error">問題が発生しました。もう一度お試しください。</string>
+    <string name="multiplayer_error_firebase_unavailable">現在マルチプレイを利用できません。</string>
+    <string name="multiplayer_error_authentication">マルチプレイに接続できませんでした。</string>
+    <string name="multiplayer_error_room_not_found">ルームが見つかりません。</string>
+    <string name="multiplayer_error_room_full">このルームは満員です。</string>
+    <string name="multiplayer_error_room_unavailable">このルームは利用できません。</string>
+    <string name="multiplayer_error_invalid_move">その手は使えません。</string>
+    <string name="multiplayer_error_permission_denied">Firebase ルールがマルチプレイルームをブロックしています。</string>
+    <string name="multiplayer_error_encoding">ルームを準備できませんでした。</string>
+    <string name="multiplayer_error_decoding">ルームを読み込めませんでした。</string>
+
+    <!-- Settings -->
+    <string name="settings_title">設定</string>
+    <string name="settings_description">ゲーム設定を調整</string>
+    <string name="settings_section_game">ゲーム</string>
+    <string name="settings_section_preferences">環境設定</string>
+    <string name="settings_section_about">情報</string>
+    <string name="settings_theme_title">テーマ</string>
+    <string name="settings_theme_prompt">お好みの表示テーマを選択</string>
+    <string name="theme_system">システム</string>
+    <string name="theme_light">ライト</string>
+    <string name="theme_dark">ダーク</string>
+    <string name="settings_haptics_title">触覚フィードバック</string>
+    <string name="settings_haptics_description_on">ボタン操作やペア成立時に軽い振動が返ります。</string>
+    <string name="settings_haptics_description_off">振動フィードバックはオフです。</string>
+    <string name="settings_notifications_title">リマインダー</string>
+    <string name="settings_notifications_description_on">2日間プレイしていないとお知らせします</string>
+    <string name="settings_notifications_description_off">しばらくプレイしていない場合に通知を受け取る</string>
+    <string name="settings_notifications_denied_title">通知がオフです</string>
+    <string name="settings_notifications_denied_message">リマインダーを受け取るには、Androidの設定でDoMemoryの通知を有効にしてください。</string>
+    <string name="settings_notifications_open_settings">設定を開く</string>
+    <string name="settings_review_title">DoMemoryを評価</string>
+    <string name="settings_review_description">レビューは他のプレイヤーがゲームを見つける助けになります</string>
+    <string name="settings_whats_new_title">新機能</string>
+    <string name="settings_whats_new_description">最新アップデートの変更点を見る</string>
+
+    <!-- Achievements -->
+    <string name="achievements_title">実績</string>
+    <string name="achievements_subtitle">進捗とバッジを確認</string>
+    <string name="achievements_stats_section">あなたの統計</string>
+    <string name="achievements_badges_section">バッジ</string>
+    <string name="stat_total_games">プレイ回数</string>
+    <string name="stat_total_wins">勝利数</string>
+    <string name="stat_win_rate">勝率</string>
+    <string name="stat_perfect_games">パーフェクト</string>
+    <string name="stat_longest_streak">最長連続記録</string>
+    <string name="stat_multiplayer_wins">マルチプレイ勝利</string>
+    <string name="ach_wins_title_format">%d勝</string>
+    <string name="ach_wins_detail_format">%d回勝利する</string>
+    <string name="ach_streak_title_format">%d日連続</string>
+    <string name="ach_streak_detail_format">%d日連続記録を達成する</string>
+    <string name="ach_perfect_title">ノーミス</string>
+    <string name="ach_perfect_detail">ミスなしで勝利する</string>
+    <string name="ach_multiplayer_title">チャンピオン</string>
+    <string name="ach_multiplayer_detail">初めてのマルチプレイ対戦に勝つ</string>
+
+    <!-- Share -->
+    <string name="share_result">結果をシェア</string>
+    <string name="share_result_caption">DoMemoryで%dペアそろえたよ！勝てるかな？</string>
+
+    <!-- Onboarding intro -->
+    <string name="intro_multiplayer_title">友達と対戦</string>
+    <string name="intro_multiplayer_subtitle">リアルタイムのマルチプレイで誰とでも対戦。6桁のコードかQRを共有するだけ。</string>
+    <string name="intro_custom_title">自分だけの一品に</string>
+    <string name="intro_custom_subtitle">オリジナルの絵文字カードを作って、好きな神経衰弱で遊ぼう。</string>
+    <string name="intro_daily_title">毎日プレイ</string>
+    <string name="intro_daily_subtitle">毎日新しいボード。連続記録を作って続けよう！</string>
+    <string name="intro_skip">スキップ</string>
+    <string name="intro_next">次へ</string>
+    <string name="intro_get_started">はじめる</string>
+
+    <!-- Notification primer -->
+    <string name="notification_primer_title">連続記録を守ろう</string>
+    <string name="notification_primer_message">リマインダーをオンにすると、次のときにお知らせします：</string>
+    <string name="notification_primer_benefit_streak">デイリーチャレンジの連続記録が途切れそうなとき</string>
+    <string name="notification_primer_benefit_inactive">しばらくプレイしていないとき</string>
+    <string name="notification_primer_benefit_no_spam">それだけです。通知は最小限、スパムは送りません</string>
+    <string name="notification_primer_preview_title">連続記録が途切れます！</string>
+    <string name="notification_primer_preview_message">5日間の連続記録が今夜終わります。今日のチャレンジをプレイしよう！</string>
+    <string name="notification_primer_enable">リマインダーをオンにする</string>
+    <string name="notification_primer_later">あとで</string>
+
+    <!-- Notifications -->
+    <string name="notification_reminder_title">プレイしよう！</string>
+    <string name="notification_reminder_body">しばらくDoMemoryをプレイしていません。脳を鍛え続けましょう！</string>
+    <string name="notification_streak_risk_title">連続記録を途切れさせないで！</string>
+    <string name="notification_streak_risk_body">%d日連続記録が今夜途切れます。今日のチャレンジをプレイして記録を守ろう！🔥</string>
+
+    <!-- What's New (shell) -->
+    <string name="whats_new_title">DoMemoryの新機能</string>
+    <string name="whats_new_button">プレイする</string>
+
+    <!-- What's New v3.0.0 (retired content, still in the catalog) -->
+    <string name="whats_new_multiplayer_title">マルチプレイヤー</string>
+    <string name="whats_new_multiplayer_description">友達とリアルタイムで対戦 — ルームを作成して6桁のコードかQRコードを共有し、より多くのペアを見つけよう。</string>
+    <string name="whats_new_reminders_title">プレイリマインダー</string>
+    <string name="whats_new_reminders_description">数日間プレイしていないと通知が届き、脳トレを継続できます。</string>
+    <string name="whats_new_theme_title">ライト＆ダークモード</string>
+    <string name="whats_new_theme_description">設定からシステム・ライト・ダークを選んでお好みの外観にカスタマイズできます。</string>
+    <string name="whats_new_hint_title">ヒント</string>
+    <string name="whats_new_hint_description">行き詰まったら？一時停止して短い広告を見ると、隠れたカードのペアが1組明かされます。</string>
+    <string name="whats_new_games_title">遊べるゲームが増えました</string>
+    <string name="whats_new_games_description">あらゆる難易度に数十種類の新しい絵文字カードセットを追加。マスターすべきメモラマは130以上。</string>
+
+    <!-- What's New v4.0.0 (retired content) -->
+    <string name="whats_new_levels_title">レベル</string>
+    <string name="whats_new_levels_description">まったく新しい無限モード。レベルをクリアすると次が解放され、盤面は大きく、制限時間は短くなっていきます。</string>
+    <string name="whats_new_stars_title">スター評価</string>
+    <string name="whats_new_stars_description">速くミスなくクリアすると各レベルで最大3つのスターを獲得。何度でも挑戦してスコアを更新できます。</string>
+    <string name="whats_new_powerups_title">パワーアップ</string>
+    <string name="whats_new_powerups_description">スターを使って、時間の追加、盤面のちら見、時間停止、ペア1組の無料公開が可能です。</string>
+    <string name="whats_new_lives_title">ライフとミス</string>
+    <string name="whats_new_lives_description">ライフは1日4個、各レベルで許されるミスの数も決まっています。なくなったら広告を見るか、スターを使って続行できます。</string>
+
+    <!-- What's New v4.2.0 (current) -->
+    <string name="whats_new_seasons_title">シーズンレベル</string>
+    <string name="whats_new_seasons_description">ハロウィンシーズンのような期間限定シーズンをプレイしよう。専用の報酬が用意されたテーマ別レベルセットで、次のシーズンが始まるまで数週間プレイできます。</string>
+    <string name="whats_new_season_artwork_title">シーズンアートワーク</string>
+    <string name="whats_new_season_artwork_description">各シーズンはレベルマップに専用の背景とカードアートを追加するので、新しいシーズンはいつもそれらしい見た目になります。</string>
+    <string name="whats_new_tap_to_play_title">タップしてプレイ</string>
+    <string name="whats_new_tap_to_play_description">レベルマップは次に進む場所を示すように脈動するようになり、すべてのタイルがタップに反応します。</string>
+    <string name="whats_new_season_progress_title">シーズンの進行状況</string>
+    <string name="whats_new_season_progress_description">ライブの進行状況バーとカウントダウンで各シーズンの進み具合を確認。時間切れになる前にすべてのレベルをクリアしよう。</string>
+
+    <!-- Android shell strings with no iOS counterpart -->
+    <string name="common_loading">読み込み中…</string>
+    <string name="menu_offline_boards">オフライン — 内蔵メモラマを表示しています</string>
+</resources>

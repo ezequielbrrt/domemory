@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from DOMEMORY_ANDROID_SPEC.md section 19 (English base catalog). -->
+<resources>
+    <!-- Common -->
+    <string name="common_accept">수락</string>
+    <string name="common_app_name">DoMemory</string>
+    <string name="common_cancel">취소</string>
+    <string name="common_delete">삭제</string>
+    <string name="common_ok">확인</string>
+
+    <!-- Difficulty -->
+    <string name="difficulty_easy">쉬움</string>
+    <string name="difficulty_easy_subtitle">가볍게 시작</string>
+    <string name="difficulty_medium">보통</string>
+    <string name="difficulty_medium_subtitle">적당한 도전</string>
+    <string name="difficulty_hard">어려움</string>
+    <string name="difficulty_hard_subtitle">기억력을 단련하세요</string>
+    <string name="difficulty_very_hard">매우 어려움</string>
+    <string name="difficulty_very_hard_subtitle">고수 전용</string>
+    <string name="home_difficulty_title">난이도</string>
+    <string name="home_select_difficulty_prompt">난이도를 선택하세요</string>
+
+    <!-- Gameplay -->
+    <string name="game_continue">계속</string>
+    <string name="game_go_to_menu">메뉴로</string>
+    <string name="game_lose_message">시간이 초과되었습니다</string>
+    <string name="game_pause_title">일시정지</string>
+    <string name="game_pairs_label">쌍</string>
+    <string name="game_points_label">점수</string>
+    <string name="game_quit_confirmation">정말로 나가시겠습니까?</string>
+    <string name="game_remaining_label">남음</string>
+    <string name="game_errors_label">오류</string>
+    <string name="game_time_label">시간</string>
+    <string name="game_try_again">다시 시도</string>
+    <string name="game_win_title">축하합니다!</string>
+    <string name="game_win_description">이 메모라마를 제한 시간 안에 완료했습니다</string>
+    <string name="game_rewarded_extra_time">광고를 보고 30초 추가</string>
+    <string name="game_rewarded_hint">광고 보고 힌트 보기</string>
+    <string name="ads_loading">광고 로드 중...</string>
+    <string name="ads_label">광고</string>
+
+    <!-- Levels -->
+    <string name="levels_screen_title">레벨</string>
+    <string name="level_title_format">레벨 %d</string>
+    <string name="levels_current_level_format">현재 레벨 %d</string>
+    <string name="level_cleared">레벨 클리어!</string>
+    <string name="level_next">다음 레벨</string>
+    <string name="level_back_to_levels">레벨로 돌아가기</string>
+    <string name="levels_out_of_lives_title">생명이 없습니다!</string>
+    <string name="levels_out_of_lives_message">광고를 보고 생명 +1을 받거나, 내일 새로운 생명으로 다시 오세요.</string>
+    <string name="levels_out_of_lives_message_no_ad">별을 써서 목숨을 더 얻거나, 내일 다시 오세요.</string>
+    <string name="levels_watch_ad_for_life">광고 보고 생명 +1 받기</string>
+    <string name="levels_lives_remaining_format">생명 %1$d / %2$d 남음</string>
+
+    <!-- Levels star economy -->
+    <string name="levels_powerup_extra_time">+15초</string>
+    <string name="levels_powerup_peek">엿보기</string>
+    <string name="levels_powerup_freeze">일시정지</string>
+    <string name="levels_powerup_reveal_pair">짝 공개</string>
+    <string name="levels_star_balance_format">별 %d개 보유</string>
+    <string name="levels_powerup_cost_format">%1$s, 별 %2$d개</string>
+    <string name="levels_buy_life_format">생명 구매 — %d</string>
+    <string name="levels_skip_level_format">이 레벨 건너뛰기 — %d</string>
+    <string name="levels_skip_level_confirm_title">이 레벨을 건너뛸까요?</string>
+    <string name="levels_skip_level_confirm_message">다음 레벨이 열리지만 이 레벨은 별 0개로 남습니다. 언제든지 다시 플레이할 수 있습니다.</string>
+    <string name="levels_skip_level_confirm_action">건너뛰기</string>
+
+    <!-- Levels mistake budget -->
+    <string name="levels_lose_too_many_mistakes">실수가 너무 많습니다</string>
+    <string name="levels_forgive_ad_format">광고 보고 실수 %d회 취소</string>
+    <string name="levels_forgive_stars_format">실수 %1$d회 취소 — %2$d</string>
+    <string name="levels_mistakes_remaining_format">실수 %1$d / %2$d</string>
+    <string name="levels_timer_frozen_format">시간 정지, %d초 남음</string>
+
+    <!-- Levels intro -->
+    <string name="levels_intro_progress_title">끝없는 레벨</string>
+    <string name="levels_intro_progress_subtitle">레벨을 클리어하면 다음 레벨이 열립니다. 판은 커지고 시간은 촉박해지며, 다음 레벨이 항상 기다립니다.</string>
+    <string name="levels_intro_stars_title">별 모으기</string>
+    <string name="levels_intro_stars_subtitle">빠르고 실수 없이 끝내면 레벨당 최대 3개의 별을 얻습니다. 파워업, 추가 목숨, 레벨 건너뛰기에 사용하세요.</string>
+    <string name="levels_intro_lives_title">목숨은 매일 충전</string>
+    <string name="levels_intro_lives_subtitle">하루에 %d개의 목숨을 받고, 레벨에 질 때마다 하나씩 줄어듭니다. 다 떨어지면 광고를 보거나 별을 써서 계속하세요.</string>
+    <string name="levels_intro_mistakes_title">실수에 주의하세요</string>
+    <string name="levels_intro_mistakes_subtitle">레벨마다 허용되는 실수 횟수가 정해져 있습니다. 한도에 도달하면 끝나지만, 실수를 취소하고 이어갈 수 있습니다.</string>
+    <string name="levels_intro_done">확인</string>
+    <string name="levels_intro_info_accessibility">레벨 이용 방법</string>
+
+    <!-- Seasons -->
+    <string name="season_fallback_title">시즌</string>
+    <string name="season_progress_format">%1$d / %2$d</string>
+    <string name="season_progress_accessibility_format">%1$d개 레벨 중 %2$d개 클리어</string>
+    <string name="season_days_left_format">%d일 남음</string>
+    <string name="season_one_day_left">1일 남음</string>
+    <string name="season_last_day">마지막 날</string>
+    <string name="season_complete_badge">완료</string>
+    <string name="season_complete_title">시즌 완료!</string>
+    <string name="season_complete_message">모든 레벨을 클리어했습니다. 아무 레벨이나 다시 플레이해 별을 올려 보세요.</string>
+
+    <!-- Menu -->
+    <string name="menu_tab_levels">레벨</string>
+    <string name="menu_tab_mine">내 메모라마</string>
+    <string name="menu_tab_all">전체</string>
+    <string name="menu_random_game">랜덤 게임</string>
+    <string name="menu_empty_mine_message">아직 내 메모라마가 없습니다</string>
+    <string name="menu_empty_mine_action">만들기</string>
+    <string name="menu_create_title">새 메모라마</string>
+    <string name="menu_create_name_label">이름</string>
+    <string name="menu_create_name_placeholder">예: 과일, 동물...</string>
+    <string name="menu_create_emojis_label">이모지</string>
+    <string name="menu_create_add">추가</string>
+    <string name="menu_create_add_emoji">이모지 추가</string>
+    <string name="menu_create_minimum_hint">최소 2개</string>
+    <string name="menu_create_save">저장</string>
+    <string name="menu_create_rejected">저장하기 전에 이모지를 2개 이상 추가하세요</string>
+    <string name="menu_levels_coming_soon_title">레벨</string>
+    <string name="menu_levels_coming_soon_subtitle">곧 출시</string>
+    <string name="menu_favorite_add">즐겨찾기에 추가</string>
+    <string name="menu_favorite_remove">즐겨찾기에서 제거</string>
+    <string name="menu_delete_memorama">삭제</string>
+    <string name="menu_delete_confirm_title">이 메모라마를 삭제할까요?</string>
+    <string name="menu_delete_confirm_message">이 메모라마의 통계도 삭제됩니다.</string>
+    <string name="menu_difficulty_label">난이도</string>
+    <string name="stats_played_label">플레이</string>
+    <string name="stats_won_label">승리</string>
+
+    <!-- Daily Challenge -->
+    <string name="daily_challenge_title">일일 챌린지</string>
+    <string name="daily_challenge_subtitle">매일 새로운 보드</string>
+    <string name="daily_challenge_completed">오늘 완료!</string>
+    <string name="daily_challenge_streak_format">🔥 %d일 연속</string>
+
+    <!-- Multiplayer -->
+    <string name="multiplayer_title">멀티플레이</string>
+    <string name="multiplayer_create_room">방 만들기</string>
+    <string name="multiplayer_join_room">방 참가</string>
+    <string name="multiplayer_join_description">친구의 6자리 방 코드를 입력하세요.</string>
+    <string name="multiplayer_code_placeholder">ABC123</string>
+    <string name="multiplayer_qr_code">멀티플레이 방 QR 코드</string>
+    <string name="multiplayer_scan_qr_code">QR 코드 스캔</string>
+    <string name="multiplayer_start_game">게임 시작</string>
+    <string name="multiplayer_waiting_for_player">이 코드를 공유하고 다른 플레이어를 기다리세요</string>
+    <string name="multiplayer_ready_to_start">플레이어가 참가했습니다. 준비되면 시작하세요</string>
+    <string name="multiplayer_waiting_for_host">호스트가 시작하길 기다리는 중</string>
+    <string name="multiplayer_your_turn">내 차례</string>
+    <string name="multiplayer_opponent_turn">상대 차례</string>
+    <string name="multiplayer_reconnecting">플레이어 재연결 대기 중</string>
+    <string name="multiplayer_you_won">승리</string>
+    <string name="multiplayer_you_lost">패배</string>
+    <string name="multiplayer_draw">무승부</string>
+    <string name="multiplayer_room_closed">방이 닫힘</string>
+    <string name="multiplayer_you">나</string>
+    <string name="multiplayer_opponent">상대</string>
+    <string name="multiplayer_final_score">최종 점수</string>
+    <string name="multiplayer_play_again">다시 하기</string>
+    <string name="multiplayer_waiting_for_rematch">호스트 대기 중</string>
+    <string name="multiplayer_choose_another_game">다른 게임 선택</string>
+    <string name="multiplayer_host_name">호스트</string>
+    <string name="multiplayer_guest_name">게스트</string>
+    <string name="multiplayer_invite_friend">친구에게 도전</string>
+    <string name="multiplayer_invite_message">DoMemory에서 기억력 대결에 도전하세요! 코드 %s 로 제 방에 참여하세요:</string>
+    <string name="multiplayer_generic_error">문제가 발생했습니다. 다시 시도하세요.</string>
+    <string name="multiplayer_error_firebase_unavailable">지금은 멀티플레이를 사용할 수 없습니다.</string>
+    <string name="multiplayer_error_authentication">멀티플레이에 연결할 수 없습니다.</string>
+    <string name="multiplayer_error_room_not_found">방을 찾을 수 없습니다.</string>
+    <string name="multiplayer_error_room_full">이 방은 이미 가득 찼습니다.</string>
+    <string name="multiplayer_error_room_unavailable">이 방은 더 이상 사용할 수 없습니다.</string>
+    <string name="multiplayer_error_invalid_move">사용할 수 없는 수입니다.</string>
+    <string name="multiplayer_error_permission_denied">Firebase 규칙이 멀티플레이 방을 차단하고 있습니다.</string>
+    <string name="multiplayer_error_encoding">방을 준비할 수 없습니다.</string>
+    <string name="multiplayer_error_decoding">방을 읽을 수 없습니다.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">설정</string>
+    <string name="settings_description">게임 환경설정을 조정하세요</string>
+    <string name="settings_section_game">게임</string>
+    <string name="settings_section_preferences">환경설정</string>
+    <string name="settings_section_about">정보</string>
+    <string name="settings_theme_title">테마</string>
+    <string name="settings_theme_prompt">원하는 화면 테마를 선택하세요</string>
+    <string name="theme_system">시스템</string>
+    <string name="theme_light">라이트</string>
+    <string name="theme_dark">다크</string>
+    <string name="settings_haptics_title">햅틱</string>
+    <string name="settings_haptics_description_on">버튼을 누르거나 짝을 맞추면 가볍게 진동합니다.</string>
+    <string name="settings_haptics_description_off">진동 피드백이 꺼져 있습니다.</string>
+    <string name="settings_notifications_title">리마인더</string>
+    <string name="settings_notifications_description_on">2일 동안 플레이하지 않으면 알림을 받습니다</string>
+    <string name="settings_notifications_description_off">한동안 플레이하지 않았을 때 알림 받기</string>
+    <string name="settings_notifications_denied_title">알림이 꺼져 있습니다</string>
+    <string name="settings_notifications_denied_message">리마인더를 받으려면 Android 설정에서 DoMemory의 알림을 활성화하세요.</string>
+    <string name="settings_notifications_open_settings">설정 열기</string>
+    <string name="settings_review_title">DoMemory 평가하기</string>
+    <string name="settings_review_description">리뷰는 다른 플레이어가 게임을 찾는 데 도움이 됩니다</string>
+    <string name="settings_whats_new_title">새로운 기능</string>
+    <string name="settings_whats_new_description">최신 업데이트에서 바뀐 점 보기</string>
+
+    <!-- Achievements -->
+    <string name="achievements_title">업적</string>
+    <string name="achievements_subtitle">진행 상황과 배지를 확인하세요</string>
+    <string name="achievements_stats_section">내 통계</string>
+    <string name="achievements_badges_section">배지</string>
+    <string name="stat_total_games">플레이한 게임</string>
+    <string name="stat_total_wins">승리</string>
+    <string name="stat_win_rate">승률</string>
+    <string name="stat_perfect_games">퍼펙트 게임</string>
+    <string name="stat_longest_streak">최장 연속 기록</string>
+    <string name="stat_multiplayer_wins">멀티플레이어 승리</string>
+    <string name="ach_wins_title_format">%d승</string>
+    <string name="ach_wins_detail_format">%d게임 승리하기</string>
+    <string name="ach_streak_title_format">%d일 연속</string>
+    <string name="ach_streak_detail_format">%d일 연속 기록 달성하기</string>
+    <string name="ach_perfect_title">완벽</string>
+    <string name="ach_perfect_detail">실수 없이 승리하기</string>
+    <string name="ach_multiplayer_title">챔피언</string>
+    <string name="ach_multiplayer_detail">첫 멀티플레이어 경기에서 승리하기</string>
+
+    <!-- Share -->
+    <string name="share_result">결과 공유</string>
+    <string name="share_result_caption">DoMemory에서 %d쌍을 맞췄어요! 이길 수 있나요?</string>
+
+    <!-- Onboarding intro -->
+    <string name="intro_multiplayer_title">친구와 플레이</string>
+    <string name="intro_multiplayer_subtitle">실시간 멀티플레이 방에서 누구와도 대결하세요 — 6자리 코드나 QR만 공유하면 끝.</string>
+    <string name="intro_custom_title">나만의 게임</string>
+    <string name="intro_custom_subtitle">나만의 이모지 카드 세트를 만들고 좋아하는 게임을 즐기세요.</string>
+    <string name="intro_daily_title">매일 다시 오기</string>
+    <string name="intro_daily_subtitle">매일 새로운 보드. 연속 기록을 만들고 이어가세요!</string>
+    <string name="intro_skip">건너뛰기</string>
+    <string name="intro_next">다음</string>
+    <string name="intro_get_started">시작하기</string>
+
+    <!-- Notification primer -->
+    <string name="notification_primer_title">연속 기록을 지키세요</string>
+    <string name="notification_primer_message">알림을 켜면 이런 순간에 알려 드립니다:</string>
+    <string name="notification_primer_benefit_streak">일일 도전 연속 기록이 곧 끊길 때</string>
+    <string name="notification_primer_benefit_inactive">며칠 동안 플레이하지 않았을 때</string>
+    <string name="notification_primer_benefit_no_spam">이게 전부입니다. 최소한의 알림만, 스팸은 없습니다</string>
+    <string name="notification_primer_preview_title">연속 기록이 끊길 거예요!</string>
+    <string name="notification_primer_preview_message">5일 연속 기록이 오늘 밤 끝납니다. 오늘의 도전을 플레이하세요!</string>
+    <string name="notification_primer_enable">알림 켜기</string>
+    <string name="notification_primer_later">나중에</string>
+
+    <!-- Notifications -->
+    <string name="notification_reminder_title">게임 시간!</string>
+    <string name="notification_reminder_body">한동안 DoMemory를 플레이하지 않았습니다. 뇌를 계속 훈련하세요!</string>
+    <string name="notification_streak_risk_title">연속 기록을 지키세요!</string>
+    <string name="notification_streak_risk_body">%d일 연속 기록이 오늘 밤 끊깁니다. 오늘의 챌린지를 플레이하세요! 🔥</string>
+
+    <!-- What's New (shell) -->
+    <string name="whats_new_title">DoMemory 새 기능</string>
+    <string name="whats_new_button">플레이하기</string>
+
+    <!-- What's New v3.0.0 (retired content, still in the catalog) -->
+    <string name="whats_new_multiplayer_title">멀티플레이어</string>
+    <string name="whats_new_multiplayer_description">친구와 실시간으로 대결 — 방을 만들고 6자리 코드나 QR코드를 공유해 더 많은 쌍을 찾으세요.</string>
+    <string name="whats_new_reminders_title">플레이 리마인더</string>
+    <string name="whats_new_reminders_description">며칠 동안 플레이하지 않으면 알림을 보내드려 뇌 운동을 놓치지 않게 도와줍니다.</string>
+    <string name="whats_new_theme_title">라이트 &amp; 다크 모드</string>
+    <string name="whats_new_theme_description">설정에서 시스템, 라이트, 다크 중 원하는 외관을 선택하세요.</string>
+    <string name="whats_new_hint_title">힌트</string>
+    <string name="whats_new_hint_description">막혔나요? 게임을 일시 정지하고 짧은 광고를 보면 숨겨진 카드 한 쌍이 공개됩니다.</string>
+    <string name="whats_new_games_title">더 많은 게임</string>
+    <string name="whats_new_games_description">모든 난이도에 수십 개의 새로운 이모지 카드 세트 추가 — 마스터할 메모라마가 130개 이상.</string>
+
+    <!-- What's New v4.0.0 (retired content) -->
+    <string name="whats_new_levels_title">레벨</string>
+    <string name="whats_new_levels_description">완전히 새로운 무한 모드. 레벨을 클리어하면 다음이 열리고, 판은 커지고 시간은 촉박해집니다.</string>
+    <string name="whats_new_stars_title">별 평가</string>
+    <string name="whats_new_stars_description">빠르고 실수 없이 끝내면 레벨마다 최대 3개의 별을 얻습니다. 언제든 다시 도전해 점수를 올리세요.</string>
+    <string name="whats_new_powerups_title">파워업</string>
+    <string name="whats_new_powerups_description">게임 중 별을 사용해 시간 추가, 판 미리보기, 시간 정지, 무료 짝 공개를 쓸 수 있습니다.</string>
+    <string name="whats_new_lives_title">목숨과 실수</string>
+    <string name="whats_new_lives_description">하루 4개의 목숨이 주어지고, 레벨마다 허용되는 실수도 정해져 있습니다. 다 떨어지면 광고를 보거나 별을 쓰세요.</string>
+
+    <!-- What's New v4.2.0 (current) -->
+    <string name="whats_new_seasons_title">시즌 레벨</string>
+    <string name="whats_new_seasons_description">스푸키 시즌 같은 기간 한정 시즌을 플레이하세요 — 전용 보상이 있는 테마별 레벨 세트로, 다음 시즌이 시작되기 전까지 몇 주간 진행됩니다.</string>
+    <string name="whats_new_season_artwork_title">시즌 아트워크</string>
+    <string name="whats_new_season_artwork_description">각 시즌마다 레벨 맵에 고유한 배경과 카드 아트가 추가되어 새로운 시즌마다 분위기가 달라집니다.</string>
+    <string name="whats_new_tap_to_play_title">탭해서 플레이</string>
+    <string name="whats_new_tap_to_play_description">레벨 맵이 이제 다음에 할 레벨을 알려주기 위해 맥동하며, 모든 타일이 탭에 반응합니다.</string>
+    <string name="whats_new_season_progress_title">시즌 진행 상황</string>
+    <string name="whats_new_season_progress_description">실시간 진행 바와 카운트다운으로 각 시즌의 진행 상황을 확인하세요 — 시간이 끝나기 전에 모든 레벨을 클리어하세요.</string>
+
+    <!-- Android shell strings with no iOS counterpart -->
+    <string name="common_loading">불러오는 중…</string>
+    <string name="menu_offline_boards">오프라인 — 내장 메모라마를 표시합니다</string>
+</resources>

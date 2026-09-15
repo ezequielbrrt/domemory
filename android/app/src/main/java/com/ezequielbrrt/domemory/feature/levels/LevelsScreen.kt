@@ -1,8 +1,13 @@
 package com.ezequielbrrt.domemory.feature.levels
 
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +37,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +49,7 @@ import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.ads.findActivity
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
+import com.ezequielbrrt.domemory.ui.anim.pressScaleClickable
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import kotlinx.coroutines.launch
@@ -132,6 +141,8 @@ private fun LevelsHeader(
     onInfoClick: () -> Unit,
 ) {
     val palette = LocalPalette.current
+    val infoAccessibilityLabel = stringResource(R.string.levels_intro_info_accessibility)
+    val starBalanceAccessibilityLabel = stringResource(R.string.levels_star_balance_format, starBalance)
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -144,7 +155,10 @@ private fun LevelsHeader(
                     style = DoMemoryType.display(20),
                     color = palette.textPrimary,
                 )
-                IconButton(onClick = onInfoClick) {
+                IconButton(
+                    onClick = onInfoClick,
+                    modifier = Modifier.semantics { contentDescription = infoAccessibilityLabel },
+                ) {
                     Text("?", fontWeight = FontWeight.Bold, color = palette.textSecondary)
                 }
             }
@@ -157,18 +171,25 @@ private fun LevelsHeader(
         Column(horizontalAlignment = Alignment.End) {
             Pill(text = stringResource(R.string.levels_lives_remaining_format, livesRemaining, 4))
             Spacer(Modifier.size(6.dp))
-            Pill(text = "★ $starBalance")
+            // Spec 14.5: "the star balance announces 'N stars available'" — the visible glyph
+            // ("★ 12") stays compact, but a screen reader gets the full sentence instead.
+            Pill(text = "★ $starBalance", accessibilityLabel = starBalanceAccessibilityLabel)
         }
     }
 }
 
 @Composable
-private fun Pill(text: String) {
+private fun Pill(text: String, accessibilityLabel: String? = null) {
     val palette = LocalPalette.current
     Surface(
         shape = RoundedCornerShape(50),
         color = palette.surfacePrimary,
         border = androidx.compose.foundation.BorderStroke(1.dp, palette.surfaceBorder),
+        modifier = if (accessibilityLabel != null) {
+            Modifier.semantics { contentDescription = accessibilityLabel }
+        } else {
+            Modifier
+        },
     ) {
         Text(
             text,
@@ -199,25 +220,75 @@ private fun LevelTile(
         unlocked -> palette.primary
         else -> palette.textSecondary
     }
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(background, RoundedCornerShape(16.dp))
-            .border(1.dp, palette.surfaceBorder, RoundedCornerShape(16.dp))
-            .clickable(enabled = unlocked, onClick = onClick)
-            .padding(vertical = 14.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            if (unlocked) level.toString() else "🔒",
-            fontWeight = FontWeight.Bold,
-            color = foreground,
+
+    // Ported from iOS's `LevelTileView` (`LevelMapView.swift`): only the `.current` tile
+    // pulses — a ring that grows/fades outward plus a subtle scale on the tile itself, looped
+    // forever. Calling `rememberInfiniteTransition`/`animateFloat` inside this `if` branch
+    // (rather than unconditionally and hiding the result) is what gives the Compose analog of
+    // iOS's `onAppear` + `onChange(of: tile.isCurrent)` re-trigger for free: whenever a tile
+    // transitions into `.current` — which iOS's own comment notes is usually a tile that was
+    // already on screen as `.locked`, not a freshly appearing one — this branch re-enters
+    // composition and the animation starts from zero again. Every other tile pays nothing.
+    val pulseProgress: Float? = if (isCurrent) {
+        val infiniteTransition = rememberInfiniteTransition(label = "levelTilePulse")
+        val progress by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1100, easing = EaseInOut),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "levelTilePulseProgress",
         )
-        Text(
-            if (stars > 0) "★".repeat(stars) else "",
-            fontSize = 11.sp,
-            color = palette.hardAmber,
-        )
+        progress
+    } else {
+        null
+    }
+
+    Box(contentAlignment = Alignment.Center) {
+        if (pulseProgress != null) {
+            // The ring: iOS scales a stroked circle 1 -> 1.45 while fading 0.7 -> 0 opacity.
+            // Android's tile is a rounded rect rather than a circle, so the ring is drawn as a
+            // matching rounded-rect border behind it — same growth/fade behavior, adapted shape.
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        val ringScale = 1f + pulseProgress * 0.45f
+                        scaleX = ringScale
+                        scaleY = ringScale
+                        alpha = 0.7f * (1f - pulseProgress)
+                    }
+                    .border(3.dp, palette.primary, RoundedCornerShape(16.dp)),
+            )
+        }
+
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    // iOS scales the tile itself to 1.06 in sync with the ring above.
+                    val tileScale = 1f + (pulseProgress ?: 0f) * 0.06f
+                    scaleX = tileScale
+                    scaleY = tileScale
+                }
+                .background(background, RoundedCornerShape(16.dp))
+                .border(1.dp, palette.surfaceBorder, RoundedCornerShape(16.dp))
+                .pressScaleClickable(enabled = unlocked, onClick = onClick)
+                .padding(vertical = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                if (unlocked) level.toString() else "🔒",
+                fontWeight = FontWeight.Bold,
+                color = foreground,
+            )
+            Text(
+                if (stars > 0) "★".repeat(stars) else "",
+                fontSize = 11.sp,
+                color = palette.hardAmber,
+            )
+        }
     }
 }
 

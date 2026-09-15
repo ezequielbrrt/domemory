@@ -76,11 +76,11 @@ graph in the same change.
 | `widget` | `DailyChallengeGlanceWidget`, receiver and calendar-aligned WorkManager refresh — the Daily Challenge home-screen widget (Phase 5) |
 | `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 in progress; create/join, invite sharing, QR rendering/scanning, gameplay, reconnect grace and rematch exist, while association deployment and live cross-platform verification remain follow-up work |
 | `services/ads` | AdMob initialization, debug/release placement configuration, the frequency-cap policy plus its presentation-trigger gate, and banner/interstitial/rewarded/native presentation — Phase 7 in progress; banners, the completion interstitial, both Levels rewarded rescues and the multiplayer-finished native ad are wired and presenting; `game_rewarded_extra_time`/`game_rewarded_hint` and app-open remain unwired (see `ANDROID_PLAN.md` §7) |
-| `services/whatsnew`, `feature/whatsnew` | Version-aware release-notes gate and dialog — Phase 8 in progress; first installs stay silent and upgrades present once |
-| `services/haptics` | `HapticIntent`, `HapticsService` — Phase 8 in progress; single gated `fire(intent)` entry point wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue moments and a handful of `NavGraph.kt` view-only taps. Menu, Levels, Seasons, Multiplayer and Settings screens have no haptics wired yet |
-| `services/review` | `AppReviews` — Play In-App Review wrapper (Phase 8 in progress); fires on a genuine win via `GameViewModel.onGameWon`, deliberately thin (no local eligibility policy — see `ANDROID_PLAN.md` §7's Phase 8 note for why that diverges from iOS on purpose) |
-| `services/stats` | `ProfileStats`, `Achievement`, `ProfileStatsService` (lifetime aggregates + the pure `achievements()` derivation), `ProfileStatsRecorder`/`UserPreferencesProfileStatsRecorder` (the write side, mirroring `GameStatsRecorder`'s seam shape) — Phase 8 in progress; recording is wired into `GameViewModel.commit()`/`.commitLossIfNeeded()` (every mode) and `MultiplayerViewModel` (guarded by `services/multiplayer/MultiplayerWinGuard`), reading into `feature/settings/AchievementsScreen.kt` |
-| `feature/share` | `ShareResultCard.kt` — the pure `resultGridString`/`resultShareCaption`, the `ShareResultCardView` composable, and `shareResultCard()` (renders it to a `Bitmap` via `GraphicsLayer.toImageBitmap()` and launches an `ACTION_SEND` chooser through a new `FileProvider`) — Phase 8 in progress; reached from `GameScreen.kt`'s win overlay only (Levels/Seasons out-of-lives and lose-screen surfaces have no share affordance, matching iOS's own Win-Modal-only placement) |
+| `services/whatsnew`, `feature/whatsnew` | Version-aware release-notes gate and dialog — Phase 8 complete; first installs stay silent and upgrades present once |
+| `services/haptics` | `HapticIntent`, `HapticsService` — Phase 8 complete; single gated `fire(intent)` entry point wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue moments and a handful of `NavGraph.kt` view-only taps. Menu, Levels, Seasons, Multiplayer and Settings screens have no haptics wired yet |
+| `services/review` | `AppReviews` — Play In-App Review wrapper (Phase 8 complete); fires on a genuine win via `GameViewModel.onGameWon`, deliberately thin (no local eligibility policy — see `ANDROID_PLAN.md` §7's Phase 8 note for why that diverges from iOS on purpose) |
+| `services/stats` | `ProfileStats`, `Achievement`, `ProfileStatsService` (lifetime aggregates + the pure `achievements()` derivation), `ProfileStatsRecorder`/`UserPreferencesProfileStatsRecorder` (the write side, mirroring `GameStatsRecorder`'s seam shape) — Phase 8 complete; recording is wired into `GameViewModel.commit()`/`.commitLossIfNeeded()` (every mode) and `MultiplayerViewModel` (guarded by `services/multiplayer/MultiplayerWinGuard`), reading into `feature/settings/AchievementsScreen.kt` |
+| `feature/share` | `ShareResultCard.kt` — the pure `resultGridString`/`resultShareCaption`, the `ShareResultCardView` composable, and `shareResultCard()` (renders it to a `Bitmap` via `GraphicsLayer.toImageBitmap()` and launches an `ACTION_SEND` chooser through a new `FileProvider`) — Phase 8 complete; reached from `GameScreen.kt`'s win overlay only (Levels/Seasons out-of-lives and lose-screen surfaces have no share affordance, matching iOS's own Win-Modal-only placement) |
 | `services/share` | `PlayStoreLinks` — the one place the Play Store listing URL is built, shared by the Settings "Rate DoMemory" row and the share-card caption |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
 
@@ -157,11 +157,18 @@ win, deliberately thin with no local eligibility policy — Android's `ReviewMan
 that server-side, unlike iOS's `ReviewFlow`), three Settings rows ("Achievements", "Rate
 DoMemory", "What's New"), achievements (`services/stats/ProfileStatsService`, recording
 wired into every `GameViewModel` finish and into multiplayer via `MultiplayerWinGuard`,
-reading into `feature/settings/AchievementsScreen.kt`), and the spoiler-free share card
-(`feature/share/ShareResultCard.kt`, reached from the win overlay only) implemented and
-unit-test clean; animations, accessibility announcements and localization remain — see
-`ANDROID_PLAN.md` §7's Phase 8 implementation note for the full mapping table and what was
-deliberately left as a seam.
+reading into `feature/settings/AchievementsScreen.kt`), the spoiler-free share card
+(`feature/share/ShareResultCard.kt`, reached from the win overlay only), the four animations
+(tile pulse and press-to-0.92 spring via new `ui/anim/PressScale.kt`; numeric transitions via
+new `ui/anim/NumericTransition.kt`, applied only to `PowerUpBar`'s star balance, iOS's one
+verified `numericText` call site; the progress-bar spring already existed from Phase 4 in
+`SeasonLevelsScreen.kt`) and the five spec-14.5 accessibility content descriptions (fails
+chip, timer-while-frozen, star balance, power-up cost — silent when disabled — and the
+already-wired season progress bar), all nine non-English resource tables, and
+`LocalizationParityTest` are implemented and unit-test clean. Phase 8's parity exit criterion
+is green across all ten locales — see `ANDROID_PLAN.md` §7's four Phase 8 implementation
+notes for the full mapping and what was deliberately left as a seam, including that the
+animation feel and real TalkBack behavior are compiled/tested only, never seen running.
 `ANDROID_PLAN.md` §7 contains the required handoff ledger: read it before starting
 Android work, update it when a migration slice changes state, and do not infer a feature
 is complete merely because its type or screen exists.
