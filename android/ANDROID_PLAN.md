@@ -353,7 +353,7 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | Phase 4 | merged (re-landed), **now emulator-verified against a live Firebase season, including the day-boundary expiry case** | `1f17bb7` / PR #44 originally, reverted (`42cc257`, unintentional), re-integrated against Phase 3's hardening in this change | Deploy `firebase/firebase-database.rules.json`'s `/seasons` read rule if not already live (a real "Spooky Season" was already readable during this session's verification, so the rule and a season are in fact already live — confirm before re-deploying). Day-boundary expiry itself is now emulator-verified too — see the 2026-09-15 note below; no further action needed here. |
 | Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified, including streak rollover across a day boundary | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
 | Phase 6 | **exit criterion met** — a live Android↔iOS match (manual 6-character code, not App Links) was played to completion 2026-09-15 with correct, consistent state on both devices throughout: join, turn-taking, matches, and the 4-0 win/loss result. Rematch and the 15s reconnect-grace forfeit rule were also exercised live and were correct and consistent on both platforms. See the two 2026-09-15 notes below. | current worktree; the `.read` rule fix is deployed to `domemory-c9211` (not yet committed to git — still a working-tree diff in `firebase/firebase-database.rules.json`) | Commit the rules fix through the normal PR flow. O1 (App Links) remains open but is no longer a Phase 6 blocker — the deep-link path (`domemory://join/CODE`, `domemory.app` universal/app links) is still unverified and needs a registered domain, but the manual-code join path this session verified is a fully supported, already-shipped alternative. |
-| Phase 7 | in progress — AdMob SDK/app ID and all nine active placement units are configured; banners, the completion interstitial, `levels_rewarded_life`/`levels_rewarded_forgive`, and the multiplayer-finished native placement are all wired and presenting through `AdsService`; the frequency-cap policy and its presentation-trigger gate are unit-test clean | current worktree | `game_rewarded_extra_time`/`game_rewarded_hint` remain configured but unwired — no pause modal exists on Android to hang the hint button off, and extra-time has no existing star-purchase call site to slot an alternative into (see this section's implementation note below). App-open is unimplemented — no launch-sequence state machine exists yet for it to gate on (O5). Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
+| Phase 7 | in progress, **now emulator-verified** — AdMob SDK/app ID and all nine active placement units are configured; banners, the completion interstitial (cadence, the 20s floor, presentation/reload all confirmed live), `levels_rewarded_life`/`levels_rewarded_forgive` (confirmed presenting and granting live), and the multiplayer-finished native placement (confirmed presenting on both clients, confirmed independent of the interstitial frequency cap) are all wired and presenting through `AdsService`; the frequency-cap policy and its presentation-trigger gate are unit-test clean and the 60s rewarded-suppression window is also live-confirmed — see the 2026-09-15 "Phase 7 ad-flow verification session" note below | current worktree | `game_rewarded_extra_time`/`game_rewarded_hint` remain configured but unwired — no pause modal exists on Android to hang the hint button off, and extra-time has no existing star-purchase call site to slot an alternative into (see this section's implementation note below). App-open is unimplemented — no launch-sequence state machine exists yet for it to gate on (O5). Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
 | Phase 8 | complete — What's New, haptics, Play In-App Review, achievements, the spoiler-free share card, three Settings rows, four animations, five accessibility content-description rules, all nine translations, and `LocalizationParityTest` are implemented; the parity exit criterion is green across all ten locales | `feature/android-animations-accessibility` / current worktree | Device-only feel/TalkBack verification and the intentionally deferred haptics expansion remain follow-ups, not Phase 8 exit blockers. See the four implementation notes below for exact scope and seams. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
@@ -1139,6 +1139,127 @@ and fixed Phase 8's missing manifest declaration for `android.permission.VIBRATE
 reached four pre-existing Phase 6 errors (`MultiplayerScreen.kt` resource lookup and three
 unremembered `NavGraph.kt` back-stack entries), which remain outside this slice.
 
+**Phase 7 ad-flow verification session, 2026-09-15.** First time any Phase 7 ad flow has
+been seen presenting on a device — everything up to this point was unit-test-clean but
+unverified against a real `AdsService`/AdMob SDK integration. Same `Pixel_10` (API 37)
+emulator. Confirmed first: debug builds serve Google's own public test/demo ad unit ids
+(`AdUnitConfiguration.unitId`'s `select(debug, TEST_*, ...)` branch), never the real
+production units — every ad seen this session was labeled "Test Ad" by the SDK itself
+(a "You've loaded a test ad from AdMob" banner, "This is an interstitial test ad.",
+rewarded videos branded "Google Ads"/"Flood-It!", a native card headlined
+"Test Ad : Google Ads"), so nothing here risked a real impression or spend.
+
+*Completion interstitial (item 1).* Exercised via free play (which, like every mode,
+fires `onCompletionInterstitial` from `GameViewModel.commit()`/`commitLossIfNeeded`) —
+chosen over Levels/Seasons for this part specifically so cadence could be driven without
+touching the daily lives budget. A `Hard`-difficulty catalog board (`interstitialEveryNWins
+= 2`) run to two consecutive natural 60s timeouts showed no ad on the first (`DEFERRED`,
+confirmed via a real `AdActivity` launch count of zero) and the real AdMob interstitial
+test creative on the second, dismissing and reloading correctly. A second pass using a
+purpose-made 2-pair custom memorama ("Fast", deleted afterward) — created specifically to
+control game duration — incidentally caught the 20s floor in action: several very-fast
+wins (won in a handful of real seconds) never even incremented the qualifying-completion
+counter, because `afterGameCompletion`'s `TOO_SHORT` branch returns the *original*, not
+incremented, state — confirmed by temporarily adding `Log.d` tracing to
+`AdsService.kt`'s interstitial path (see below) and reverted once understood, not by
+guessing. A same-session false alarm is worth recording so it isn't re-chased: two
+further "Fast"-board wins after the first confirmed presentation also showed no ad despite
+what looked like a qualifying `REQUEST` decision, which briefly looked like a caching
+regression (the interstitial never reloading after its first show). Diagnostic logging
+(`Log.d` calls added to `loadInterstitial`/`notifyGameFinished`/`presentInterstitial`,
+gated behind no build flag — a pure temporary diagnostic, reverted via `git diff` showing
+clean before moving on) proved those specific wins were actually still under the 20s floor
+in real wall-clock time (`TOO_SHORT`, `qualifyingCompletions` unchanged) — not a caching
+bug. A follow-up round paced to run past 20s real time then showed `decision=true`, a
+cached ad (`cachedAd=true`), an actual `AdActivity` launch, and — critically — a
+subsequent `onAdDismissedFullScreenContent → loadInterstitial → onAdLoaded` reload
+completing in about one second, confirmed both by the diagnostic log and by the very next
+qualifying finish successfully presenting again later in the session (the multiplayer
+native-ad check further below). No bug; the diagnostic `Log.d` calls were reverted
+(`git diff` on `AdsService.kt` is empty) before any further testing.
+
+*Levels rewarded rescues (item 2).* Played endless Level 2, deliberately racking up
+mismatches to `errors: 5/5` (`Too many mistakes`) to reach the lose screen with both
+`levels_rewarded_life` and `levels_rewarded_forgive` buttons visible. "Watch ad to forgive
+3 mistakes" presented the real rewarded test video, showed "Reward granted" after playing
+to completion, and correctly returned to gameplay with `errors` reduced from 5 to 2 (the
+board and progress otherwise untouched) — `applyForgiveMistakesReward()`'s effect,
+confirmed on screen, not just via the reward callback firing. A second loss (this one a
+plain timeout, so only "Watch ad for +1 life" showed — confirms `canWatchAdToForgive` is
+correctly gated on `lostToMistakes` and `canWatchAdForLife` is not) was rescued the same
+way: rewarded video to completion, "Reward granted", and the level restarted fresh with no
+life spent (`applyLifeReward()`). Both grants were real, on-screen state changes, not just
+an SDK callback assumed to have worked.
+
+*60s post-rewarded suppression (item 4, partial).* Immediately after the second rewarded
+grant above, three more mismatches were forced to reach a fresh `errors: 5/5`, and this
+loss was committed (`Menu` → `acknowledgeLossAndQuit()`, confirmed by "3 of 4 lives
+remaining" on the menu afterward) well inside 60 real seconds of the rewarded-ad grant.
+No interstitial presented — confirmed by an unchanged `AdActivity` launch count — exactly
+matching `RECENT_REWARDED` suppression, and this finish would otherwise plausibly have
+qualified (a Level loss, duration comfortably over the 20s floor). The 20s floor itself
+was already covered above. The 90s global gap was **not** independently demonstrated as a
+live `GLOBAL_GAP`-suppressed case — every gap check this session had already had enough
+real wall-clock time elapse (multi-minute UI navigation between rounds) that the decision
+was always `REQUEST` by the time a qualifying finish landed, which is itself a correct
+exercise of the same branch (`nowMillis - lastFullScreenAtMillis >= FULL_SCREEN_GAP_MILLIS`
+evaluating true), just not the suppressed half. Deliberately pacing two sub-90s qualifying
+finishes back-to-back to force the suppressed branch was judged not worth the additional
+emulator time this session, given `AdFrequencyCapTest`'s existing `GLOBAL_GAP` case already
+pins that exact branch in pure logic and the sibling `RECENT_REWARDED` branch (identical
+"early-return before the cadence/gap checks" shape) was just confirmed live above.
+
+*Multiplayer-finished native ad (item 3).* Re-verified deliberately, not reused from
+memory of the incidental iOS confirmation earlier today. Since testing against a second
+iOS Simulator wasn't readily available in this environment (no `idb`), a **second Android
+emulator** was used instead — the existing `Pixel_10` AVD directory was cloned
+(`~/.android/avd/Pixel_10_B.avd`, since no `avdmanager`/`cmdline-tools` were installed to
+create one the normal way) and its app data cleared (`pm clear`) before first launch so it
+authenticated as a genuinely distinct Firebase anonymous user, confirmed by comparing the
+two devices' logged UIDs. A real room (host on the original emulator, guest on the clone)
+was created, joined (the join failed once with the same generic
+"Multiplayer is unavailable." error the 2026-09-15 Android↔iOS session hit on its first
+attempt — see that note above — and succeeded on an immediate retry, consistent with that
+being connection-establishment flakiness on a just-launched client rather than a rules or
+protocol problem; not chased further since it's unrelated to Phase 7 and already understood
+context from that earlier session), played to a real 4-0 finish, and both clients showed
+`AdMobNativeAdView` in place of the card grid — device A "Test Ad : Google Ads", device B
+independently "Test Ad : Flood-It!" (different creatives, confirming each side loads its own
+native ad rather than sharing one). Both results were consistent (host "You won" 4-0,
+guest "You lost" 0-4). **Frequency-cap interaction, checked deliberately per this task's
+instruction, not just "did an ad appear":** `MultiplayerScreen.kt`/`MultiplayerViewModel`
+never call `AdsService.notifyGameFinished` — confirmed by code (no such call site exists
+in `feature/multiplayer/`) and empirically (the `AdActivity` launch count did not change
+across the multiplayer finish, and the native ad itself renders inline via `NativeAdView`,
+never through `AdActivity`). The multiplayer native placement is therefore correctly
+orthogonal to the interstitial frequency cap in both directions: finishing a multiplayer
+match doesn't consume or reset the interstitial cadence counter, and a pending interstitial
+cadence state has no bearing on whether the native ad shows. "Play again" was also
+exercised: the native ad correctly disappeared and the card grid returned the instant the
+room left `FINISHED` for a fresh `PLAYING` rematch, matching `MultiplayerGameBoard`'s
+`room.status == FINISHED` gate exactly.
+
+No source changes were made — the one edit this session (temporary `Log.d` diagnostics in
+`AdsService.kt`, used to resolve the `TOO_SHORT` false alarm above) was fully reverted
+before the session ended; `git diff` on the file is empty and `./gradlew testDebugUnitTest`
+(326 tests, unchanged) and `assembleDebug` were both re-run clean afterward. Test-only
+artifacts created for this session (the "Fast" custom memorama, the cloned `Pixel_10_B`
+AVD and its emulator process) were deleted before finishing, leaving both the app's
+on-device state and the host machine's AVD directory as they were found, apart from the
+Level 2 progress consumed by the deliberate mistake/loss testing above (one life spent,
+reflected honestly in "3 of 4 lives remaining").
+
+**Incidental finding, not fixed (out of scope for this session):** the onboarding
+difficulty picker (`Choose your pace`) renders `Difficulty.VERY_HARD` as the literal
+enum-derived string **"Very_hard"** instead of a translated `difficulty_very_hard`-style
+label, on a freshly-installed app before any game has been played. This is the same class
+of bug the 2026-09-14 emulator session found and fixed in `SettingsScreen.kt` (raw enum
+name bypassing the string catalog) — evidently that fix didn't cover every difficulty
+picker in the app, just the one in Settings. Confirmed live on two independent fresh
+installs (both emulators, this session). Left unfixed here per this task's explicit
+boundary against combining unrelated cleanup with the requested ads verification; flagged
+for a future session.
+
 ## 8. Immediate next steps
 
 1. ~~Verify the remaining boundary cases on an emulator or device — a season's day-boundary
@@ -1156,9 +1277,17 @@ unremembered `NavGraph.kt` back-stack entries), which remain outside this slice.
 4. Build the season-specific out-of-lives prompt the reconciliation note flags as
    deferred (Seasons currently just pops back to the map instead of endless's
    dedicated modal).
-5. On device/emulator, exercise the Phase 7 ad flows end to end — a completion
+5. ~~On device/emulator, exercise the Phase 7 ad flows end to end — a completion
    interstitial actually firing at the right cadence, both rewarded rescues, and the
-   multiplayer-finished native ad — none of which a JVM unit test can observe.
+   multiplayer-finished native ad — none of which a JVM unit test can observe.~~
+   **Done (2026-09-15)** — see the "Phase 7 ad-flow verification session" note under §7.
+   Cadence, the 20s floor, presentation/reload, both rewarded rescues, the 60s
+   post-rewarded suppression window, and the multiplayer native ad (including its
+   independence from the interstitial frequency cap) were all exercised live and found
+   correct; no bug, no source change. The 90s global gap was exercised only indirectly
+   (the same decision branch's REQUEST path fired correctly once the gap had genuinely
+   elapsed) rather than via a dedicated live SUPPRESSED demonstration — see the note for
+   why, and `AdFrequencyCapTest`'s existing `GLOBAL_GAP` case for the pure-logic pin.
 6. Decide whether `game_rewarded_extra_time`/`game_rewarded_hint` are worth their own
    new UI (a pause modal for the hint, a cross-mode lose-screen affordance for
    extra-time) before wiring them — see this session's Phase 7 implementation note for

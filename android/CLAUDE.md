@@ -151,10 +151,13 @@ gap is App Links (O1): `domemory.app` is unregistered, so the deep-link join pat
 session used is a fully supported, already-shipped alternative.
 Phase 7 has AdMob init, all nine placement units, banners, the completion interstitial,
 both Levels rewarded rescues (life, forgive-mistakes) and the multiplayer-finished native
-ad all wired and presenting through `AdsService`; `game_rewarded_extra_time`/
-`game_rewarded_hint` and app-open remain unwired — see `ANDROID_PLAN.md` §7's Phase 7
-implementation note for exactly why, before assuming either is a missed requirement
-rather than a deliberate seam.
+ad all wired and presenting through `AdsService`, **now confirmed live on an emulator**
+(cadence, the 20s floor, the 60s rewarded-suppression window, both rewarded rescues
+actually granting their reward, and the native ad's presentation and its independence
+from the interstitial frequency cap — see `ANDROID_PLAN.md` §7's 2026-09-15 "Phase 7
+ad-flow verification session" note); `game_rewarded_extra_time`/`game_rewarded_hint` and
+app-open remain unwired — see `ANDROID_PLAN.md` §7's Phase 7 implementation note for
+exactly why, before assuming either is a missed requirement rather than a deliberate seam.
 Phase 8 has What's New (version-gated dialog), haptics (`HapticsService`/`HapticIntent`,
 wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue
 moments only — no other screen yet), Play In-App Review (`AppReviews`, fired on a genuine
