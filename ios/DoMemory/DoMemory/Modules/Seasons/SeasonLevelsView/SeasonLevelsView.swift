@@ -15,6 +15,11 @@ struct SeasonLevelsView: View {
 
     @State private var viewModel: SeasonLevelsViewModel
     @State private var selectedLevel: Int?
+    /// See `LevelsView`: only a refill animates on the header, and a credit
+    /// sparkles over the star chip.
+    @State private var livesEffect: LivesRowEffect?
+    @State private var starsCredited = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Chooses between a season's light and dark artwork. `RemoteImage` is
     /// keyed on the URL, so flipping appearance swaps the picture, and both are
@@ -155,7 +160,9 @@ struct SeasonLevelsView: View {
                     // One daily budget and one wallet across endless Levels and
                     // every season, so both counters belong here too — losing a
                     // life in a season must not look like it came from nowhere.
-                    LivesRow(remaining: viewModel.livesRemaining, iconSize: 13)
+                    LivesRow(remaining: viewModel.livesRemaining, iconSize: 13, effect: livesEffect) {
+                        livesEffect = nil
+                    }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
                         .background(
@@ -163,10 +170,25 @@ struct SeasonLevelsView: View {
                                 .fill(Color.surfacePrimary)
                                 .overlay(Capsule().stroke(Color.surfaceBorder, lineWidth: 1))
                         )
+                        .onChange(of: viewModel.livesRemaining) { previous, current in
+                            if current > previous {
+                                livesEffect = LivesRowEffect.forTransition(from: previous, to: current)
+                            }
+                        }
 
                     HStack(spacing: 4) {
                         Image(systemName: "star.fill")
                             .foregroundStyle(Color.hardAmber)
+                            .overlay {
+                                if starsCredited && !reduceMotion {
+                                    LottieView(name: "star-sparkle", tint: Color.hardAmber) { starsCredited = false }
+                                        .frame(width: 56, height: 56)
+                                        .allowsHitTesting(false)
+                                }
+                            }
+                            .onChange(of: viewModel.starBalance) { previous, current in
+                                if current > previous { starsCredited = true }
+                            }
                         Text("\(viewModel.starBalance)")
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundStyle(Color.textPrimary)

@@ -21,6 +21,12 @@ struct LevelsView: View {
     @State private var selectedLevel: Int?
     @State private var showIntro = false
     @State private var introSource = "auto"
+    /// A refill playing over the header's hearts. Only a *gain* animates here:
+    /// a loss already broke its heart on the lose screen.
+    @State private var livesEffect: LivesRowEffect?
+    /// Sparkle over the star chip while a credit that just landed counts up.
+    @State private var starsCredited = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let introGate = LevelsIntroGate()
 
@@ -127,7 +133,9 @@ struct LevelsView: View {
                 // Shown to everyone, Remove-Ads purchasers included: the
                 // daily budget applies to them too, so hiding the counter
                 // would mean losing a life with no visible cause.
-                LivesRow(remaining: viewModel.livesRemaining, iconSize: 13)
+                LivesRow(remaining: viewModel.livesRemaining, iconSize: 13, effect: livesEffect) {
+                    livesEffect = nil
+                }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(
@@ -135,10 +143,25 @@ struct LevelsView: View {
                             .fill(Color.surfacePrimary)
                             .overlay(Capsule().stroke(Color.surfaceBorder, lineWidth: 1))
                     )
+                    .onChange(of: viewModel.livesRemaining) { previous, current in
+                        if current > previous {
+                            livesEffect = LivesRowEffect.forTransition(from: previous, to: current)
+                        }
+                    }
 
                 HStack(spacing: 4) {
                     Image(systemName: "star.fill")
                         .foregroundStyle(Color.hardAmber)
+                        .overlay {
+                            if starsCredited && !reduceMotion {
+                                LottieView(name: "star-sparkle", tint: Color.hardAmber) { starsCredited = false }
+                                    .frame(width: 56, height: 56)
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                        .onChange(of: viewModel.totalStars) { previous, current in
+                            if current > previous { starsCredited = true }
+                        }
                     Text("\(viewModel.totalStars)")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(Color.textPrimary)

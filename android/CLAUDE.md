@@ -71,7 +71,7 @@ graph in the same change.
 | `services/seasons` | `Season`, `SeasonDecoder`, `SeasonCatalogService`, `SeasonProgressService`, `SeasonLocaleResolver` — Phase 4, feature-complete |
 | `services/daily` | `DailyChallengeService` — deterministic board, streak/milestone tracking (Phase 5) |
 | `core/deeplink` | `DeepLink`, `DeepLinkRouter` — `domemory://daily` and `domemory://join/CODE` parsing and routing |
-| `feature/seasons`, `feature/daily` | `SeasonCard`/`SeasonLevelsScreen` and `DailyChallengeCard` — the menu entry points for Phases 4 and 5 |
+| `feature/seasons`, `feature/daily` | `SeasonCard`/`SeasonLevelsScreen`/`SeasonLevelsViewModel` (wires the endless-Levels lives gate into a season tile tap) and `DailyChallengeCard` — the menu entry points for Phases 4 and 5 |
 | `services/notifications`, `feature/notifications` | `NotificationService`, reminder workers and the once-per-install permission primer — the three local reminders and their OS-permission sync (Phase 5) |
 | `widget` | `DailyChallengeGlanceWidget`, receiver and calendar-aligned WorkManager refresh — the Daily Challenge home-screen widget (Phase 5) |
 | `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 in progress; create/join, invite sharing, QR rendering/scanning, gameplay, reconnect grace and rematch exist, while association deployment and live cross-platform verification remain follow-up work |
@@ -83,6 +83,9 @@ graph in the same change.
 | `feature/share` | `ShareResultCard.kt` — the pure `resultGridString`/`resultShareCaption`, the `ShareResultCardView` composable, and `shareResultCard()` (renders it to a `Bitmap` via `GraphicsLayer.toImageBitmap()` and launches an `ACTION_SEND` chooser through a new `FileProvider`) — Phase 8 complete; reached from `GameScreen.kt`'s win overlay only (Levels/Seasons out-of-lives and lose-screen surfaces have no share affordance, matching iOS's own Win-Modal-only placement) |
 | `services/share` | `PlayStoreLinks` — the one place the Play Store listing URL is built, shared by the Settings "Rate DoMemory" row and the share-card caption |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
+| `ui/lottie` | `BundledLottie` — plays a bundled Lottie JSON clip, mirroring iOS's `LottieView`; reads from a shared `assets/lottie/` at the repository root (an extra `assets.srcDir` in `app/build.gradle.kts`), the same JSON files iOS reaches through a `SupportingFiles/Lottie` symlink, so an animation cannot drift between platforms |
+| `ui/anim` | `ReduceMotion.kt` (`rememberReduceMotion`, the animator-duration-scale-off counterpart of iOS's `accessibilityReduceMotion`), `PressScale.kt`, `NumericTransition.kt` |
+| `ui/components` | `LivesRow` (the canonical hearts row, plays heart-break/heart-refill Lottie effects), `CompactCardLayout` (the shared icon-circle/title/badge layout `DailyChallengeCard` and `SeasonCard` both switch to when sharing the menu's card row, porting iOS's `CompactCardLayout`), `Pill`/capsule treatments |
 
 Everything else in the plan's package layout (`services/haptics`/`HapticIntent.fire`
 wiring beyond `feature/game/`'s own call sites, full `multiplayer/` feature gameplay UI)
@@ -179,6 +182,16 @@ already-wired season progress bar), all nine non-English resource tables, and
 is green across all ten locales — see `ANDROID_PLAN.md` §7's four Phase 8 implementation
 notes for the full mapping and what was deliberately left as a seam, including that the
 animation feel and real TalkBack behavior are compiled/tested only, never seen running.
+As of the 2026-09-15 sessions in `ANDROID_PLAN.md` §7, the win-screen confetti/star-pop
+Lottie clips are joined by six more (lose-modal hero, `LivesRow` heart-break/heart-refill,
+freeze-thaw, star-sparkle) reading from a repository-root `assets/lottie/` shared with iOS,
+and the endless Levels, Daily Challenge and Season Levels screens went through a visual-parity
+pass against the actual SwiftUI source — real vector icons via `material-icons-extended`, a
+restyled `OutOfLivesModal` now reused by Seasons (which previously had no lives gate at all),
+a real swipeable Levels intro carousel, and compact Daily/Season menu cards matching iOS's
+`CompactCardLayout`. Real-device verification of the new effects' feel, the out-of-lives modal
+on Seasons, and RTL/dark-mode rendering remain open — see §8.
+
 `ANDROID_PLAN.md` §7 contains the required handoff ledger: read it before starting
 Android work, update it when a migration slice changes state, and do not infer a feature
 is complete merely because its type or screen exists.

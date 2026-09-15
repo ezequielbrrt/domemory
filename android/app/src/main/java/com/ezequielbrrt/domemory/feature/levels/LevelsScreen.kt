@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,11 +23,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,11 +50,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,8 +71,12 @@ import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.ui.anim.pressScaleClickable
+import com.ezequielbrrt.domemory.ui.anim.rememberReduceMotion
+import com.ezequielbrrt.domemory.ui.components.LivesRow
+import com.ezequielbrrt.domemory.ui.lottie.BundledLottie
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
+import com.ezequielbrrt.domemory.ui.theme.Palette
 import kotlinx.coroutines.launch
 
 /**
@@ -84,7 +103,11 @@ fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
             LevelsHeader(
                 currentLevel = highest,
                 livesRemaining = uiState.livesRemaining,
+                livesEffect = uiState.livesEffect,
+                onLivesEffectFinished = viewModel::consumeLivesEffect,
                 starBalance = uiState.starBalance,
+                starsCredited = uiState.starsCredited,
+                onStarsCreditedFinished = viewModel::consumeStarsCredited,
                 onInfoClick = { HapticsService.fire(HapticIntent.TAP); viewModel.presentIntro() },
             )
             LazyVerticalGrid(
@@ -140,9 +163,12 @@ fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
             )
         }
 
-        if (uiState.showIntro) {
-            LevelsIntroDialog(onDismiss = viewModel::dismissIntro)
-        }
+        // uiState.showIntro itself is read one level up, in NavGraph.kt's Menu composable —
+        // not here. LevelsScreen is only ever composed as the Levels tab's *content*, below
+        // the Menu header, cards and tab row; iOS's own `.fullScreenCover(isPresented:
+        // $showIntro)` (LevelsView.swift) covers the *entire* screen, that chrome included,
+        // so LevelsIntroOverlay has to be a sibling of MenuScreen, not a child of this
+        // composable, or it would only ever cover the tab body underneath that chrome.
     }
 }
 
@@ -150,12 +176,15 @@ fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
 private fun LevelsHeader(
     currentLevel: Int,
     livesRemaining: Int,
+    livesEffect: LivesEffect?,
+    onLivesEffectFinished: () -> Unit,
     starBalance: Int,
+    starsCredited: Boolean,
+    onStarsCreditedFinished: () -> Unit,
     onInfoClick: () -> Unit,
 ) {
     val palette = LocalPalette.current
     val infoAccessibilityLabel = stringResource(R.string.levels_intro_info_accessibility)
-    val starBalanceAccessibilityLabel = stringResource(R.string.levels_star_balance_format, starBalance)
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -168,11 +197,14 @@ private fun LevelsHeader(
                     style = DoMemoryType.display(20),
                     color = palette.textPrimary,
                 )
+                // SF Symbol `questionmark.circle` (LevelsView.swift) — a real vector icon
+                // rather than the bare "?" glyph this used before material-icons-extended
+                // was added (spec 14.3's "map each SF Symbol to a Material Symbol").
                 IconButton(
                     onClick = onInfoClick,
                     modifier = Modifier.semantics { contentDescription = infoAccessibilityLabel },
                 ) {
-                    Text("?", fontWeight = FontWeight.Bold, color = palette.textSecondary)
+                    Icon(Icons.AutoMirrored.Outlined.HelpOutline, contentDescription = null, tint = palette.textSecondary)
                 }
             }
             Text(
@@ -182,52 +214,50 @@ private fun LevelsHeader(
             )
         }
         Column(horizontalAlignment = Alignment.End) {
-            LevelLivesRow(livesRemaining)
+            // Matches iOS's LevelsView.swift header: the lives row gets the same pill
+            // treatment as the star counter beside it, not a bare row of glyphs. Carries
+            // the heart-break/refill Lottie effect (spec 14.4 polish, `1dc9282`'s
+            // "LivesRow effects on both platforms").
+            LivesPill(livesRemaining, effect = livesEffect, onEffectFinished = onLivesEffectFinished)
             Spacer(Modifier.size(6.dp))
-            // Spec 14.5: "the star balance announces 'N stars available'" — the visible glyph
-            // ("★ 12") stays compact, but a screen reader gets the full sentence instead.
-            Pill(text = "★ $starBalance", accessibilityLabel = starBalanceAccessibilityLabel)
+            StarBalancePill(starBalance, credited = starsCredited, onCreditedFinished = onStarsCreditedFinished)
         }
     }
 }
 
-/** Matches iOS's [LivesRow]: a compact row of filled and outline heart glyphs. */
+/**
+ * [com.ezequielbrrt.domemory.ui.components.LivesRow] wrapped in the same capsule pill as
+ * the star counter (`LevelsView.swift:130-137`: `LivesRow` inside a `Capsule` filled
+ * `surfacePrimary`, stroked `surfaceBorder`). Shared by the endless map and the season map.
+ */
 @Composable
-private fun LevelLivesRow(
+fun LivesPill(
     remaining: Int,
     total: Int = LevelLivesService.MAX_LIVES,
+    effect: LivesEffect? = null,
+    onEffectFinished: (() -> Unit)? = null,
 ) {
-    val palette = LocalPalette.current
-    val accessibilityLabel = stringResource(R.string.levels_lives_remaining_format, remaining, total)
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.clearAndSetSemantics {
-            contentDescription = accessibilityLabel
-        },
-    ) {
-        repeat(total) { index ->
-            Text(
-                text = if (index < remaining) "♥" else "♡",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = if (index < remaining) {
-                    palette.secondary
-                } else {
-                    palette.textSecondary.copy(alpha = 0.3f)
-                },
-            )
-        }
-    }
-}
-
-@Composable
-private fun Pill(text: String, accessibilityLabel: String? = null) {
     val palette = LocalPalette.current
     Surface(
         shape = RoundedCornerShape(50),
         color = palette.surfacePrimary,
-        border = androidx.compose.foundation.BorderStroke(1.dp, palette.surfaceBorder),
+        border = BorderStroke(1.dp, palette.surfaceBorder),
+    ) {
+        Box(Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
+            LivesRow(remaining = remaining, total = total, effect = effect, onEffectFinished = onEffectFinished)
+        }
+    }
+}
+
+/** A capsule pill of plain text, e.g. a season's `cleared / total` progress. Public so the
+ * season map can reuse the exact same treatment as the endless map. */
+@Composable
+fun Pill(text: String, accessibilityLabel: String? = null) {
+    val palette = LocalPalette.current
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = palette.surfacePrimary,
+        border = BorderStroke(1.dp, palette.surfaceBorder),
         modifier = if (accessibilityLabel != null) {
             Modifier.semantics { contentDescription = accessibilityLabel }
         } else {
@@ -236,11 +266,56 @@ private fun Pill(text: String, accessibilityLabel: String? = null) {
     ) {
         Text(
             text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = palette.textPrimary,
         )
+    }
+}
+
+/**
+ * The star-balance pill (`LevelsView.swift`'s trailing "★ N" capsule): a star glyph, a
+ * sparkle Lottie clip that plays over it on a credit (never a spend — `1dc9282`'s
+ * "star-sparkle over the header star chip on a credit"), and the count. Public so the
+ * season map's identical wallet-balance pill can reuse it.
+ */
+@Composable
+fun StarBalancePill(balance: Int, credited: Boolean = false, onCreditedFinished: (() -> Unit)? = null) {
+    val palette = LocalPalette.current
+    val reduceMotion = rememberReduceMotion()
+    val accessibilityLabel = stringResource(R.string.levels_star_balance_format, balance)
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = palette.surfacePrimary,
+        border = BorderStroke(1.dp, palette.surfaceBorder),
+        // Spec 14.5: "the star balance announces 'N stars available'" — the visible glyph
+        // ("★ 12") stays compact, but a screen reader gets the full sentence instead.
+        modifier = Modifier.semantics { contentDescription = accessibilityLabel },
+    ) {
+        Row(
+            Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Star, contentDescription = null, tint = palette.hardAmber, modifier = Modifier.size(14.dp))
+                if (credited && !reduceMotion) {
+                    BundledLottie(
+                        name = "star-sparkle",
+                        tint = palette.hardAmber,
+                        modifier = Modifier.size(40.dp),
+                        onFinished = onCreditedFinished,
+                    )
+                }
+            }
+            Text(
+                balance.toString(),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = palette.textPrimary,
+            )
+        }
     }
 }
 
@@ -324,26 +399,51 @@ fun LevelTile(
                     .pressScaleClickable(enabled = unlocked, onClick = onClick),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = if (unlocked) level.toString() else "🔒",
-                    fontSize = if (isCurrent) 26.sp else 24.sp,
-                    fontWeight = if (isCurrent) FontWeight.Black else FontWeight.Bold,
-                    color = foreground,
-                )
+                if (unlocked) {
+                    Text(
+                        text = level.toString(),
+                        fontSize = if (isCurrent) 26.sp else 24.sp,
+                        fontWeight = if (isCurrent) FontWeight.Black else FontWeight.Bold,
+                        color = foreground,
+                    )
+                } else {
+                    // SF Symbol `lock.fill` (LevelMapView.swift:189-192) — a real vector icon
+                    // rather than the "🔒" emoji glyph this used before material-icons-extended
+                    // was added.
+                    Icon(
+                        Icons.Filled.Lock,
+                        contentDescription = null,
+                        tint = foreground,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
         }
-        Text(
-            text = if (stars > 0) "★".repeat(stars) else "",
+        // Matches iOS's `starsRow` (LevelMapView.swift:213-226): always 3 slots, filled
+        // (hardAmber) vs. muted-outline, so a 1-star clear still reads as "out of 3"
+        // instead of a single lonely star.
+        Row(
             modifier = Modifier.height(14.dp),
-            fontSize = 11.sp,
-            color = palette.hardAmber,
-        )
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            if (stars > 0) {
+                repeat(3) { index ->
+                    Icon(
+                        Icons.Filled.Star,
+                        contentDescription = null,
+                        tint = if (index < stars) palette.hardAmber else palette.textSecondary.copy(alpha = 0.3f),
+                        modifier = Modifier.size(11.dp),
+                    )
+                }
+            }
+        }
     }
 }
 
-/** Shown from the level map when tapping a tile with no lives left today (spec 7.4). */
+/** Shown from the level map when tapping a tile with no lives left today (spec 7.4).
+ * Public so the season map (Phase 3) can reuse it verbatim. */
 @Composable
-private fun OutOfLivesModal(
+fun OutOfLivesModal(
     starBalance: Int,
     canWatchAd: Boolean,
     onWatchAd: () -> Unit,
@@ -356,19 +456,23 @@ private fun OutOfLivesModal(
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = palette.surfacePrimary,
-            border = androidx.compose.foundation.BorderStroke(1.dp, palette.surfaceBorder),
+            border = BorderStroke(1.dp, palette.surfaceBorder),
         ) {
             Column(
-                Modifier.padding(28.dp),
+                Modifier.padding(28.dp).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text("💔", fontSize = 40.sp)
+                Text("💔", fontSize = 56.sp)
+                Spacer(Modifier.height(12.dp))
                 Text(
                     stringResource(R.string.levels_out_of_lives_title),
-                    style = DoMemoryType.display(20),
+                    style = DoMemoryType.display(22),
                     color = palette.textPrimary,
+                    textAlign = TextAlign.Center,
                 )
+                Spacer(Modifier.height(12.dp))
+                LivesRow(remaining = 0)
+                Spacer(Modifier.height(12.dp))
                 Text(
                     // Message text mirrors whether a rewarded-ad refill is actually on offer
                     // (spec 7.4) rather than always assuming the star-only wording.
@@ -377,80 +481,195 @@ private fun OutOfLivesModal(
                         else R.string.levels_out_of_lives_message_no_ad,
                     ),
                     color = palette.textSecondary,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
                 )
-                if (canWatchAd) {
-                    Button(
-                        onClick = onWatchAd,
-                        colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
-                    ) {
-                        Text(stringResource(R.string.levels_watch_ad_for_life))
+                Spacer(Modifier.height(28.dp))
+                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    if (canWatchAd) {
+                        Button(
+                            onClick = onWatchAd,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(50),
+                            contentPadding = PaddingValues(vertical = 16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = palette.hardAmber),
+                        ) {
+                            Text(
+                                stringResource(R.string.levels_watch_ad_for_life),
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                            )
+                        }
                     }
-                }
-                if (canBuyWithStars) {
-                    Button(
-                        onClick = onBuyWithStars,
-                        colors = ButtonDefaults.buttonColors(containerColor = palette.hardAmber),
-                    ) {
-                        Text(stringResource(R.string.levels_buy_life_format, LevelPowerUp.LIFE_COST))
+                    if (canBuyWithStars) {
+                        OutlinedButton(
+                            onClick = onBuyWithStars,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(50),
+                            contentPadding = PaddingValues(vertical = 16.dp),
+                            border = BorderStroke(1.5.dp, palette.hardAmber.copy(alpha = 0.5f)),
+                        ) {
+                            Text(
+                                stringResource(R.string.levels_buy_life_format, LevelPowerUp.LIFE_COST),
+                                fontWeight = FontWeight.Bold,
+                                color = palette.hardAmber,
+                            )
+                        }
                     }
-                }
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.common_cancel), color = palette.primary)
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(50),
+                        contentPadding = PaddingValues(vertical = 16.dp),
+                        border = BorderStroke(1.5.dp, palette.primary.copy(alpha = 0.4f)),
+                    ) {
+                        Text(
+                            stringResource(R.string.common_cancel),
+                            fontWeight = FontWeight.SemiBold,
+                            color = palette.primary,
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-/** The 4-slide one-shot intro carousel (spec 7.9), reachable again from the map's info
- * button. A simple stacked layout today rather than a swipeable pager — the paging
- * gesture and slide transitions are presentation polish tracked separately from the
- * one-shot gating logic this exists to exercise. */
+/** One slide of [LevelsIntroOverlay]: a big tinted circle + icon, a heavy title and a
+ * muted subtitle, matching iOS's `IntroSlideView` (`IntroCarouselView.swift:80-115`). */
+private data class LevelIntroSlideSpec(
+    val icon: ImageVector,
+    val color: (Palette) -> Color,
+    val titleRes: Int,
+)
+
+private val levelIntroSlides = listOf(
+    LevelIntroSlideSpec(Icons.Filled.EmojiEvents, { it.easyGreen }, R.string.levels_intro_progress_title),
+    LevelIntroSlideSpec(Icons.Filled.Star, { it.hardAmber }, R.string.levels_intro_stars_title),
+    LevelIntroSlideSpec(Icons.Filled.Favorite, { it.secondary }, R.string.levels_intro_lives_title),
+    // Neutral primary rather than the success green — a green X reads as "you passed",
+    // the opposite of what this slide teaches (mirrors IntroCarouselView.swift's own comment).
+    LevelIntroSlideSpec(Icons.Filled.Cancel, { it.primary }, R.string.levels_intro_mistakes_title),
+)
+
+/**
+ * A full-screen, swipeable 4-slide carousel (spec 7.9), reachable again from the map's
+ * info button. Rebuilt to match iOS's `IntroCarouselView.swift` exactly: a paged
+ * `HorizontalPager` with dot indicators, a Skip button top-right, and a full-width
+ * capsule Next/Done button — replacing the earlier static stacked-dialog placeholder.
+ *
+ * Public, and deliberately **not** called from [LevelsScreen] itself: iOS presents this
+ * with `.fullScreenCover`, which covers the whole screen — Menu's header, cards and tab
+ * row included — not just the Levels tab's own content area. `NavGraph.kt`'s Menu
+ * composable renders this as a sibling of `MenuScreen`, the same way it layers
+ * `NotificationPrimerHost`, to get that same true full-screen coverage.
+ */
 @Composable
-private fun LevelsIntroDialog(onDismiss: () -> Unit) {
+fun LevelsIntroOverlay(onDismiss: () -> Unit) {
     val palette = LocalPalette.current
-    Box(Modifier.fillMaxSize().background(palette.overlayBackdrop), contentAlignment = Alignment.Center) {
-        Surface(
-            shape = RoundedCornerShape(28.dp),
-            color = palette.surfacePrimary,
-            border = androidx.compose.foundation.BorderStroke(1.dp, palette.surfaceBorder),
-        ) {
-            Column(
-                Modifier.padding(24.dp).fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+    val pagerState = rememberPagerState(pageCount = { levelIntroSlides.size })
+    val coroutineScope = rememberCoroutineScope()
+    val isLastPage = pagerState.currentPage == levelIntroSlides.size - 1
+
+    Box(Modifier.fillMaxSize().background(palette.appBackground)) {
+        Column(Modifier.fillMaxSize()) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.End,
             ) {
-                IntroSlideText(
-                    stringResource(R.string.levels_intro_progress_title),
-                    stringResource(R.string.levels_intro_progress_subtitle),
-                )
-                IntroSlideText(
-                    stringResource(R.string.levels_intro_stars_title),
-                    stringResource(R.string.levels_intro_stars_subtitle),
-                )
-                IntroSlideText(
-                    stringResource(R.string.levels_intro_lives_title),
-                    stringResource(R.string.levels_intro_lives_subtitle, 4),
-                )
-                IntroSlideText(
-                    stringResource(R.string.levels_intro_mistakes_title),
-                    stringResource(R.string.levels_intro_mistakes_subtitle),
-                )
-                Button(
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
-                ) {
-                    Text(stringResource(R.string.levels_intro_done))
+                TextButton(onClick = { HapticsService.fire(HapticIntent.TAP); onDismiss() }) {
+                    Text(
+                        stringResource(R.string.intro_skip),
+                        color = palette.textSecondary,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                 }
+            }
+
+            HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
+                LevelIntroSlideView(levelIntroSlides[page])
+            }
+
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                repeat(levelIntroSlides.size) { index ->
+                    val selected = index == pagerState.currentPage
+                    Box(
+                        Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(if (selected) 8.dp else 6.dp)
+                            .background(if (selected) palette.primary else palette.surfaceBorder, CircleShape),
+                    )
+                }
+            }
+
+            Button(
+                onClick = {
+                    if (isLastPage) {
+                        HapticsService.fire(HapticIntent.TAP)
+                        onDismiss()
+                    } else {
+                        HapticsService.fire(HapticIntent.SELECT)
+                        coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 32.dp),
+                shape = RoundedCornerShape(50),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
+            ) {
+                Text(
+                    if (isLastPage) stringResource(R.string.levels_intro_done) else stringResource(R.string.intro_next),
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                )
             }
         }
     }
 }
 
 @Composable
-private fun IntroSlideText(title: String, subtitle: String) {
+private fun LevelIntroSlideView(spec: LevelIntroSlideSpec) {
     val palette = LocalPalette.current
-    Column {
-        Text(title, style = DoMemoryType.display(16), color = palette.textPrimary)
-        Text(subtitle, fontSize = 13.sp, color = palette.textSecondary)
+    val color = spec.color(palette)
+    val subtitle = levelIntroSubtitle(spec.titleRes)
+    Column(
+        Modifier.fillMaxSize().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Box(
+            Modifier.size(140.dp).background(color.copy(alpha = 0.15f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(spec.icon, contentDescription = null, tint = color, modifier = Modifier.size(60.dp))
+        }
+        Spacer(Modifier.height(24.dp))
+        Text(
+            stringResource(spec.titleRes),
+            style = DoMemoryType.display(26),
+            color = palette.textPrimary,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            subtitle,
+            color = palette.textSecondary,
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center,
+            lineHeight = 22.sp,
+        )
     }
+}
+
+/** Each slide's subtitle string, keyed off its title resource — kept as one `when` so the
+ * lives slide's `%d` (max daily lives) stays next to the title it belongs to. */
+@Composable
+private fun levelIntroSubtitle(titleRes: Int): String = when (titleRes) {
+    R.string.levels_intro_progress_title -> stringResource(R.string.levels_intro_progress_subtitle)
+    R.string.levels_intro_stars_title -> stringResource(R.string.levels_intro_stars_subtitle)
+    R.string.levels_intro_lives_title -> stringResource(R.string.levels_intro_lives_subtitle, LevelLivesService.MAX_LIVES)
+    else -> stringResource(R.string.levels_intro_mistakes_subtitle)
 }

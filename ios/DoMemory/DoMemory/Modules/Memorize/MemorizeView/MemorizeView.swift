@@ -13,6 +13,11 @@ struct MemorizeView: View {
     @State private var hasPreparedGame = false
     @State private var purchaseService = PurchaseService.shared
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// The ice-shatter burst over the timer chip when a Freeze runs out. The
+    /// clock restarting is otherwise easy to miss — the number just starts
+    /// moving again — which is why a haptic already marks the moment.
+    @State private var showThaw = false
 
     init(viewModel: MemorizeViewModel, gameStartSource: String = "initial") {
         self._viewModel = State(initialValue: viewModel)
@@ -116,6 +121,17 @@ struct MemorizeView: View {
                         ? Strings.timerFrozenFormat(viewModel.timeRemaining)
                         : "\(viewModel.timeRemaining)")
                     .animation(.easeInOut(duration: 0.2), value: viewModel.isFrozen)
+                    .overlay {
+                        if showThaw {
+                            LottieView(name: "freeze-thaw", tint: Color.freezeBlue) { showThaw = false }
+                                .frame(width: 96, height: 96)
+                                .allowsHitTesting(false)
+                                .accessibilityHidden(true)
+                        }
+                    }
+                    .onChange(of: viewModel.isFrozen) { wasFrozen, isFrozen in
+                        if wasFrozen && !isFrozen && !reduceMotion { showThaw = true }
+                    }
 
                     Spacer()
 

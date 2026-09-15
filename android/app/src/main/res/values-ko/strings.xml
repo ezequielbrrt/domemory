@@ -4,6 +4,7 @@
     <!-- Common -->
     <string name="common_accept">수락</string>
     <string name="common_app_name">DoMemory</string>
+    <string name="common_back">뒤로</string>
     <string name="common_cancel">취소</string>
     <string name="common_delete">삭제</string>
     <string name="common_ok">확인</string>

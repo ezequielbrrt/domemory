@@ -4,6 +4,7 @@
     <!-- Common -->
     <string name="common_accept">接受</string>
     <string name="common_app_name">DoMemory</string>
+    <string name="common_back">返回</string>
     <string name="common_cancel">取消</string>
     <string name="common_delete">删除</string>
     <string name="common_ok">确定</string>

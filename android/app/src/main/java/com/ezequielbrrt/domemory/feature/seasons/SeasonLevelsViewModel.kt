@@ -1,12 +1,13 @@
-package com.ezequielbrrt.domemory.feature.levels
+package com.ezequielbrrt.domemory.feature.seasons
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ezequielbrrt.domemory.feature.levels.LivesEffect
+import com.ezequielbrrt.domemory.feature.levels.livesEffect
+import com.ezequielbrrt.domemory.feature.levels.starsCredited
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
-import com.ezequielbrrt.domemory.services.levels.LevelProgressService
-import com.ezequielbrrt.domemory.services.levels.LevelsIntroGate
 import com.ezequielbrrt.domemory.services.levels.StarWalletService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,22 +17,29 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Thin wrapper over [LevelProgressService] / [LevelLivesService] / [StarWalletService]
- * for `LevelsScreen` — mirrors iOS's `LevelsViewModel`. The one rule this exists to make
- * testable without Compose: [attemptStart] is the spec 7.4 gate that must refuse to
- * start a level attempt at 0 daily lives, surfacing the out-of-lives prompt instead.
+ * The season-map counterpart of [com.ezequielbrrt.domemory.feature.levels.LevelsViewModel]
+ * (spec 7.4, mirrored for Seasons at spec 9.1's "one daily budget and one wallet across
+ * endless Levels and every season"). iOS's `SeasonLevelsView.swift` gates a tile tap on
+ * `hasLivesRemaining` exactly the way `LevelsView.swift` does and shows the identical
+ * `OutOfLivesModal` on a refusal — this class exists so Android's season map can do the
+ * same instead of starting every tile tap unconditionally (the gap `ANDROID_PLAN.md`'s
+ * 2026-09-15 haptics entry names as "a separate, still-open item, §8 item 4").
+ *
+ * Also carries the same header Lottie-effect state
+ * [com.ezequielbrrt.domemory.feature.levels.LevelsViewModel] does (`1dc9282`'s heart-break/
+ * refill and star-sparkle work) — iOS's `SeasonLevelsView.swift` wires the identical
+ * `livesEffect`/`starsCredited` pair on its own lives/star pills, so the season map would
+ * otherwise be the one place in the app where a life refill or star credit lands silently.
+ *
+ * [lives] and [wallet] are the same app-wide singletons
+ * [com.ezequielbrrt.domemory.feature.levels.LevelsViewModel] uses — there is no
+ * season-specific lives or star concept, only a season-specific *progress* one (tracked
+ * separately by [SeasonLevelProgressStore]/[SeasonProgressService]).
  */
-class LevelsViewModel(
-    private val progress: LevelProgressService,
+class SeasonLevelsViewModel(
     private val lives: LevelLivesService,
     private val wallet: StarWalletService,
-    private val introGate: LevelsIntroGate,
     private val scope: CoroutineScope? = null,
-    // Android counterpart of iOS's `LevelsView.onSelect` (`.select`/`.warning`) and
-    // `LevelsViewModel.buyLifeWithStars`/`watchAdForLife` (`.reward`) — see this class's own
-    // call sites below for the exact mapping. Bare callback, not a `HapticsService` reference,
-    // for the same reason `GameViewModel.onHaptic` is: this class stays Android-framework-free
-    // so it can be constructed and tested with no `HapticsService.initialize` ever having run.
     private val onHaptic: ((HapticIntent) -> Unit)? = null,
 ) : ViewModel() {
 
@@ -39,18 +47,14 @@ class LevelsViewModel(
         val livesRemaining: Int = LevelLivesService.MAX_LIVES,
         val starBalance: Int = 0,
         val showOutOfLivesPrompt: Boolean = false,
-        val showIntro: Boolean = false,
-        /** A one-shot heart animation the header owes the player; see [HeaderEffects.kt]. */
+        /** A one-shot heart animation the header owes the player; see `HeaderEffects.kt`. */
         val livesEffect: LivesEffect? = null,
         /** Sparkle over the star chip for a credit that just landed; never for a spend. */
         val starsCredited: Boolean = false,
     )
 
-    /**
-     * Whether [refresh] has populated the counters at least once. The defaults above are
-     * placeholders, not a real previous state — comparing against them would break a heart
-     * on the very first screen entry of a day with 2 lives left.
-     */
+    /** Whether [refresh] has populated the counters at least once — see
+     * [com.ezequielbrrt.domemory.feature.levels.LevelsViewModel]'s identical guard. */
     private var hasLoadedCounters = false
 
     /** Clears a played heart effect so it does not replay on the next recomposition. */
@@ -80,25 +84,14 @@ class LevelsViewModel(
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    /** Live progress revision, so the tile grid recomposes as stars/unlocks arrive. */
-    val progressRevision get() = progress.revision
-
-    val highestUnlockedLevel: Int get() = progress.highestUnlockedLevel
-    fun stars(level: Int): Int = progress.stars(level)
-    fun isUnlocked(level: Int): Boolean = progress.isUnlocked(level)
-
     init {
         refresh()
-        presentIntroIfNeeded()
     }
 
-    /** Call after returning from a game so newly-earned stars/unlocks and the lives
-     * count show up (mirrors iOS's `LevelsView.onDisappear { viewModel.refresh() }`). */
+    /** Call after returning from a game so newly-spent lives/stars show up the moment the
+     * player is back on the season map (mirrors iOS's `SeasonLevelsView.onDisappear`). */
     fun refresh() {
         workScope.launch {
-            // wallet.refresh(), not wallet.balance.value: a level win credits the wallet
-            // directly through UserPreferences (LevelProgressService.recordCompletion),
-            // so this cache can be stale until something explicitly re-pulls it.
             val starBalance = wallet.refresh()
             val livesRemaining = lives.remaining()
             _uiState.update { it.withCounters(livesRemaining = livesRemaining, starBalance = starBalance) }
@@ -106,37 +99,16 @@ class LevelsViewModel(
         }
     }
 
-    private fun presentIntroIfNeeded() {
-        workScope.launch {
-            if (introGate.shouldPresent()) _uiState.update { it.copy(showIntro = true) }
-        }
-    }
-
-    /** Reopens the one-shot intro from the map header's info button. */
-    fun presentIntro() {
-        _uiState.update { it.copy(showIntro = true) }
-    }
-
-    /** Persisted on dismissal, not on presentation — a kill mid-intro leaves the player
-     * eligible to see it again (spec 7.9). */
-    fun dismissIntro() {
-        workScope.launch {
-            introGate.markSeen()
-            _uiState.update { it.copy(showIntro = false) }
-        }
-    }
-
     /**
-     * The spec 7.4 gate: a player with 0 daily lives may not start a level attempt.
-     * Returns true when the caller should navigate into the level; on a refusal it
-     * surfaces the out-of-lives prompt instead and returns false.
+     * The spec 7.4 gate, applied to season play too: a player with 0 daily lives may not
+     * start a season-level attempt. Returns true when the caller should navigate into the
+     * level; on a refusal it surfaces the out-of-lives prompt instead and returns false —
+     * mirrors iOS's `SeasonLevelsView.onSelect` exactly.
      */
     suspend fun attemptStart(level: Int): Boolean {
         val remaining = lives.remaining()
         _uiState.update { it.copy(livesRemaining = remaining) }
         if (remaining <= 0) {
-            // Refusal, not a selection — mirrors iOS's LevelsView.onSelect: "the modal
-            // that follows is bad news."
             onHaptic?.invoke(HapticIntent.WARNING)
             _uiState.update { it.copy(showOutOfLivesPrompt = true) }
             return false
@@ -150,13 +122,12 @@ class LevelsViewModel(
     }
 
     /** Not gated on the Remove-Ads entitlement — the daily budget applies to purchasers
-     * too (spec 7.4). */
+     * too (spec 7.4), season play included. */
     fun buyLifeWithStars() {
         workScope.launch {
             if (wallet.spend(LevelPowerUp.LIFE_COST)) {
                 // Mirrors iOS's own comment on the equivalent button: "emits .reward on the
-                // spend; a .tap here would double-buzz" — the composable's Buy-with-stars
-                // button fires nothing of its own.
+                // spend; a .tap here would double-buzz."
                 onHaptic?.invoke(HapticIntent.REWARD)
                 lives.refill(1)
                 val livesRemaining = lives.remaining()
@@ -169,16 +140,10 @@ class LevelsViewModel(
         }
     }
 
-    /**
-     * Ad-earned equivalent of [buyLifeWithStars] — no star spend, the ad already paid for
-     * it. The composable layer calls this from a rewarded ad's earned-reward callback
-     * (`AdsService.showRewarded`), never directly from a tap.
-     */
+    /** Ad-earned equivalent of [buyLifeWithStars] — the composable layer calls this from a
+     * rewarded ad's earned-reward callback, never directly from a tap. */
     fun applyLifeRewardFromAd() {
         workScope.launch {
-            // Mirrors iOS's watchAdForLife rewardHandler: fires .reward the moment the ad
-            // actually pays out, not on the watch-ad button tap itself (that TAP lives at
-            // the composable call site, before the ad even starts).
             onHaptic?.invoke(HapticIntent.REWARD)
             lives.refill(1)
             val livesRemaining = lives.remaining()

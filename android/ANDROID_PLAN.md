@@ -1352,20 +1352,90 @@ purely a call-site-wiring slice, not an enum change.
   are confirmed. Wiring correctness (which screen fires which intent, in what order, gated
   correctly) is what's actually verified here, not the vibration motor.
 
+**Shared Lottie effects, 2026-09-15.** Cross-platform commit (`1dc9282`, co-authored
+`Claude Fable 5.1`) moving the two hand-authored win-screen clips (confetti burst, staggered
+star pop — already live on both platforms) to a new shared `assets/lottie/` at the repository
+root, reached by iOS through a `SupportingFiles/Lottie` symlink and by Android through an
+extra `assets.srcDir` in `app/build.gradle.kts`, so one JSON file per animation serves both
+apps and the two cannot drift on frame count, colour or timing. Added `lottie-compose` 6.7.1,
+a new `ui/lottie/BundledLottie.kt` wrapper mirroring iOS's `LottieView`, and
+`ui/anim/ReduceMotion.kt` (`rememberReduceMotion`, reading the system animator-duration-scale
+setting) as the Android counterpart of `accessibilityReduceMotion`. Six new clips, generated
+via `assets/lottie/generate_animations.py` and tinted at runtime through a shared `**.tint`
+keypath so one file serves light and dark: a lose-modal hero (clock-crack on timeout, x-shake
+on a mistake bust; reduce-motion keeps the static face), heart-break/heart-refill on the new
+canonical `ui/components/LivesRow.kt` (fired on both the endless and season map headers, since
+Android's lose overlay shows no hearts and defers the spend, unlike iOS which also breaks a
+heart on its lose modal), a freeze-thaw ice-shatter over the timer chip, and a star-sparkle
+over the header star chip on a credit only, never a spend. `LevelsViewModel.UiState` now
+carries `livesEffect`/`starsCredited`, never populated on a screen's first load. New tests:
+`WinStarSlotTest`, `HeaderEffectsTest`, `LevelsViewModelEffectsTest`, `LottieAssetsTest`
+(every clip decodes, stays under a second, exposes its tint shape name).
+
+**Levels/Daily Challenge/Seasons visual-parity pass, 2026-09-15.** Closed the visual gap
+between these three Android screens and shipping iOS, read against the actual SwiftUI source
+rather than the spec's prose (`LevelMapView`/`LevelsView`/`OutOfLivesModal`/`IntroCarouselView`
+under `ios/DoMemory/DoMemory/Modules/Levels/`, `SeasonLevelsView.swift`, and the
+`DailyChallengeCard`/`CompactDailyChallengeCard`/`SeasonCard`/`CompactCardLayout` private
+structs in `MenuView.swift`). Added `material-icons-extended` for real vector icons (lock,
+help-outline, verified, back arrow) replacing emoji/text glyphs on these three screens.
+
+- `LevelTile`: cleared tiles now always show all 3 star slots (filled vs. muted-outline),
+  matching `LevelMapView.swift` — a 1-star clear no longer reads as a lone star. Lock glyph is
+  a real icon. Lives pill gets the same `Pill`/capsule treatment the star counter already had.
+- `OutOfLivesModal` rebuilt to match `OutOfLivesModal.swift`: embeds a 0-lives `LivesRow`,
+  full-width capsule buttons instead of default Material buttons.
+- Levels intro rebuilt as a real full-screen swipeable `HorizontalPager` (4 slides, icon
+  circles, dot indicators, Skip button), replacing the earlier static stacked-dialog
+  placeholder — closes the gap this file's own prior comment flagged as deferred "presentation
+  polish." Hoisted to `NavGraph.kt`'s Menu composable (same pattern as
+  `NotificationPrimerHost`) so it covers the full screen, matching iOS's `.fullScreenCover`,
+  instead of only the Levels tab's content area.
+- **Season out-of-lives gate built** (closes item 2 below): new `SeasonLevelsViewModel` wires
+  the spec 7.4 lives check into a season tile tap, reusing the same restyled
+  `OutOfLivesModal`. The season map's tiles were previously tappable with no lives check at
+  all. Also added the header's lives/star pills (previously absent — only a cumulative star
+  count sat inline next to the progress text, which was itself the wrong metric; the header
+  now shows the spendable wallet balance, matching iOS), a visible back button
+  (transparent-over-artwork / opaque otherwise, matching iOS's nav-bar toggle — there was
+  previously no in-app back affordance), and a restyled completion banner (tinted/bordered
+  card with a seal icon, replacing two bare text lines).
+- **Compact Daily Challenge/Season cards built** (closes the "compact Daily-card layout" part
+  of item 6 below): new shared `ui/components/CompactCardLayout.kt` ports iOS's
+  `CompactCardLayout` literally (icon circle → title → badge, including the leading→trailing
+  artwork gradient for text legibility). `DailyChallengeCard` now branches full vs. compact
+  exactly like `MenuView.swift` — previously it was one flat, uncoloured card in both states,
+  with no icon and a plain-text badge instead of a pill. `SeasonCard`'s badge now shows
+  `cleared / total`/"Complete" (the correct per-`MenuView.swift` metric) instead of
+  days-remaining, which belongs on the season screen's own header, not the menu card.
+
+Verification: `./gradlew testDebugUnitTest` 374/374 passing (7 new: `SeasonLevelsViewModelTest`
+— lives gate allow/refuse, haptics, buy-with-stars, ad-granted reward, first-load-never-animates
+effect state), `assembleDebug` succeeds, and an on-device `Pixel_10` (API 37) smoke test
+confirmed the compact menu cards, the Levels header pills/lock icon/3-star rows/tile pulse, the
+Season Levels back arrow/header pills/full-bleed artwork, and the full-screen swipeable intro
+carousel (catching and fixing the full-screen-coverage bug above). **Not verified:** the
+out-of-lives modal's actual on-screen appearance (would need spending down to 0 lives on
+device) and RTL/dark-mode-specific rendering of the new components.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links
    association files, then verify a shared invite link opens directly into the join flow.
-2. Build the Season-specific out-of-lives prompt so it matches the endless Levels recovery
-   flow rather than returning directly to the map.
+2. ~~Build the Season-specific out-of-lives prompt~~ — done, 2026-09-15 (see above).
 3. `game_rewarded_hint` is now wired from a pause sheet available in every mode (this change).
    Decide whether `game_rewarded_extra_time` warrants its own UI, then wire it if approved.
 4. Decide UMP consent behavior (O5), build the launch-sequence state machine, and only then
    enable the configured app-open placement.
-5. Run real-device follow-ups: haptic feel, TalkBack announcements, and animation feel.
+5. Run real-device follow-ups: haptic feel, TalkBack announcements, animation feel for the new
+   Lottie effects, the out-of-lives modal's on-screen appearance, and RTL/dark-mode rendering
+   of the new Levels/Daily/Seasons components.
 6. Resolve optional cleanup decisions: bundled display fonts (O6), a second Firebase debug
-   client (O7), compact Daily-card layout, and season system-bar transparency.
+   client (O7) — ~~compact Daily-card layout~~ done, 2026-09-15 — and season system-bar
+   transparency.
 
 **Completed since the previous handoff:** season/day-rollover verification, live Phase 7 ad
 flows, app-wide haptics, the Android↔iOS multiplayer match and rematch, the production room-read
-rule repair (PR #58), and the iOS rematch-win accounting repair (PR #59).
+rule repair (PR #58), the iOS rematch-win accounting repair (PR #59), shared cross-platform
+Lottie effects (win/lose/lives/freeze/star-credit), and the Levels/Daily Challenge/Seasons
+visual-parity pass with iOS.
