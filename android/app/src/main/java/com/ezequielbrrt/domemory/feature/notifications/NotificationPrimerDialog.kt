@@ -34,7 +34,7 @@ import com.ezequielbrrt.domemory.ui.theme.LocalPalette
  * through the same [rememberNotificationPermissionRequester] path.
  *
  * Visual shape mirrors this codebase's other full-screen modals (`LevelsScreen`'s
- * `OutOfLivesModal` / `LevelsIntroDialog`): a backdrop-dimmed `Box` behind a rounded
+ * `OutOfLivesModal`): a backdrop-dimmed `Box` behind a rounded
  * `Surface` card, not a platform `AlertDialog` — keeping one card style across the app
  * rather than mixing Material's default dialog chrome into an otherwise fully custom UI.
  */

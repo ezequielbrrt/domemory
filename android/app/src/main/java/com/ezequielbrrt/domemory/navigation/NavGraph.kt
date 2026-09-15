@@ -28,6 +28,7 @@ import com.ezequielbrrt.domemory.core.model.LevelContext
 import com.ezequielbrrt.domemory.feature.game.GameScreen
 import com.ezequielbrrt.domemory.feature.game.GameViewModel
 import com.ezequielbrrt.domemory.feature.game.UserPreferencesGameStatsRecorder
+import com.ezequielbrrt.domemory.feature.levels.LevelsIntroOverlay
 import com.ezequielbrrt.domemory.feature.levels.LevelsViewModel
 import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaScreen
 import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaViewModel
@@ -37,6 +38,7 @@ import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingScreen
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingViewModel
 import com.ezequielbrrt.domemory.feature.seasons.SeasonLevelsScreen
+import com.ezequielbrrt.domemory.feature.seasons.SeasonLevelsViewModel
 import com.ezequielbrrt.domemory.feature.settings.AchievementsScreen
 import com.ezequielbrrt.domemory.feature.settings.AchievementsViewModel
 import com.ezequielbrrt.domemory.feature.settings.SettingsScreen
@@ -142,6 +144,7 @@ fun NavGraph(
                     }
                 },
             )
+            val levelsUiState by levelsViewModel.uiState.collectAsState()
             val activeSeason by container.seasonCatalog.activeSeason.collectAsState()
             val dailyStreak by container.prefs.dailyStreakCurrent.collectAsState(initial = 0)
             val dailyLastAttemptDay by container.prefs.dailyLastAttemptDay.collectAsState(initial = null)
@@ -172,7 +175,7 @@ fun NavGraph(
                     levelsViewModel = levelsViewModel,
                     onLevelSelected = { navController.navigate(Routes.level(it)) },
                     activeSeason = activeSeason,
-                    todayKey = container.todayKey(),
+                    activeSeasonStore = activeSeason?.let { container.seasonProgressStore(it) },
                     onSeasonSelected = { season -> navController.navigate(Routes.seasonLevels(season.id)) },
                     dailyStreak = dailyStreak,
                     isDailyChallengeCompletedToday = isDailyCompletedToday,
@@ -187,6 +190,15 @@ fun NavGraph(
                         }
                     },
                 )
+
+                // A sibling of MenuScreen, not something LevelsScreen renders itself: iOS's
+                // `.fullScreenCover(isPresented: $showIntro)` (LevelsView.swift) covers the
+                // whole screen, Menu chrome included, and LevelsScreen is only ever composed
+                // as the Levels tab's content, below that chrome — see LevelsScreen.kt's own
+                // comment on this exact point.
+                if (levelsUiState.showIntro) {
+                    LevelsIntroOverlay(onDismiss = levelsViewModel::dismissIntro)
+                }
 
                 // Spec 11.3: "Shown once per install on the menu, and reused by the Settings
                 // toggle" (that reuse is SettingsScreen's own
@@ -291,11 +303,24 @@ fun NavGraph(
                 return@composable
             }
             val store = remember(season.id) { container.seasonProgressStore(season) }
+            val seasonLevelsViewModel: SeasonLevelsViewModel = viewModel(
+                factory = viewModelFactory {
+                    initializer {
+                        SeasonLevelsViewModel(
+                            lives = container.levelLives,
+                            wallet = container.starWallet,
+                            onHaptic = HapticsService::fire,
+                        )
+                    }
+                },
+            )
             SeasonLevelsScreen(
                 season = season,
                 store = store,
+                viewModel = seasonLevelsViewModel,
                 todayKey = container.todayKey(),
                 onLevelSelected = { level -> navController.navigate(Routes.seasonGame(season.id, level)) },
+                onBack = { navController.popBackStack() },
             )
         }
 
@@ -345,6 +370,27 @@ fun NavGraph(
             val starBalance by container.starWallet.balance.collectAsState()
             val coroutineScope = rememberCoroutineScope()
 
+            // The same SeasonLevelsViewModel instance still on the season map's back-stack
+            // entry — refreshed on the way out so newly-spent lives/stars show up the moment
+            // the player is back on the map (mirrors LEVEL_GAME's identical wiring for the
+            // endless map, and iOS's `SeasonLevelsView.onDisappear { viewModel.refresh() }`).
+            val seasonLevelsEntry = remember { navController.getBackStackEntry(Routes.seasonLevels(seasonId)) }
+            val seasonLevelsViewModel: SeasonLevelsViewModel = viewModel(
+                viewModelStoreOwner = seasonLevelsEntry,
+                factory = viewModelFactory {
+                    initializer {
+                        SeasonLevelsViewModel(
+                            lives = container.levelLives,
+                            wallet = container.starWallet,
+                            onHaptic = HapticsService::fire,
+                        )
+                    }
+                },
+            )
+            DisposableEffect(Unit) {
+                onDispose { seasonLevelsViewModel.refresh() }
+            }
+
             GameScreen(
                 state = state,
                 onChoose = viewModel::choose,
@@ -360,10 +406,10 @@ fun NavGraph(
                 onRetry = {
                     coroutineScope.launch {
                         if (!viewModel.retry()) {
-                            // Out of lives after this loss committed. There is no
-                            // season-specific out-of-lives prompt yet (deferred — see
-                            // ANDROID_PLAN.md); bounce back to the season map rather than
-                            // strand the player on a screen with nothing left to do.
+                            // Out of lives after this loss committed — stay put; the season
+                            // map's own out-of-lives prompt (SeasonLevelsViewModel, matching
+                            // the endless map) is where the player buys back in, same as
+                            // LEVEL_GAME's identical bounce-back above.
                             navController.popBackStack()
                         }
                     }

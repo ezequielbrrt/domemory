@@ -48,6 +48,7 @@ import com.ezequielbrrt.domemory.feature.levels.LevelsScreen
 import com.ezequielbrrt.domemory.feature.levels.LevelsViewModel
 import com.ezequielbrrt.domemory.feature.seasons.SeasonCard
 import com.ezequielbrrt.domemory.services.seasons.Season
+import com.ezequielbrrt.domemory.services.seasons.SeasonLevelProgressStore
 import com.ezequielbrrt.domemory.services.ads.AdMobBanner
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
@@ -72,7 +73,7 @@ fun MenuScreen(
     levelsViewModel: LevelsViewModel,
     onLevelSelected: (Int) -> Unit,
     activeSeason: Season? = null,
-    todayKey: String = "",
+    activeSeasonStore: SeasonLevelProgressStore? = null,
     onSeasonSelected: (Season) -> Unit = {},
     dailyStreak: Int = 0,
     isDailyChallengeCompletedToday: Boolean = false,
@@ -83,19 +84,27 @@ fun MenuScreen(
     Column(modifier.fillMaxSize().background(palette.appBackground)) {
         MenuHeader(onCreateMemorama = onCreateMemorama, onMultiplayer = onMultiplayer, onSettings = onSettings)
         // Spec 9.1: while a season is active it shares this row with the Daily card, which
-        // shrinks; with no active season the Daily card keeps its full-width layout.
-        Row(Modifier.fillMaxWidth()) {
+        // shrinks to the compact layout; with no active season the Daily card keeps its
+        // full-width layout. Margin lives on the row itself (16dp horizontal, 8dp bottom,
+        // 12dp between cards), matching MenuView.swift's own `.padding(.horizontal, 16)
+        // .padding(.bottom, 8)` on the row/single-card wrapper — not on each card, which
+        // would double the outer margin when both cards share the row.
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             DailyChallengeCard(
                 streak = dailyStreak,
                 isCompletedToday = isDailyChallengeCompletedToday,
                 onClick = onDailyChallengeSelected,
+                compact = activeSeason != null,
                 modifier = if (activeSeason != null) Modifier.weight(1f) else Modifier.fillMaxWidth(),
             )
-            activeSeason?.let { season ->
+            if (activeSeason != null && activeSeasonStore != null) {
                 SeasonCard(
-                    season = season,
-                    todayKey = todayKey,
-                    onClick = { HapticsService.fire(HapticIntent.TAP); onSeasonSelected(season) },
+                    season = activeSeason,
+                    store = activeSeasonStore,
+                    onClick = { HapticsService.fire(HapticIntent.TAP); onSeasonSelected(activeSeason) },
                     modifier = Modifier.weight(1f),
                 )
             }

@@ -71,6 +71,9 @@ import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.ui.anim.pressScaleClickable
+import com.ezequielbrrt.domemory.ui.anim.rememberReduceMotion
+import com.ezequielbrrt.domemory.ui.components.LivesRow
+import com.ezequielbrrt.domemory.ui.lottie.BundledLottie
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import com.ezequielbrrt.domemory.ui.theme.Palette
@@ -100,7 +103,11 @@ fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
             LevelsHeader(
                 currentLevel = highest,
                 livesRemaining = uiState.livesRemaining,
+                livesEffect = uiState.livesEffect,
+                onLivesEffectFinished = viewModel::consumeLivesEffect,
                 starBalance = uiState.starBalance,
+                starsCredited = uiState.starsCredited,
+                onStarsCreditedFinished = viewModel::consumeStarsCredited,
                 onInfoClick = { HapticsService.fire(HapticIntent.TAP); viewModel.presentIntro() },
             )
             LazyVerticalGrid(
@@ -156,9 +163,12 @@ fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
             )
         }
 
-        if (uiState.showIntro) {
-            LevelsIntroOverlay(onDismiss = viewModel::dismissIntro)
-        }
+        // uiState.showIntro itself is read one level up, in NavGraph.kt's Menu composable —
+        // not here. LevelsScreen is only ever composed as the Levels tab's *content*, below
+        // the Menu header, cards and tab row; iOS's own `.fullScreenCover(isPresented:
+        // $showIntro)` (LevelsView.swift) covers the *entire* screen, that chrome included,
+        // so LevelsIntroOverlay has to be a sibling of MenuScreen, not a child of this
+        // composable, or it would only ever cover the tab body underneath that chrome.
     }
 }
 
@@ -166,12 +176,15 @@ fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
 private fun LevelsHeader(
     currentLevel: Int,
     livesRemaining: Int,
+    livesEffect: LivesEffect?,
+    onLivesEffectFinished: () -> Unit,
     starBalance: Int,
+    starsCredited: Boolean,
+    onStarsCreditedFinished: () -> Unit,
     onInfoClick: () -> Unit,
 ) {
     val palette = LocalPalette.current
     val infoAccessibilityLabel = stringResource(R.string.levels_intro_info_accessibility)
-    val starBalanceAccessibilityLabel = stringResource(R.string.levels_star_balance_format, starBalance)
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -202,53 +215,28 @@ private fun LevelsHeader(
         }
         Column(horizontalAlignment = Alignment.End) {
             // Matches iOS's LevelsView.swift header: the lives row gets the same pill
-            // treatment as the star counter beside it, not a bare row of glyphs.
-            LivesPill(livesRemaining)
+            // treatment as the star counter beside it, not a bare row of glyphs. Carries
+            // the heart-break/refill Lottie effect (spec 14.4 polish, `1dc9282`'s
+            // "LivesRow effects on both platforms").
+            LivesPill(livesRemaining, effect = livesEffect, onEffectFinished = onLivesEffectFinished)
             Spacer(Modifier.size(6.dp))
-            // Spec 14.5: "the star balance announces 'N stars available'" — the visible glyph
-            // ("★ 12") stays compact, but a screen reader gets the full sentence instead.
-            Pill(text = "★ $starBalance", accessibilityLabel = starBalanceAccessibilityLabel)
-        }
-    }
-}
-
-/** Matches iOS's [LivesRow]: a compact row of filled and outline heart glyphs. */
-@Composable
-fun LevelLivesRow(
-    remaining: Int,
-    total: Int = LevelLivesService.MAX_LIVES,
-) {
-    val palette = LocalPalette.current
-    val accessibilityLabel = stringResource(R.string.levels_lives_remaining_format, remaining, total)
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.clearAndSetSemantics {
-            contentDescription = accessibilityLabel
-        },
-    ) {
-        repeat(total) { index ->
-            Text(
-                text = if (index < remaining) "♥" else "♡",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = if (index < remaining) {
-                    palette.secondary
-                } else {
-                    palette.textSecondary.copy(alpha = 0.3f)
-                },
-            )
+            StarBalancePill(starBalance, credited = starsCredited, onCreditedFinished = onStarsCreditedFinished)
         }
     }
 }
 
 /**
- * [LevelLivesRow] wrapped in the same capsule pill as the star counter
- * (`LevelsView.swift:130-137`: `LivesRow` inside a `Capsule` filled `surfacePrimary`,
- * stroked `surfaceBorder`). Shared by the endless map and, from Phase 3, the season map.
+ * [com.ezequielbrrt.domemory.ui.components.LivesRow] wrapped in the same capsule pill as
+ * the star counter (`LevelsView.swift:130-137`: `LivesRow` inside a `Capsule` filled
+ * `surfacePrimary`, stroked `surfaceBorder`). Shared by the endless map and the season map.
  */
 @Composable
-fun LivesPill(remaining: Int, total: Int = LevelLivesService.MAX_LIVES) {
+fun LivesPill(
+    remaining: Int,
+    total: Int = LevelLivesService.MAX_LIVES,
+    effect: LivesEffect? = null,
+    onEffectFinished: (() -> Unit)? = null,
+) {
     val palette = LocalPalette.current
     Surface(
         shape = RoundedCornerShape(50),
@@ -256,13 +244,13 @@ fun LivesPill(remaining: Int, total: Int = LevelLivesService.MAX_LIVES) {
         border = BorderStroke(1.dp, palette.surfaceBorder),
     ) {
         Box(Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
-            LevelLivesRow(remaining, total)
+            LivesRow(remaining = remaining, total = total, effect = effect, onEffectFinished = onEffectFinished)
         }
     }
 }
 
-/** A capsule pill of plain text, e.g. the star-balance badge. Public so the season map
- * (Phase 3) can reuse the exact same treatment as the endless map. */
+/** A capsule pill of plain text, e.g. a season's `cleared / total` progress. Public so the
+ * season map can reuse the exact same treatment as the endless map. */
 @Composable
 fun Pill(text: String, accessibilityLabel: String? = null) {
     val palette = LocalPalette.current
@@ -283,6 +271,51 @@ fun Pill(text: String, accessibilityLabel: String? = null) {
             fontWeight = FontWeight.Bold,
             color = palette.textPrimary,
         )
+    }
+}
+
+/**
+ * The star-balance pill (`LevelsView.swift`'s trailing "★ N" capsule): a star glyph, a
+ * sparkle Lottie clip that plays over it on a credit (never a spend — `1dc9282`'s
+ * "star-sparkle over the header star chip on a credit"), and the count. Public so the
+ * season map's identical wallet-balance pill can reuse it.
+ */
+@Composable
+fun StarBalancePill(balance: Int, credited: Boolean = false, onCreditedFinished: (() -> Unit)? = null) {
+    val palette = LocalPalette.current
+    val reduceMotion = rememberReduceMotion()
+    val accessibilityLabel = stringResource(R.string.levels_star_balance_format, balance)
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = palette.surfacePrimary,
+        border = BorderStroke(1.dp, palette.surfaceBorder),
+        // Spec 14.5: "the star balance announces 'N stars available'" — the visible glyph
+        // ("★ 12") stays compact, but a screen reader gets the full sentence instead.
+        modifier = Modifier.semantics { contentDescription = accessibilityLabel },
+    ) {
+        Row(
+            Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Star, contentDescription = null, tint = palette.hardAmber, modifier = Modifier.size(14.dp))
+                if (credited && !reduceMotion) {
+                    BundledLottie(
+                        name = "star-sparkle",
+                        tint = palette.hardAmber,
+                        modifier = Modifier.size(40.dp),
+                        onFinished = onCreditedFinished,
+                    )
+                }
+            }
+            Text(
+                balance.toString(),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = palette.textPrimary,
+            )
+        }
     }
 }
 
@@ -438,7 +471,7 @@ fun OutOfLivesModal(
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(12.dp))
-                LevelLivesRow(remaining = 0)
+                LivesRow(remaining = 0)
                 Spacer(Modifier.height(12.dp))
                 Text(
                     // Message text mirrors whether a rewarded-ad refill is actually on offer
@@ -524,9 +557,15 @@ private val levelIntroSlides = listOf(
  * info button. Rebuilt to match iOS's `IntroCarouselView.swift` exactly: a paged
  * `HorizontalPager` with dot indicators, a Skip button top-right, and a full-width
  * capsule Next/Done button — replacing the earlier static stacked-dialog placeholder.
+ *
+ * Public, and deliberately **not** called from [LevelsScreen] itself: iOS presents this
+ * with `.fullScreenCover`, which covers the whole screen — Menu's header, cards and tab
+ * row included — not just the Levels tab's own content area. `NavGraph.kt`'s Menu
+ * composable renders this as a sibling of `MenuScreen`, the same way it layers
+ * `NotificationPrimerHost`, to get that same true full-screen coverage.
  */
 @Composable
-private fun LevelsIntroOverlay(onDismiss: () -> Unit) {
+fun LevelsIntroOverlay(onDismiss: () -> Unit) {
     val palette = LocalPalette.current
     val pagerState = rememberPagerState(pageCount = { levelIntroSlides.size })
     val coroutineScope = rememberCoroutineScope()

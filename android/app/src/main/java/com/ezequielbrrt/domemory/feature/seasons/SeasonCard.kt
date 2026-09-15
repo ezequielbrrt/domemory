@@ -1,61 +1,68 @@
 package com.ezequielbrrt.domemory.feature.seasons
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.SingletonImageLoader
-import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.services.seasons.Season
+import com.ezequielbrrt.domemory.services.seasons.SeasonLevelProgressStore
 import com.ezequielbrrt.domemory.services.seasons.SeasonLocaleResolver
-import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
+import com.ezequielbrrt.domemory.ui.components.CompactCardLayout
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import java.util.Locale
 
 /**
- * The menu's season entry point (spec 9.1). Shares a row with [com.ezequielbrrt.domemory.feature.daily.DailyChallengeCard]
- * when a season is active — [com.ezequielbrrt.domemory.feature.menu.MenuScreen] gives each
- * card equal `weight(1f)` in that row, though neither card's internal layout restyles for
- * the narrower width yet (spec 9.1's "shrinks to a compact layout" is not implemented —
- * cosmetic only, see `ANDROID_PLAN.md` §7).
+ * The menu's season entry point (spec 9.1). Always the compact vertical layout — unlike
+ * the Daily Challenge card, iOS's `SeasonCard` (`MenuView.swift:614-655`) has no separate
+ * full-width variant, since a season is only ever shown while it shares the row with the
+ * Daily card.
  *
- * The card is the season's accent colour with white text (spec 9.7), overlaid with
- * [Season.cardImageURL] when present. Entering this card is also the trigger to warm the
- * disk cache with the season's background artwork, so [SeasonLevelsScreen] does not flash
- * flat colour on first open — mirrors iOS's "prefetch when the active season changes"
- * guard by keying on the season id.
+ * The badge shows the same metric iOS's `SeasonCard.badgeText` does (`MenuView.swift:
+ * 629-638`): `cleared / total` progress, or the "Complete" badge once the season is
+ * finished — **not** a season-cumulative star total, which iOS's header never displays
+ * either (see `SeasonLevelsScreen.kt`'s own doc comment on that same point).
+ *
+ * Entering this card is also the trigger to warm the disk cache with the season's
+ * background artwork, so [SeasonLevelsScreen] does not flash flat colour on first open —
+ * mirrors iOS's "prefetch when the active season changes" guard by keying on the season id.
  */
 @Composable
-fun SeasonCard(season: Season, todayKey: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun SeasonCard(
+    season: Season,
+    store: SeasonLevelProgressStore,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     val languageTag = remember { Locale.getDefault().toLanguageTag() }
     val resolved = remember(season, languageTag) { SeasonLocaleResolver.resolveText(season, languageTag) }
     val title = resolved?.first ?: stringResource(R.string.season_fallback_title)
     val fallbackAccent = LocalPalette.current.primary
     val accentColor = remember(season.accentColor, fallbackAccent) { season.parsedAccentColor() ?: fallbackAccent }
-    val daysRemaining = remember(season, todayKey) { season.daysRemaining(todayKey) }
+
+    // Recomposes the badge when a level is cleared elsewhere (e.g. the season map) while
+    // this card is still on screen behind it.
+    val revision by store.progress.revision.collectAsState()
+    val isComplete = store.progress.isComplete(season.levelCount)
+    val clearedCount = store.progress.clearedLevelCount(season.levelCount)
+    val badgeText = if (isComplete) {
+        stringResource(R.string.season_complete_badge)
+    } else {
+        stringResource(R.string.season_progress_format, clearedCount, season.levelCount)
+    }
 
     LaunchedEffect(season.id) {
         val loader = SingletonImageLoader.get(context)
@@ -64,39 +71,22 @@ fun SeasonCard(season: Season, todayKey: String, onClick: () -> Unit, modifier: 
         }
     }
 
-    // Mirrors iOS's ZStack: the artwork is a background layer sized to the text content's own
-    // bounds (a `Color.clear` the exact size of the card on iOS), never foreground content that
-    // could drive the card's height off the image's own intrinsic pixel size.
-    Box(
-        modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(accentColor)
-            .clickable(onClick = onClick),
-    ) {
-        season.cardImageURL?.let { url ->
-            AsyncImage(
-                model = url,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.matchParentSize(),
+    CompactCardLayout(
+        icon = { Text(season.icon, fontSize = 18.sp) },
+        title = title,
+        background = accentColor,
+        badge = {
+            Text(
+                badgeText,
+                color = Color.White,
+                fontWeight = FontWeight.Black,
+                fontSize = 12.sp,
+                maxLines = 1,
             )
-        }
-        Row(
-            Modifier.fillMaxWidth().padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(season.icon, fontSize = 26.sp)
-            Spacer(Modifier.width(10.dp))
-            Column {
-                Text(title, color = Color.White, fontWeight = FontWeight.Bold, style = DoMemoryType.display(16))
-                daysRemaining?.let { days ->
-                    Text(text = seasonCountdownLabel(days), color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
-                }
-            }
-        }
-    }
+        },
+        artworkUrl = season.cardImageURL,
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
+    )
 }
 
 @Composable

@@ -4,6 +4,7 @@
     <!-- Common -->
     <string name="common_accept">Aceptar</string>
     <string name="common_app_name">DoMemory</string>
+    <string name="common_back">Atrás</string>
     <string name="common_cancel">Cancelar</string>
     <string name="common_delete">Eliminar</string>
     <string name="common_ok">OK</string>
