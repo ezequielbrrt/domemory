@@ -44,6 +44,16 @@ android {
     kotlin {
         jvmToolchain(21)
     }
+
+    sourceSets {
+        getByName("main") {
+            // Lottie JSON lives once, at the repository root, and both apps read it in
+            // place: iOS through a symlink under SupportingFiles/, Android through this
+            // extra assets root. A single file per animation means the two platforms
+            // cannot drift on frame count, colour or timing.
+            assets.srcDir("../../assets/lottie")
+        }
+    }
 }
 
 dependencies {
@@ -56,6 +66,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    // Real vector icons for lock/help/verified/calendar/etc. (spec 14.3's "map each SF
+    // Symbol to a Material Symbol"), replacing the emoji/plain-text glyphs the Levels and
+    // Seasons screens used before this iOS visual-parity pass.
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.datastore.preferences)
 
@@ -72,6 +86,7 @@ dependencies {
     implementation(libs.google.code.scanner)
     implementation(libs.zxing.core)
     implementation(libs.google.play.review.ktx)
+    implementation(libs.lottie.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

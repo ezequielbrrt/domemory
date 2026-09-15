@@ -15,10 +15,12 @@
 		0706C14227955FFB2B5218F6 /* MultiplayerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F3EE1134F4B1BBDBD2D6E5 /* MultiplayerModels.swift */; };
 		07F4FA0022C819302F3BB1F4 /* FirebaseAnalyticsCoreWrapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4D8B11D7D219F16ED27A5AF /* FirebaseAnalyticsCoreWrapper.framework */; };
 		099C8CCE02DF4A8AE15202D6 /* LevelProgressServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D322E3D203B117CAFBE372BF /* LevelProgressServiceTests.swift */; };
+		0C132C82137A03ED2865F4AD /* x-shake.json in Resources */ = {isa = PBXBuildFile; fileRef = F57CC8D5978D1028741DFAAC /* x-shake.json */; };
 		0DBD2D85DC585E573987354D /* LevelMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F3FCD01F1E40CF29B52803 /* LevelMapView.swift */; };
 		0E276218D2F56149BC963400 /* LevelsIntroGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50D2A3085C15742082B0714 /* LevelsIntroGateTests.swift */; };
 		0EDD5F6FF6847F7B0F8228AA /* WatchKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3117DD37A128BD5876BEE67 /* WatchKit.framework */; platformFilters = (watchos, ); };
 		0F2D5DB915FE425900A44B2F /* RemoteImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E55D0D11E6EAE1B184F474 /* RemoteImageService.swift */; };
+		0FF13727DE838144B97E624D /* star-sparkle.json in Resources */ = {isa = PBXBuildFile; fileRef = C4702DC5FB9231884E6B8418 /* star-sparkle.json */; };
 		0FF23ACC7677E57B231BDD65 /* GoogleUtilities_GoogleUtilities_Logger.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 3D908E0C66CB550D11B5156F /* GoogleUtilities_GoogleUtilities_Logger.bundle */; };
 		1092E9B801AD6E9D2F2B0BB9 /* LevelCurveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C990444D7670DF53DC051D34 /* LevelCurveTests.swift */; };
 		11FB2F11E3EECEF00714B558 /* SeasonProgressService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5E6D0EA61ED7FB54F3F8B3 /* SeasonProgressService.swift */; };
@@ -76,6 +78,7 @@
 		437815626D1C4F40B22274CF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0001B619BB4CCC1E15C2B257 /* Assets.xcassets */; };
 		4415AE2D3C6ECD78485EAB02 /* third_party_IsAppEncrypted.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79990180A6DB4A67B1601B05 /* third_party_IsAppEncrypted.framework */; };
 		44D89625BCC1D0EA279D467E /* Firebase_FirebaseCoreExtension.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 1902AC4FD25ADCEFEFA63444 /* Firebase_FirebaseCoreExtension.bundle */; };
+		467F8A9A2CAC2911B99987FB /* LivesRowEffectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85B9B6838D590E184CF1ECBE /* LivesRowEffectTests.swift */; };
 		4AD62E24AFBCF6EC326FE232 /* SeasonCatalogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63858934183A97FEA59B2107 /* SeasonCatalogService.swift */; };
 		4D0C8A8D02C5B766E6BEFA46 /* GoogleAppMeasurementCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 913603DB308279B454551AF4 /* GoogleAppMeasurementCore.framework */; };
 		4D28C8AF7108526049615B3D /* QuitModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72DECBD021B4E2969DF06D7E /* QuitModal.swift */; };
@@ -95,6 +98,7 @@
 		5807478050D8BB618D3F7CF1 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641993891718AB600C6BE3E0 /* AppConfiguration.swift */; };
 		58772EE17414F7DC80932232 /* Promises.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DF319D3122D1C039FCA5F97 /* Promises.framework */; };
 		58D05942EE5FFA546A64781F /* FeatureIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E0A0D82FBC36B03F6822F37 /* FeatureIntroView.swift */; };
+		5A0AC62EAF99BE04C7F4D6DA /* heart-refill.json in Resources */ = {isa = PBXBuildFile; fileRef = 51F4B90A3E1305BF7D4C5FD6 /* heart-refill.json */; };
 		5D9C916C021AA13A4C672D99 /* GoogleUtilities_GoogleUtilities_UserDefaults.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E60241E5697D981A2369DECD /* GoogleUtilities_GoogleUtilities_UserDefaults.bundle */; };
 		5E14A96E1DEEB582EB116534 /* MemorizeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9DE9F32CAF0B87850C08DC /* MemorizeViewModelTests.swift */; };
 		5E27E9DFCF5DE7ABEC7E1644 /* SeasonLevelsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDC430F8432283F763A0EBE7 /* SeasonLevelsViewModelTests.swift */; };
@@ -194,6 +198,7 @@
 		C56EFA6522B4C066B15F075E /* Firebase_FirebaseAuth.bundle in Dependencies */ = {isa = PBXBuildFile; fileRef = 3680F4FBE72BA4316BC13F40 /* Firebase_FirebaseAuth.bundle */; };
 		C67AC24690E197A9BF066CDE /* Difficulty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF8A01822286D0C03EFD6D9 /* Difficulty.swift */; };
 		C68B41F8C0D332723C6EA934 /* AchievementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC9B48C8BCA48BDD56085BC2 /* AchievementsView.swift */; };
+		C792F5EABFEB5618FD352FDC /* heart-break.json in Resources */ = {isa = PBXBuildFile; fileRef = AD32D306FC1E74A27E6066D2 /* heart-break.json */; };
 		C8358CF3BC0B7C811AE05D41 /* TuistFonts+DoMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD92E74C840FF27A722F2680 /* TuistFonts+DoMemory.swift */; };
 		CBEB9F3A1E21EE43999A8F71 /* Firebase_FirebaseMessaging.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 1C60C6DED8F26BCDDBD2094D /* Firebase_FirebaseMessaging.bundle */; };
 		CC1F02F484EA9E9E01302AD8 /* AppReviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB4F0F8F7EC6DF8F6E6BA6C /* AppReviews.swift */; };
@@ -227,6 +232,7 @@
 		E6C67A4973F27311669F09C3 /* nanopb_nanopb.bundle in Dependencies */ = {isa = PBXBuildFile; fileRef = 78B9EF60C17A9425ACF036E0 /* nanopb_nanopb.bundle */; };
 		E798D30B21C87A357026AC72 /* SeasonLevelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08B1156F5E46E93C774188A5 /* SeasonLevelsView.swift */; };
 		E82FB4B60EB4048894C5AA73 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E488EE58A62495FE475BC040 /* libz.tbd */; };
+		E84CA199C0513DD41937C1D8 /* clock-crack.json in Resources */ = {isa = PBXBuildFile; fileRef = BA9409EB98C2AA657A45DF83 /* clock-crack.json */; };
 		EBB2D431522B3968A992A9BB /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D182921A95B4FE240D5B8F /* SettingsViewModel.swift */; };
 		EBE14346C8B583D4466CA58B /* GoogleUtilities_Reachability.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A886AE10A2A23BD52BBEE7AC /* GoogleUtilities_Reachability.framework */; };
 		ED3909D9FF702A3908E129DD /* TuistStrings+DoMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE956C82292F926EA4FBB917 /* TuistStrings+DoMemory.swift */; };
@@ -238,6 +244,7 @@
 		F65D6AE99F9A96FA11E1A2E3 /* LevelsIntroGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BC528D77FCBA8D6F0A89D2 /* LevelsIntroGate.swift */; };
 		F826C0EC45AEA57EA1171A33 /* SeasonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0EF96514EF25BB349153528 /* SeasonTests.swift */; };
 		F909F55D81EBE153D2341C80 /* GoogleUtilities_GoogleUtilities_MethodSwizzler.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BBBA85E0072EADE8AFF6448F /* GoogleUtilities_GoogleUtilities_MethodSwizzler.bundle */; };
+		FB5113074086A50E2522968B /* freeze-thaw.json in Resources */ = {isa = PBXBuildFile; fileRef = 383A65B31991715B0992490C /* freeze-thaw.json */; };
 		FB5BD53AE22AF167608C0005 /* Cardify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07CF7AF32FEAFEF3FE3E72F8 /* Cardify.swift */; };
 		FCE43E33012D35DCBC44CF9D /* JoinMultiplayerRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE848C773AFBCF923A05F0A3 /* JoinMultiplayerRoomView.swift */; };
 /* End PBXBuildFile section */
@@ -352,6 +359,7 @@
 		36B6FFF22771A630BAF8E510 /* LoseModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoseModalViewModel.swift; sourceTree = "<group>"; };
 		3737054699D9FAB429E0E3C7 /* DoMemory.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DoMemory.entitlements; sourceTree = "<group>"; };
 		37D182921A95B4FE240D5B8F /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		383A65B31991715B0992490C /* freeze-thaw.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "freeze-thaw.json"; sourceTree = "<group>"; };
 		398FF89878522A4BCF4640BC /* GoogleUtilities_MethodSwizzler.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GoogleUtilities_MethodSwizzler.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		39DB12F13C1E4E1725D4E303 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/StoreKit.framework; sourceTree = DEVELOPER_DIR; };
 		3B1FAA12262F23C2D075B06A /* Pie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pie.swift; sourceTree = "<group>"; };
@@ -382,6 +390,7 @@
 		5070A7E4DB167B4C28F41737 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		50CEA5F0D8204663156E3B29 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		51A3BFCC62F4EDCCADF052E7 /* QuitModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitModalViewModel.swift; sourceTree = "<group>"; };
+		51F4B90A3E1305BF7D4C5FD6 /* heart-refill.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "heart-refill.json"; sourceTree = "<group>"; };
 		51FB86198E66E5CE6E788B1A /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5214A2391104F8E3D0BCE8D9 /* ListWithoutSeparatorAndMargins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListWithoutSeparatorAndMargins.swift; sourceTree = "<group>"; };
 		5281C4609C2DF3DA39AB0DB0 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -437,6 +446,7 @@
 		83F3FCD01F1E40CF29B52803 /* LevelMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelMapView.swift; sourceTree = "<group>"; };
 		846021B8F99EFD207858ECC5 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreTelephony.framework; sourceTree = DEVELOPER_DIR; };
 		859DD5389F5EB017E491BC14 /* LevelCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelCurve.swift; sourceTree = "<group>"; };
+		85B9B6838D590E184CF1ECBE /* LivesRowEffectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivesRowEffectTests.swift; sourceTree = "<group>"; };
 		867122F55C9E89CC4318A76D /* HapticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsService.swift; sourceTree = "<group>"; };
 		88E5FFF2B567B5B36E73164F /* WhatsNewManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewManagerTests.swift; sourceTree = "<group>"; };
 		8CE112DBDE53DA20D32621AB /* PurchaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseService.swift; sourceTree = "<group>"; };
@@ -464,6 +474,7 @@
 		AB24F59230A66566E2226C83 /* SeasonCatalogServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonCatalogServiceTests.swift; sourceTree = "<group>"; };
 		AC5E6D0EA61ED7FB54F3F8B3 /* SeasonProgressService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonProgressService.swift; sourceTree = "<group>"; };
 		AD041F648BC963B119E699FF /* RecaptchaInterop.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RecaptchaInterop.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD32D306FC1E74A27E6066D2 /* heart-break.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "heart-break.json"; sourceTree = "<group>"; };
 		AD92E74C840FF27A722F2680 /* TuistFonts+DoMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistFonts+DoMemory.swift"; sourceTree = "<group>"; };
 		AE062DEF9149CBAF22A03A89 /* WinModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinModal.swift; sourceTree = "<group>"; };
 		AE3A564D3AAA82ACAB94ED30 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
@@ -475,6 +486,7 @@
 		B80C8B1E88CA6415E7F98EBF /* FirebaseDatabaseInternal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseDatabaseInternal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B87CBCAE688CB9B0F1E2C33F /* LevelsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelsViewModel.swift; sourceTree = "<group>"; };
 		B8B973CFDC9D34E9E85CA95A /* FirebaseCrashlytics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseCrashlytics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA9409EB98C2AA657A45DF83 /* clock-crack.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "clock-crack.json"; sourceTree = "<group>"; };
 		BAEFCD34DE7EC456BA7BD79C /* LocalizationParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationParityTests.swift; sourceTree = "<group>"; };
 		BBBA85E0072EADE8AFF6448F /* GoogleUtilities_GoogleUtilities_MethodSwizzler.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GoogleUtilities_GoogleUtilities_MethodSwizzler.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD3E3F826ECA07F76A61954B /* LoseModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoseModal.swift; sourceTree = "<group>"; };
@@ -484,6 +496,7 @@
 		C0E8DDFE230B3DE293410029 /* FirebaseCrashlyticsSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseCrashlyticsSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0EF96514EF25BB349153528 /* SeasonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonTests.swift; sourceTree = "<group>"; };
 		C3117DD37A128BD5876BEE67 /* WatchKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/WatchKit.framework; sourceTree = DEVELOPER_DIR; };
+		C4702DC5FB9231884E6B8418 /* star-sparkle.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "star-sparkle.json"; sourceTree = "<group>"; };
 		C49A16BA60A33A5D4DD667B8 /* FirebaseSessionsObjC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseSessionsObjC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4D8B11D7D219F16ED27A5AF /* FirebaseAnalyticsCoreWrapper.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseAnalyticsCoreWrapper.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C64BFD29E269A9ABDB1312FA /* LaunchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenView.swift; sourceTree = "<group>"; };
@@ -531,6 +544,7 @@
 		EFBEAFCCAA5DC1CD78FBBF35 /* FirebaseAppCheckInterop.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseAppCheckInterop.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F29064A22F609A3B4658FD28 /* MemoryDataType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryDataType.swift; sourceTree = "<group>"; };
 		F43BB32A6C4C4393657D0F80 /* FirebaseAuth.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseAuth.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F57CC8D5978D1028741DFAAC /* x-shake.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "x-shake.json"; sourceTree = "<group>"; };
 		F69EE3C58CB01698898DD6DB /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/AppKit.framework; sourceTree = DEVELOPER_DIR; };
 		F6ACF9294A68A492E545DA60 /* MemoryGameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGameTests.swift; sourceTree = "<group>"; };
 		F6E66291E57977BDA611B6D7 /* Lottie_Lottie.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Lottie_Lottie.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -702,8 +716,14 @@
 		27E801776443A1662E26D9E2 /* Lottie */ = {
 			isa = PBXGroup;
 			children = (
+				BA9409EB98C2AA657A45DF83 /* clock-crack.json */,
 				C8A44E37E94436684D69BA6A /* confetti-burst.json */,
+				383A65B31991715B0992490C /* freeze-thaw.json */,
+				AD32D306FC1E74A27E6066D2 /* heart-break.json */,
+				51F4B90A3E1305BF7D4C5FD6 /* heart-refill.json */,
 				402DB30787BDBCE4C6F8BC0B /* star-pop.json */,
+				C4702DC5FB9231884E6B8418 /* star-sparkle.json */,
+				F57CC8D5978D1028741DFAAC /* x-shake.json */,
 			);
 			path = Lottie;
 			sourceTree = "<group>";
@@ -1338,6 +1358,7 @@
 				0309EC51A91F7E6966E98006 /* LevelLivesServiceTests.swift */,
 				D322E3D203B117CAFBE372BF /* LevelProgressServiceTests.swift */,
 				D50D2A3085C15742082B0714 /* LevelsIntroGateTests.swift */,
+				85B9B6838D590E184CF1ECBE /* LivesRowEffectTests.swift */,
 				BAEFCD34DE7EC456BA7BD79C /* LocalizationParityTests.swift */,
 				E1DC4725635DD628E5A823A6 /* LottieAssetsTests.swift */,
 				5A9DE9F32CAF0B87850C08DC /* MemorizeViewModelTests.swift */,
@@ -1469,8 +1490,14 @@
 				437815626D1C4F40B22274CF /* Assets.xcassets in Resources */,
 				C195C17A934836A2B72F435C /* PatrickHand-Regular.ttf in Resources */,
 				835C75796F4A3669DB911276 /* Righteous-Regular.ttf in Resources */,
+				E84CA199C0513DD41937C1D8 /* clock-crack.json in Resources */,
 				16B58A2BDC2A03502B37F8D3 /* confetti-burst.json in Resources */,
+				FB5113074086A50E2522968B /* freeze-thaw.json in Resources */,
+				C792F5EABFEB5618FD352FDC /* heart-break.json in Resources */,
+				5A0AC62EAF99BE04C7F4D6DA /* heart-refill.json in Resources */,
 				A0E019CF16D5BE4071854B03 /* star-pop.json in Resources */,
+				0FF13727DE838144B97E624D /* star-sparkle.json in Resources */,
+				0C132C82137A03ED2865F4AD /* x-shake.json in Resources */,
 				A63A499AF00F0D802DA2816D /* InfoPlist.strings in Resources */,
 				3798D6770ACB2CDF0E9F558D /* Localizable.strings in Resources */,
 				3967D7F63EA91776C74DDB12 /* Firebase_FirebaseAuth.bundle in Resources */,
@@ -1619,6 +1646,7 @@
 				6B292345B7B5712A1F0E6515 /* LevelLivesServiceTests.swift in Sources */,
 				099C8CCE02DF4A8AE15202D6 /* LevelProgressServiceTests.swift in Sources */,
 				0E276218D2F56149BC963400 /* LevelsIntroGateTests.swift in Sources */,
+				467F8A9A2CAC2911B99987FB /* LivesRowEffectTests.swift in Sources */,
 				AC11DD587D1533500443643D /* LocalizationParityTests.swift in Sources */,
 				7461EB41C40795999B8B6A5C /* LottieAssetsTests.swift in Sources */,
 				5E14A96E1DEEB582EB116534 /* MemorizeViewModelTests.swift in Sources */,

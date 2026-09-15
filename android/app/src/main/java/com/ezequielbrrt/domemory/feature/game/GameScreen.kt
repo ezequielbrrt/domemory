@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,8 +54,11 @@ import com.ezequielbrrt.domemory.services.ads.AdMobBanner
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.ui.anim.NumericTransition
+import com.ezequielbrrt.domemory.ui.anim.rememberReduceMotion
+import com.ezequielbrrt.domemory.ui.lottie.BundledLottie
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
@@ -294,17 +298,38 @@ private fun GameHud(state: GameUiState, onPauseToggle: () -> Unit, onQuit: () ->
         stringResource(R.string.levels_mistakes_remaining_format, used, max)
     }
 
+    // The ice-shatter burst over the timer chip when a Freeze runs out. The clock
+    // restarting is otherwise easy to miss — the number just starts moving again —
+    // which is why a haptic already marks the moment (spec 7.6).
+    val reduceMotion = rememberReduceMotion()
+    var wasFrozen by remember { mutableStateOf(state.isFrozen) }
+    var showThaw by remember { mutableStateOf(false) }
+    LaunchedEffect(state.isFrozen) {
+        if (wasFrozen && !state.isFrozen && !reduceMotion) showThaw = true
+        wasFrozen = state.isFrozen
+    }
+
     Row(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Chip(
-            label = stringResource(R.string.game_time_label),
-            value = "${ceil(state.timeRemaining).toInt()}",
-            tint = if (state.isFrozen) palette.freezeBlue else palette.primary,
-            accessibilityLabel = timerAccessibilityLabel,
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Chip(
+                label = stringResource(R.string.game_time_label),
+                value = "${ceil(state.timeRemaining).toInt()}",
+                tint = if (state.isFrozen) palette.freezeBlue else palette.primary,
+                accessibilityLabel = timerAccessibilityLabel,
+            )
+            if (showThaw) {
+                BundledLottie(
+                    name = "freeze-thaw",
+                    tint = palette.freezeBlue,
+                    modifier = Modifier.size(96.dp),
+                    onFinished = { showThaw = false },
+                )
+            }
+        }
         Chip(
             label = stringResource(R.string.game_pairs_label),
             value = "${state.matchedPairs}/${state.totalPairs}",
@@ -555,10 +580,23 @@ private fun OutcomeOverlay(
         }
     }
 
+    val reduceMotion = rememberReduceMotion()
+
     Box(
         Modifier.fillMaxSize().background(palette.overlayBackdrop),
         contentAlignment = Alignment.Center,
     ) {
+        // A one-shot celebratory burst behind the card, as on iOS's WinModal. Skipped for
+        // reduce-motion players, who see the card with no motion at all rather than a
+        // burst that plays regardless of the setting. Drawn before the Surface so it sits
+        // behind the card, and it takes no input so the card's buttons stay reachable.
+        if (won && !reduceMotion) {
+            BundledLottie(
+                name = "confetti-burst",
+                modifier = Modifier.size(400.dp),
+            )
+        }
+
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = palette.surfacePrimary,
@@ -579,6 +617,19 @@ private fun OutcomeOverlay(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    // The hero says *why*, as on iOS's LoseModal: a clock rings and cracks
+                    // on a timeout, a red badge stamps in and shakes its head on a mistake
+                    // bust. Both end on a still picture. Reduce-motion players get the
+                    // static face iOS has always shown there.
+                    if (reduceMotion) {
+                        Text("😳", fontSize = 56.sp)
+                    } else {
+                        BundledLottie(
+                            name = if (lostToMistakes) "x-shake" else "clock-crack",
+                            tint = palette.secondary,
+                            modifier = Modifier.size(72.dp),
+                        )
+                    }
                     Text(
                         text = stringResource(
                             if (lostToMistakes) R.string.levels_lose_too_many_mistakes else R.string.game_lose_message,
@@ -719,18 +770,7 @@ private fun WinOutcomeContent(
                 fontWeight = FontWeight.Bold,
                 color = palette.textSecondary,
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
-            ) {
-                repeat(3) { index ->
-                    Text(
-                        text = if (index < state.starsEarned) "★" else "☆",
-                        fontSize = 24.sp,
-                        color = if (index < state.starsEarned) palette.hardAmber else palette.textSecondary.copy(alpha = 0.3f),
-                    )
-                }
-            }
+            WinStarRow(starsEarned = state.starsEarned)
         } else {
             Text(
                 text = stringResource(R.string.game_win_description),
@@ -771,6 +811,57 @@ private fun WinOutcomeContent(
         if (offersNextLevel) {
             TextButton(onClick = onQuit) {
                 Text(stringResource(R.string.level_back_to_levels), color = palette.textSecondary, fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
+}
+
+/**
+ * The three-star row of a Levels/Seasons win, popping in one earned star at a time —
+ * the port of iOS `WinModal`'s `starView(for:)` + `revealStars()`.
+ *
+ * `startedCount` paces when each star gets its go-ahead (one every
+ * [WIN_STAR_STAGGER_MILLIS]); each star's own Lottie completion raises `completedCount`,
+ * which is what actually settles it to the static filled glyph. See [winStarSlot] for why
+ * the two counters are kept apart.
+ */
+@Composable
+private fun WinStarRow(starsEarned: Int) {
+    val palette = LocalPalette.current
+    val reduceMotion = rememberReduceMotion()
+    var startedCount by remember { mutableIntStateOf(0) }
+    var completedCount by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(starsEarned, reduceMotion) {
+        if (reduceMotion || starsEarned <= 0) return@LaunchedEffect
+        for (index in 0 until starsEarned) {
+            startedCount = index + 1
+            delay(WIN_STAR_STAGGER_MILLIS)
+        }
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
+    ) {
+        repeat(3) { index ->
+            when (winStarSlot(index, starsEarned, startedCount, completedCount, reduceMotion)) {
+                WinStarSlot.DIM -> Text(
+                    text = "☆",
+                    fontSize = 24.sp,
+                    color = palette.textSecondary.copy(alpha = 0.3f),
+                )
+                WinStarSlot.FILLED -> Text(
+                    text = "★",
+                    fontSize = 24.sp,
+                    color = palette.hardAmber,
+                )
+                WinStarSlot.POPPING -> BundledLottie(
+                    name = "star-pop",
+                    modifier = Modifier.size(28.dp),
+                    onFinished = { completedCount = maxOf(completedCount, index + 1) },
+                )
             }
         }
     }

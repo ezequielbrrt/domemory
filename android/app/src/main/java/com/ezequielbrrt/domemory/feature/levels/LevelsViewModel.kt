@@ -40,7 +40,40 @@ class LevelsViewModel(
         val starBalance: Int = 0,
         val showOutOfLivesPrompt: Boolean = false,
         val showIntro: Boolean = false,
+        /** A one-shot heart animation the header owes the player; see [HeaderEffects.kt]. */
+        val livesEffect: LivesEffect? = null,
+        /** Sparkle over the star chip for a credit that just landed; never for a spend. */
+        val starsCredited: Boolean = false,
     )
+
+    /**
+     * Whether [refresh] has populated the counters at least once. The defaults above are
+     * placeholders, not a real previous state — comparing against them would break a heart
+     * on the very first screen entry of a day with 2 lives left.
+     */
+    private var hasLoadedCounters = false
+
+    /** Clears a played heart effect so it does not replay on the next recomposition. */
+    fun consumeLivesEffect() {
+        _uiState.update { it.copy(livesEffect = null) }
+    }
+
+    fun consumeStarsCredited() {
+        _uiState.update { it.copy(starsCredited = false) }
+    }
+
+    /** Applies fresh counters, attaching whatever animation the change deserves. */
+    private fun UiState.withCounters(livesRemaining: Int, starBalance: Int = this.starBalance): UiState =
+        if (!hasLoadedCounters) {
+            copy(livesRemaining = livesRemaining, starBalance = starBalance)
+        } else {
+            copy(
+                livesRemaining = livesRemaining,
+                starBalance = starBalance,
+                livesEffect = livesEffect(this.livesRemaining, livesRemaining) ?: livesEffect,
+                starsCredited = starsCredited || starsCredited(this.starBalance, starBalance),
+            )
+        }
 
     private val workScope: CoroutineScope get() = scope ?: viewModelScope
 
@@ -67,7 +100,9 @@ class LevelsViewModel(
             // directly through UserPreferences (LevelProgressService.recordCompletion),
             // so this cache can be stale until something explicitly re-pulls it.
             val starBalance = wallet.refresh()
-            _uiState.update { it.copy(livesRemaining = lives.remaining(), starBalance = starBalance) }
+            val livesRemaining = lives.remaining()
+            _uiState.update { it.withCounters(livesRemaining = livesRemaining, starBalance = starBalance) }
+            hasLoadedCounters = true
         }
     }
 
@@ -124,12 +159,11 @@ class LevelsViewModel(
                 // button fires nothing of its own.
                 onHaptic?.invoke(HapticIntent.REWARD)
                 lives.refill(1)
+                val livesRemaining = lives.remaining()
+                val starBalance = wallet.balance.value
                 _uiState.update {
-                    it.copy(
-                        livesRemaining = lives.remaining(),
-                        starBalance = wallet.balance.value,
-                        showOutOfLivesPrompt = false,
-                    )
+                    it.withCounters(livesRemaining = livesRemaining, starBalance = starBalance)
+                        .copy(showOutOfLivesPrompt = false)
                 }
             }
         }
@@ -147,8 +181,9 @@ class LevelsViewModel(
             // the composable call site, before the ad even starts).
             onHaptic?.invoke(HapticIntent.REWARD)
             lives.refill(1)
+            val livesRemaining = lives.remaining()
             _uiState.update {
-                it.copy(livesRemaining = lives.remaining(), showOutOfLivesPrompt = false)
+                it.withCounters(livesRemaining = livesRemaining).copy(showOutOfLivesPrompt = false)
             }
         }
     }

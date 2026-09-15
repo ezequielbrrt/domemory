@@ -10,6 +10,8 @@ import SwiftUI
 struct LoseModal: View {
     var listener: LoseModalViewModelListener?
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var isOutOfLives: Bool {
         (listener?.levelLivesRemaining ?? -1) == 0
     }
@@ -29,9 +31,20 @@ struct LoseModal: View {
                 .background(.ultraThinMaterial)
 
             VStack(spacing: 0) {
-                Text("😳")
-                    .font(.system(size: 64))
-                    .padding(.bottom, 12)
+                // The hero says *why*: a clock rings and cracks on a timeout,
+                // a red badge stamps in and shakes its head on a mistake
+                // bust. Both end on a still picture. Reduce-motion players
+                // keep the face the modal has always shown.
+                if reduceMotion {
+                    Text("😳")
+                        .font(.system(size: 64))
+                        .padding(.bottom, 12)
+                } else {
+                    LottieView(name: lostToMistakes ? "x-shake" : "clock-crack", tint: Color.secundaryColor)
+                        .frame(width: 72, height: 72)
+                        .padding(.bottom, 12)
+                        .accessibilityHidden(true)
+                }
 
                 // Reason pill chip
                 HStack(spacing: 6) {
@@ -49,8 +62,14 @@ struct LoseModal: View {
                 .padding(.bottom, 12)
 
                 if let lives = listener?.levelLivesRemaining {
-                    LivesRow(remaining: lives, iconSize: 15)
-                        .padding(.bottom, 8)
+                    // `levelLivesRemaining` is already the post-loss count, so
+                    // the heart that just went is the first empty slot.
+                    LivesRow(
+                        remaining: lives,
+                        iconSize: 15,
+                        effect: lives < LevelLivesService.maxLives ? .lost(slot: lives) : nil
+                    )
+                    .padding(.bottom, 8)
 
                     if isOutOfLives {
                         Text(listener?.canWatchAdForLife == true
