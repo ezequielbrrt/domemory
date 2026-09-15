@@ -48,6 +48,8 @@ import com.ezequielbrrt.domemory.feature.seasons.SeasonCard
 import com.ezequielbrrt.domemory.services.seasons.Season
 import com.ezequielbrrt.domemory.services.ads.AdMobBanner
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
+import com.ezequielbrrt.domemory.services.haptics.HapticIntent
+import com.ezequielbrrt.domemory.services.haptics.HapticsService
 
 /**
  * The real menu (spec 2): header, three tabs (`Levels` / `My memoramas` / `All`),
@@ -90,7 +92,7 @@ fun MenuScreen(
                 SeasonCard(
                     season = season,
                     todayKey = todayKey,
-                    onClick = { onSeasonSelected(season) },
+                    onClick = { HapticsService.fire(HapticIntent.TAP); onSeasonSelected(season) },
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -130,13 +132,13 @@ private fun MenuHeader(onCreateMemorama: () -> Unit, onMultiplayer: () -> Unit, 
             color = palette.primary,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("♟", color = palette.primary, fontSize = 22.sp, modifier = Modifier.size(44.dp).clickable(onClick = onMultiplayer).padding(10.dp))
+            Text("♟", color = palette.primary, fontSize = 22.sp, modifier = Modifier.size(44.dp).clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onMultiplayer() }).padding(10.dp))
             Text(text = stringResource(R.string.menu_create_title), color = palette.primary, fontWeight = FontWeight.SemiBold, modifier = Modifier
                 .background(palette.surfaceSecondary, RoundedCornerShape(999.dp))
-                .clickable(onClick = onCreateMemorama)
+                .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onCreateMemorama() })
                 .padding(horizontal = 14.dp, vertical = 8.dp),
             )
-            Text(text = "⚙", color = palette.primary, fontSize = 22.sp, modifier = Modifier.size(44.dp).clickable(onClick = onSettings).padding(10.dp))
+            Text(text = "⚙", color = palette.primary, fontSize = 22.sp, modifier = Modifier.size(44.dp).clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onSettings() }).padding(10.dp))
         }
     }
 }
@@ -237,7 +239,7 @@ private fun EmptyMineState(onCreateMemorama: () -> Unit) {
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .background(palette.primary, RoundedCornerShape(999.dp))
-                    .clickable(onClick = onCreateMemorama)
+                    .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onCreateMemorama() })
                     .padding(horizontal = 18.dp, vertical = 10.dp),
             )
         }
@@ -273,7 +275,14 @@ private fun AllTab(
                                 color = if (selected) palette.primary else palette.surfaceSecondary,
                                 shape = RoundedCornerShape(999.dp),
                             )
-                            .clickable { onDifficultyChange(entry) }
+                            // Android-only UI (iOS's Menu only ever shows a read-only
+                            // difficulty badge here, never a picker) — SELECT matches
+                            // HapticIntent's own "picker change" definition, the closest
+                            // iOS moment to what this control actually is.
+                            .clickable {
+                                HapticsService.fire(HapticIntent.SELECT)
+                                onDifficultyChange(entry)
+                            }
                             .padding(horizontal = 14.dp, vertical = 8.dp),
                     )
                 }
@@ -342,7 +351,7 @@ private fun BoardCell(
             .fillMaxWidth()
             .background(palette.surfacePrimary, RoundedCornerShape(14.dp))
             .border(1.dp, palette.surfaceBorder, RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
+            .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onClick() })
             .padding(12.dp),
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -353,7 +362,7 @@ private fun BoardCell(
                     color = if (isFavorite) palette.hardAmber else palette.textSecondary,
                     fontSize = 18.sp,
                     modifier = Modifier
-                        .clickable(onClick = onToggleFavorite)
+                        .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onToggleFavorite() })
                         .semantics { contentDescription = favoriteDescription },
                 )
                 if (onDelete != null) {

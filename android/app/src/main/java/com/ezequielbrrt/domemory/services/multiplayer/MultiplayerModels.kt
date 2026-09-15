@@ -86,4 +86,19 @@ data class MultiplayerRoom(
 ) {
     val allPairsMatched get() = cards.isNotEmpty() && cards.all { it.isMatched }
     fun isTurnFor(playerId: String) = status == MultiplayerRoomStatus.PLAYING && currentPlayerId == playerId
+
+    /**
+     * Whether tapping a card right now would actually flip one — mirrors iOS's
+     * `MultiplayerRoomViewModel.isInteractionEnabled`. Checked locally (no round trip to
+     * Firebase) so the optimistic `CARD_FLIP` haptic a tap fires immediately — before the
+     * transaction that actually moves the card even lands — matches what a legal tap would
+     * do: it's this player's turn, the room is still playing, and no already-selected pair
+     * is sitting there waiting to clear. Takes an `isCurrentUser` predicate rather than a raw
+     * id, the same shape [isTurnFor] would need if it also had to resolve "me" from the
+     * caller's auth session rather than being handed an id directly.
+     */
+    fun canFlipNow(isCurrentUser: (String) -> Boolean): Boolean =
+        status == MultiplayerRoomStatus.PLAYING &&
+            currentPlayerId?.let(isCurrentUser) == true &&
+            selectedCardIds.size < 2
 }

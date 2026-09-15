@@ -18,6 +18,8 @@ import com.ezequielbrrt.domemory.feature.game.CardView
 import com.ezequielbrrt.domemory.services.ads.AdMobNativeAdView
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
+import com.ezequielbrrt.domemory.services.haptics.HapticIntent
+import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.multiplayer.*
 import com.ezequielbrrt.domemory.services.stats.ProfileStatsRecorder
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
@@ -34,15 +36,25 @@ data class MultiplayerUiState(val room: MultiplayerRoom? = null, val error: Stri
  * site is unaffected. Wiring it records a multiplayer win exactly once per room, only for
  * the actual winner, guarded by [MultiplayerWinGuard] — see that class's doc for why the
  * guard is a separate, dependency-free object rather than a boolean field here.
+ *
+ * [onHaptic] is the same bare-callback shape as [com.ezequielbrrt.domemory.feature.game
+ * .GameViewModel.onHaptic] — null-default so every existing test/preview call site is
+ * unaffected, wired to the real [HapticsService.fire] only from `NavGraph.kt`. Every remote
+ * room-update moment (card flip resolution, turn handover, finish) goes through
+ * [MultiplayerHapticsTracker]; [choose] fires the one *local*, optimistic haptic
+ * ([HapticIntent.CARD_FLIP]) itself, the moment the tap happens, mirroring iOS's
+ * `MultiplayerRoomViewModel.choose(card:)`.
  */
 class MultiplayerViewModel(
     private val service: MultiplayerService,
     private val profileStats: ProfileStatsRecorder? = null,
+    private val onHaptic: ((HapticIntent) -> Unit)? = null,
 ) : ViewModel() {
     private val _state = MutableStateFlow(MultiplayerUiState()); val state = _state.asStateFlow()
     private var observer: kotlinx.coroutines.Job? = null
     private var reconnectDeadline: kotlinx.coroutines.Job? = null
     private val winGuard = MultiplayerWinGuard()
+    private val hapticsTracker = MultiplayerHapticsTracker()
     fun create(board: Board) = launchRoomAction { service.createRoom(board).id }
     fun join(code: String) = launchRoomAction { service.joinRoom(code) }
     fun joinScannedInvite(rawValue: String?) {
@@ -64,6 +76,12 @@ class MultiplayerViewModel(
     fun isCurrentUser(userId: String) = service.isCurrentUser(userId)
     fun restart(roomId: String) = viewModelScope.launch { runCatching { service.restart(roomId) }.onFailure(::fail) }
     fun choose(roomId: String, cardId: Int) = viewModelScope.launch {
+        // Optimistic and local — fired on the tap itself, before the transaction that
+        // actually moves the card lands, exactly like iOS's own `isInteractionEnabled`
+        // guard in front of its `.cardFlip` fire.
+        if (_state.value.room?.canFlipNow(service::isCurrentUser) == true) {
+            onHaptic?.invoke(HapticIntent.CARD_FLIP)
+        }
         runCatching { service.choose(roomId, cardId) }.onFailure(::fail)
     }
     private fun launchRoomAction(action: suspend () -> String) = viewModelScope.launch {
@@ -80,12 +98,28 @@ class MultiplayerViewModel(
             service.observe(id).collect { result ->
                 result.onSuccess { room ->
                     _state.value = _state.value.copy(room = room, loading = false)
+                    fireRoomHaptics(room)
                     scheduleMismatchClear(room)
                     reconcilePresence(room)
                     recordMultiplayerWinIfNeeded(room)
                 }.onFailure(::fail)
             }
         }
+    }
+    /** Spec: iOS's `MultiplayerRoomViewModel.fireRoomHaptics` — every haptic a *remote* room
+     * update can imply (a resolved pair, a turn landing on this player, the match finishing),
+     * as opposed to [choose]'s own local, optimistic CARD_FLIP. */
+    private fun fireRoomHaptics(room: MultiplayerRoom) {
+        val onHaptic = onHaptic ?: return
+        val isMyTurnNow = room.currentPlayerId?.let(service::isCurrentUser) == true
+        hapticsTracker.intentsFor(
+            status = room.status,
+            selectedCardIds = room.selectedCardIds,
+            cards = room.cards,
+            isMyTurnNow = isMyTurnNow,
+            winnerId = room.winnerId,
+            isCurrentUser = service::isCurrentUser,
+        ).forEach(onHaptic)
     }
     private fun scheduleMismatchClear(room: MultiplayerRoom) {
         val selected = room.selectedCardIds
@@ -130,7 +164,7 @@ class MultiplayerViewModel(
     val state by vm.state.collectAsState(); var code by rememberSaveable { mutableStateOf(initialCode) }; val p = LocalPalette.current; val context = LocalContext.current
     LaunchedEffect(initialCode) { if (initialCode.isNotBlank() && state.room == null) vm.join(initialCode) }
     Column(Modifier.fillMaxSize().background(p.appBackground).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        TextButton(onClick = onBack) { Text("‹") }; Text(stringResource(R.string.multiplayer_title))
+        TextButton(onClick = { HapticsService.fire(HapticIntent.TAP); onBack() }) { Text("‹") }; Text(stringResource(R.string.multiplayer_title))
         state.room?.let { room ->
             if (room.status in setOf(MultiplayerRoomStatus.PLAYING, MultiplayerRoomStatus.RECONNECTING, MultiplayerRoomStatus.FINISHED)) {
                 MultiplayerGameBoard(room, vm, Modifier.weight(1f))
@@ -159,15 +193,24 @@ class MultiplayerViewModel(
                 ) { Text(stringResource(R.string.multiplayer_invite_friend)) }
             }
             if (room.status == MultiplayerRoomStatus.READY && vm.isHost(room)) {
-                Button(onClick = { vm.start(room, boards) }, enabled = !state.loading, modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = { HapticsService.fire(HapticIntent.TAP); vm.start(room, boards) },
+                    enabled = !state.loading,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
                     Text(stringResource(R.string.multiplayer_start_game))
                 }
             }
         } ?: run {
             OutlinedTextField(code, { code = it }, label = { Text(stringResource(R.string.multiplayer_code_placeholder)) }, modifier = Modifier.fillMaxWidth())
-            Button(onClick = { vm.join(code) }, enabled = code.isNotBlank() && !state.loading, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.multiplayer_join_room)) }
+            Button(
+                onClick = { HapticsService.fire(HapticIntent.TAP); vm.join(code) },
+                enabled = code.isNotBlank() && !state.loading,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(stringResource(R.string.multiplayer_join_room)) }
             OutlinedButton(
                 onClick = {
+                    HapticsService.fire(HapticIntent.TAP)
                     launchMultiplayerQrScanner(
                         context = context,
                         onScanned = vm::joinScannedInvite,
@@ -177,7 +220,13 @@ class MultiplayerViewModel(
                 enabled = !state.loading,
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.multiplayer_scan_qr_code)) }
-            boards.firstOrNull()?.let { board -> Button(onClick = { vm.create(board) }, enabled = !state.loading, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.multiplayer_create_room)) } }
+            boards.firstOrNull()?.let { board ->
+                Button(
+                    onClick = { HapticsService.fire(HapticIntent.TAP); vm.create(board) },
+                    enabled = !state.loading,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(stringResource(R.string.multiplayer_create_room)) }
+            }
         }
         if (state.loading) CircularProgressIndicator(color = p.primary)
         state.error?.let { Text(it, color = p.secondary) }
@@ -236,7 +285,7 @@ private fun MultiplayerGameBoard(room: MultiplayerRoom, vm: MultiplayerViewModel
     }
     if (room.status == MultiplayerRoomStatus.FINISHED) {
         Button(
-            onClick = { vm.restart(room.id) },
+            onClick = { HapticsService.fire(HapticIntent.TAP); vm.restart(room.id) },
             enabled = vm.isHost(room),
             modifier = Modifier.fillMaxWidth(),
         ) {

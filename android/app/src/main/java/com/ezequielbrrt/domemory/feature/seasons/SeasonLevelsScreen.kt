@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.services.haptics.HapticIntent
+import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.seasons.Season
 import com.ezequielbrrt.domemory.services.seasons.SeasonLevelProgressStore
 import com.ezequielbrrt.domemory.services.seasons.SeasonLocaleResolver
@@ -177,7 +179,16 @@ fun SeasonLevelsScreen(
                         // here: unlike endless Levels, this screen's progress store has no
                         // "current level" concept to key a pulse off — see this slice's report
                         // for why that's a deliberate seam rather than a missed port.
-                        .pressScaleClickable(enabled = unlocked) { onLevelSelected(level) }
+                        //
+                        // Fires .select unconditionally, matching endless Levels' own tile tap
+                        // — there is no season-specific out-of-lives refusal to distinguish a
+                        // .warning from yet (a locked tile is simply non-clickable via
+                        // `enabled`, same as endless), so this deliberately doesn't replicate
+                        // the .warning branch of iOS's SeasonLevelsView.onSelect.
+                        .pressScaleClickable(enabled = unlocked) {
+                            HapticsService.fire(HapticIntent.SELECT)
+                            onLevelSelected(level)
+                        }
                         .padding(vertical = 14.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {

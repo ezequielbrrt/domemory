@@ -48,6 +48,8 @@ import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.ads.findActivity
+import com.ezequielbrrt.domemory.services.haptics.HapticIntent
+import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.ui.anim.pressScaleClickable
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
@@ -79,7 +81,7 @@ fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
                 currentLevel = highest,
                 livesRemaining = uiState.livesRemaining,
                 starBalance = uiState.starBalance,
-                onInfoClick = viewModel::presentIntro,
+                onInfoClick = { HapticsService.fire(HapticIntent.TAP); viewModel.presentIntro() },
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
@@ -116,14 +118,21 @@ fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
                 starBalance = uiState.starBalance,
                 canWatchAd = AdsService.isRewardedConfigured(AdPlacement.LEVELS_REWARDED_LIFE),
                 onWatchAd = {
+                    // Matches iOS's OutOfLivesModal: TAP on the button itself; the eventual
+                    // .reward fires separately from applyLifeRewardFromAd() once the ad
+                    // actually pays out.
+                    HapticsService.fire(HapticIntent.TAP)
                     AdsService.showRewarded(
                         activity = activity,
                         placement = AdPlacement.LEVELS_REWARDED_LIFE,
                         onReward = { viewModel.applyLifeRewardFromAd() },
                     )
                 },
+                // No TAP here — buyLifeWithStars() fires its own .reward on a successful
+                // spend, and iOS's own comment on this exact button says a .tap here would
+                // double-buzz.
                 onBuyWithStars = viewModel::buyLifeWithStars,
-                onDismiss = viewModel::dismissOutOfLivesPrompt,
+                onDismiss = { HapticsService.fire(HapticIntent.TAP); viewModel.dismissOutOfLivesPrompt() },
             )
         }
 
