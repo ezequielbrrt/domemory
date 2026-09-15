@@ -4,8 +4,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -25,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.core.model.Card
+import com.ezequielbrrt.domemory.ui.anim.pressScaleClickable
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 
 /**
@@ -52,7 +50,6 @@ fun CardView(
         label = "cardHide",
     )
     val showingFront = rotation < 90f
-    val interaction = remember { MutableInteractionSource() }
 
     Box(
         modifier = modifier
@@ -70,9 +67,13 @@ fun CardView(
                 color = if (showingFront) palette.surfaceBorder else Color.Transparent,
                 shape = RoundedCornerShape(14.dp),
             )
-            .clickable(
-                interactionSource = interaction,
-                indication = null,
+            // Same press-to-0.92 spring as level tiles (spec: "any other primarily-tappable
+            // game surface"). iOS never applies `TileTapStyle` to game cards themselves — this
+            // is an Android-only extension of the same reusable feedback to a surface that
+            // previously had none at all (`indication = null` with nothing replacing it).
+            // Visual-only: `onClick`/`enabled` are unchanged, so this doesn't touch the
+            // gameplay-determinism contract `CardView`'s model half is pinned against.
+            .pressScaleClickable(
                 enabled = !isHidden,
                 onClick = onClick,
             ),

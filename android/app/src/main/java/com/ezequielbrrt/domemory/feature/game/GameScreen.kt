@@ -38,6 +38,8 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,6 +51,7 @@ import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.services.ads.AdMobBanner
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
+import com.ezequielbrrt.domemory.ui.anim.NumericTransition
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import kotlinx.coroutines.launch
@@ -166,6 +169,25 @@ fun GameScreen(
 @Composable
 private fun GameHud(state: GameUiState, onPauseToggle: () -> Unit, onQuit: () -> Unit) {
     val palette = LocalPalette.current
+
+    // Spec 14.5: the timer only announces while frozen — "an always-on label would replace
+    // the icon-plus-number screen readers already read by default with a bare, contextless
+    // number" — so outside a freeze this stays null and the chip is left to its default
+    // label+value reading.
+    val frozenSeconds = timerAccessibilitySeconds(ceil(state.timeRemaining).toInt(), state.isFrozen)
+    val timerAccessibilityLabel = frozenSeconds?.let {
+        stringResource(R.string.levels_timer_frozen_format, it)
+    }
+
+    // Spec 14.5: the fails chip announces "N of M mistakes used". There's only an "M" to
+    // report in modes with a mistake budget (Levels/Seasons) — free play and the Daily
+    // Challenge leave `maxFailures` null, so there's nothing to announce and the chip keeps
+    // its default label+value reading there too.
+    val failsAccessibilityValues = failsChipAccessibilityValues(state.failedTries, state.maxFailures)
+    val failsAccessibilityLabel = failsAccessibilityValues?.let { (used, max) ->
+        stringResource(R.string.levels_mistakes_remaining_format, used, max)
+    }
+
     Row(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -175,6 +197,7 @@ private fun GameHud(state: GameUiState, onPauseToggle: () -> Unit, onQuit: () ->
             label = stringResource(R.string.game_time_label),
             value = "${ceil(state.timeRemaining).toInt()}",
             tint = if (state.isFrozen) palette.freezeBlue else palette.primary,
+            accessibilityLabel = timerAccessibilityLabel,
         )
         Chip(
             label = stringResource(R.string.game_pairs_label),
@@ -186,6 +209,7 @@ private fun GameHud(state: GameUiState, onPauseToggle: () -> Unit, onQuit: () ->
             value = state.maxFailures?.let { "${state.failedTries}/$it" }
                 ?: "${state.failedTries}",
             tint = if (state.mistakesAreCritical) palette.secondary else palette.textSecondary,
+            accessibilityLabel = failsAccessibilityLabel,
         )
         TextButton(onClick = onPauseToggle) {
             Text(
@@ -198,13 +222,38 @@ private fun GameHud(state: GameUiState, onPauseToggle: () -> Unit, onQuit: () ->
 }
 
 @Composable
-private fun Chip(label: String, value: String, tint: androidx.compose.ui.graphics.Color) {
+private fun Chip(
+    label: String,
+    value: String,
+    tint: androidx.compose.ui.graphics.Color,
+    accessibilityLabel: String? = null,
+) {
     val palette = LocalPalette.current
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = if (accessibilityLabel != null) {
+            Modifier.semantics(mergeDescendants = true) { contentDescription = accessibilityLabel }
+        } else {
+            Modifier
+        },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Text(text = label, fontSize = 11.sp, color = palette.textSecondary)
         Text(text = value, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = tint)
     }
 }
+
+/** Pure selection logic behind the timer chip's accessibility description (spec 14.5): only
+ * announced while frozen. Kept separate from the `@Composable` that calls `stringResource` so
+ * it is unit-testable without Compose/Robolectric. */
+fun timerAccessibilitySeconds(timeRemainingSeconds: Int, isFrozen: Boolean): Int? =
+    if (isFrozen) timeRemainingSeconds else null
+
+/** Pure selection logic behind the fails chip's accessibility description (spec 14.5): "N of M
+ * mistakes used" only applies where there's an M to report against — modes with no mistake
+ * budget ([maxFailures] null) have nothing to announce. Kept separate from the `@Composable`
+ * that calls `stringResource` so it is unit-testable without Compose/Robolectric. */
+fun failsChipAccessibilityValues(failedTries: Int, maxFailures: Int?): Pair<Int, Int>? =
+    maxFailures?.let { failedTries to it }
 
 /** The power-up bar under the HUD (spec 7.6). No confirmation step: a purchase applies
  * immediately, so every button is a single tap. */
@@ -249,11 +298,18 @@ private fun PowerUpBar(
         )
     }
     Spacer(Modifier.size(2.dp))
-    Text(
-        stringResource(R.string.levels_star_balance_format, starBalance),
-        fontSize = 11.sp,
-        color = palette.textSecondary,
-    )
+    // The one place iOS actually uses `.contentTransition(.numericText())` — see
+    // `PowerUpBar.swift`'s `balanceChip`. Everywhere else a plain `Text($count)` was left
+    // unanimated on purpose: iOS itself never applies the numeric transition to the HUD
+    // chips or the Levels header's star pill, so animating those here would be inventing
+    // behavior the source of truth doesn't have.
+    NumericTransition(targetValue = starBalance, label = "powerUpStarBalance") { balance ->
+        Text(
+            stringResource(R.string.levels_star_balance_format, balance),
+            fontSize = 11.sp,
+            color = palette.textSecondary,
+        )
+    }
 }
 
 @Composable
@@ -265,6 +321,15 @@ private fun PowerUpButton(
     modifier: Modifier = Modifier,
 ) {
     val palette = LocalPalette.current
+    // Spec 14.5: "power-up buttons announce '<name>, costs N stars'" — and "disabled controls
+    // stay silent", mirroring the haptics slice's own disabled-subtree rule, so this is only
+    // set while the button is actually enabled; disabled falls back to the default label+cost
+    // text reading instead of the crafted sentence.
+    val accessibilityLabel = if (enabled) {
+        stringResource(R.string.levels_powerup_cost_format, label, cost)
+    } else {
+        null
+    }
     Column(
         modifier
             .background(
@@ -272,6 +337,13 @@ private fun PowerUpButton(
                 RoundedCornerShape(12.dp),
             )
             .border(1.dp, palette.surfaceBorder, RoundedCornerShape(12.dp))
+            .then(
+                if (accessibilityLabel != null) {
+                    Modifier.semantics(mergeDescendants = true) { contentDescription = accessibilityLabel }
+                } else {
+                    Modifier
+                },
+            )
             .clickable(enabled = enabled, onClick = onClick)
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

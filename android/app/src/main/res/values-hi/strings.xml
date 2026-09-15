@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from DOMEMORY_ANDROID_SPEC.md section 19 (English base catalog). -->
+<resources>
+    <!-- Common -->
+    <string name="common_accept">स्वीकार करें</string>
+    <string name="common_app_name">DoMemory</string>
+    <string name="common_cancel">रद्द करें</string>
+    <string name="common_delete">हटाएं</string>
+    <string name="common_ok">ठीक है</string>
+
+    <!-- Difficulty -->
+    <string name="difficulty_easy">आसान</string>
+    <string name="difficulty_easy_subtitle">आरामदायक शुरुआत</string>
+    <string name="difficulty_medium">सामान्य</string>
+    <string name="difficulty_medium_subtitle">संतुलित चुनौती</string>
+    <string name="difficulty_hard">कठिन</string>
+    <string name="difficulty_hard_subtitle">अपनी याददाश्त निखारें</string>
+    <string name="difficulty_very_hard">बहुत कठिन</string>
+    <string name="difficulty_very_hard_subtitle">केवल विशेषज्ञों के लिए</string>
+    <string name="home_difficulty_title">कठिनाई</string>
+    <string name="home_select_difficulty_prompt">कठिनाई चुनें</string>
+
+    <!-- Gameplay -->
+    <string name="game_continue">जारी रखें</string>
+    <string name="game_go_to_menu">मेनू पर जाएं</string>
+    <string name="game_lose_message">माफ़ करें, आपका समय समाप्त हो गया</string>
+    <string name="game_pause_title">रोकें</string>
+    <string name="game_pairs_label">जोड़े</string>
+    <string name="game_points_label">अंक</string>
+    <string name="game_quit_confirmation">क्या आप वाकई बाहर निकलना चाहते हैं?</string>
+    <string name="game_remaining_label">बाकी</string>
+    <string name="game_errors_label">गलतियां</string>
+    <string name="game_time_label">समय</string>
+    <string name="game_try_again">फिर से कोशिश करें</string>
+    <string name="game_win_title">बधाई हो!</string>
+    <string name="game_win_description">आपने यह मेमोरामा समय पर पूरा किया</string>
+    <string name="game_rewarded_extra_time">विज्ञापन देखकर 30 सेकंड जोड़ें</string>
+    <string name="game_rewarded_hint">विज्ञापन देखकर संकेत पाएं</string>
+    <string name="ads_loading">विज्ञापन लोड हो रहा है...</string>
+    <string name="ads_label">विज्ञापन</string>
+
+    <!-- Levels -->
+    <string name="levels_screen_title">स्तर</string>
+    <string name="level_title_format">स्तर %d</string>
+    <string name="levels_current_level_format">फिलहाल स्तर %d पर</string>
+    <string name="level_cleared">स्तर पूरा हुआ!</string>
+    <string name="level_next">अगला स्तर</string>
+    <string name="level_back_to_levels">स्तरों पर वापस जाएं</string>
+    <string name="levels_out_of_lives_title">जीवन समाप्त!</string>
+    <string name="levels_out_of_lives_message">+1 जीवन के लिए विज्ञापन देखें, या नए सेट के लिए कल वापस आएं।</string>
+    <string name="levels_out_of_lives_message_no_ad">एक और जीवन के लिए सितारे खर्च करें, या कल नए सेट के लिए वापस आएँ।</string>
+    <string name="levels_watch_ad_for_life">+1 जीवन के लिए विज्ञापन देखें</string>
+    <string name="levels_lives_remaining_format">%1$d में से %2$d जीवन शेष</string>
+
+    <!-- Levels star economy -->
+    <string name="levels_powerup_extra_time">+15 से.</string>
+    <string name="levels_powerup_peek">झलक</string>
+    <string name="levels_powerup_freeze">फ़्रीज़</string>
+    <string name="levels_powerup_reveal_pair">जोड़ी दिखाएँ</string>
+    <string name="levels_star_balance_format">%d सितारे उपलब्ध</string>
+    <string name="levels_powerup_cost_format">%1$s, %2$d सितारे लगेंगे</string>
+    <string name="levels_buy_life_format">एक जीवन खरीदें — %d</string>
+    <string name="levels_skip_level_format">यह स्तर छोड़ें — %d</string>
+    <string name="levels_skip_level_confirm_title">यह स्तर छोड़ें?</string>
+    <string name="levels_skip_level_confirm_message">अगला स्तर खुल जाएगा, लेकिन इस स्तर पर शून्य सितारे रहेंगे। आप इसे कभी भी दोबारा खेल सकते हैं।</string>
+    <string name="levels_skip_level_confirm_action">छोड़ें</string>
+
+    <!-- Levels mistake budget -->
+    <string name="levels_lose_too_many_mistakes">बहुत सारी गलतियाँ</string>
+    <string name="levels_forgive_ad_format">%d गलतियाँ माफ़ करने के लिए विज्ञापन देखें</string>
+    <string name="levels_forgive_stars_format">%1$d गलतियाँ माफ़ करें — %2$d</string>
+    <string name="levels_mistakes_remaining_format">%1$d में से %2$d गलतियाँ</string>
+    <string name="levels_timer_frozen_format">घड़ी रुकी है, %d सेकंड बाकी</string>
+
+    <!-- Levels intro -->
+    <string name="levels_intro_progress_title">अनंत स्तर</string>
+    <string name="levels_intro_progress_subtitle">अगला स्तर खोलने के लिए मौजूदा स्तर पूरा करें। बोर्ड बड़े होते जाते हैं और समय कम — हमेशा एक और स्तर तैयार रहता है।</string>
+    <string name="levels_intro_stars_title">सितारे कमाएँ</string>
+    <string name="levels_intro_stars_subtitle">तेज़ी से और बिना गलती पूरा करें और हर स्तर पर 3 तक सितारे कमाएँ, फिर उन्हें पावर-अप, अतिरिक्त जीवन या स्तर छोड़ने पर खर्च करें।</string>
+    <string name="levels_intro_lives_title">जीवन रोज़ भरते हैं</string>
+    <string name="levels_intro_lives_subtitle">आपको हर दिन %d जीवन मिलते हैं और हर हार पर एक कम हो जाता है। जीवन खत्म? विज्ञापन देखें या सितारे खर्च करें।</string>
+    <string name="levels_intro_mistakes_title">गलतियों का ध्यान रखें</string>
+    <string name="levels_intro_mistakes_subtitle">हर स्तर में सीमित गलतियाँ ही चलती हैं। सीमा पर पहुँचते ही खेल खत्म — लेकिन आप गलतियाँ माफ़ करके जारी रख सकते हैं।</string>
+    <string name="levels_intro_done">समझ गया</string>
+    <string name="levels_intro_info_accessibility">स्तर कैसे काम करते हैं</string>
+
+    <!-- Seasons -->
+    <string name="season_fallback_title">सीज़न</string>
+    <string name="season_progress_format">%1$d / %2$d</string>
+    <string name="season_progress_accessibility_format">%1$d में से %2$d स्तर पूरे</string>
+    <string name="season_days_left_format">%d दिन बाकी</string>
+    <string name="season_one_day_left">1 दिन बाकी</string>
+    <string name="season_last_day">आखिरी दिन</string>
+    <string name="season_complete_badge">पूर्ण</string>
+    <string name="season_complete_title">सीज़न पूरा हुआ!</string>
+    <string name="season_complete_message">आपने सभी स्तर पूरे कर लिए। इनमें से किसी को दोबारा खेलकर उसके सितारे बेहतर करें।</string>
+
+    <!-- Menu -->
+    <string name="menu_tab_levels">स्तर</string>
+    <string name="menu_tab_mine">मेरे मेमोरामा</string>
+    <string name="menu_tab_all">सभी</string>
+    <string name="menu_random_game">रैंडम गेम</string>
+    <string name="menu_empty_mine_message">आपके पास अभी तक अपना कोई मेमोरामा नहीं है</string>
+    <string name="menu_empty_mine_action">एक बनाएं</string>
+    <string name="menu_create_title">नया मेमोरामा</string>
+    <string name="menu_create_name_label">नाम</string>
+    <string name="menu_create_name_placeholder">उदा.: फल, जानवर...</string>
+    <string name="menu_create_emojis_label">इमोजी</string>
+    <string name="menu_create_add">जोड़ें</string>
+    <string name="menu_create_add_emoji">इमोजी जोड़ें</string>
+    <string name="menu_create_minimum_hint">कम से कम 2</string>
+    <string name="menu_create_save">सहेजें</string>
+    <string name="menu_create_rejected">सेव करने से पहले कम से कम 2 इमोजी जोड़ें</string>
+    <string name="menu_levels_coming_soon_title">लेवल</string>
+    <string name="menu_levels_coming_soon_subtitle">जल्द आ रहा है</string>
+    <string name="menu_favorite_add">पसंदीदा में जोड़ें</string>
+    <string name="menu_favorite_remove">पसंदीदा से हटाएँ</string>
+    <string name="menu_delete_memorama">मिटाएँ</string>
+    <string name="menu_delete_confirm_title">यह मेमोरामा मिटाएँ?</string>
+    <string name="menu_delete_confirm_message">इससे इसके आँकड़े भी मिट जाएँगे।</string>
+    <string name="menu_difficulty_label">कठिनाई</string>
+    <string name="stats_played_label">खेले</string>
+    <string name="stats_won_label">जीते</string>
+
+    <!-- Daily Challenge -->
+    <string name="daily_challenge_title">दैनिक चुनौती</string>
+    <string name="daily_challenge_subtitle">हर दिन नया बोर्ड</string>
+    <string name="daily_challenge_completed">आज के लिए पूरा!</string>
+    <string name="daily_challenge_streak_format">🔥 %d-दिन की लकीर</string>
+
+    <!-- Multiplayer -->
+    <string name="multiplayer_title">मल्टीप्लेयर</string>
+    <string name="multiplayer_create_room">रूम बनाएं</string>
+    <string name="multiplayer_join_room">रूम में जाएं</string>
+    <string name="multiplayer_join_description">अपने दोस्त का 6-अक्षर वाला रूम कोड डालें.</string>
+    <string name="multiplayer_code_placeholder">ABC123</string>
+    <string name="multiplayer_qr_code">मल्टीप्लेयर रूम QR कोड</string>
+    <string name="multiplayer_scan_qr_code">QR कोड स्कैन करें</string>
+    <string name="multiplayer_start_game">गेम शुरू करें</string>
+    <string name="multiplayer_waiting_for_player">यह कोड शेयर करें और दूसरे खिलाड़ी का इंतज़ार करें</string>
+    <string name="multiplayer_ready_to_start">खिलाड़ी जुड़ गया. तैयार हों तो शुरू करें</string>
+    <string name="multiplayer_waiting_for_host">होस्ट के शुरू करने का इंतज़ार</string>
+    <string name="multiplayer_your_turn">आपकी बारी</string>
+    <string name="multiplayer_opponent_turn">प्रतिद्वंद्वी की बारी</string>
+    <string name="multiplayer_reconnecting">खिलाड़ी के दोबारा जुड़ने का इंतज़ार</string>
+    <string name="multiplayer_you_won">आप जीते</string>
+    <string name="multiplayer_you_lost">आप हारे</string>
+    <string name="multiplayer_draw">ड्रॉ</string>
+    <string name="multiplayer_room_closed">रूम बंद</string>
+    <string name="multiplayer_you">आप</string>
+    <string name="multiplayer_opponent">प्रतिद्वंद्वी</string>
+    <string name="multiplayer_final_score">अंतिम स्कोर</string>
+    <string name="multiplayer_play_again">फिर खेलें</string>
+    <string name="multiplayer_waiting_for_rematch">होस्ट का इंतज़ार</string>
+    <string name="multiplayer_choose_another_game">दूसरा गेम चुनें</string>
+    <string name="multiplayer_host_name">होस्ट</string>
+    <string name="multiplayer_guest_name">मेहमान</string>
+    <string name="multiplayer_invite_friend">किसी मित्र को चुनौती दें</string>
+    <string name="multiplayer_invite_message">मैं तुम्हें DoMemory में मेमोरी मैच की चुनौती देता हूँ! कोड %s से मेरे रूम में शामिल हो:</string>
+    <string name="multiplayer_generic_error">कुछ गलत हो गया. कृपया फिर कोशिश करें.</string>
+    <string name="multiplayer_error_firebase_unavailable">मल्टीप्लेयर अभी उपलब्ध नहीं है.</string>
+    <string name="multiplayer_error_authentication">मल्टीप्लेयर से कनेक्ट नहीं हो सका.</string>
+    <string name="multiplayer_error_room_not_found">रूम नहीं मिला.</string>
+    <string name="multiplayer_error_room_full">यह रूम पहले से भरा है.</string>
+    <string name="multiplayer_error_room_unavailable">यह रूम अब उपलब्ध नहीं है.</string>
+    <string name="multiplayer_error_invalid_move">यह चाल उपलब्ध नहीं है.</string>
+    <string name="multiplayer_error_permission_denied">Firebase नियम मल्टीप्लेयर रूम रोक रहे हैं.</string>
+    <string name="multiplayer_error_encoding">रूम तैयार नहीं हो सका.</string>
+    <string name="multiplayer_error_decoding">रूम पढ़ा नहीं जा सका.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">सेटिंग्स</string>
+    <string name="settings_description">अपनी गेम पसंद बदलें</string>
+    <string name="settings_section_game">गेम</string>
+    <string name="settings_section_preferences">प्राथमिकताएँ</string>
+    <string name="settings_section_about">परिचय</string>
+    <string name="settings_theme_title">थीम</string>
+    <string name="settings_theme_prompt">अपनी पसंद का रूप चुनें</string>
+    <string name="theme_system">सिस्टम</string>
+    <string name="theme_light">लाइट</string>
+    <string name="theme_dark">डार्क</string>
+    <string name="settings_haptics_title">हैप्टिक्स</string>
+    <string name="settings_haptics_description_on">बटन और मिलान वाले जोड़े हल्का कंपन देते हैं।</string>
+    <string name="settings_haptics_description_off">कंपन फ़ीडबैक बंद है।</string>
+    <string name="settings_notifications_title">रिमाइंडर</string>
+    <string name="settings_notifications_description_on">यदि आपने 2 दिनों में नहीं खेला तो आपको याद दिलाया जाएगा</string>
+    <string name="settings_notifications_description_off">जब आपने कुछ समय से नहीं खेला हो तो सूचना पाएं</string>
+    <string name="settings_notifications_denied_title">सूचनाएं अक्षम हैं</string>
+    <string name="settings_notifications_denied_message">रिमाइंडर पाने के लिए Android सेटिंग्स में DoMemory की सूचनाएं सक्षम करें।</string>
+    <string name="settings_notifications_open_settings">सेटिंग्स खोलें</string>
+    <string name="settings_review_title">DoMemory को रेट करें</string>
+    <string name="settings_review_description">समीक्षाएँ दूसरे खिलाड़ियों को गेम खोजने में मदद करती हैं</string>
+    <string name="settings_whats_new_title">नया क्या है</string>
+    <string name="settings_whats_new_description">देखें कि नए अपडेट में क्या बदला</string>
+
+    <!-- Achievements -->
+    <string name="achievements_title">उपलब्धियाँ</string>
+    <string name="achievements_subtitle">अपनी प्रगति और बैज देखें</string>
+    <string name="achievements_stats_section">आपके आँकड़े</string>
+    <string name="achievements_badges_section">बैज</string>
+    <string name="stat_total_games">खेली गई बाज़ियाँ</string>
+    <string name="stat_total_wins">जीत</string>
+    <string name="stat_win_rate">जीत दर</string>
+    <string name="stat_perfect_games">परफेक्ट गेम</string>
+    <string name="stat_longest_streak">सबसे लंबी लकीर</string>
+    <string name="stat_multiplayer_wins">मल्टीप्लेयर जीत</string>
+    <string name="ach_wins_title_format">%d जीत</string>
+    <string name="ach_wins_detail_format">%d बाज़ियाँ जीतें</string>
+    <string name="ach_streak_title_format">%d-दिन की लकीर</string>
+    <string name="ach_streak_detail_format">%d-दिन की दैनिक लकीर तक पहुँचें</string>
+    <string name="ach_perfect_title">निर्दोष</string>
+    <string name="ach_perfect_detail">बिना गलती के गेम जीतें</string>
+    <string name="ach_multiplayer_title">चैंपियन</string>
+    <string name="ach_multiplayer_detail">अपना पहला मल्टीप्लेयर मैच जीतें</string>
+
+    <!-- Share -->
+    <string name="share_result">परिणाम साझा करें</string>
+    <string name="share_result_caption">मैंने DoMemory में %d जोड़े मिलाए! क्या तुम मुझे हरा सकते हो?</string>
+
+    <!-- Onboarding intro -->
+    <string name="intro_multiplayer_title">दोस्तों के साथ खेलें</string>
+    <string name="intro_multiplayer_subtitle">रियल-टाइम मल्टीप्लेयर रूम में किसी को भी चुनौती दें — बस 6-अंकों का कोड या QR साझा करें।</string>
+    <string name="intro_custom_title">इसे अपना बनाएं</string>
+    <string name="intro_custom_subtitle">अपने खुद के इमोजी कार्ड सेट बनाएं और पसंदीदा मेमोरमा खेलें।</string>
+    <string name="intro_daily_title">रोज़ वापस आएं</string>
+    <string name="intro_daily_subtitle">हर दिन एक नया बोर्ड। लकीर बनाएं और बनाए रखें!</string>
+    <string name="intro_skip">छोड़ें</string>
+    <string name="intro_next">आगे</string>
+    <string name="intro_get_started">शुरू करें</string>
+
+    <!-- Notification primer -->
+    <string name="notification_primer_title">अपनी लय बनाए रखें</string>
+    <string name="notification_primer_message">रिमाइंडर चालू करें और DoMemory आपको तब बताएगा जब:</string>
+    <string name="notification_primer_benefit_streak">आपकी दैनिक चुनौती की लय टूटने वाली हो</string>
+    <string name="notification_primer_benefit_inactive">आपने कुछ दिनों से न खेला हो</string>
+    <string name="notification_primer_benefit_no_spam">बस इतना ही — कुछ ही रिमाइंडर, कभी स्पैम नहीं</string>
+    <string name="notification_primer_preview_title">अपनी लय मत तोड़िए!</string>
+    <string name="notification_primer_preview_message">आपकी 5 दिन की लय आज रात खत्म हो रही है। आज की चुनौती खेलें!</string>
+    <string name="notification_primer_enable">रिमाइंडर चालू करें</string>
+    <string name="notification_primer_later">बाद में</string>
+
+    <!-- Notifications -->
+    <string name="notification_reminder_title">खेलने का समय!</string>
+    <string name="notification_reminder_body">आपने कुछ समय से DoMemory नहीं खेला है। अपने दिमाग को तेज़ रखें!</string>
+    <string name="notification_streak_risk_title">अपनी लकीर मत तोड़ो!</string>
+    <string name="notification_streak_risk_body">आपकी %d-दिन की लकीर आज रात खत्म हो जाएगी। इसे बनाए रखने के लिए आज की चुनौती खेलें! 🔥</string>
+
+    <!-- What's New (shell) -->
+    <string name="whats_new_title">DoMemory में नया क्या है</string>
+    <string name="whats_new_button">खेलते हैं!</string>
+
+    <!-- What's New v3.0.0 (retired content, still in the catalog) -->
+    <string name="whats_new_multiplayer_title">मल्टीप्लेयर</string>
+    <string name="whats_new_multiplayer_description">दोस्त को रियल-टाइम में चुनौती दें — कमरा बनाएं, 6-अंकीय कोड या QR साझा करें और अधिक जोड़े खोजें।</string>
+    <string name="whats_new_reminders_title">खेल अनुस्मारक</string>
+    <string name="whats_new_reminders_description">कुछ दिन न खेलने पर सूचना मिलेगी ताकि आपका दिमाग तेज़ बना रहे।</string>
+    <string name="whats_new_theme_title">लाइट और डार्क मोड</string>
+    <string name="whats_new_theme_description">सेटिंग्स में सिस्टम, लाइट या डार्क चुनकर अपनी पसंद के अनुसार ऐप का रूप बदलें।</string>
+    <string name="whats_new_hint_title">संकेत</string>
+    <string name="whats_new_hint_description">अटक गए? गेम रोकें और छोटा विज्ञापन देखें — एक छुपा हुआ जोड़ा सामने आ जाएगा।</string>
+    <string name="whats_new_games_title">खेलने के लिए और भी गेम</string>
+    <string name="whats_new_games_description">हर कठिनाई स्तर पर दर्जनों नए इमोजी कार्ड सेट — महारत हासिल करने के लिए 130 से ज़्यादा मेमोरमा।</string>
+
+    <!-- What's New v4.0.0 (retired content) -->
+    <string name="whats_new_levels_title">स्तर</string>
+    <string name="whats_new_levels_description">बिल्कुल नया अनंत मोड। अगला स्तर खोलने के लिए मौजूदा पूरा करें — बोर्ड बड़े होते जाते हैं और समय कम।</string>
+    <string name="whats_new_stars_title">सितारा रेटिंग</string>
+    <string name="whats_new_stars_description">तेज़ी से और बिना गलती पूरा करें और हर स्तर पर 3 तक सितारे कमाएँ। स्कोर सुधारने के लिए कोई भी स्तर दोबारा खेलें।</string>
+    <string name="whats_new_powerups_title">पावर-अप</string>
+    <string name="whats_new_powerups_description">खेल के दौरान सितारे खर्च करें — अतिरिक्त समय, बोर्ड की झलक, रुकी हुई घड़ी या एक मुफ़्त जोड़ी।</string>
+    <string name="whats_new_lives_title">जीवन और गलतियाँ</string>
+    <string name="whats_new_lives_description">हर दिन 4 जीवन मिलते हैं, और हर स्तर में सीमित गलतियाँ ही चलती हैं। खत्म हो गए? विज्ञापन देखें या सितारे खर्च करें।</string>
+
+    <!-- What's New v4.2.0 (current) -->
+    <string name="whats_new_seasons_title">सीज़न लेवल</string>
+    <string name="whats_new_seasons_description">डरावना सीज़न जैसे सीमित समय के सीज़न खेलें — एक थीम वाला लेवल सेट जिसके अपने इनाम हैं, जो अगला शुरू होने से पहले कुछ हफ्तों तक चलता है।</string>
+    <string name="whats_new_season_artwork_title">सीज़न आर्टवर्क</string>
+    <string name="whats_new_season_artwork_description">हर सीज़न लेवल मैप पर अपना खुद का बैकग्राउंड और कार्ड आर्ट लाता है, ताकि नया सीज़न हमेशा अलग दिखे।</string>
+    <string name="whats_new_tap_to_play_title">खेलने के लिए टैप करें</string>
+    <string name="whats_new_tap_to_play_description">लेवल मैप अब यह दिखाने के लिए स्पंदित होता है कि आगे क्या है, और हर टाइल आपके टैप पर प्रतिक्रिया देती है।</string>
+    <string name="whats_new_season_progress_title">सीज़न प्रगति</string>
+    <string name="whats_new_season_progress_description">लाइव प्रोग्रेस बार और काउंटडाउन के साथ हर सीज़न में अपनी प्रगति ट्रैक करें — समय खत्म होने से पहले हर लेवल पूरा करें।</string>
+
+    <!-- Android shell strings with no iOS counterpart -->
+    <string name="common_loading">लोड हो रहा है…</string>
+    <string name="menu_offline_boards">ऑफ़लाइन — शामिल मेमोरामा दिखाए जा रहे हैं</string>
+</resources>

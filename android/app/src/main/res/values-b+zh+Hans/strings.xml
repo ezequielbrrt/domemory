@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from DOMEMORY_ANDROID_SPEC.md section 19 (English base catalog). -->
+<resources>
+    <!-- Common -->
+    <string name="common_accept">接受</string>
+    <string name="common_app_name">DoMemory</string>
+    <string name="common_cancel">取消</string>
+    <string name="common_delete">删除</string>
+    <string name="common_ok">确定</string>
+
+    <!-- Difficulty -->
+    <string name="difficulty_easy">简单</string>
+    <string name="difficulty_easy_subtitle">轻松开始</string>
+    <string name="difficulty_medium">普通</string>
+    <string name="difficulty_medium_subtitle">恰到好处的挑战</string>
+    <string name="difficulty_hard">困难</string>
+    <string name="difficulty_hard_subtitle">磨练你的记忆力</string>
+    <string name="difficulty_very_hard">非常困难</string>
+    <string name="difficulty_very_hard_subtitle">仅限高手</string>
+    <string name="home_difficulty_title">难度</string>
+    <string name="home_select_difficulty_prompt">请选择难度</string>
+
+    <!-- Gameplay -->
+    <string name="game_continue">继续</string>
+    <string name="game_go_to_menu">返回菜单</string>
+    <string name="game_lose_message">很遗憾，时间到了</string>
+    <string name="game_pause_title">暂停</string>
+    <string name="game_pairs_label">配对</string>
+    <string name="game_points_label">分数</string>
+    <string name="game_quit_confirmation">确定要退出吗？</string>
+    <string name="game_remaining_label">剩余</string>
+    <string name="game_errors_label">错误</string>
+    <string name="game_time_label">时间</string>
+    <string name="game_try_again">再试一次</string>
+    <string name="game_win_title">恭喜！</string>
+    <string name="game_win_description">你按时完成了这个记忆游戏</string>
+    <string name="game_rewarded_extra_time">观看广告增加30秒</string>
+    <string name="game_rewarded_hint">观看广告获得提示</string>
+    <string name="ads_loading">广告加载中...</string>
+    <string name="ads_label">广告</string>
+
+    <!-- Levels -->
+    <string name="levels_screen_title">关卡</string>
+    <string name="level_title_format">第 %d 关</string>
+    <string name="levels_current_level_format">当前第 %d 关</string>
+    <string name="level_cleared">关卡完成！</string>
+    <string name="level_next">下一关</string>
+    <string name="level_back_to_levels">返回关卡</string>
+    <string name="levels_out_of_lives_title">生命值用完了！</string>
+    <string name="levels_out_of_lives_message">观看广告获得 +1 生命值，或明天再来获取新的生命值。</string>
+    <string name="levels_out_of_lives_message_no_ad">花费星星再获得一个生命，或明天回来领取新的生命。</string>
+    <string name="levels_watch_ad_for_life">观看广告获得 +1 生命值</string>
+    <string name="levels_lives_remaining_format">剩余 %1$d / %2$d 条生命</string>
+
+    <!-- Levels star economy -->
+    <string name="levels_powerup_extra_time">+15秒</string>
+    <string name="levels_powerup_peek">偷看</string>
+    <string name="levels_powerup_freeze">冻结</string>
+    <string name="levels_powerup_reveal_pair">揭示配对</string>
+    <string name="levels_star_balance_format">可用星星 %d 颗</string>
+    <string name="levels_powerup_cost_format">%1$s，需要 %2$d 颗星星</string>
+    <string name="levels_buy_life_format">购买一条生命 — %d</string>
+    <string name="levels_skip_level_format">跳过本关 — %d</string>
+    <string name="levels_skip_level_confirm_title">要跳过本关吗？</string>
+    <string name="levels_skip_level_confirm_message">下一关会解锁，但本关将保持零星。你可以随时重玩。</string>
+    <string name="levels_skip_level_confirm_action">跳过</string>
+
+    <!-- Levels mistake budget -->
+    <string name="levels_lose_too_many_mistakes">错误次数过多</string>
+    <string name="levels_forgive_ad_format">观看广告抵消 %d 次错误</string>
+    <string name="levels_forgive_stars_format">抵消 %1$d 次错误 — %2$d</string>
+    <string name="levels_mistakes_remaining_format">已用错误 %1$d / %2$d</string>
+    <string name="levels_timer_frozen_format">时间已冻结，剩余 %d 秒</string>
+
+    <!-- Levels intro -->
+    <string name="levels_intro_progress_title">无尽关卡</string>
+    <string name="levels_intro_progress_subtitle">通关后即可解锁下一关。牌面越来越大，时间越来越紧，总有下一关在等着你。</string>
+    <string name="levels_intro_stars_title">赚取星星</string>
+    <string name="levels_intro_stars_subtitle">又快又准地通关，每关最多可得 3 颗星。星星可用于道具、额外生命，或跳过卡住的关卡。</string>
+    <string name="levels_intro_lives_title">生命每日恢复</string>
+    <string name="levels_intro_lives_subtitle">每天获得 %d 个生命，每输一关消耗一个。用完了？观看广告或花费星星即可继续。</string>
+    <string name="levels_intro_mistakes_title">小心失误</string>
+    <string name="levels_intro_mistakes_subtitle">每关允许的失误次数有限。达到上限本轮就结束了——但你可以抵消失误后继续。</string>
+    <string name="levels_intro_done">知道了</string>
+    <string name="levels_intro_info_accessibility">关卡玩法说明</string>
+
+    <!-- Seasons -->
+    <string name="season_fallback_title">赛季</string>
+    <string name="season_progress_format">%1$d / %2$d</string>
+    <string name="season_progress_accessibility_format">已通关 %1$d 关中的 %2$d 关</string>
+    <string name="season_days_left_format">剩余 %d 天</string>
+    <string name="season_one_day_left">剩余 1 天</string>
+    <string name="season_last_day">最后一天</string>
+    <string name="season_complete_badge">已完成</string>
+    <string name="season_complete_title">赛季完成！</string>
+    <string name="season_complete_message">你已通关所有关卡。随时重玩任意一关来提升它的星数。</string>
+
+    <!-- Menu -->
+    <string name="menu_tab_levels">关卡</string>
+    <string name="menu_tab_mine">我的记忆游戏</string>
+    <string name="menu_tab_all">全部</string>
+    <string name="menu_random_game">随机游戏</string>
+    <string name="menu_empty_mine_message">你还没有自己的记忆游戏</string>
+    <string name="menu_empty_mine_action">创建一个</string>
+    <string name="menu_create_title">新记忆游戏</string>
+    <string name="menu_create_name_label">名称</string>
+    <string name="menu_create_name_placeholder">例如：水果、动物...</string>
+    <string name="menu_create_emojis_label">表情</string>
+    <string name="menu_create_add">添加</string>
+    <string name="menu_create_add_emoji">添加表情</string>
+    <string name="menu_create_minimum_hint">至少 2 个</string>
+    <string name="menu_create_save">保存</string>
+    <string name="menu_create_rejected">保存前请至少添加2个表情符号</string>
+    <string name="menu_levels_coming_soon_title">关卡</string>
+    <string name="menu_levels_coming_soon_subtitle">即将推出</string>
+    <string name="menu_favorite_add">添加到收藏</string>
+    <string name="menu_favorite_remove">从收藏中移除</string>
+    <string name="menu_delete_memorama">删除</string>
+    <string name="menu_delete_confirm_title">删除这个记忆游戏？</string>
+    <string name="menu_delete_confirm_message">这也会清除其统计数据。</string>
+    <string name="menu_difficulty_label">难度</string>
+    <string name="stats_played_label">已玩</string>
+    <string name="stats_won_label">获胜</string>
+
+    <!-- Daily Challenge -->
+    <string name="daily_challenge_title">每日挑战</string>
+    <string name="daily_challenge_subtitle">每天全新棋盘</string>
+    <string name="daily_challenge_completed">今日已完成！</string>
+    <string name="daily_challenge_streak_format">🔥 连续 %d 天</string>
+
+    <!-- Multiplayer -->
+    <string name="multiplayer_title">多人游戏</string>
+    <string name="multiplayer_create_room">创建房间</string>
+    <string name="multiplayer_join_room">加入房间</string>
+    <string name="multiplayer_join_description">输入好友的 6 位房间代码。</string>
+    <string name="multiplayer_code_placeholder">ABC123</string>
+    <string name="multiplayer_qr_code">多人房间二维码</string>
+    <string name="multiplayer_scan_qr_code">扫描二维码</string>
+    <string name="multiplayer_start_game">开始游戏</string>
+    <string name="multiplayer_waiting_for_player">分享此代码并等待另一位玩家</string>
+    <string name="multiplayer_ready_to_start">玩家已加入，准备好后开始</string>
+    <string name="multiplayer_waiting_for_host">等待房主开始</string>
+    <string name="multiplayer_your_turn">轮到你</string>
+    <string name="multiplayer_opponent_turn">对手回合</string>
+    <string name="multiplayer_reconnecting">等待玩家重新连接</string>
+    <string name="multiplayer_you_won">你赢了</string>
+    <string name="multiplayer_you_lost">你输了</string>
+    <string name="multiplayer_draw">平局</string>
+    <string name="multiplayer_room_closed">房间已关闭</string>
+    <string name="multiplayer_you">你</string>
+    <string name="multiplayer_opponent">对手</string>
+    <string name="multiplayer_final_score">最终得分</string>
+    <string name="multiplayer_play_again">再玩一次</string>
+    <string name="multiplayer_waiting_for_rematch">等待房主</string>
+    <string name="multiplayer_choose_another_game">选择其他游戏</string>
+    <string name="multiplayer_host_name">房主</string>
+    <string name="multiplayer_guest_name">访客</string>
+    <string name="multiplayer_invite_friend">挑战好友</string>
+    <string name="multiplayer_invite_message">我要在 DoMemory 和你来一场记忆对决！用代码 %s 加入我的房间:</string>
+    <string name="multiplayer_generic_error">出了点问题，请重试。</string>
+    <string name="multiplayer_error_firebase_unavailable">多人游戏暂不可用。</string>
+    <string name="multiplayer_error_authentication">无法连接多人游戏。</string>
+    <string name="multiplayer_error_room_not_found">未找到房间。</string>
+    <string name="multiplayer_error_room_full">此房间已满。</string>
+    <string name="multiplayer_error_room_unavailable">此房间不再可用。</string>
+    <string name="multiplayer_error_invalid_move">该操作不可用。</string>
+    <string name="multiplayer_error_permission_denied">Firebase 规则正在阻止多人房间。</string>
+    <string name="multiplayer_error_encoding">无法准备房间。</string>
+    <string name="multiplayer_error_decoding">无法读取房间。</string>
+
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="settings_description">调整你的游戏偏好</string>
+    <string name="settings_section_game">游戏</string>
+    <string name="settings_section_preferences">偏好设置</string>
+    <string name="settings_section_about">关于</string>
+    <string name="settings_theme_title">主题</string>
+    <string name="settings_theme_prompt">选择你偏好的外观</string>
+    <string name="theme_system">跟随系统</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_dark">深色</string>
+    <string name="settings_haptics_title">触感反馈</string>
+    <string name="settings_haptics_description_on">点击按钮和配对成功时会有轻微振动。</string>
+    <string name="settings_haptics_description_off">振动反馈已关闭。</string>
+    <string name="settings_notifications_title">提醒</string>
+    <string name="settings_notifications_description_on">若 2 天未游戏，将向您发送提醒</string>
+    <string name="settings_notifications_description_off">长时间未游戏时收到通知</string>
+    <string name="settings_notifications_denied_title">通知已关闭</string>
+    <string name="settings_notifications_denied_message">请在 Android 设置中为 DoMemory 开启通知，以接收提醒。</string>
+    <string name="settings_notifications_open_settings">打开设置</string>
+    <string name="settings_review_title">为 DoMemory 评分</string>
+    <string name="settings_review_description">评价能帮助更多玩家发现这款游戏</string>
+    <string name="settings_whats_new_title">新功能</string>
+    <string name="settings_whats_new_description">看看最新版本有哪些变化</string>
+
+    <!-- Achievements -->
+    <string name="achievements_title">成就</string>
+    <string name="achievements_subtitle">查看你的进度和徽章</string>
+    <string name="achievements_stats_section">你的统计</string>
+    <string name="achievements_badges_section">徽章</string>
+    <string name="stat_total_games">已玩局数</string>
+    <string name="stat_total_wins">胜利</string>
+    <string name="stat_win_rate">胜率</string>
+    <string name="stat_perfect_games">完美对局</string>
+    <string name="stat_longest_streak">最长连胜</string>
+    <string name="stat_multiplayer_wins">多人对战胜利</string>
+    <string name="ach_wins_title_format">%d 次胜利</string>
+    <string name="ach_wins_detail_format">赢得 %d 局</string>
+    <string name="ach_streak_title_format">连续 %d 天</string>
+    <string name="ach_streak_detail_format">达成连续 %d 天的纪录</string>
+    <string name="ach_perfect_title">完美无瑕</string>
+    <string name="ach_perfect_detail">零失误赢得一局</string>
+    <string name="ach_multiplayer_title">冠军</string>
+    <string name="ach_multiplayer_detail">赢得你的第一场多人对战</string>
+
+    <!-- Share -->
+    <string name="share_result">分享结果</string>
+    <string name="share_result_caption">我在 DoMemory 里配对了 %d 对！你能赢我吗？</string>
+
+    <!-- Onboarding intro -->
+    <string name="intro_multiplayer_title">和朋友一起玩</string>
+    <string name="intro_multiplayer_subtitle">在实时多人房间里挑战任何人——只需分享 6 位代码或二维码。</string>
+    <string name="intro_custom_title">打造专属</string>
+    <string name="intro_custom_subtitle">创建你自己的表情卡牌，畅玩你喜爱的记忆游戏。</string>
+    <string name="intro_daily_title">每天回来</string>
+    <string name="intro_daily_subtitle">每天都有新棋盘。建立连胜并保持下去！</string>
+    <string name="intro_skip">跳过</string>
+    <string name="intro_next">下一步</string>
+    <string name="intro_get_started">开始</string>
+
+    <!-- Notification primer -->
+    <string name="notification_primer_title">保持你的连续纪录</string>
+    <string name="notification_primer_message">开启提醒，DoMemory 会在这些时候通知你：</string>
+    <string name="notification_primer_benefit_streak">每日挑战的连续纪录即将中断</string>
+    <string name="notification_primer_benefit_inactive">你已经几天没玩了</string>
+    <string name="notification_primer_benefit_no_spam">仅此而已——只有少量提醒，绝不打扰</string>
+    <string name="notification_primer_preview_title">别让纪录中断！</string>
+    <string name="notification_primer_preview_message">你的 5 天连续纪录今晚结束。快来玩今天的挑战！</string>
+    <string name="notification_primer_enable">开启提醒</string>
+    <string name="notification_primer_later">以后再说</string>
+
+    <!-- Notifications -->
+    <string name="notification_reminder_title">该玩游戏了！</string>
+    <string name="notification_reminder_body">您已经有一段时间没有玩 DoMemory 了，保持大脑活跃吧！</string>
+    <string name="notification_streak_risk_title">别中断你的连胜！</string>
+    <string name="notification_streak_risk_body">你连续 %d 天的纪录今晚就要中断了。来玩今天的挑战保持纪录吧！🔥</string>
+
+    <!-- What's New (shell) -->
+    <string name="whats_new_title">DoMemory 新功能</string>
+    <string name="whats_new_button">开始游戏</string>
+
+    <!-- What's New v3.0.0 (retired content, still in the catalog) -->
+    <string name="whats_new_multiplayer_title">多人游戏</string>
+    <string name="whats_new_multiplayer_description">与朋友实时对战 — 创建房间，分享6位代码或扫描二维码，看谁找到更多对。</string>
+    <string name="whats_new_reminders_title">游戏提醒</string>
+    <string name="whats_new_reminders_description">如果您几天没玩，系统会发送提醒通知，让大脑保持活跃。</string>
+    <string name="whats_new_theme_title">浅色与深色模式</string>
+    <string name="whats_new_theme_description">在设置中选择系统、浅色或深色模式，打造专属外观。</string>
+    <string name="whats_new_hint_title">提示</string>
+    <string name="whats_new_hint_description">卡关了？暂停游戏并观看短视频广告，即可揭示一对隐藏的牌。</string>
+    <string name="whats_new_games_title">更多游戏可玩</string>
+    <string name="whats_new_games_description">各个难度新增数十套表情卡牌——超过 130 个记忆卡牌等你挑战。</string>
+
+    <!-- What's New v4.0.0 (retired content) -->
+    <string name="whats_new_levels_title">关卡</string>
+    <string name="whats_new_levels_description">全新的无尽模式。通关后解锁下一关，牌面越来越大，时间越来越紧。</string>
+    <string name="whats_new_stars_title">星级评价</string>
+    <string name="whats_new_stars_description">又快又准地通关，每关最多可得 3 颗星。随时重玩任意关卡来刷新成绩。</string>
+    <string name="whats_new_powerups_title">道具</string>
+    <string name="whats_new_powerups_description">在游戏中花费星星：延长时间、偷看牌面、冻结时钟，或免费翻开一对。</string>
+    <string name="whats_new_lives_title">生命与失误</string>
+    <string name="whats_new_lives_description">每天 4 个生命，每关允许的失误次数也有限。用完了？观看广告或花费星星即可继续。</string>
+
+    <!-- What's New v4.2.0 (current) -->
+    <string name="whats_new_seasons_title">赛季关卡</string>
+    <string name="whats_new_seasons_description">畅玩万圣节赛季等限时赛季——拥有专属奖励的主题关卡集，在下一个赛季开始前会持续开放几周。</string>
+    <string name="whats_new_season_artwork_title">赛季美术</string>
+    <string name="whats_new_season_artwork_description">每个赛季都会为关卡地图带来专属的背景和卡片美术，让新赛季总能焕然一新。</string>
+    <string name="whats_new_tap_to_play_title">点击开始游戏</string>
+    <string name="whats_new_tap_to_play_description">关卡地图现在会脉动提示你接下来要玩哪一关，每个关卡节点都会响应你的点击。</string>
+    <string name="whats_new_season_progress_title">赛季进度</string>
+    <string name="whats_new_season_progress_description">通过实时进度条和倒计时追踪你在每个赛季中的进度——在时间耗尽前通关所有关卡。</string>
+
+    <!-- Android shell strings with no iOS counterpart -->
+    <string name="common_loading">正在加载…</string>
+    <string name="menu_offline_boards">离线 — 正在显示内置记忆游戏</string>
+</resources>

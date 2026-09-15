@@ -354,7 +354,7 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
 | Phase 6 | in progress — transactional room protocol, menu/deep-link entry (custom scheme and App Link manifest), invite sharing and QR rendering/scanning, lobby, synchronized board, reconnect grace and rematch are implemented and unit-test clean | current worktree | Deploy O1's App Links association file, then run a live Android↔iOS match before declaring it complete. |
 | Phase 7 | in progress — AdMob SDK/app ID and all nine active placement units are configured; banners, the completion interstitial, `levels_rewarded_life`/`levels_rewarded_forgive`, and the multiplayer-finished native placement are all wired and presenting through `AdsService`; the frequency-cap policy and its presentation-trigger gate are unit-test clean | current worktree | `game_rewarded_extra_time`/`game_rewarded_hint` remain configured but unwired — no pause modal exists on Android to hang the hint button off, and extra-time has no existing star-purchase call site to slot an alternative into (see this section's implementation note below). App-open is unimplemented — no launch-sequence state machine exists yet for it to gate on (O5). Remove Ads and the temporary rewarded ad-free day are intentionally out of scope for now. |
-| Phase 8 | in progress — What's New (version gating + dialog), haptics (`HapticsService`, wired into `GameViewModel`'s flip/match/mismatch/win/loss/power-up/rescue moments), Play In-App Review (`AppReviews`, fired on a genuine win), achievements (`services/stats/ProfileStatsService`, recording wired into every `GameViewModel` finish and multiplayer via `MultiplayerWinGuard`, `feature/settings/AchievementsScreen.kt`), the spoiler-free share card (`feature/share/ShareResultCard.kt`, win overlay only), and three Settings rows ("Achievements", "Rate DoMemory", "What's New") are implemented and unit-test clean | current worktree | Animations (tile pulse, press spring, progress-bar spring, numeric transitions), accessibility announcements, and the nine translations + localization parity test remain. See this section's Phase 8 implementation notes below for exactly what each slice covered and what it deliberately left as a seam. |
+| Phase 8 | complete — What's New, haptics, Play In-App Review, achievements, the spoiler-free share card, three Settings rows, four animations, five accessibility content-description rules, all nine translations, and `LocalizationParityTest` are implemented; the parity exit criterion is green across all ten locales | `feature/android-animations-accessibility` / current worktree | Device-only feel/TalkBack verification and the intentionally deferred haptics expansion remain follow-ups, not Phase 8 exit blockers. See the four implementation notes below for exact scope and seams. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
 
@@ -953,6 +953,157 @@ not seen running — no emulator/device is available in this environment.
   reuse this app's existing visual language (🔥 already used for the Daily Challenge
   streak); no new icon-library dependency was added or considered.
 
+**Phase 8 implementation, third slice (2026-09-14): animations and accessibility content
+descriptions.** Scoped to exactly these two things, same discipline as the prior two slices
+— localization (the nine translations plus the parity test) is untouched.
+
+*Evidence gathering, before writing any code.* Grepped the **entire** `ios/` tree (not just
+`Modules/`) for `numericText`/`contentTransition` and `.spring(` — the prompt's own file list
+was a starting point, verified rather than trusted. Result: `.contentTransition(.numericText
+())` appears **exactly once**, on `PowerUpBar.swift`'s star-balance chip; nowhere else in the
+app does iOS animate a changing number. `.spring(...)` appears eight times, but only two are
+the animations this slice covers — `LevelMapView.swift`'s `TileTapStyle` (press-to-0.92,
+shared by both endless Levels and Season tiles through the one `LevelMapView`/`LevelTileView`
+component) and `SeasonLevelsView.swift`'s `progressBar` (`response: 0.5, dampingFraction:
+0.8`). The other six (`HomeView.swift`, `MenuView.swift`'s grid-reflow, `SettingsView.swift`
+×4) are generic row/card press-scale or a grid-layout animation, not one of the four named
+animations, and were left untouched — extending press feedback to Settings/Menu rows is a
+different, broader migration slice, not this one.
+
+*Progress-bar spring was already done.* `SeasonLevelsScreen.kt`'s `animatedFraction`
+(`animateFloatAsState` + `spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness =
+Spring.StiffnessLow)`) already existed from Phase 4, predating this slice — verified against
+iOS's `progressBar` and left alone. Its damping ratio (1.0, critically damped) is a looser
+approximation of iOS's `0.8` (slightly underdamped) than an exact port would be, but that was
+a pre-existing choice outside this slice's brief of "add the missing animations," not
+something this pass changed.
+
+*Tile pulse.* `feature/levels/LevelsScreen.kt`'s private `LevelTile` now pulses only when
+`isCurrent`: a `rememberInfiniteTransition`/`animateFloat` (`tween(1100, easing = EaseInOut)`,
+`RepeatMode.Reverse`) called *inside* an `if (isCurrent)` branch rather than unconditionally —
+that conditional-call placement is what gives the Compose analog of iOS's `onAppear` +
+`onChange(of: tile.isCurrent)` re-trigger for free: whenever a tile transitions into
+`.current` (usually a tile already on screen as `.locked`, per iOS's own comment), the branch
+re-enters composition and the animation restarts from zero; every other tile pays nothing.
+iOS's tile is a 64pt `Circle` with a separate stroked ring; Android's tile is a full-width
+rounded-rect card with no separate "node," so the ring is drawn as a `matchParentSize()`
+rounded-rect border scaling 1 → 1.45 while fading 0.7 → 0 alpha, and the tile itself scales to
+1.06 — same growth/fade *behavior*, shape adapted to Android's actual layout rather than
+forcing iOS's circle geometry onto a design that doesn't use it. `Season` tiles get **no**
+pulse: Android's `SeasonLevelProgressStore` has no "current level" concept the way
+`LevelsViewModel.highestUnlockedLevel` does (the screen only distinguishes unlocked/locked),
+and inventing one was judged out of this slice's scope — flagged below, not silently dropped.
+
+*Press-to-0.92 spring.* New reusable `Modifier.pressScaleClickable(...)`
+(`ui/anim/PressScale.kt`) ports `TileTapStyle` exactly: scale to 0.92 on press, spring back on
+release. SwiftUI's `response`/`dampingFraction` has no direct Compose equivalent (Compose's
+`spring()` takes `dampingRatio`/`stiffness`); the file documents the conversion used —
+`stiffness = (2*PI / response)^2`, giving `~631` for `response = 0.25` — so this is a real
+unit conversion of iOS's physical spring, not a similar-looking guess. Applied to `LevelTile`
+(endless Levels), the inline tile `Column` in `SeasonLevelsScreen.kt` (same `TileTapStyle`
+source on iOS, per the shared `LevelMapView` above), and `CardView.kt`'s game-card tap. The
+last one is an **Android-only extension beyond verified iOS evidence** — iOS never applies
+`TileTapStyle` (or anything else) to game cards, only to level tiles — added because the
+prompt explicitly asked this file be checked, `CardView`'s tap previously had zero press
+feedback of any kind (`indication = null` with nothing replacing it), and the change is
+visual-only: `onClick`/`enabled` are untouched, so it doesn't touch the gameplay-determinism
+contract the root `CLAUDE.md`'s parity table protects. Flagged here as a deliberate,
+evidence-labeled divergence rather than presented as a port.
+
+*Numeric transitions.* New reusable `NumericTransition<T>` (`ui/anim/NumericTransition.kt`) —
+an `AnimatedContent` keyed on the value with a directional slide (up if the value increased,
+down if it decreased) plus fade, the pattern Android's own Compose animation guidance
+recommends for a changing counter, since there is no public per-digit "rolling" API (SwiftUI's
+`numericText` is a private system transition). Applied to exactly one place:
+`GameScreen.kt`'s `PowerUpBar` star-balance text, matching iOS's one verified call site.
+Deliberately **not** applied to `GameHud`'s time/pairs/errors chips or `LevelsScreen.kt`'s
+header pills, even though the task description named those files as places to check — iOS
+itself never animates those numbers either (confirmed by the same whole-tree grep above), and
+inventing a transition there would be adding unverified behavior, not porting existing
+behavior.
+
+*Accessibility (spec 14.5).* Re-read the spec section directly rather than the task's summary
+of it, and re-verified its premise with `grep -n accessibility app/src/main/res/values/
+strings.xml`: **four** of the five needed string resources already existed verbatim
+(`levels_intro_info_accessibility`, `season_progress_accessibility_format`,
+`levels_mistakes_remaining_format`, `levels_timer_frozen_format`, `levels_star_balance_format`,
+`levels_powerup_cost_format` — six resources covering the five spec rules; only
+`season_progress_accessibility_format` was already wired, from Phase 4). No new string
+resources were added — this slice is wiring-only. Wired:
+- `GameHud`'s fails chip (`Chip` composable, `feature/game/GameScreen.kt`) — "N of M mistakes
+  used" via `levels_mistakes_remaining_format`, applied only when `state.maxFailures != null`
+  (free play/Daily Challenge have no budget to report, so the chip keeps its default
+  label+value reading there).
+- `GameHud`'s timer chip — "Timer frozen, N seconds left" via `levels_timer_frozen_format`,
+  applied only while `state.isFrozen`, per the spec's explicit "an always-on label would
+  replace the icon-plus-number screen readers already read by default" reasoning.
+- `LevelsScreen.kt`'s star-balance `Pill` ("★ N") — "N stars available" via
+  `levels_star_balance_format`.
+- `LevelsScreen.kt`'s info `IconButton` — "How Levels works" via
+  `levels_intro_info_accessibility` (spec-named in §19, not itself one of §14.5's five
+  bullets, but the second of the two pre-existing unused strings the task flagged).
+- `GameScreen.kt`'s `PowerUpButton`s — "<name>, costs N stars" via
+  `levels_powerup_cost_format`, applied only while `enabled`; disabled buttons get no
+  `contentDescription` at all and fall back to their default child-text reading, mirroring
+  the haptics slice's own "the haptic modifier sits inside the disabled subtree" rule for the
+  same spec section.
+- `SeasonLevelsScreen.kt`'s progress bar was already wired (Phase 4) — verified against the
+  spec's exact wording, left unchanged.
+
+The two pure selection functions with real branching (which value to build the description
+from, not just which string resource) — `timerAccessibilitySeconds(timeRemainingSeconds,
+isFrozen)` and `failsChipAccessibilityValues(failedTries, maxFailures)`, both in
+`feature/game/GameScreen.kt` — are kept separate from the `@Composable`s that resolve
+`stringResource`, and pinned by a new `GameHudAccessibilityTest.kt` (6 cases), matching this
+repo's existing pure-formatter test style (`ResultGridStringTest`).
+
+`./gradlew testDebugUnitTest` (326 tests, up from 320 — the 6 new accessibility-selection
+cases — all green) and `./gradlew assembleDebug` both pass. **Unverifiable from this shell,
+same limitation as every prior phase, and explicitly called out per the task's own
+instruction:** this is feel work — the tile pulse's timing, the press-spring's physical feel,
+the numeric transition's slide direction and the progress bar's spring tuning are compiled and
+type-checked but never seen running, and actual TalkBack announcement behavior (ordering,
+whether a disabled control's default reading is really silent enough, whether `mergeDescendants`
+produces the intended single announcement per chip) was not exercised on a device or emulator.
+
+**Deliberately left as a seam, not silently dropped:**
+- Season Levels tiles get press-scale but no pulse — no "current tile" concept exists in
+  `SeasonLevelProgressStore` today; adding one is a real feature change, not an animation
+  port, and out of this slice's scope.
+- `CardView.kt`'s press-scale is an Android-only addition with no iOS source behavior behind
+  it (see above) — flagged rather than presented as parity.
+- `GameHud` chips, `LevelsScreen.kt`'s header pills (current level, lives, star balance) and
+  any other counter not named above stay without a numeric transition, on the same
+  evidence-based reasoning as the accessibility scope: iOS doesn't animate them, so this port
+  doesn't either.
+- No attempt was made to tighten `SeasonLevelsScreen.kt`'s pre-existing progress-bar spring
+  constants (`DampingRatioNoBouncy`/`StiffnessLow`) to iOS's exact `response: 0.5,
+  dampingFraction: 0.8` — it already animates, which was this slice's bar, and re-tuning an
+  already-working, previously-reviewed animation was judged out of scope for a slice about
+  filling gaps.
+
+**Phase 8 implementation, fourth slice (2026-09-14): localization.** Added Android
+resource tables for all nine non-English locales in the spec: `values-b+es+419`,
+`values-pt-rBR`, `values-de`, `values-it`, `values-fr`, `values-hi`, `values-ja`,
+`values-ko`, and `values-b+zh+Hans`. The BCP-47 resource syntax is deliberate for the
+numeric `419` region and the `Hans` script; Portuguese uses Android's standard region
+qualifier. For 228 shared keys, the values come from the shipping iOS app's already
+parity-tested `Localizable.strings` tables. The 12 Android-only keys (offline/loading UI,
+custom-memorama validation and actions, favorites, the Levels placeholder, and QR scanning)
+were translated directly in every locale. iOS-only purchase strings were not brought over
+because purchases remain outside Android's scope.
+
+All tables contain the same 240 keys as `values/strings.xml`. Multi-argument translations
+were converted to Android's positional specifiers (`%1$d`, `%2$d`, `%1$s`) while preserving
+the translated wording. New `LocalizationParityTest.kt` hard-codes the ten expected resource
+directories (so deleting a locale fails), rejects missing/extra/duplicate keys, and compares
+the multiset of format conversion characters for every localized value against English.
+`./gradlew testDebugUnitTest assembleDebug` passes, including Android resource compilation;
+this completes Phase 8's parity-test exit criterion. A broader `lintDebug` pass also found
+and fixed Phase 8's missing manifest declaration for `android.permission.VIBRATE`; lint then
+reached four pre-existing Phase 6 errors (`MultiplayerScreen.kt` resource lookup and three
+unremembered `NavGraph.kt` back-stack entries), which remain outside this slice.
+
 ## 8. Immediate next steps
 
 1. Verify the remaining boundary cases on an emulator or device — a season's day-boundary
@@ -977,10 +1128,9 @@ not seen running — no emulator/device is available in this environment.
 8. Extend `HapticsService.fire`/`HapticIntent` to Menu, Levels, Seasons, Multiplayer and
    Settings screens — this Phase 8 slice wired only `feature/game/`. Verify haptic feel on
    a real device once one is available (the emulator's `Vibrator` is a no-op).
-9. Remaining Phase 8 work: animations (tile pulse, press-to-0.92 spring, progress-bar
-   spring, numeric transitions), accessibility announcements, and the nine translations
-   plus the localization parity test. Achievements and the spoiler-free share card are
-   now implemented — see this section's second Phase 8 implementation note above.
+9. Phase 8 is complete: all ten locale tables are parity-tested and compile. On a device,
+   verify the tile pulse/press-spring/numeric-transition feel and actual TalkBack
+   announcements — neither was exercised outside compilation and unit tests.
 10. Extend `HapticsService.fire`/`HapticIntent` to Multiplayer specifically before (or
     alongside) any future multiplayer polish — `MultiplayerViewModel` now has a
     `profileStats`-recording call site in its room-update collector but still no haptics,

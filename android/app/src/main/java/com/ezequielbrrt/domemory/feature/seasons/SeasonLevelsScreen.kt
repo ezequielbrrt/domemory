@@ -4,7 +4,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +42,7 @@ import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.services.seasons.Season
 import com.ezequielbrrt.domemory.services.seasons.SeasonLevelProgressStore
 import com.ezequielbrrt.domemory.services.seasons.SeasonLocaleResolver
+import com.ezequielbrrt.domemory.ui.anim.pressScaleClickable
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import java.util.Locale
@@ -172,7 +172,12 @@ fun SeasonLevelsScreen(
                     Modifier
                         .fillMaxWidth()
                         .background(if (unlocked) palette.surfacePrimary else palette.surfaceSecondary, RoundedCornerShape(16.dp))
-                        .clickable(enabled = unlocked) { onLevelSelected(level) }
+                        // Same press-to-0.92 spring as the endless map's tiles (iOS's
+                        // `TileTapStyle` is shared by both through `LevelMapView`). No pulse
+                        // here: unlike endless Levels, this screen's progress store has no
+                        // "current level" concept to key a pulse off — see this slice's report
+                        // for why that's a deliberate seam rather than a missed port.
+                        .pressScaleClickable(enabled = unlocked) { onLevelSelected(level) }
                         .padding(vertical = 14.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
