@@ -37,6 +37,8 @@ import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingScreen
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingViewModel
 import com.ezequielbrrt.domemory.feature.seasons.SeasonLevelsScreen
+import com.ezequielbrrt.domemory.feature.settings.AchievementsScreen
+import com.ezequielbrrt.domemory.feature.settings.AchievementsViewModel
 import com.ezequielbrrt.domemory.feature.settings.SettingsScreen
 import com.ezequielbrrt.domemory.feature.settings.SettingsViewModel
 import com.ezequielbrrt.domemory.feature.whatsnew.WhatsNewDialog
@@ -46,6 +48,7 @@ import com.ezequielbrrt.domemory.services.ads.findActivity
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.review.AppReviews
+import com.ezequielbrrt.domemory.services.stats.UserPreferencesProfileStatsRecorder
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
@@ -62,6 +65,7 @@ private object Routes {
     const val MENU = "menu"
     const val ONBOARDING = "onboarding"
     const val SETTINGS = "settings"
+    const val ACHIEVEMENTS = "achievements"
     const val CREATE_MEMORAMA = "create_memorama"
     const val LEVEL_GAME = "level/{level}"
     const val SEASON_LEVELS = "season/{seasonId}"
@@ -191,7 +195,12 @@ fun NavGraph(
             val initialCode = entry.arguments?.getString("code").orEmpty()
             val viewModel: com.ezequielbrrt.domemory.feature.multiplayer.MultiplayerViewModel = viewModel(
                 factory = viewModelFactory {
-                    initializer { com.ezequielbrrt.domemory.feature.multiplayer.MultiplayerViewModel(container.multiplayer) }
+                    initializer {
+                        com.ezequielbrrt.domemory.feature.multiplayer.MultiplayerViewModel(
+                            container.multiplayer,
+                            UserPreferencesProfileStatsRecorder(container.prefs),
+                        )
+                    }
                 },
             )
             val boards by container.boardCatalog.boards.collectAsState(initial = emptyList())
@@ -216,6 +225,7 @@ fun NavGraph(
                             mode = GameMode.DailyChallenge,
                             playerDifficulty = playerDifficulty,
                             stats = UserPreferencesGameStatsRecorder(container.prefs),
+                            profileStats = UserPreferencesProfileStatsRecorder(container.prefs),
                             statsScope = container.applicationScope,
                             dailyChallenge = container.dailyChallenge,
                             onDailyChallengeFinished = container.onDailyChallengeFinished,
@@ -230,12 +240,15 @@ fun NavGraph(
                 },
             )
             val state by viewModel.state.collectAsState()
+            val dailyStreak by container.prefs.dailyStreakCurrent.collectAsState(initial = 0)
             GameScreen(
                 state,
                 viewModel::choose,
                 { if (state.isPaused) viewModel.resume() else viewModel.pause() },
                 { HapticsService.fire(HapticIntent.TAP); navController.popBackStack() },
                 { HapticsService.fire(HapticIntent.TAP); viewModel.restart() },
+                isDailyChallenge = true,
+                dailyStreak = dailyStreak,
             )
         }
 
@@ -284,6 +297,7 @@ fun NavGraph(
                                 LevelContext(number = level, store = store, seasonId = season.id, levelCount = season.levelCount),
                             ),
                             stats = UserPreferencesGameStatsRecorder(container.prefs),
+                            profileStats = UserPreferencesProfileStatsRecorder(container.prefs),
                             statsScope = container.applicationScope,
                             levelLives = container.levelLives,
                             // Power-ups and the lose-screen star purchases are "Levels and
@@ -365,6 +379,7 @@ fun NavGraph(
                             board = store.board(level),
                             mode = GameMode.Level(com.ezequielbrrt.domemory.core.model.LevelContext(level, store)),
                             stats = UserPreferencesGameStatsRecorder(container.prefs),
+                            profileStats = UserPreferencesProfileStatsRecorder(container.prefs),
                             statsScope = container.applicationScope,
                             levelLives = container.levelLives,
                             starWallet = container.starWallet,
@@ -470,10 +485,19 @@ fun NavGraph(
                 onEnableReminders = viewModel::enableReminders,
                 onDisableReminders = viewModel::disableReminders,
                 onWhatsNew = { showWhatsNew = true },
+                onAchievements = { navController.navigate(Routes.ACHIEVEMENTS) },
             )
             if (showWhatsNew) {
                 WhatsNewDialog(onDismiss = { showWhatsNew = false })
             }
+        }
+
+        composable(Routes.ACHIEVEMENTS) {
+            val viewModel: AchievementsViewModel = viewModel(
+                factory = viewModelFactory { initializer { AchievementsViewModel(container.profileStats) } },
+            )
+            val state by viewModel.state.collectAsState()
+            AchievementsScreen(state = state, onBack = { navController.popBackStack() })
         }
 
         composable(Routes.CREATE_MEMORAMA) {
@@ -543,6 +567,7 @@ fun NavGraph(
                             mode = GameMode.Free,
                             playerDifficulty = difficulty,
                             stats = UserPreferencesGameStatsRecorder(container.prefs),
+                            profileStats = UserPreferencesProfileStatsRecorder(container.prefs),
                             statsScope = container.applicationScope,
                             onGameFinished = container.onGameFinished,
                             onCompletionInterstitial = { difficulty, durationMs ->

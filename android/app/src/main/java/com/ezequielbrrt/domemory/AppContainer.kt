@@ -26,6 +26,7 @@ import com.ezequielbrrt.domemory.services.seasons.SeasonCatalogService
 import com.ezequielbrrt.domemory.services.seasons.SeasonCatalogSource
 import com.ezequielbrrt.domemory.services.seasons.SeasonLevelProgressStore
 import com.ezequielbrrt.domemory.services.seasons.SeasonProgressService
+import com.ezequielbrrt.domemory.services.stats.ProfileStatsService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -71,6 +72,14 @@ class AppContainer(
     val starWallet = StarWalletService(prefs, applicationScope)
     val levelsIntroGate = LevelsIntroGate(prefs)
     val dailyChallenge = DailyChallengeService(prefs, dayProvider)
+
+    /** Lifetime aggregates + derived achievements (spec 13.2), the Settings > Achievements
+     * screen's read side. `feature/game/GameViewModel` and `feature/multiplayer
+     * .MultiplayerViewModel` record into the same [prefs] keys through a separate
+     * `UserPreferencesProfileStatsRecorder(prefs)` at each construction site — not stored
+     * here — matching the existing `UserPreferencesGameStatsRecorder(container.prefs)`
+     * precedent (`NavGraph.kt`), rather than this container. */
+    val profileStats = ProfileStatsService(prefs, dailyChallenge)
     val deepLinkRouter = DeepLinkRouter()
     val multiplayer = MultiplayerService()
     val whatsNew = WhatsNewManager(prefs, BuildConfig.VERSION_NAME)

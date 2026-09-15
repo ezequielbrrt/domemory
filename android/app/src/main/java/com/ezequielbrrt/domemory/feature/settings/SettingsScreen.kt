@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.feature.notifications.rememberNotificationPermissionRequester
+import com.ezequielbrrt.domemory.services.share.PlayStoreLinks
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
@@ -41,6 +42,7 @@ fun SettingsScreen(
     onEnableReminders: () -> Unit,
     onDisableReminders: () -> Unit,
     onWhatsNew: () -> Unit,
+    onAchievements: () -> Unit,
 ) {
     BackHandler(onBack = onBack)
     val p = LocalPalette.current
@@ -59,6 +61,11 @@ fun SettingsScreen(
             if (turningOn) requestPermission() else onDisableReminders()
         }
         SettingGroup(stringResource(R.string.settings_section_about)) {
+            SettingRow(
+                title = stringResource(R.string.achievements_title),
+                description = stringResource(R.string.achievements_subtitle),
+                onClick = onAchievements,
+            )
             // Opens the Play Store listing directly — the standard manual "rate the app"
             // entry. This is deliberately separate from the win-triggered Play In-App Review
             // prompt (AppReviews.recordSuccessfulGameWin, fired from GameViewModel on a real
@@ -94,9 +101,7 @@ private fun openPlayStoreListing(context: Context) {
     try {
         context.startActivity(marketIntent)
     } catch (_: ActivityNotFoundException) {
-        context.startActivity(
-            Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appId")),
-        )
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PlayStoreLinks.listingUrl(context))))
     }
 }
 

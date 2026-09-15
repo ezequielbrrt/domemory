@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -25,22 +27,31 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.feature.share.ResultShareData
+import com.ezequielbrrt.domemory.feature.share.ShareResultCardView
+import com.ezequielbrrt.domemory.feature.share.shareResultCard
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.services.ads.AdMobBanner
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
+import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
 /**
@@ -71,6 +82,13 @@ fun GameScreen(
     onSkipLevelWithStars: () -> Unit = {},
     onWatchAdForLife: () -> Unit = {},
     onWatchAdToForgive: () -> Unit = {},
+    /** True only for the Daily Challenge (spec: the share card's title and streak row
+     * depend on this — see `feature/share/ShareResultCard.kt`). */
+    isDailyChallenge: Boolean = false,
+    /** The Daily Challenge's current streak at the moment of this win, for the share
+     * card's streak row (shown only when [isDailyChallenge] and this is > 0). Irrelevant,
+     * and left at its default, for every other mode. */
+    dailyStreak: Int = 0,
 ) {
     val palette = LocalPalette.current
     val context = LocalContext.current
@@ -129,6 +147,8 @@ fun GameScreen(
                 state = state,
                 isLevel = isLevel,
                 starBalance = starBalance,
+                isDailyChallenge = isDailyChallenge,
+                dailyStreak = dailyStreak,
                 onRetry = onRetry,
                 onQuit = onQuit,
                 onBuyLifeWithStars = onBuyLifeWithStars,
@@ -303,6 +323,8 @@ private fun OutcomeOverlay(
     state: GameUiState,
     isLevel: Boolean,
     starBalance: Int?,
+    isDailyChallenge: Boolean,
+    dailyStreak: Int,
     onRetry: () -> Unit,
     onQuit: () -> Unit,
     onBuyLifeWithStars: () -> Unit,
@@ -314,9 +336,45 @@ private fun OutcomeOverlay(
     onWatchAdToForgive: () -> Unit = {},
 ) {
     val palette = LocalPalette.current
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     var showSkipConfirm by remember { mutableStateOf(false) }
     val won = outcome is GameOutcome.Won
     val lostToMistakes = outcome is GameOutcome.Lost && outcome.reason == LoseReason.TOO_MANY_MISTAKES
+
+    // Built once per outcome — the pairs/time/mistakes/difficulty of the game that just
+    // finished (spec: "renders the card from the just-finished game's own state").
+    val shareData = remember(state.totalPairs, state.timeRemaining, state.failedTries, state.recordedDifficulty, isDailyChallenge, dailyStreak) {
+        ResultShareData(
+            pairs = state.totalPairs,
+            timeRemaining = ceil(state.timeRemaining).toInt(),
+            failedTries = state.failedTries,
+            difficulty = state.recordedDifficulty,
+            isDailyChallenge = isDailyChallenge,
+            streak = dailyStreak,
+        )
+    }
+    val shareCardLayer = rememberGraphicsLayer()
+
+    if (won) {
+        // Off-screen render target for the share card (spec: "Compose has no direct
+        // SwiftUI-ImageRenderer analogue"). alpha(0f) keeps it invisible without removing
+        // it from composition/layout — graphicsLayer.record needs real drawn content to
+        // capture, and a Box stacks children without reflowing siblings, so this has no
+        // effect on the rest of this overlay's layout.
+        Box(
+            Modifier
+                .width(320.dp)
+                .height(440.dp)
+                .alpha(0f)
+                .drawWithContent {
+                    shareCardLayer.record { this@drawWithContent.drawContent() }
+                    drawLayer(shareCardLayer)
+                },
+        ) {
+            ShareResultCardView(shareData)
+        }
+    }
 
     Box(
         Modifier.fillMaxSize().background(palette.overlayBackdrop),
@@ -355,6 +413,14 @@ private fun OutcomeOverlay(
                     text = "${stringResource(R.string.game_errors_label)}: ${state.failedTries}",
                     color = palette.textSecondary,
                 )
+
+                if (won) {
+                    TextButton(onClick = {
+                        coroutineScope.launch { shareResultCard(context, shareCardLayer, shareData) }
+                    }) {
+                        Text(stringResource(R.string.share_result), color = palette.primary, fontWeight = FontWeight.SemiBold)
+                    }
+                }
 
                 // Lose-screen star purchases (spec 7.7) — Levels/Seasons only.
                 if (!won && isLevel && starBalance != null) {

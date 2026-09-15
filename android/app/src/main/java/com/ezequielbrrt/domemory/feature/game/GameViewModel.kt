@@ -13,6 +13,7 @@ import com.ezequielbrrt.domemory.services.levels.LevelCurve
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.services.levels.StarWalletService
+import com.ezequielbrrt.domemory.services.stats.ProfileStatsRecorder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -61,6 +62,14 @@ class GameViewModel(
      * existing plain-Kotlin test that does not care about persistence is unaffected.
      */
     private val stats: GameStatsRecorder? = null,
+    /**
+     * Records lifetime `profile.*` aggregates (spec 13.2) alongside the per-board [stats]
+     * above, from the exact same single-fire commit points ([commit], [commitLossIfNeeded])
+     * — mirrors iOS's `ProfileStatsService.recordGameFinished`, itself called from the same
+     * `logGameFinishedIfNeeded` guard [stats] is. Null (the default) is a no-op, matching
+     * [stats]'s own shape, so existing tests that don't care about this are unaffected.
+     */
+    private val profileStats: ProfileStatsRecorder? = null,
     private val now: () -> Long = System::currentTimeMillis,
     private val scope: CoroutineScope? = null,
     /** A longer-lived scope for finish persistence; production passes AppContainer's scope. */
@@ -332,6 +341,7 @@ class GameViewModel(
         }
         if (outcome is GameOutcome.Won) onGameWon?.invoke()
         recordStats(outcome)
+        recordProfileStats(outcome)
         notifyCompletionInterstitial()
     }
 
@@ -361,6 +371,7 @@ class GameViewModel(
         }
         levelLives?.spendOnLoss()
         recordStats(outcome)
+        recordProfileStats(outcome)
         notifyCompletionInterstitial(allowInterstitial)
     }
 
@@ -379,6 +390,25 @@ class GameViewModel(
     private fun recordStats(outcome: GameOutcome) {
         val recorder = stats ?: return
         statsWorkScope.launch { recorder.recordFinished(board.id, didWin = outcome is GameOutcome.Won) }
+    }
+
+    /**
+     * Lifetime `profile.*` aggregates (spec 13.2), same single-fire guard as [recordStats].
+     * `isPerfect` is a win with zero mistakes — [GameUiState.failedTries] is read here
+     * rather than [MemoryGame.failedTries] directly since it's already the value
+     * [publishCards] kept in sync with the model on every choice, and is what the win
+     * screen itself displays (spec: "the pair that finished them" applies to losses only —
+     * a win's failedTries is simply whatever the player accumulated along the way).
+     */
+    private fun recordProfileStats(outcome: GameOutcome) {
+        val recorder = profileStats ?: return
+        val didWin = outcome is GameOutcome.Won
+        val isPerfect = didWin && _state.value.failedTries == 0
+        val difficulty = _state.value.recordedDifficulty
+        val timeRemaining = _state.value.timeRemaining.toInt()
+        statsWorkScope.launch {
+            recorder.recordGameFinished(didWin, isPerfect, difficulty, timeRemaining)
+        }
     }
 
     fun pause() {
