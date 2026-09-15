@@ -51,6 +51,8 @@
 "menu_create_title" = "新记忆游戏";
 "menu_empty_mine_action" = "创建一个";
 "menu_empty_mine_message" = "你还没有自己的记忆游戏";
+"menu_favorite_add" = "添加到收藏";
+"menu_favorite_remove" = "从收藏中移除";
 "menu_random_game" = "随机游戏";
 "menu_tab_all" = "全部";
 "menu_tab_levels" = "关卡";

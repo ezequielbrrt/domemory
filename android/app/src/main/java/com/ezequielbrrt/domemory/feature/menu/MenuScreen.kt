@@ -16,10 +16,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -31,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -398,17 +404,38 @@ private fun BoardCell(
             .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onClick() })
             .padding(12.dp),
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = board.items.take(3).joinToString(" "), fontSize = 22.sp)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = if (isFavorite) "★" else "☆",
-                    color = if (isFavorite) palette.hardAmber else palette.textSecondary,
-                    fontSize = 18.sp,
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                // A single, properly sized action on the card face: the
+                // favorite toggle. The previous 18sp glyph had no padding of
+                // its own, well under Android's 48dp minimum touch target; it
+                // now gets a real 48dp hit area with a visible tinted circle,
+                // matching a heart icon already used for "favorite" elsewhere
+                // in the app (LevelsScreen's intro carousel).
+                Box(
                     modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
                         .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onToggleFavorite() })
                         .semantics { contentDescription = favoriteDescription },
-                )
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        Modifier
+                            .size(36.dp)
+                            .background(
+                                if (isFavorite) palette.secondary.copy(alpha = 0.12f) else palette.surfaceSecondary,
+                                CircleShape,
+                            ),
+                    )
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = null,
+                        tint = if (isFavorite) palette.secondary else palette.textSecondary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
                 if (onDelete != null) {
                     Text(
                         text = "✕",
@@ -421,13 +448,9 @@ private fun BoardCell(
                 }
             }
         }
-        Spacer(Modifier.size(6.dp))
-        Text(
-            text = board.name,
-            fontWeight = FontWeight.SemiBold,
-            color = palette.textPrimary,
-            maxLines = 1,
-        )
+        // No name label: the catalog has no per-board names — `board.name` is
+        // literally the board's own emoji — so the preview row above already
+        // carries identity and the label was pure repetition.
         Spacer(Modifier.size(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             BoardStatBadge(

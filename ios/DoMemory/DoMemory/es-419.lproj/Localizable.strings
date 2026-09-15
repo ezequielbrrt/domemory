@@ -51,6 +51,8 @@
 "menu_create_title" = "Nuevo Memorama";
 "menu_empty_mine_action" = "Crear uno";
 "menu_empty_mine_message" = "Aún no tienes memoramas propios";
+"menu_favorite_add" = "Agregar a favoritos";
+"menu_favorite_remove" = "Quitar de favoritos";
 "menu_random_game" = "Juego aleatorio";
 "menu_tab_all" = "Todos";
 "menu_tab_levels" = "Niveles";

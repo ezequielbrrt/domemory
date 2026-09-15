@@ -476,27 +476,27 @@ private struct MemoramaGridCell: View {
                 }
             }
 
-            VStack(spacing: 4) {
-                Button(action: { HapticsService.shared.fire(.tap); onToggleFavorite() }) {
+            // A single, properly sized action on the card face: the favorite
+            // toggle. Its previous 31pt frame sat well under Apple's 44pt
+            // minimum tap target; it now gets a real 44pt hit area with a
+            // visible tinted circle so the state (and the button itself) is
+            // easy to see and to hit. Multiplayer's per-card icon was
+            // removed — "Create room" already lives one long-press away in
+            // the context menu below, and the top bar keeps its join button.
+            Button(action: { HapticsService.shared.fire(.tap); onToggleFavorite() }) {
+                ZStack {
+                    Circle()
+                        .fill(isFavorite ? Color.secundaryColor.opacity(0.12) : Color.surfaceSecondary)
+                        .frame(width: 36, height: 36)
                     Image(systemName: isFavorite ? "heart.fill" : "heart")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(isFavorite ? Color.secundaryColor : Color.textMuted)
-                        .padding(8)
                 }
-                .buttonStyle(.plain)
-
-                Button {
-                    HapticsService.shared.fire(.tap)
-                    isStartingMultiplayer = true
-                } label: {
-                    Image(systemName: "person.2.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.primaryColor)
-                        .padding(8)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(Strings.multiplayerCreateRoom)
+                .frame(width: 44, height: 44)
+                .contentShape(Circle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isFavorite ? Strings.menuFavoriteRemove : Strings.menuFavoriteAdd)
             .padding(.top, 4)
         }
         .navigationDestination(isPresented: $isStartingMultiplayer) {
@@ -725,15 +725,13 @@ struct MemoramaCard: View {
                 .frame(height: 156)
 
             VStack(spacing: 10) {
+                // No name label: the catalog has no per-board names, so the
+                // emoji alone carries identity here — stepped up from 44 to
+                // 52pt to fill the space the label used to occupy.
                 if let first = memorama.items.first {
                     Text(first)
-                        .font(.system(size: 44))
+                        .font(.system(size: 52))
                 }
-                Text(memorama.name)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color.textPrimary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
 
                 HStack(spacing: 8) {
                     StatBadge(label: Strings.statsPlayed, value: stats.playedCount, color: Color.primaryColor)

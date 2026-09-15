@@ -51,6 +51,8 @@
 "menu_create_title" = "새 메모라마";
 "menu_empty_mine_action" = "만들기";
 "menu_empty_mine_message" = "아직 내 메모라마가 없습니다";
+"menu_favorite_add" = "즐겨찾기에 추가";
+"menu_favorite_remove" = "즐겨찾기에서 제거";
 "menu_random_game" = "랜덤 게임";
 "menu_tab_all" = "전체";
 "menu_tab_levels" = "레벨";
