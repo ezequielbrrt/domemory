@@ -86,7 +86,7 @@ LaunchScreen (1.2s splash overlay, fades out)
                 +-- Daily card   --> MemorizeView(daily)
                 +-- any board    --> MemorizeView(free)
                 +-- Settings     --> Achievements
-                +-- Multiplayer  --> MultiplayerRoomView (create/join) --> live match
+                +-- Multiplayer  --> host (empty room, pick game in lobby) or join --> live match
 ```
 
 Deep links land on the Menu and are routed from there (see §11).
@@ -758,9 +758,9 @@ Two-player, turn-based, real-time over Firebase Realtime Database.
   status: waiting | ready | playing | reconnecting | finished | abandoned,
   createdAt, updatedAt,          // epoch seconds
   hostId, guestId,
-  players: { <uid>: { id, name, connected, lastSeenAt, score } },
+  players: { <uid>: { id, name, connected, lastSeenAt, score, isReady } },
   gameSource: firebase | custom,
-  gameId, gameName, difficulty,
+  gameId, gameName, difficulty,  // gameId/gameName/difficulty are "" until the host picks a game — see 10.4
   customGamePayload: { title, category, items, itemType, isDoubleItem } | null,
   currentPlayerId,
   cards: [ { id, itemId, content, isFaceUp, isMatched } ],
@@ -774,6 +774,19 @@ Two-player, turn-based, real-time over Firebase Realtime Database.
 device — the whole card set has to travel with the room or the guest has nothing
 to render.
 
+`gameId == ""` is the wire sentinel for "no game chosen yet" — deliberately a
+plain empty string on an already-required field rather than a new optional/null
+field, so a client that predates this doesn't need a schema migration and still
+decodes the room; it just has no UI for the empty-game state. `gameName` and
+`difficulty` are empty alongside it and are meaningless until `gameId` is
+non-empty. A room only ever has an empty `gameId` in `waiting`/`ready` — it is
+never empty once `status` reaches `playing`.
+
+`players.<uid>.isReady` is a per-player flag, `false` unless explicitly set true.
+Decode it defensively (default `false` when the key is absent) — a room written
+before this field existed, or briefly during a mixed-version rollout, has no
+`isReady` key on its player nodes at all.
+
 ### 10.3 Room codes
 
 6 characters from the alphabet **`ABCDEFGHJKLMNPQRSTUVWXYZ23456789`** — no `I`,
@@ -784,16 +797,46 @@ Input is trimmed and uppercased before lookup.
 
 ### 10.4 Flow
 
+Hosting is **host-first**: a room is created empty, with no game chosen, and the
+host picks the game from inside the lobby — any time before or after a guest
+joins, and changeable again right up until the match actually starts. This
+replaced an earlier "pick a game, then create its room for it" flow; there is no
+longer a way to create a room already bound to a specific board.
+
 1. **Create** — host authenticates anonymously, allocates a room id, generates a
-   unique code, writes the room in `waiting`, writes the code index, and registers
-   presence.
+   unique code, writes the room in `waiting` with `gameId`/`gameName`/`difficulty`
+   all `""` and `gameSource: firebase` (ignored until a game is picked), writes
+   the code index, and registers presence. Takes no board.
 2. **Join** — resolve `code → roomId`, load the room. Reject unless status is
    `waiting` or `ready`. Reject if a *different* guest already holds it (re-joining
    as the same uid is allowed — this is how reconnect works). On success the guest
-   is added, status becomes `ready`.
-3. **Start** (host only) — deal cards, set `currentPlayerId`, status `playing`,
-   reset scores/selection/winner.
-4. **Turn** — only `currentPlayerId` may act. A tap is rejected unless the card
+   is added, status becomes `ready`. A guest can join a room that has no game
+   chosen yet; the lobby shows a "waiting for the host to choose a game" message
+   until the host picks one.
+3. **Select game** (host only, any `waiting`/`ready` room) — sets
+   `gameSource`/`gameId`/`gameName`/`difficulty`/`customGamePayload` from the
+   chosen board. Does **not** touch `status`, `cards`, `currentPlayerId`, or
+   `players` — no cards are dealt and nothing else changes; the room stays
+   `waiting`/`ready`. Picking or changing the game resets every current player's
+   `isReady` to `false`, since readiness was for whatever game was picked before.
+   The game picker offers its own difficulty filter (independent of whatever
+   difficulty the catalog tab happens to be showing) across every difficulty, not
+   just the currently-filtered catalog; custom memoramas always show regardless
+   of the filter.
+4. **Ready check** — once a game is picked, *either* player (host or guest, once
+   both have joined) may mark themselves ready. This does not itself start the
+   match. Picking/changing the game (step 3) resets both players back to not
+   ready.
+5. **Start** — happens automatically, host-side only, the moment the room's
+   state satisfies all of: `status == ready`, `gameId` non-empty, exactly two
+   players present, and every player's `isReady` is `true`. No separate manual
+   "start" action exists once both are ready — the host's client reacts to that
+   condition and deals cards, sets `currentPlayerId` to the host, and flips
+   `status` to `playing`. Guard against re-triggering while an earlier start
+   write is still in flight (e.g. an unrelated presence heartbeat landing in that
+   window must not cause a second deal) — reset that guard whenever `status`
+   leaves `ready`.
+6. **Turn** — only `currentPlayerId` may act. A tap is rejected unless the card
    exists, is neither matched nor face-up, and fewer than 2 cards are selected.
    - 1st selection: card face up, added to `selectedCardIds`.
    - 2nd selection, **match**: both matched, **current player's score +1**,
@@ -801,10 +844,13 @@ Input is trimmed and uppercased before lookup.
    - 2nd selection, **mismatch**: turn passes to the other player. The client
      clears the two face-up cards after its own delay.
    - When every card is matched: status `finished`, `winnerId` computed.
-5. **Winner** — highest score. Sorted by score desc, id asc for stability. If the
+7. **Winner** — highest score. Sorted by score desc, id asc for stability. If the
    top two scores are **equal**, `winnerId` is `null` (a draw).
-6. **Rematch** — host can restart with the same board or choose another game.
-7. **Leave** — from `waiting`/`ready`, the room becomes `abandoned`. From
+8. **Rematch** — host can restart with the same board or choose another game.
+   This is a separate, host-only, immediate action (unlike step 3) — a rematch
+   redeals cards and returns straight to `playing` without going through the
+   ready check again.
+9. **Leave** — from `waiting`/`ready`, the room becomes `abandoned`. From
    `playing`, the player is just marked disconnected.
 
 ### 10.5 Presence and reconnect
@@ -1517,8 +1563,12 @@ multiplayer_code_placeholder = ABC123
 multiplayer_qr_code = Multiplayer room QR code
 multiplayer_start_game = Start game
 multiplayer_waiting_for_player = Share this code and wait for another player
-multiplayer_ready_to_start = Player joined. Start when ready
-multiplayer_waiting_for_host = Waiting for the host to start
+multiplayer_choose_game = Choose a game
+multiplayer_host_choose_game_prompt = Choose a game to get started
+multiplayer_waiting_for_game = Waiting for the host to choose a game
+multiplayer_no_games_for_difficulty = No boards for this difficulty yet
+multiplayer_tap_start_when_ready = Tap Start when you're ready
+multiplayer_waiting_for_opponent_ready = Waiting for the other player to get ready
 multiplayer_your_turn = Your turn
 multiplayer_opponent_turn = Opponent's turn
 multiplayer_reconnecting = Waiting for player to reconnect

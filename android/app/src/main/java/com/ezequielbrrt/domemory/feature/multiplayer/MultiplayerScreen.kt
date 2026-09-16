@@ -2,18 +2,26 @@ package com.ezequielbrrt.domemory.feature.multiplayer
 
 import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Board
+import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.feature.game.CardView
 import com.ezequielbrrt.domemory.services.ads.AdMobNativeAdView
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
@@ -55,7 +63,23 @@ class MultiplayerViewModel(
     private var reconnectDeadline: kotlinx.coroutines.Job? = null
     private val winGuard = MultiplayerWinGuard()
     private val hapticsTracker = MultiplayerHapticsTracker()
-    fun create(board: Board) = launchRoomAction { service.createRoom(board).id }
+
+    // The catalog list the UI has in scope (container.boardCatalog.boards, merged with custom
+    // boards at the call site) — the auto-start trigger below needs it to resolve a
+    // MultiplayerRoom.gameId back to a Board, but observe()'s collect block otherwise has no
+    // access to it. Set once from the Composable via setBoards; a plain var rather than a
+    // constructor param because the boards StateFlow isn't available yet when NavGraph builds
+    // this ViewModel.
+    private var boards: List<Board> = emptyList()
+    fun setBoards(boards: List<Board>) { this.boards = boards }
+
+    // Spec 10.4 step 5's "guard against re-triggering while an earlier start write is still in
+    // flight" — mirrors iOS's `hasTriggeredAutoStart` in `MultiplayerRoomViewModel
+    // .handleRoomUpdate`. Reset whenever status leaves READY, so a genuinely new ready-window
+    // (e.g. after the host changes the game and both players ready up again) can trigger again.
+    private var hasTriggeredAutoStart = false
+
+    fun create() = launchRoomAction { service.createRoom().id }
     fun join(code: String) = launchRoomAction { service.joinRoom(code) }
     fun joinScannedInvite(rawValue: String?) {
         MultiplayerQrScan.roomCode(rawValue)?.let(::join) ?: run {
@@ -65,15 +89,24 @@ class MultiplayerViewModel(
     fun reportScanFailure(error: Throwable) {
         _state.value = _state.value.copy(error = error.message ?: "Could not scan the QR code.")
     }
-    fun start(room: MultiplayerRoom, boards: List<Board>) = launchRoomAction {
-        val board = boards.firstOrNull { it.id == room.gameId }
-            ?: room.customGamePayload?.asBoard(room.gameId, room.difficulty)
-            ?: throw MultiplayerException.Decoding
-        service.start(room.id, board)
-        room.id
+    /** Spec 10.4 step 3: host-only. Resets both players' [MultiplayerPlayer.isReady]. */
+    fun selectGame(room: MultiplayerRoom, board: Board) = viewModelScope.launch {
+        runCatching { service.selectGame(room.id, board) }.onFailure(::fail)
+    }
+    /** Spec 10.4 step 4: marks the caller ready. Never starts the match itself — see
+     * [triggerAutoStartIfNeeded]. */
+    fun markReady(room: MultiplayerRoom) = viewModelScope.launch {
+        runCatching { service.setReady(room.id, true) }.onFailure(::fail)
     }
     fun isHost(room: MultiplayerRoom) = service.isCurrentUser(room.hostId)
     fun isCurrentUser(userId: String) = service.isCurrentUser(userId)
+    /** Whether *I* have already marked myself ready for the currently-picked game. */
+    fun isSelfReady(room: MultiplayerRoom): Boolean =
+        room.players.values.firstOrNull { service.isCurrentUser(it.id) }?.isReady == true
+    /** Host-only, and only while there is no in-flight/dealt match to disturb — the game
+     * picker's entry point (both "choose a game" and "change game") gates on this. */
+    fun canPickGame(room: MultiplayerRoom): Boolean =
+        isHost(room) && room.status in setOf(MultiplayerRoomStatus.WAITING, MultiplayerRoomStatus.READY)
     fun restart(roomId: String) = viewModelScope.launch { runCatching { service.restart(roomId) }.onFailure(::fail) }
     fun choose(roomId: String, cardId: Int) = viewModelScope.launch {
         // Optimistic and local — fired on the tap itself, before the transaction that
@@ -102,6 +135,7 @@ class MultiplayerViewModel(
                     scheduleMismatchClear(room)
                     reconcilePresence(room)
                     recordMultiplayerWinIfNeeded(room)
+                    triggerAutoStartIfNeeded(room)
                 }.onFailure(::fail)
             }
         }
@@ -158,10 +192,32 @@ class MultiplayerViewModel(
         viewModelScope.launch { recorder.recordMultiplayerWin() }
     }
 
+    /** Spec 10.4 step 5: reactive, host-only start once [MultiplayerRoom.readyToAutoStart].
+     * Latches on the write, not the room snapshot, so an unrelated snapshot arriving while
+     * `service.start` is still in flight (e.g. a presence heartbeat) can't fire it twice; the
+     * latch resets as soon as status leaves READY (a fresh ready-window, or a failed start). */
+    private fun triggerAutoStartIfNeeded(room: MultiplayerRoom) {
+        if (room.status != MultiplayerRoomStatus.READY) { hasTriggeredAutoStart = false; return }
+        if (hasTriggeredAutoStart) return
+        if (!isHost(room) || !room.readyToAutoStart) return
+        val board = boards.firstOrNull { it.id == room.gameId }
+            ?: room.customGamePayload?.asBoard(room.gameId, room.difficulty)
+            ?: return
+        hasTriggeredAutoStart = true
+        viewModelScope.launch {
+            runCatching { service.start(room.id, board) }.onFailure {
+                hasTriggeredAutoStart = false
+                fail(it)
+            }
+        }
+    }
+
     companion object { private const val MISMATCH_VISIBLE_MS = 2_000L }
 }
 @Composable fun MultiplayerScreen(boards: List<Board>, vm: MultiplayerViewModel, initialCode: String = "", onBack: () -> Unit) {
     val state by vm.state.collectAsState(); var code by rememberSaveable { mutableStateOf(initialCode) }; val p = LocalPalette.current; val context = LocalContext.current
+    var showGamePicker by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(boards) { vm.setBoards(boards) }
     LaunchedEffect(initialCode) { if (initialCode.isNotBlank() && state.room == null) vm.join(initialCode) }
     Column(Modifier.fillMaxSize().background(p.appBackground).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         TextButton(onClick = { HapticsService.fire(HapticIntent.TAP); onBack() }) { Text("‹") }; Text(stringResource(R.string.multiplayer_title))
@@ -170,13 +226,24 @@ class MultiplayerViewModel(
                 MultiplayerGameBoard(room, vm, Modifier.weight(1f))
                 return@Column
             }
+            // Spec 10.4 steps 1-4: before a game is picked, the lobby's status message is
+            // about *who* is missing (host still choosing / guest still waiting on the host);
+            // once a game is picked it's about the mutual ready-check instead. Mirrors iOS's
+            // `MultiplayerRoomViewModel.statusText`/`noGameChosenStatusText`.
             val message = when (room.status) {
-                MultiplayerRoomStatus.WAITING -> stringResource(R.string.multiplayer_waiting_for_player)
-                MultiplayerRoomStatus.READY -> stringResource(R.string.multiplayer_ready_to_start)
-                MultiplayerRoomStatus.PLAYING -> stringResource(R.string.multiplayer_waiting_for_host)
-                MultiplayerRoomStatus.RECONNECTING -> stringResource(R.string.multiplayer_reconnecting)
-                MultiplayerRoomStatus.FINISHED -> stringResource(R.string.multiplayer_final_score)
+                MultiplayerRoomStatus.WAITING -> if (room.hasSelectedGame) {
+                    stringResource(R.string.multiplayer_waiting_for_player)
+                } else {
+                    stringResource(if (vm.isHost(room)) R.string.multiplayer_host_choose_game_prompt else R.string.multiplayer_waiting_for_game)
+                }
+                MultiplayerRoomStatus.READY -> when {
+                    !room.hasSelectedGame -> stringResource(if (vm.isHost(room)) R.string.multiplayer_host_choose_game_prompt else R.string.multiplayer_waiting_for_game)
+                    vm.isSelfReady(room) -> stringResource(R.string.multiplayer_waiting_for_opponent_ready)
+                    else -> stringResource(R.string.multiplayer_tap_start_when_ready)
+                }
                 MultiplayerRoomStatus.ABANDONED -> stringResource(R.string.multiplayer_room_closed)
+                // Unreachable here — PLAYING/RECONNECTING/FINISHED already returned above.
+                else -> stringResource(R.string.multiplayer_reconnecting)
             }
             Text("$message\n${room.code}")
             if (room.status in setOf(MultiplayerRoomStatus.WAITING, MultiplayerRoomStatus.READY)) {
@@ -191,14 +258,44 @@ class MultiplayerViewModel(
                     },
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.multiplayer_invite_friend)) }
-            }
-            if (room.status == MultiplayerRoomStatus.READY && vm.isHost(room)) {
-                Button(
-                    onClick = { HapticsService.fire(HapticIntent.TAP); vm.start(room, boards) },
-                    enabled = !state.loading,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(stringResource(R.string.multiplayer_start_game))
+
+                // Spec 10.4 step 3: host-only entry point, any time before the match starts.
+                // Guests see nothing here — the status message above already tells them the
+                // host hasn't picked, or what was picked.
+                if (room.hasSelectedGame) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(room.gameName, fontWeight = FontWeight.Bold, color = p.textPrimary)
+                        if (vm.canPickGame(room)) {
+                            Text(
+                                text = stringResource(R.string.multiplayer_choose_another_game),
+                                color = p.primary,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.clickable {
+                                    HapticsService.fire(HapticIntent.TAP)
+                                    showGamePicker = true
+                                },
+                            )
+                        }
+                    }
+                } else if (vm.canPickGame(room)) {
+                    Button(
+                        onClick = { HapticsService.fire(HapticIntent.TAP); showGamePicker = true },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text(stringResource(R.string.multiplayer_choose_game)) }
+                }
+
+                // Spec 10.4 step 4: available to either player once a game is picked and both
+                // have joined; marks only the caller ready — the match starts on its own once
+                // both are (see MultiplayerViewModel.triggerAutoStartIfNeeded).
+                if (room.hasSelectedGame && room.players.size == 2) {
+                    val selfReady = vm.isSelfReady(room)
+                    Button(
+                        onClick = { HapticsService.fire(HapticIntent.TAP); vm.markReady(room) },
+                        enabled = !selfReady && !state.loading,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(if (selfReady) R.string.multiplayer_waiting_for_opponent_ready else R.string.multiplayer_start_game))
+                    }
                 }
             }
         } ?: run {
@@ -220,17 +317,115 @@ class MultiplayerViewModel(
                 enabled = !state.loading,
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.multiplayer_scan_qr_code)) }
-            boards.firstOrNull()?.let { board ->
-                Button(
-                    onClick = { HapticsService.fire(HapticIntent.TAP); vm.create(board) },
-                    enabled = !state.loading,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text(stringResource(R.string.multiplayer_create_room)) }
-            }
+            // Spec 10.4 step 1: host-first — a room is created empty, no board required.
+            Button(
+                onClick = { HapticsService.fire(HapticIntent.TAP); vm.create() },
+                enabled = !state.loading,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(stringResource(R.string.multiplayer_create_room)) }
         }
         if (state.loading) CircularProgressIndicator(color = p.primary)
         state.error?.let { Text(it, color = p.secondary) }
     }
+
+    if (showGamePicker) {
+        state.room?.let { room ->
+            MultiplayerGamePickerDialog(
+                title = stringResource(if (room.hasSelectedGame) R.string.multiplayer_choose_another_game else R.string.multiplayer_choose_game),
+                boards = boards,
+                onSelect = { board ->
+                    HapticsService.fire(HapticIntent.TAP)
+                    showGamePicker = false
+                    vm.selectGame(room, board)
+                },
+                onDismiss = { showGamePicker = false },
+            )
+        }
+    }
+}
+
+/**
+ * Spec 10.4 step 3: the game picker's own difficulty filter, independent of whatever
+ * difficulty the All tab's catalog filter happens to be showing, across every difficulty;
+ * custom boards always show regardless of the filter. Reuses `MenuScreen.kt`'s `AllTab`
+ * difficulty-pill visual pattern (duplicated rather than shared — this codebase already
+ * duplicates a small private `Difficulty.labelRes()` per screen rather than extracting one).
+ */
+@Composable
+private fun MultiplayerGamePickerDialog(
+    title: String,
+    boards: List<Board>,
+    onSelect: (Board) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val palette = LocalPalette.current
+    var selectedDifficulty by rememberSaveable { mutableStateOf(Difficulty.MEDIUM) }
+    val filtered = boards.filter { it.isCustom || Difficulty.parse(it.difficulty) == selectedDifficulty }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
+        },
+        text = {
+            Column(Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Difficulty.entries.forEach { entry ->
+                        val selected = entry == selectedDifficulty
+                        Text(
+                            text = stringResource(entry.pickerLabelRes()),
+                            fontSize = 13.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                            color = if (selected) palette.surfacePrimary else palette.textSecondary,
+                            modifier = Modifier
+                                .background(
+                                    color = if (selected) palette.primary else palette.surfaceSecondary,
+                                    shape = RoundedCornerShape(999.dp),
+                                )
+                                .clickable {
+                                    HapticsService.fire(HapticIntent.SELECT)
+                                    selectedDifficulty = entry
+                                }
+                                .padding(horizontal = 14.dp, vertical = 8.dp),
+                        )
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                if (filtered.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.multiplayer_no_games_for_difficulty),
+                        color = palette.textSecondary,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                    )
+                } else {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(filtered, key = { it.id }) { board ->
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .background(palette.surfaceSecondary, RoundedCornerShape(12.dp))
+                                    .clickable { onSelect(board) }
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            ) {
+                                Text(board.items.firstOrNull().orEmpty(), fontSize = 24.sp)
+                                Text(board.name, color = palette.textPrimary, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+            }
+        },
+    )
+}
+
+private fun Difficulty.pickerLabelRes(): Int = when (this) {
+    Difficulty.EASY -> R.string.difficulty_easy
+    Difficulty.MEDIUM -> R.string.difficulty_medium
+    Difficulty.HARD -> R.string.difficulty_hard
+    Difficulty.VERY_HARD -> R.string.difficulty_very_hard
 }
 
 @Composable

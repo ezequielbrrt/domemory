@@ -13,6 +13,10 @@ data class MultiplayerPlayer(
     val connected: Boolean = true,
     val lastSeenAt: Long,
     val score: Int = 0,
+    // Spec 10.2/10.4: per-player mutual ready-check flag, false until explicitly set true.
+    // Reset to false on both players whenever the host (re)picks a game — see
+    // MultiplayerService.selectGame.
+    val isReady: Boolean = false,
 )
 
 data class MultiplayerCustomGamePayload(
@@ -86,6 +90,23 @@ data class MultiplayerRoom(
 ) {
     val allPairsMatched get() = cards.isNotEmpty() && cards.all { it.isMatched }
     fun isTurnFor(playerId: String) = status == MultiplayerRoomStatus.PLAYING && currentPlayerId == playerId
+
+    /** Spec 10.2: `gameId == ""` is the wire sentinel for "no game chosen yet" — a room only
+     * ever has an empty [gameId] in WAITING/READY, never once [status] reaches PLAYING. */
+    val hasSelectedGame get() = gameId.isNotEmpty()
+
+    /**
+     * Spec 10.4 step 5: the pure precondition for the automatic, host-only start —
+     * `status == ready`, a game picked, exactly two players present, and every player ready.
+     * Deliberately doesn't check `hostId == caller` — that half of the guard belongs to
+     * whoever is *acting* (see [MultiplayerService.start]'s transaction and
+     * `MultiplayerViewModel`'s auto-start trigger), not to the room's own data.
+     */
+    val readyToAutoStart get() =
+        status == MultiplayerRoomStatus.READY &&
+            hasSelectedGame &&
+            players.size == 2 &&
+            players.values.all { it.isReady }
 
     /**
      * Whether tapping a card right now would actually flip one — mirrors iOS's

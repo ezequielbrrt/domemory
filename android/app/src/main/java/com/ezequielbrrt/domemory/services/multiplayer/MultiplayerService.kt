@@ -20,12 +20,17 @@ class MultiplayerService(
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance(),
     private val now: () -> Long = { Instant.now().epochSecond },
 ) {
-    suspend fun createRoom(board: Board): MultiplayerRoom {
+    /**
+     * Spec 10.4 step 1: host-first — the room is created *empty*, with no game chosen
+     * (`gameId`/`gameName`/`difficulty` all `""`, `gameSource: firebase` and ignored until a
+     * game is picked via [selectGame]). Takes no board.
+     */
+    suspend fun createRoom(): MultiplayerRoom {
         val uid = uid()
         val roomId = database.reference.child(ROOMS).push().key ?: error("Could not allocate room")
         val code = reserveCode(roomId)
         val timestamp = now()
-        val room = MultiplayerRoom(roomId, code, MultiplayerRoomStatus.WAITING, timestamp, timestamp, uid, players = mapOf(uid to MultiplayerPlayer(uid, "Host", lastSeenAt = timestamp)), gameSource = if (board.isCustom) MultiplayerGameSource.CUSTOM else MultiplayerGameSource.FIREBASE, gameId = board.id, gameName = board.name, difficulty = board.difficulty, customGamePayload = board.takeIf { it.isCustom }?.let(MultiplayerCustomGamePayload::from))
+        val room = MultiplayerRoom(roomId, code, MultiplayerRoomStatus.WAITING, timestamp, timestamp, uid, players = mapOf(uid to MultiplayerPlayer(uid, "Host", lastSeenAt = timestamp)), gameSource = MultiplayerGameSource.FIREBASE, gameId = "", gameName = "", difficulty = "")
         try {
             database.reference.child(ROOMS).child(roomId).setValue(MultiplayerRoomCodec.encode(room)).await()
         } catch (error: Throwable) {
@@ -34,6 +39,39 @@ class MultiplayerService(
         }
         configurePresence(roomId, uid)
         return room
+    }
+
+    /**
+     * Spec 10.4 step 3: host-only, any `waiting`/`ready` room. Sets the game fields from
+     * [board] and does **not** touch `status`/`cards`/`currentPlayerId`/scores — no cards are
+     * dealt. Resets every current player's `isReady` back to `false`, since readiness was for
+     * whatever game (if any) was picked before.
+     */
+    suspend fun selectGame(roomId: String, board: Board) {
+        val uid = uid()
+        transaction(roomId) { room ->
+            if (room.hostId != uid || room.status !in setOf(MultiplayerRoomStatus.WAITING, MultiplayerRoomStatus.READY)) return@transaction null
+            room.copy(
+                gameSource = if (board.isCustom) MultiplayerGameSource.CUSTOM else MultiplayerGameSource.FIREBASE,
+                gameId = board.id,
+                gameName = board.name,
+                difficulty = board.difficulty,
+                customGamePayload = board.takeIf { it.isCustom }?.let(MultiplayerCustomGamePayload::from),
+                players = room.players.mapValues { it.value.copy(isReady = false) },
+                updatedAt = now(),
+            )
+        }
+    }
+
+    /** Spec 10.4 step 4: either current player (host or guest) marks their own readiness.
+     * Never starts the match by itself — see [readyToAutoStart's][MultiplayerRoom] use in
+     * [start]'s guard and `MultiplayerViewModel`'s auto-start trigger. */
+    suspend fun setReady(roomId: String, ready: Boolean) {
+        val uid = uid()
+        transaction(roomId) { room ->
+            val player = room.players[uid] ?: return@transaction null
+            room.copy(players = room.players + (uid to player.copy(isReady = ready)), updatedAt = now())
+        }
     }
 
     suspend fun joinRoom(rawCode: String): String {
@@ -71,10 +109,16 @@ class MultiplayerService(
         ref.addValueEventListener(listener); awaitClose { ref.removeEventListener(listener) }
     }
 
+    /**
+     * Spec 10.4 step 5: reactive, host-only — the caller (`MultiplayerViewModel`'s auto-start
+     * trigger) is expected to call this only once [MultiplayerRoom.readyToAutoStart] is true.
+     * The transaction still re-checks it against the newest room, since Firebase may re-run
+     * this transform against a snapshot that raced the one the caller observed.
+     */
     suspend fun start(roomId: String, board: Board) {
         val uid = uid()
         transaction(roomId) { room ->
-            if (room.hostId != uid || room.status != MultiplayerRoomStatus.READY) return@transaction null
+            if (room.hostId != uid || !room.readyToAutoStart) return@transaction null
             room.copy(
                 status = MultiplayerRoomStatus.PLAYING,
                 currentPlayerId = room.hostId,

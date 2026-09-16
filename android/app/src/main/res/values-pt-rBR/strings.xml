@@ -139,8 +139,12 @@
     <string name="multiplayer_scan_qr_code">Ler código QR</string>
     <string name="multiplayer_start_game">Iniciar jogo</string>
     <string name="multiplayer_waiting_for_player">Compartilhe este código e aguarde outro jogador</string>
-    <string name="multiplayer_ready_to_start">Jogador entrou. Inicie quando quiser</string>
-    <string name="multiplayer_waiting_for_host">Aguardando o anfitrião iniciar</string>
+    <string name="multiplayer_choose_game">Escolher um jogo</string>
+    <string name="multiplayer_host_choose_game_prompt">Escolha um jogo para começar</string>
+    <string name="multiplayer_waiting_for_game">Aguardando o anfitrião escolher um jogo</string>
+    <string name="multiplayer_no_games_for_difficulty">Ainda não há tabuleiros para esta dificuldade</string>
+    <string name="multiplayer_tap_start_when_ready">Toque em Iniciar quando estiver pronto</string>
+    <string name="multiplayer_waiting_for_opponent_ready">Aguardando o outro jogador ficar pronto</string>
     <string name="multiplayer_your_turn">Sua vez</string>
     <string name="multiplayer_opponent_turn">Vez do adversário</string>
     <string name="multiplayer_reconnecting">Aguardando reconexão</string>

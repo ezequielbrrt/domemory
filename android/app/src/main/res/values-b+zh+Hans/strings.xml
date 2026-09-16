@@ -139,8 +139,12 @@
     <string name="multiplayer_scan_qr_code">扫描二维码</string>
     <string name="multiplayer_start_game">开始游戏</string>
     <string name="multiplayer_waiting_for_player">分享此代码并等待另一位玩家</string>
-    <string name="multiplayer_ready_to_start">玩家已加入，准备好后开始</string>
-    <string name="multiplayer_waiting_for_host">等待房主开始</string>
+    <string name="multiplayer_choose_game">选择游戏</string>
+    <string name="multiplayer_host_choose_game_prompt">选择一个游戏开始</string>
+    <string name="multiplayer_waiting_for_game">等待房主选择游戏</string>
+    <string name="multiplayer_no_games_for_difficulty">这个难度还没有棋盘</string>
+    <string name="multiplayer_tap_start_when_ready">准备好后点击开始</string>
+    <string name="multiplayer_waiting_for_opponent_ready">等待对方准备好</string>
     <string name="multiplayer_your_turn">轮到你</string>
     <string name="multiplayer_opponent_turn">对手回合</string>
     <string name="multiplayer_reconnecting">等待玩家重新连接</string>
