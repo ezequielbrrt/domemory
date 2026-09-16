@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AlertDialog
@@ -152,10 +153,14 @@ private fun MenuHeader(onCreateMemorama: () -> Unit, onMultiplayer: () -> Unit, 
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("♟", color = palette.primary, fontSize = 22.sp, modifier = Modifier.size(44.dp).clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onMultiplayer() }).padding(10.dp))
-            Text(text = stringResource(R.string.menu_create_title), color = palette.primary, fontWeight = FontWeight.SemiBold, modifier = Modifier
-                .background(palette.surfaceSecondary, RoundedCornerShape(999.dp))
-                .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onCreateMemorama() })
-                .padding(horizontal = 14.dp, vertical = 8.dp),
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = stringResource(R.string.menu_create_title),
+                tint = palette.primary,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onCreateMemorama() })
+                    .padding(10.dp),
             )
             Text(text = "⚙", color = palette.primary, fontSize = 22.sp, modifier = Modifier.size(44.dp).clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onSettings() }).padding(10.dp))
         }
