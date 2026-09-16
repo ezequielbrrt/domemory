@@ -5,7 +5,7 @@ object MultiplayerRoomCodec {
     fun encode(room: MultiplayerRoom): Map<String, Any?> = mapOf(
         "id" to room.id, "code" to room.code, "status" to room.status.wire(), "createdAt" to room.createdAt,
         "updatedAt" to room.updatedAt, "hostId" to room.hostId, "guestId" to room.guestId,
-        "players" to room.players.mapValues { (_, p) -> mapOf("id" to p.id, "name" to p.name, "connected" to p.connected, "lastSeenAt" to p.lastSeenAt, "score" to p.score) },
+        "players" to room.players.mapValues { (_, p) -> mapOf("id" to p.id, "name" to p.name, "connected" to p.connected, "lastSeenAt" to p.lastSeenAt, "score" to p.score, "isReady" to p.isReady) },
         "gameSource" to room.gameSource.wire(), "gameId" to room.gameId, "gameName" to room.gameName,
         "difficulty" to room.difficulty, "customGamePayload" to room.customGamePayload?.let { mapOf("title" to it.title, "category" to it.category, "items" to it.items, "itemType" to it.itemType, "isDoubleItem" to it.isDoubleItem) },
         "currentPlayerId" to room.currentPlayerId,
@@ -21,7 +21,7 @@ object MultiplayerRoomCodec {
         fun bool(map: Map<String, Any?>, key: String, fallback: Boolean = false) = map[key] as? Boolean ?: fallback
         val players = (m["players"] as? Map<String, Any?>).orEmpty().mapValues { (id, raw) ->
             val p = raw as Map<String, Any?>
-            MultiplayerPlayer(id = p["id"] as? String ?: id, name = p["name"] as? String ?: "Player", connected = bool(p, "connected", true), lastSeenAt = (p["lastSeenAt"] as? Number)?.toLong() ?: 0, score = (p["score"] as? Number)?.toInt() ?: 0)
+            MultiplayerPlayer(id = p["id"] as? String ?: id, name = p["name"] as? String ?: "Player", connected = bool(p, "connected", true), lastSeenAt = (p["lastSeenAt"] as? Number)?.toLong() ?: 0, score = (p["score"] as? Number)?.toInt() ?: 0, isReady = bool(p, "isReady", false))
         }
         val cards = (m["cards"] as? List<Any?>).orEmpty().map { raw ->
             val c = raw as Map<String, Any?>

@@ -230,7 +230,12 @@ fun NavGraph(
                     }
                 },
             )
-            val boards by container.boardCatalog.boards.collectAsState(initial = emptyList())
+            // Spec 10.4 step 3: the game picker offers every difficulty of the raw catalog
+            // (unlike the All tab's boards(difficulty), boards here is already unfiltered),
+            // plus every custom board, the same merge boards(difficulty) does for the All tab.
+            val catalogBoards by container.boardCatalog.boards.collectAsState(initial = emptyList())
+            val customBoards by container.boardCatalog.customBoardsFlow.collectAsState(initial = emptyList())
+            val boards = catalogBoards + customBoards
             com.ezequielbrrt.domemory.feature.multiplayer.MultiplayerScreen(
                 boards = boards,
                 vm = viewModel,

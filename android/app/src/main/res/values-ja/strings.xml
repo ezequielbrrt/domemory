@@ -140,8 +140,12 @@
     <string name="multiplayer_scan_qr_code">QRコードをスキャン</string>
     <string name="multiplayer_start_game">ゲーム開始</string>
     <string name="multiplayer_waiting_for_player">このコードを共有して相手を待ちます</string>
-    <string name="multiplayer_ready_to_start">相手が参加しました。準備できたら開始</string>
-    <string name="multiplayer_waiting_for_host">ホストの開始を待っています</string>
+    <string name="multiplayer_choose_game">ゲームを選択</string>
+    <string name="multiplayer_host_choose_game_prompt">ゲームを選んで開始しましょう</string>
+    <string name="multiplayer_waiting_for_game">ホストがゲームを選ぶのを待っています</string>
+    <string name="multiplayer_no_games_for_difficulty">この難易度のボードはまだありません</string>
+    <string name="multiplayer_tap_start_when_ready">準備ができたら「開始」をタップ</string>
+    <string name="multiplayer_waiting_for_opponent_ready">相手の準備を待っています</string>
     <string name="multiplayer_your_turn">あなたの番</string>
     <string name="multiplayer_opponent_turn">相手の番</string>
     <string name="multiplayer_reconnecting">再接続を待っています</string>

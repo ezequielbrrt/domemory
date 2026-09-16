@@ -140,8 +140,12 @@
     <string name="multiplayer_scan_qr_code">QR कोड स्कैन करें</string>
     <string name="multiplayer_start_game">गेम शुरू करें</string>
     <string name="multiplayer_waiting_for_player">यह कोड शेयर करें और दूसरे खिलाड़ी का इंतज़ार करें</string>
-    <string name="multiplayer_ready_to_start">खिलाड़ी जुड़ गया. तैयार हों तो शुरू करें</string>
-    <string name="multiplayer_waiting_for_host">होस्ट के शुरू करने का इंतज़ार</string>
+    <string name="multiplayer_choose_game">गेम चुनें</string>
+    <string name="multiplayer_host_choose_game_prompt">शुरू करने के लिए एक गेम चुनें</string>
+    <string name="multiplayer_waiting_for_game">होस्ट के गेम चुनने का इंतज़ार</string>
+    <string name="multiplayer_no_games_for_difficulty">इस कठिनाई के लिए अभी कोई बोर्ड नहीं है</string>
+    <string name="multiplayer_tap_start_when_ready">तैयार होने पर शुरू करें पर टैप करें</string>
+    <string name="multiplayer_waiting_for_opponent_ready">दूसरे खिलाड़ी के तैयार होने का इंतज़ार</string>
     <string name="multiplayer_your_turn">आपकी बारी</string>
     <string name="multiplayer_opponent_turn">प्रतिद्वंद्वी की बारी</string>
     <string name="multiplayer_reconnecting">खिलाड़ी के दोबारा जुड़ने का इंतज़ार</string>
