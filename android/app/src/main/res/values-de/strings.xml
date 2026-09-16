@@ -28,6 +28,7 @@
     <string name="game_pause_title">Pause</string>
     <string name="game_pairs_label">Paare</string>
     <string name="game_points_label">Punkte</string>
+    <string name="game_quit_accessibility">Spiel beenden</string>
     <string name="game_quit_confirmation">Möchtest du wirklich beenden?</string>
     <string name="game_remaining_label">übrig</string>
     <string name="game_errors_label">Fehler</string>

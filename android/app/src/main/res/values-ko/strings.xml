@@ -28,6 +28,7 @@
     <string name="game_pause_title">일시정지</string>
     <string name="game_pairs_label">쌍</string>
     <string name="game_points_label">점수</string>
+    <string name="game_quit_accessibility">게임 나가기</string>
     <string name="game_quit_confirmation">정말로 나가시겠습니까?</string>
     <string name="game_remaining_label">남음</string>
     <string name="game_errors_label">오류</string>

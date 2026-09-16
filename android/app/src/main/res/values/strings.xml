@@ -28,6 +28,7 @@
     <string name="game_pause_title">Pause</string>
     <string name="game_pairs_label">pairs</string>
     <string name="game_points_label">Points</string>
+    <string name="game_quit_accessibility">Quit game</string>
     <string name="game_quit_confirmation">Are you sure you want to exit?</string>
     <string name="game_remaining_label">remaining</string>
     <string name="game_errors_label">errors</string>

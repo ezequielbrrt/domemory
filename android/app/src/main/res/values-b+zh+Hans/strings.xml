@@ -28,6 +28,7 @@
     <string name="game_pause_title">暂停</string>
     <string name="game_pairs_label">配对</string>
     <string name="game_points_label">分数</string>
+    <string name="game_quit_accessibility">退出游戏</string>
     <string name="game_quit_confirmation">确定要退出吗？</string>
     <string name="game_remaining_label">剩余</string>
     <string name="game_errors_label">错误</string>

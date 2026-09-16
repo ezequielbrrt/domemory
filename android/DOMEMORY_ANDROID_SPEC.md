@@ -175,6 +175,25 @@ with 10 pt spacing and 16 pt padding, so a 6-card board shows large cards and a
 24-card board shows small ones. There is no scrolling — the whole board is always
 on screen.
 
+### 3.6 Quitting mid-game
+
+A close ("×") button sits in the HUD, top-left, for every mode (free play, Daily
+Challenge, Levels, Seasons). Tapping it pauses the game and shows a confirmation
+dialog (`game_quit_confirmation`, buttons `common_cancel`/`common_accept`) —
+there is no single-tap way to leave an in-progress game. Cancel resumes the
+game exactly where it left off; confirm abandons it.
+
+Abandoning mid-game is a pure quit, not a loss: no stats, lifetime stars, or
+Levels/Seasons life are touched, and no win/loss is recorded — quitting must
+never cost more than a genuine loss would (mirrors iOS's `tapOnExit()`, which
+deliberately never calls `logGameFinishedIfNeeded`). This is distinct from the
+Levels/Seasons lose screen's own "Menu" button, which commits that loss (a life
+already spent) before leaving — the two must not share one code path, or a
+mid-game quit would silently spend a life. `quit_confirmed` (§16.1) fires on
+confirm once an analytics pipeline exists on Android (currently absent — see
+the "Deliberately deferred" list in `ANDROID_PLAN.md` §7); until then this is
+UI-only parity.
+
 ---
 
 ## 4. Difficulty
@@ -1416,6 +1435,7 @@ game_lose_message = Sorry, you ran out of time
 game_pause_title = Pause
 game_pairs_label = pairs
 game_points_label = Points
+game_quit_accessibility = Quit game
 game_quit_confirmation = Are you sure you want to exit?
 game_remaining_label = remaining
 game_errors_label = errors
