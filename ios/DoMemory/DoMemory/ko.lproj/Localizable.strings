@@ -97,8 +97,12 @@
 "multiplayer_qr_code" = "멀티플레이 방 QR 코드";
 "multiplayer_start_game" = "게임 시작";
 "multiplayer_waiting_for_player" = "이 코드를 공유하고 다른 플레이어를 기다리세요";
-"multiplayer_ready_to_start" = "플레이어가 참가했습니다. 준비되면 시작하세요";
-"multiplayer_waiting_for_host" = "호스트가 시작하길 기다리는 중";
+"multiplayer_tap_start_when_ready" = "준비되면 시작을 탭하세요";
+"multiplayer_waiting_for_opponent_ready" = "상대방이 준비되길 기다리는 중";
+"multiplayer_choose_game" = "게임 선택";
+"multiplayer_host_choose_game_prompt" = "시작하려면 게임을 선택하세요";
+"multiplayer_waiting_for_game" = "호스트가 게임을 선택하길 기다리는 중";
+"multiplayer_no_games_for_difficulty" = "이 난이도에는 아직 보드가 없어요";
 "multiplayer_your_turn" = "내 차례";
 "multiplayer_opponent_turn" = "상대 차례";
 "multiplayer_reconnecting" = "플레이어 재연결 대기 중";

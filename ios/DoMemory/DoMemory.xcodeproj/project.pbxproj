@@ -135,6 +135,7 @@
 		835C75796F4A3669DB911276 /* Righteous-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F9E49DC8A9BB4E1468099543 /* Righteous-Regular.ttf */; };
 		838A7A6DC789D76FA9F0974B /* OutOfLivesModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D71F85AB2AC162E493DD3D /* OutOfLivesModal.swift */; };
 		84FC7F23903E94EE6BCB60C7 /* GoogleUtilities_GoogleUtilities_NSData.bundle in Dependencies */ = {isa = PBXBuildFile; fileRef = F938AD7EC93B11E700A008F4 /* GoogleUtilities_GoogleUtilities_NSData.bundle */; };
+		85EBE6BC1F033A0AEE83C37E /* MultiplayerModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74E6A67B735CEBEE33FACD4 /* MultiplayerModelsTests.swift */; };
 		889DBAE26519530A5C54FD81 /* GoogleAdsOnDeviceConversion.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 721BE633B60CFB9F9333D645 /* GoogleAdsOnDeviceConversion.xcframework */; };
 		893D1D28E37FEDAEC2435894 /* AdsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 941A9B53D6F54040761109A8 /* AdsService.swift */; };
 		8A6E24BD38735E13906B3029 /* MemoryGameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6ACF9294A68A492E545DA60 /* MemoryGameTests.swift */; };
@@ -515,6 +516,7 @@
 		D3FAA56CD3A1742239B217E7 /* FirebaseSharedSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseSharedSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D50D2A3085C15742082B0714 /* LevelsIntroGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelsIntroGateTests.swift; sourceTree = "<group>"; };
 		D6958452C62322357BD7A479 /* Firebase_FirebaseCoreInternal.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Firebase_FirebaseCoreInternal.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		D74E6A67B735CEBEE33FACD4 /* MultiplayerModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerModelsTests.swift; sourceTree = "<group>"; };
 		D835B045B37D3747427E4EAF /* GoogleDataTransport.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GoogleDataTransport.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D918A65DEFDD86B254FA024F /* SeededGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeededGenerator.swift; sourceTree = "<group>"; };
 		D93B797E4F95C8C0E6881E7D /* hi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hi; path = hi.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1363,6 +1365,7 @@
 				E1DC4725635DD628E5A823A6 /* LottieAssetsTests.swift */,
 				5A9DE9F32CAF0B87850C08DC /* MemorizeViewModelTests.swift */,
 				F6ACF9294A68A492E545DA60 /* MemoryGameTests.swift */,
+				D74E6A67B735CEBEE33FACD4 /* MultiplayerModelsTests.swift */,
 				E743AB2239A2350BBB1B35BC /* RemoteImageServiceTests.swift */,
 				7EA877981D5E10DC5E4EA4F1 /* ReviewHistoryMigrationTests.swift */,
 				AB24F59230A66566E2226C83 /* SeasonCatalogServiceTests.swift */,
@@ -1651,6 +1654,7 @@
 				7461EB41C40795999B8B6A5C /* LottieAssetsTests.swift in Sources */,
 				5E14A96E1DEEB582EB116534 /* MemorizeViewModelTests.swift in Sources */,
 				8A6E24BD38735E13906B3029 /* MemoryGameTests.swift in Sources */,
+				85EBE6BC1F033A0AEE83C37E /* MultiplayerModelsTests.swift in Sources */,
 				8258136841B3D2ED472D706D /* RemoteImageServiceTests.swift in Sources */,
 				78B1A948387E1E49C812F9CB /* ReviewHistoryMigrationTests.swift in Sources */,
 				2F3F5ADC28FF4BCD1AA7E9BD /* SeasonCatalogServiceTests.swift in Sources */,

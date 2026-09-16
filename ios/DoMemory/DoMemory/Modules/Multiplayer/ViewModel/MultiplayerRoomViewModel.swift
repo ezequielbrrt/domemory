@@ -11,14 +11,17 @@ import SwiftUI
 @MainActor
 final class MultiplayerRoomViewModel {
     enum EntryMode: Hashable {
-        case create(Memorama)
+        case host
         case join(String)
     }
 
     private let service: MultiplayerService
     private let entryMode: EntryMode
     let availableMemoramas: [Memorama]
-    private var selectedMemorama: Memorama?
+    /// The player's current All-tab difficulty, used only to preselect the
+    /// lobby game picker's own difficulty filter — the host can still change
+    /// it there without affecting the All tab.
+    let defaultDifficulty: Difficulty
     private var roomObserverHandle: UInt?
     // Remote updates arrive as whole-room snapshots, so each felt moment needs
     // its own edge detection to avoid re-firing on every snapshot.
@@ -36,23 +39,65 @@ final class MultiplayerRoomViewModel {
     var closeView = false
     var hasStarted = false
     private var hasRecordedMultiplayerWin = false
+    // Guards the auto-start trigger below against firing more than once
+    // while waiting for its own `startGame` write to round-trip back as a
+    // new snapshot — an unrelated update (e.g. the 5s heartbeat) could
+    // otherwise land in that window and re-evaluate the same "both ready"
+    // condition before `status` has actually flipped to `.playing`.
+    private var hasTriggeredAutoStart = false
 
-    init(entryMode: EntryMode, availableMemoramas: [Memorama] = [], service: MultiplayerService = .shared) {
+    init(
+        entryMode: EntryMode,
+        availableMemoramas: [Memorama] = [],
+        defaultDifficulty: Difficulty = .medium,
+        service: MultiplayerService = .shared
+    ) {
         self.entryMode = entryMode
         self.availableMemoramas = availableMemoramas
+        self.defaultDifficulty = defaultDifficulty
         self.service = service
-        if case .create(let memorama) = entryMode {
-            selectedMemorama = memorama
-        }
     }
 
     var roomCode: String {
         room?.code ?? ""
     }
 
-    var canStartGame: Bool {
+    /// The room's currently chosen game, resolved from its `gameId`/
+    /// `gameSource`/`customGamePayload` rather than tracked separately —
+    /// the room itself is the single source of truth for what is picked.
+    /// `nil` before any game has been chosen.
+    var selectedMemorama: Memorama? {
+        guard let room else { return nil }
+        return service.resolveMemorama(from: room, availableMemoramas: availableMemoramas)
+    }
+
+    /// Whether *I* have confirmed readiness for the currently selected game.
+    /// The match only starts once both players are — see
+    /// `handleRoomUpdate`'s auto-start trigger.
+    var isCurrentUserReady: Bool {
+        room?.currentUserPlayer?.isReady ?? false
+    }
+
+    var isOpponentReady: Bool {
+        room?.opponent?.isReady ?? false
+    }
+
+    /// Whether tapping "Start game" right now would do anything: a game
+    /// must be picked, a guest must have joined, and I haven't already
+    /// marked myself ready. True for either player, not just the host —
+    /// both now confirm readiness before the match starts.
+    var canMarkReady: Bool {
         guard let room else { return false }
-        return room.hostId == MultiplayerService.currentUserID && room.status == .ready
+        return room.status == .ready && room.hasSelectedGame && !isCurrentUserReady
+    }
+
+    /// The host may pick or change the room's game any time before the
+    /// match starts. Once play begins the post-game "choose another game"
+    /// rematch flow (`startNewGame`) takes over instead.
+    var canSelectGame: Bool {
+        guard let room else { return false }
+        guard room.status == .waiting || room.status == .ready else { return false }
+        return room.hostId == MultiplayerService.currentUserID
     }
 
     var canRestartGame: Bool {
@@ -80,9 +125,11 @@ final class MultiplayerRoomViewModel {
         guard let room else { return "" }
         switch room.status {
         case .waiting:
+            guard room.hasSelectedGame else { return noGameChosenStatusText(room: room) }
             return Strings.multiplayerWaitingForPlayer
         case .ready:
-            return room.hostId == MultiplayerService.currentUserID ? Strings.multiplayerReadyToStart : Strings.multiplayerWaitingForHost
+            guard room.hasSelectedGame else { return noGameChosenStatusText(room: room) }
+            return isCurrentUserReady ? Strings.multiplayerWaitingForOpponentReady : Strings.multiplayerTapStartWhenReady
         case .playing:
             return room.isCurrentUserTurn ? Strings.multiplayerYourTurn : Strings.multiplayerOpponentTurn
         case .reconnecting:
@@ -98,6 +145,12 @@ final class MultiplayerRoomViewModel {
         case .abandoned:
             return Strings.multiplayerRoomClosed
         }
+    }
+
+    private func noGameChosenStatusText(room: MultiplayerRoom) -> String {
+        room.hostId == MultiplayerService.currentUserID
+            ? Strings.multiplayerHostChooseGamePrompt
+            : Strings.multiplayerWaitingForGame
     }
 
     var currentUserScore: Int {
@@ -122,8 +175,8 @@ final class MultiplayerRoomViewModel {
             do {
                 let roomId: String
                 switch entryMode {
-                case .create(let memorama):
-                    let createdRoom = try await service.createRoom(for: memorama)
+                case .host:
+                    let createdRoom = try await service.createRoom()
                     room = createdRoom
                     roomId = createdRoom.id
                 case .join(let code):
@@ -138,11 +191,28 @@ final class MultiplayerRoomViewModel {
         }
     }
 
-    func startGame() {
-        guard let room, let selectedMemorama else { return }
+    /// Either player confirming they're ready to start the selected game.
+    /// This does not itself start the match — `handleRoomUpdate` reacts once
+    /// both players are ready and starts it from the host's client.
+    func markReady() {
+        guard let room else { return }
         Task {
             do {
-                try await service.startGame(room: room, memorama: selectedMemorama)
+                try await service.setReady(room: room, ready: true)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    /// The host picking or changing the room's game before the match
+    /// starts. Unlike `startNewGame(with:)`, this leaves `status`, `cards`
+    /// and `players` untouched — no cards are dealt until "Start game".
+    func selectGame(_ memorama: Memorama) {
+        guard let room else { return }
+        Task {
+            do {
+                try await service.selectGame(room: room, memorama: memorama)
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -164,7 +234,6 @@ final class MultiplayerRoomViewModel {
         guard let room else { return }
         Task {
             do {
-                selectedMemorama = memorama
                 try await service.startNewGame(room: room, memorama: memorama)
             } catch {
                 errorMessage = error.localizedDescription
@@ -294,6 +363,37 @@ private extension MultiplayerRoomViewModel {
             Task {
                 try? await service.resumeAfterReconnect(room: room)
                 try? await service.updateReconnectStateIfNeeded(room: room)
+            }
+        }
+
+        if room.status != .ready {
+            hasTriggeredAutoStart = false
+        }
+        triggerAutoStartIfBothReady(room)
+    }
+
+    /// Only the host's own client acts on this — both players' clients
+    /// observe the same "both ready" snapshot, but `service.startGame`
+    /// itself is host-only, so only one of them would ever succeed. Checking
+    /// `hostId` here rather than relying solely on that server-side guard
+    /// avoids the guest's client making a doomed network call every time.
+    private func triggerAutoStartIfBothReady(_ room: MultiplayerRoom) {
+        guard !hasTriggeredAutoStart,
+              room.status == .ready,
+              room.hostId == MultiplayerService.currentUserID,
+              room.hasSelectedGame,
+              room.players.count == 2,
+              room.players.values.allSatisfy(\.isReady),
+              let memorama = service.resolveMemorama(from: room, availableMemoramas: availableMemoramas) else {
+            return
+        }
+        hasTriggeredAutoStart = true
+        Task {
+            do {
+                try await service.startGame(room: room, memorama: memorama)
+            } catch {
+                hasTriggeredAutoStart = false
+                errorMessage = error.localizedDescription
             }
         }
     }

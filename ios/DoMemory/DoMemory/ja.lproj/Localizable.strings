@@ -97,8 +97,12 @@
 "multiplayer_qr_code" = "マルチプレイルームのQRコード";
 "multiplayer_start_game" = "ゲーム開始";
 "multiplayer_waiting_for_player" = "このコードを共有して相手を待ちます";
-"multiplayer_ready_to_start" = "相手が参加しました。準備できたら開始";
-"multiplayer_waiting_for_host" = "ホストの開始を待っています";
+"multiplayer_tap_start_when_ready" = "準備ができたら「開始」をタップ";
+"multiplayer_waiting_for_opponent_ready" = "相手の準備を待っています";
+"multiplayer_choose_game" = "ゲームを選択";
+"multiplayer_host_choose_game_prompt" = "ゲームを選んで開始しましょう";
+"multiplayer_waiting_for_game" = "ホストがゲームを選ぶのを待っています";
+"multiplayer_no_games_for_difficulty" = "この難易度のボードはまだありません";
 "multiplayer_your_turn" = "あなたの番";
 "multiplayer_opponent_turn" = "相手の番";
 "multiplayer_reconnecting" = "再接続を待っています";

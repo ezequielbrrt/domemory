@@ -25,6 +25,33 @@ struct MultiplayerPlayer: Codable, Identifiable, Hashable {
     var connected: Bool
     var lastSeenAt: TimeInterval
     var score: Int
+    var isReady: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, connected, lastSeenAt, score, isReady
+    }
+
+    init(id: String, name: String, connected: Bool, lastSeenAt: TimeInterval, score: Int, isReady: Bool = false) {
+        self.id = id
+        self.name = name
+        self.connected = connected
+        self.lastSeenAt = lastSeenAt
+        self.score = score
+        self.isReady = isReady
+    }
+
+    // `isReady` is a new field: a room written by a pre-update client (or,
+    // during the rollout window, one still mid-match) has no such key on its
+    // player nodes, and must decode as "not ready" rather than fail.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        connected = try container.decode(Bool.self, forKey: .connected)
+        lastSeenAt = try container.decode(TimeInterval.self, forKey: .lastSeenAt)
+        score = try container.decode(Int.self, forKey: .score)
+        isReady = try container.decodeIfPresent(Bool.self, forKey: .isReady) ?? false
+    }
 }
 
 struct MultiplayerCard: Codable, Identifiable, Hashable {
@@ -177,5 +204,13 @@ extension MultiplayerRoom {
 
     var allPairsMatched: Bool {
         !cards.isEmpty && cards.allSatisfy(\.isMatched)
+    }
+
+    /// `gameId == ""` is the wire sentinel for "no game chosen yet" — a
+    /// host-first room is created empty and the host picks a game from
+    /// inside the lobby. An unmodified Android client already decodes an
+    /// empty string fine; it just has no UI for the transient state yet.
+    var hasSelectedGame: Bool {
+        !gameId.isEmpty
     }
 }

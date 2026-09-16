@@ -97,8 +97,12 @@
 "multiplayer_qr_code" = "Code QR du salon multijoueur";
 "multiplayer_start_game" = "Démarrer";
 "multiplayer_waiting_for_player" = "Partagez ce code et attendez un autre joueur";
-"multiplayer_ready_to_start" = "Joueur rejoint. Démarrez quand vous êtes prêt";
-"multiplayer_waiting_for_host" = "En attente de l’hôte";
+"multiplayer_tap_start_when_ready" = "Appuyez sur Démarrer quand vous êtes prêt";
+"multiplayer_waiting_for_opponent_ready" = "En attente que l’autre joueur soit prêt";
+"multiplayer_choose_game" = "Choisir un jeu";
+"multiplayer_host_choose_game_prompt" = "Choisissez un jeu pour commencer";
+"multiplayer_waiting_for_game" = "En attente que l’hôte choisisse un jeu";
+"multiplayer_no_games_for_difficulty" = "Aucun plateau pour cette difficulté pour l’instant";
 "multiplayer_your_turn" = "À vous";
 "multiplayer_opponent_turn" = "Tour de l’adversaire";
 "multiplayer_reconnecting" = "En attente de reconnexion";

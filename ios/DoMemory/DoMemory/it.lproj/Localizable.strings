@@ -97,8 +97,12 @@
 "multiplayer_qr_code" = "Codice QR stanza multigiocatore";
 "multiplayer_start_game" = "Inizia";
 "multiplayer_waiting_for_player" = "Condividi questo codice e attendi un altro giocatore";
-"multiplayer_ready_to_start" = "Giocatore entrato. Inizia quando vuoi";
-"multiplayer_waiting_for_host" = "In attesa dell’host";
+"multiplayer_tap_start_when_ready" = "Tocca Inizia quando sei pronto";
+"multiplayer_waiting_for_opponent_ready" = "In attesa che l’altro giocatore sia pronto";
+"multiplayer_choose_game" = "Scegli un gioco";
+"multiplayer_host_choose_game_prompt" = "Scegli un gioco per iniziare";
+"multiplayer_waiting_for_game" = "In attesa che l’host scelga un gioco";
+"multiplayer_no_games_for_difficulty" = "Ancora nessun tabellone per questa difficoltà";
 "multiplayer_your_turn" = "Il tuo turno";
 "multiplayer_opponent_turn" = "Turno avversario";
 "multiplayer_reconnecting" = "In attesa della riconnessione";

@@ -7,11 +7,26 @@ import SwiftUI
 
 struct MultiplayerRoomView: View {
     @State private var viewModel: MultiplayerRoomViewModel
+    /// Rematch picker, shown from the finished-game screen; calls
+    /// `startNewGame(with:)`, which deals a fresh hand immediately.
     @State private var showGamePicker = false
+    /// Pre-start lobby picker, shown before "Start game" is tappable; calls
+    /// `selectGame(_:)`, which only sets the room's game and deals nothing.
+    /// Kept separate from `showGamePicker` since the two trigger different
+    /// view-model actions.
+    @State private var showLobbyGamePicker = false
     @Environment(\.dismiss) private var dismiss
 
-    init(entryMode: MultiplayerRoomViewModel.EntryMode, availableMemoramas: [Memorama] = []) {
-        _viewModel = State(initialValue: MultiplayerRoomViewModel(entryMode: entryMode, availableMemoramas: availableMemoramas))
+    init(
+        entryMode: MultiplayerRoomViewModel.EntryMode,
+        availableMemoramas: [Memorama] = [],
+        defaultDifficulty: Difficulty = .medium
+    ) {
+        _viewModel = State(initialValue: MultiplayerRoomViewModel(
+            entryMode: entryMode,
+            availableMemoramas: availableMemoramas,
+            defaultDifficulty: defaultDifficulty
+        ))
     }
 
     var body: some View {
@@ -39,10 +54,28 @@ struct MultiplayerRoomView: View {
         }
         .sheet(isPresented: $showGamePicker) {
             MultiplayerGamePickerView(
+                title: Strings.multiplayerChooseAnotherGame,
                 memoramas: viewModel.availableMemoramas,
+                initialDifficulty: viewModel.defaultDifficulty,
                 onSelect: { memorama in
                     showGamePicker = false
                     viewModel.startNewGame(with: memorama)
+                }
+            )
+        }
+        .sheet(isPresented: $showLobbyGamePicker) {
+            MultiplayerGamePickerView(
+                // The very first pick has nothing to be "another" game than,
+                // so it gets its own title; changing an already-picked game
+                // reuses the rematch flow's "Choose another game" copy.
+                title: (viewModel.room?.hasSelectedGame ?? false)
+                    ? Strings.multiplayerChooseAnotherGame
+                    : Strings.multiplayerChooseGame,
+                memoramas: viewModel.availableMemoramas,
+                initialDifficulty: viewModel.defaultDifficulty,
+                onSelect: { memorama in
+                    showLobbyGamePicker = false
+                    viewModel.selectGame(memorama)
                 }
             )
         }
@@ -107,6 +140,8 @@ struct MultiplayerRoomView: View {
 
                 playerScoreRow
 
+                gameSelectionSection
+
                 if let errorMessage = viewModel.errorMessage {
                     Text(Strings.multiplayerGenericError)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
@@ -118,26 +153,106 @@ struct MultiplayerRoomView: View {
 
                 Button {
                     HapticsService.shared.fire(.tap)
-                    viewModel.startGame()
+                    viewModel.markReady()
                 } label: {
-                    Label(Strings.multiplayerStartGame, systemImage: "play.fill")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 15)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(viewModel.canStartGame ? Color.primaryColor : Color.textMuted.opacity(0.45))
-                        )
+                    // Tapping only marks *me* ready — the match starts once
+                    // the other player has too, so once I've tapped this
+                    // reflects that back rather than staying labeled "Start
+                    // game" while doing nothing on a second tap.
+                    Label(
+                        viewModel.isCurrentUserReady ? Strings.multiplayerWaitingForOpponentReady : Strings.multiplayerStartGame,
+                        systemImage: viewModel.isCurrentUserReady ? "hourglass" : "play.fill"
+                    )
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 15)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(viewModel.canMarkReady ? Color.primaryColor : Color.textMuted.opacity(0.45))
+                    )
                 }
                 .buttonStyle(.plain)
-                .disabled(!viewModel.canStartGame)
+                .disabled(!viewModel.canMarkReady)
                 .padding(.horizontal, 16)
             }
 
             Spacer()
         }
         .padding(.bottom, 18)
+    }
+
+    /// Sits between the player scores and "Start game". Before any game is
+    /// chosen the host sees a prominent CTA and the guest sees nothing here
+    /// (the `statusText` above already tells them the host hasn't picked);
+    /// once a game is chosen, everyone sees what it is, with a "change"
+    /// affordance for the host only.
+    @ViewBuilder
+    private var gameSelectionSection: some View {
+        if let room = viewModel.room {
+            if room.hasSelectedGame {
+                selectedGameRow(room: room)
+            } else if viewModel.canSelectGame {
+                Button {
+                    HapticsService.shared.fire(.tap)
+                    showLobbyGamePicker = true
+                } label: {
+                    Label(Strings.multiplayerChooseGame, systemImage: "square.grid.2x2")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color.primaryColor)
+                        )
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 16)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func selectedGameRow(room: MultiplayerRoom) -> some View {
+        HStack(spacing: 12) {
+            if let emoji = viewModel.selectedMemorama?.items.first {
+                Text(emoji)
+                    .font(.system(size: 30))
+                    .frame(width: 44, height: 44)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(viewModel.selectedMemorama?.name ?? room.gameName)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.textPrimary)
+                    .lineLimit(1)
+
+                if viewModel.canSelectGame {
+                    Button {
+                        HapticsService.shared.fire(.tap)
+                        showLobbyGamePicker = true
+                    } label: {
+                        Text(Strings.multiplayerChooseAnotherGame)
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.primaryColor)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            Spacer()
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.surfacePrimary)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 16)
     }
 
     private var multiplayerBoard: some View {
@@ -319,61 +434,111 @@ struct MultiplayerRoomView: View {
 }
 
 private struct MultiplayerGamePickerView: View {
+    var title: String = Strings.multiplayerChooseAnotherGame
     let memoramas: [Memorama]
     let onSelect: (Memorama) -> Void
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedDifficulty: Difficulty
+
+    init(
+        title: String = Strings.multiplayerChooseAnotherGame,
+        memoramas: [Memorama],
+        initialDifficulty: Difficulty = .medium,
+        onSelect: @escaping (Memorama) -> Void
+    ) {
+        self.title = title
+        self.memoramas = memoramas
+        self.onSelect = onSelect
+        _selectedDifficulty = State(initialValue: initialDifficulty)
+    }
+
+    /// Catalog boards are filtered to the picked difficulty, the same rule
+    /// the All tab applies to `memoramaArray`; custom memoramas always show
+    /// regardless of difficulty, matching how the All tab's filter already
+    /// leaves "My memoramas" untouched.
+    private var filteredMemoramas: [Memorama] {
+        memoramas.filter { memorama in
+            memorama.id.hasPrefix("custom_") || Difficulty(rawValue: memorama.difficulty) == selectedDifficulty
+        }
+    }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.appBackground.ignoresSafeArea()
 
-                ScrollView {
-                    LazyVStack(spacing: 10) {
-                        ForEach(memoramas) { memorama in
-                            Button {
-                                HapticsService.shared.fire(.tap)
-                                onSelect(memorama)
-                            } label: {
-                                HStack(spacing: 12) {
-                                    Text(memorama.items.first ?? "•")
-                                        .font(.system(size: 34))
-                                        .frame(width: 48, height: 48)
+                VStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(Strings.difficulty)
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.textMuted)
 
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(memorama.name)
-                                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                                            .foregroundStyle(Color.textPrimary)
-                                            .lineLimit(1)
-
-                                        Text(memorama.difficulty.capitalized)
-                                            .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                            .foregroundStyle(Color.textMuted)
-                                    }
-
-                                    Spacer()
-
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundStyle(Color.textMuted)
-                                }
-                                .padding(14)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .fill(Color.surfacePrimary)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                                .stroke(Color.surfaceBorder, lineWidth: 1)
-                                        )
-                                )
-                            }
-                            .buttonStyle(.plain)
+                        MenuDifficultyPicker(selectedDifficulty: selectedDifficulty) { difficulty in
+                            HapticsService.shared.fire(.select)
+                            selectedDifficulty = difficulty
                         }
                     }
-                    .padding(16)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 4)
+
+                    if filteredMemoramas.isEmpty {
+                        Spacer()
+                        Text(Strings.multiplayerNoGamesForDifficulty)
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.textMuted)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 10) {
+                                ForEach(filteredMemoramas) { memorama in
+                                    Button {
+                                        HapticsService.shared.fire(.tap)
+                                        onSelect(memorama)
+                                    } label: {
+                                        HStack(spacing: 12) {
+                                            Text(memorama.items.first ?? "•")
+                                                .font(.system(size: 34))
+                                                .frame(width: 48, height: 48)
+
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(memorama.name)
+                                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                                    .foregroundStyle(Color.textPrimary)
+                                                    .lineLimit(1)
+
+                                                Text(memorama.difficulty.capitalized)
+                                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                                    .foregroundStyle(Color.textMuted)
+                                            }
+
+                                            Spacer()
+
+                                            Image(systemName: "chevron.right")
+                                                .font(.system(size: 13, weight: .bold))
+                                                .foregroundStyle(Color.textMuted)
+                                        }
+                                        .padding(14)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                                .fill(Color.surfacePrimary)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                                        .stroke(Color.surfaceBorder, lineWidth: 1)
+                                                )
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(16)
+                        }
+                    }
                 }
             }
-            .navigationTitle(Strings.multiplayerChooseAnotherGame)
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
