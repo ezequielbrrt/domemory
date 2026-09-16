@@ -1692,6 +1692,17 @@ ach_multiplayer_detail = Win your first multiplayer match
 share_result = Share Result
 share_result_caption = I matched %d pairs in DoMemory! Can you beat me?
 
+# Onboarding
+onboarding_pairs_title = Match the pairs
+onboarding_pairs_subtitle = Find every matching pair before time runs out.
+onboarding_pace_title = Play at your pace
+onboarding_pace_subtitle = Games start at a comfortable pace you can fine-tune anytime from Settings.
+onboarding_custom_title = Make it yours
+onboarding_custom_subtitle = Create your own memoramas and keep favourites close.
+onboarding_skip = Skip
+onboarding_continue = Continue
+onboarding_get_started = Get started
+
 # Onboarding intro
 intro_multiplayer_title = Play with Friends
 intro_multiplayer_subtitle = Challenge anyone in real-time multiplayer rooms — just share a 6-digit code or QR.

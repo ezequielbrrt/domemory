@@ -223,6 +223,17 @@
     <string name="share_result">Condividi risultato</string>
     <string name="share_result_caption">Ho abbinato %d coppie su DoMemory! Riesci a battermi?</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_pairs_title">Abbina le coppie</string>
+    <string name="onboarding_pairs_subtitle">Trova ogni coppia prima che il tempo scada.</string>
+    <string name="onboarding_pace_title">Gioca al tuo ritmo</string>
+    <string name="onboarding_pace_subtitle">Le partite iniziano con un ritmo comodo che puoi regolare in qualsiasi momento dalle Impostazioni.</string>
+    <string name="onboarding_custom_title">Rendilo tuo</string>
+    <string name="onboarding_custom_subtitle">Crea i tuoi memorama e tieni i preferiti sempre a portata di mano.</string>
+    <string name="onboarding_skip">Salta</string>
+    <string name="onboarding_continue">Continua</string>
+    <string name="onboarding_get_started">Inizia</string>
+
     <!-- Onboarding intro -->
     <string name="intro_multiplayer_title">Gioca con gli amici</string>
     <string name="intro_multiplayer_subtitle">Sfida chiunque in stanze multigiocatore in tempo reale: condividi un codice a 6 cifre o un QR.</string>
