@@ -10,12 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-enum class OnboardingStep { INTRO, DIFFICULTY }
-
 data class OnboardingUiState(
-    val step: OnboardingStep = OnboardingStep.INTRO,
     val page: Int = 0,
-    val difficulty: Difficulty = Difficulty.MEDIUM,
     val isSaving: Boolean = false,
 )
 
@@ -27,8 +23,9 @@ class OnboardingViewModel(
     private val _state = MutableStateFlow(OnboardingUiState())
     val state: StateFlow<OnboardingUiState> = _state.asStateFlow()
 
-    fun next() { _state.value = if (_state.value.page == 2) _state.value.copy(step = OnboardingStep.DIFFICULTY) else _state.value.copy(page = _state.value.page + 1) }
-    fun skipIntro() { _state.value = _state.value.copy(step = OnboardingStep.DIFFICULTY) }
-    fun selectDifficulty(value: Difficulty) { _state.value = _state.value.copy(difficulty = value) }
-    fun finish(onComplete: () -> Unit) { workScope.launch { _state.value = _state.value.copy(isSaving = true); prefs.completeOnboarding(_state.value.difficulty); onComplete() } }
+    fun next(onComplete: () -> Unit) {
+        if (_state.value.page == 2) finish(onComplete) else _state.value = _state.value.copy(page = _state.value.page + 1)
+    }
+    fun skipIntro(onComplete: () -> Unit) { finish(onComplete) }
+    private fun finish(onComplete: () -> Unit) { workScope.launch { _state.value = _state.value.copy(isSaving = true); prefs.completeOnboarding(Difficulty.MEDIUM); onComplete() } }
 }

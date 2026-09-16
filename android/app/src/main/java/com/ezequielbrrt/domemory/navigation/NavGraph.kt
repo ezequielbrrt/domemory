@@ -120,9 +120,12 @@ fun NavGraph(
         composable(Routes.ONBOARDING) {
             val viewModel: OnboardingViewModel = viewModel(factory = viewModelFactory { initializer { OnboardingViewModel(container.prefs) } })
             val state by viewModel.state.collectAsState()
-            OnboardingScreen(state, viewModel::next, viewModel::skipIntro, viewModel::selectDifficulty) {
-                viewModel.finish { navController.navigate(Routes.MENU) { popUpTo(Routes.ONBOARDING) { inclusive = true } } }
-            }
+            val onOnboardingComplete = { navController.navigate(Routes.MENU) { popUpTo(Routes.ONBOARDING) { inclusive = true } } }
+            OnboardingScreen(
+                state,
+                onNext = { viewModel.next(onOnboardingComplete) },
+                onSkip = { viewModel.skipIntro(onOnboardingComplete) },
+            )
         }
         composable(Routes.MENU) {
             val viewModel: MenuViewModel = viewModel(
