@@ -28,6 +28,7 @@
     <string name="game_pause_title">一時停止</string>
     <string name="game_pairs_label">ペア</string>
     <string name="game_points_label">ポイント</string>
+    <string name="game_quit_accessibility">ゲームを終了</string>
     <string name="game_quit_confirmation">本当に終了しますか？</string>
     <string name="game_remaining_label">残り</string>
     <string name="game_errors_label">ミス</string>

@@ -3,6 +3,7 @@ package com.ezequielbrrt.domemory.feature.game
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,9 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -78,6 +83,13 @@ fun GameScreen(
     onPauseToggle: () -> Unit,
     onQuit: () -> Unit,
     onRetry: () -> Unit,
+    /** Fired by the in-HUD quit button once the player confirms, i.e. abandoning a game
+     * that hasn't reached an outcome yet. Unlike [onQuit] (which the Levels/Seasons win
+     * and lose screens use, and which commits that outcome first), this must never spend
+     * a life, touch stats or lifetime stars, or log a finish — quitting mid-game is a pure
+     * abandon (spec §3.6, matching iOS's `tapOnExit()`). Defaults to [onQuit] because for
+     * free play and the Daily Challenge, "leave" already has no side effects either way. */
+    onQuitDuringPlay: () -> Unit = onQuit,
     onNextLevel: () -> Unit = onQuit,
     modifier: Modifier = Modifier,
     isLevel: Boolean = false,
@@ -104,6 +116,7 @@ fun GameScreen(
     val palette = LocalPalette.current
     val context = LocalContext.current
     var isHintAdInProgress by remember { mutableStateOf(false) }
+    var showQuitConfirm by remember { mutableStateOf(false) }
 
     // Drives the pie only. Repainting on frames is cheap; recomputing the model is not.
     var frameTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -132,7 +145,17 @@ fun GameScreen(
             .background(palette.appBackground),
     ) {
         Column(Modifier.fillMaxSize().padding(16.dp)) {
-            GameHud(state = state, onPauseToggle = onPauseToggle, onQuit = onQuit)
+            GameHud(
+                state = state,
+                onPauseToggle = onPauseToggle,
+                onQuitTapped = {
+                    // Pause first so the timer can't run out from underneath the
+                    // confirmation dialog (spec §3.6, matching iOS's `tapOnQuitPrompt()`
+                    // stopping the timer before it ever shows the modal).
+                    onPauseToggle()
+                    showQuitConfirm = true
+                },
+            )
             Spacer(Modifier.size(12.dp))
             BoardGrid(
                 state = state,
@@ -175,7 +198,10 @@ fun GameScreen(
             )
         }
 
-        if (state.isPaused && state.outcome == null) {
+        // Suppressed while the quit dialog is up — that dialog paused the game via the
+        // same `onPauseToggle`, and showing both at once would stack an unrelated pause
+        // sheet behind the confirmation.
+        if (state.isPaused && state.outcome == null && !showQuitConfirm) {
             PauseOverlay(
                 showRewardedHint = AdsService.isRewardedConfigured(AdPlacement.GAME_REWARDED_HINT),
                 isRewardedHintInProgress = isHintAdInProgress,
@@ -186,6 +212,26 @@ fun GameScreen(
                 },
                 onRetry = onRetry,
                 onContinue = onPauseToggle,
+            )
+        }
+
+        // Android counterpart to iOS's QuitModal (spec §3.6): cancel resumes the game
+        // exactly where it left off, confirm abandons it with no stats/lives/win-loss
+        // side effect — see `onQuitDuringPlay`'s doc above.
+        if (showQuitConfirm) {
+            AlertDialog(
+                onDismissRequest = { showQuitConfirm = false; onPauseToggle() },
+                title = { Text(stringResource(R.string.game_quit_confirmation)) },
+                confirmButton = {
+                    TextButton(onClick = { showQuitConfirm = false; onQuitDuringPlay() }) {
+                        Text(stringResource(R.string.common_accept))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showQuitConfirm = false; onPauseToggle() }) {
+                        Text(stringResource(R.string.common_cancel))
+                    }
+                },
             )
         }
     }
@@ -206,7 +252,19 @@ private fun PauseOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(palette.overlayBackdrop),
+            .background(palette.overlayBackdrop)
+            // A plain background doesn't consume touches in Compose — without a click
+            // handler here, taps at the same screen position as the HUD's "×" quit
+            // button or "Pause" toggle (drawn earlier, and so *behind* this overlay only
+            // visually) would fall straight through to them. That's exactly the case the
+            // new quit-confirmation flow's own pause-first guarantee (spec §3.6) depends
+            // on holding: reaching the HUD's quit button while already paused must not be
+            // able to silently toggle the game back to running underneath the dialog.
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {},
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Surface(
@@ -277,8 +335,9 @@ private fun PauseActionButton(
 }
 
 @Composable
-private fun GameHud(state: GameUiState, onPauseToggle: () -> Unit, onQuit: () -> Unit) {
+private fun GameHud(state: GameUiState, onPauseToggle: () -> Unit, onQuitTapped: () -> Unit) {
     val palette = LocalPalette.current
+    val quitAccessibilityLabel = stringResource(R.string.game_quit_accessibility)
 
     // Spec 14.5: the timer only announces while frozen — "an always-on label would replace
     // the icon-plus-number screen readers already read by default with a bare, contextless
@@ -314,6 +373,12 @@ private fun GameHud(state: GameUiState, onPauseToggle: () -> Unit, onQuit: () ->
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        IconButton(
+            onClick = onQuitTapped,
+            modifier = Modifier.semantics { contentDescription = quitAccessibilityLabel },
+        ) {
+            Icon(Icons.Filled.Close, contentDescription = null, tint = palette.textSecondary)
+        }
         Box(contentAlignment = Alignment.Center) {
             Chip(
                 label = stringResource(R.string.game_time_label),
@@ -583,7 +648,20 @@ private fun OutcomeOverlay(
     val reduceMotion = rememberReduceMotion()
 
     Box(
-        Modifier.fillMaxSize().background(palette.overlayBackdrop),
+        Modifier
+            .fillMaxSize()
+            .background(palette.overlayBackdrop)
+            // Same touch-passthrough fix as PauseOverlay: the HUD's "×" quit button sits
+            // underneath this backdrop too, and without consuming the tap here it would
+            // reach that button, pop the quit-confirmation dialog over the finished-game
+            // screen, and call `onPauseToggle` against a `GameViewModel` that has already
+            // moved past this game (`pause()`'s `isFinished` guard makes that call a
+            // no-op, but the stray dialog itself is still a confusing false affordance).
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {},
+            ),
         contentAlignment = Alignment.Center,
     ) {
         // A one-shot celebratory burst behind the card, as on iOS's WinModal. Skipped for

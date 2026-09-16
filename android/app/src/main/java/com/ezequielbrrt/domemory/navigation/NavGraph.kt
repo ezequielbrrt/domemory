@@ -406,6 +406,12 @@ fun NavGraph(
                     viewModel.acknowledgeLossAndQuit()
                     navController.popBackStack()
                 },
+                onQuitDuringPlay = {
+                    // Mid-game abandon (spec §3.6) — no outcome exists yet, so unlike
+                    // [onQuit] above this must not spend a life or touch stats.
+                    HapticsService.fire(HapticIntent.TAP)
+                    navController.popBackStack()
+                },
                 onRetry = {
                     coroutineScope.launch {
                         if (!viewModel.retry()) {
@@ -520,6 +526,12 @@ fun NavGraph(
                 onPauseToggle = { if (state.isPaused) viewModel.resume() else viewModel.pause() },
                 onQuit = {
                     viewModel.acknowledgeLossAndQuit()
+                    navController.popBackStack()
+                },
+                onQuitDuringPlay = {
+                    // Mid-game abandon (spec §3.6) — no outcome exists yet, so unlike
+                    // [onQuit] above this must not spend a life or touch stats.
+                    HapticsService.fire(HapticIntent.TAP)
                     navController.popBackStack()
                 },
                 onRetry = {

@@ -28,6 +28,7 @@
     <string name="game_pause_title">रोकें</string>
     <string name="game_pairs_label">जोड़े</string>
     <string name="game_points_label">अंक</string>
+    <string name="game_quit_accessibility">गेम से बाहर निकलें</string>
     <string name="game_quit_confirmation">क्या आप वाकई बाहर निकलना चाहते हैं?</string>
     <string name="game_remaining_label">बाकी</string>
     <string name="game_errors_label">गलतियां</string>
