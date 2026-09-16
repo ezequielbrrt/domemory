@@ -97,8 +97,12 @@
 "multiplayer_qr_code" = "Código QR da sala multijogador";
 "multiplayer_start_game" = "Iniciar jogo";
 "multiplayer_waiting_for_player" = "Compartilhe este código e aguarde outro jogador";
-"multiplayer_ready_to_start" = "Jogador entrou. Inicie quando quiser";
-"multiplayer_waiting_for_host" = "Aguardando o anfitrião iniciar";
+"multiplayer_tap_start_when_ready" = "Toque em Iniciar quando estiver pronto";
+"multiplayer_waiting_for_opponent_ready" = "Aguardando o outro jogador ficar pronto";
+"multiplayer_choose_game" = "Escolher um jogo";
+"multiplayer_host_choose_game_prompt" = "Escolha um jogo para começar";
+"multiplayer_waiting_for_game" = "Aguardando o anfitrião escolher um jogo";
+"multiplayer_no_games_for_difficulty" = "Ainda não há tabuleiros para esta dificuldade";
 "multiplayer_your_turn" = "Sua vez";
 "multiplayer_opponent_turn" = "Vez do adversário";
 "multiplayer_reconnecting" = "Aguardando reconexão";

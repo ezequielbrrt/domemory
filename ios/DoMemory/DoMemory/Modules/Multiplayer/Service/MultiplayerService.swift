@@ -49,7 +49,11 @@ final class MultiplayerService {
 
     private init() {}
 
-    func createRoom(for memorama: Memorama) async throws -> MultiplayerRoom {
+    /// Creates an empty, host-first room with no game chosen yet
+    /// (`gameId == ""`). The host picks a game from inside the lobby via
+    /// `selectGame(room:memorama:)`, at any time before or after a guest
+    /// joins.
+    func createRoom() async throws -> MultiplayerRoom {
         let uid = try await ensureAuthenticated()
         guard let rootRef else { throw MultiplayerServiceError.firebaseUnavailable }
 
@@ -63,7 +67,6 @@ final class MultiplayerService {
             lastSeenAt: now,
             score: 0
         )
-        let isCustom = memorama.id.hasPrefix("custom_")
         let room = MultiplayerRoom(
             id: roomId,
             code: code,
@@ -73,17 +76,11 @@ final class MultiplayerService {
             hostId: uid,
             guestId: nil,
             players: [uid: player],
-            gameSource: isCustom ? .custom : .firebase,
-            gameId: memorama.id,
-            gameName: memorama.name,
-            difficulty: memorama.difficulty,
-            customGamePayload: isCustom ? MultiplayerCustomGamePayload(
-                title: memorama.name,
-                category: memorama.category,
-                items: memorama.items,
-                itemType: memorama.itemType,
-                isDoubleItem: memorama.isDoubleItem
-            ) : nil,
+            gameSource: .firebase,
+            gameId: "",
+            gameName: "",
+            difficulty: "",
+            customGamePayload: nil,
             currentPlayerId: nil,
             cards: [],
             selectedCardIds: [],
@@ -95,8 +92,89 @@ final class MultiplayerService {
         try await setCodable(room, at: rootRef.child(roomsPath).child(roomId))
         try await rootRef.child(codesPath).child(code).setValueAsync(roomId)
         configurePresence(roomId: roomId, playerId: uid)
-        AnalyticsService.log(.multiplayerRoomCreated(gameID: memorama.id, isCustom: isCustom))
         return room
+    }
+
+    /// Sets or changes the room's game before the match starts. Only the
+    /// game fields move — `status`, `cards`, `currentPlayerId` and `players`
+    /// are untouched, so the room stays `.waiting`/`.ready` with no cards
+    /// dealt until the host explicitly taps "Start game".
+    ///
+    /// `multiplayerRoomCreated` fires here, on first game selection, rather
+    /// than at room creation, since there is no game to attribute the event
+    /// to until now.
+    func selectGame(room: MultiplayerRoom, memorama: Memorama) async throws {
+        guard room.hostId == Self.currentUserID else { throw MultiplayerServiceError.invalidMove }
+        guard let rootRef else { throw MultiplayerServiceError.firebaseUnavailable }
+
+        let now = Date().timeIntervalSince1970
+        let isCustom = memorama.id.hasPrefix("custom_")
+        let hadGameBefore = room.hasSelectedGame
+
+        var updates: [String: Any] = [
+            "gameSource": (isCustom ? MultiplayerGameSource.custom : MultiplayerGameSource.firebase).rawValue,
+            "gameId": memorama.id,
+            "gameName": memorama.name,
+            "difficulty": memorama.difficulty,
+            "customGamePayload": isCustom ? try dictionary(from: MultiplayerCustomGamePayload(
+                title: memorama.name,
+                category: memorama.category,
+                items: memorama.items,
+                itemType: memorama.itemType,
+                isDoubleItem: memorama.isDoubleItem
+            )) : NSNull(),
+            "updatedAt": now
+        ]
+        // Picking or changing the game invalidates any earlier "I'm ready" —
+        // both players confirm readiness for *this* game before it starts.
+        for playerId in room.players.keys {
+            updates["players/\(playerId)/isReady"] = false
+        }
+
+        try await rootRef.child(roomsPath).child(room.id).updateChildValuesAsync(updates)
+
+        if !hadGameBefore {
+            AnalyticsService.log(.multiplayerRoomCreated(gameID: memorama.id, isCustom: isCustom))
+        }
+    }
+
+    /// Either player marks themselves ready to start the currently selected
+    /// game. The match only actually starts (cards dealt, `status` flips to
+    /// `.playing`) once both are ready — see
+    /// `MultiplayerRoomViewModel.handleRoomUpdate`, which reacts to that
+    /// condition on the host's client and calls `startGame`.
+    func setReady(room: MultiplayerRoom, ready: Bool) async throws {
+        guard let uid = Self.currentUserID, room.players[uid] != nil else {
+            throw MultiplayerServiceError.invalidMove
+        }
+        guard let rootRef else { throw MultiplayerServiceError.firebaseUnavailable }
+        try await rootRef.child(roomsPath).child(room.id).updateChildValuesAsync([
+            "players/\(uid)/isReady": ready,
+            "updatedAt": Date().timeIntervalSince1970
+        ])
+    }
+
+    /// Reconstructs the `Memorama` a room's chosen game refers to, for a
+    /// room that has not dealt cards yet (`room.cards` is still empty). A
+    /// custom game rebuilds from its embedded `customGamePayload`, the same
+    /// way `makeCards(from room:)` does for an in-progress custom match; a
+    /// catalog game is looked up by `gameId` in the caller's known catalog.
+    func resolveMemorama(from room: MultiplayerRoom, availableMemoramas: [Memorama]) -> Memorama? {
+        guard room.hasSelectedGame else { return nil }
+        if let payload = room.customGamePayload {
+            return Memorama(
+                id: room.gameId,
+                name: payload.title,
+                category: payload.category,
+                difficulty: room.difficulty,
+                description: "",
+                publishedDate: "",
+                items: payload.items,
+                itemType: payload.itemType,
+                isDoubleItem: payload.isDoubleItem
+            )
+        }
+        return availableMemoramas.first { $0.id == room.gameId }
     }
 
     func joinRoom(code rawCode: String) async throws -> String {
@@ -175,7 +253,17 @@ final class MultiplayerService {
 
     func startGame(room: MultiplayerRoom, memorama: Memorama) async throws {
         guard room.hostId == Self.currentUserID else { throw MultiplayerServiceError.invalidMove }
+        guard !room.gameId.isEmpty else { throw MultiplayerServiceError.invalidMove }
         guard room.guestId != nil else { throw MultiplayerServiceError.roomUnavailable }
+        // Both players must have confirmed readiness for the currently
+        // selected game — the host's client is the one that actually calls
+        // this, reactively, once that becomes true (see
+        // `MultiplayerRoomViewModel.handleRoomUpdate`), but the guard stays
+        // here too since this is the source of truth for whether a match may
+        // legally start.
+        guard room.players.count == 2, room.players.values.allSatisfy(\.isReady) else {
+            throw MultiplayerServiceError.invalidMove
+        }
         guard let rootRef else { throw MultiplayerServiceError.firebaseUnavailable }
 
         let now = Date().timeIntervalSince1970

@@ -97,8 +97,12 @@
 "multiplayer_qr_code" = "Multiplayer room QR code";
 "multiplayer_start_game" = "Start game";
 "multiplayer_waiting_for_player" = "Share this code and wait for another player";
-"multiplayer_ready_to_start" = "Player joined. Start when ready";
-"multiplayer_waiting_for_host" = "Waiting for the host to start";
+"multiplayer_tap_start_when_ready" = "Tap Start when you're ready";
+"multiplayer_waiting_for_opponent_ready" = "Waiting for the other player to get ready";
+"multiplayer_choose_game" = "Choose a game";
+"multiplayer_host_choose_game_prompt" = "Choose a game to get started";
+"multiplayer_waiting_for_game" = "Waiting for the host to choose a game";
+"multiplayer_no_games_for_difficulty" = "No boards for this difficulty yet";
 "multiplayer_your_turn" = "Your turn";
 "multiplayer_opponent_turn" = "Opponent's turn";
 "multiplayer_reconnecting" = "Waiting for player to reconnect";

@@ -24,6 +24,7 @@ struct MenuView: View {
     @State var showBanner = false
     @State private var showCreateSheet = false
     @State private var showJoinMultiplayerSheet = false
+    @State private var isHostingMultiplayerRoom = false
     @State private var selectedTab: GameTab = .levels
     @State private var randomMemorama: Memorama?
     @State private var dailyChallengeBoard: Memorama?
@@ -61,7 +62,7 @@ struct MenuView: View {
     }
 
     private var multiplayerAvailableGames: [Memorama] {
-        viewModel.memoramaArray
+        viewModel.multiplayerCatalog
     }
 
     var body: some View {
@@ -85,7 +86,21 @@ struct MenuView: View {
 
                                 Spacer()
 
-                                Button(action: { HapticsService.shared.fire(.tap); self.showJoinMultiplayerSheet = true }) {
+                                Menu {
+                                    Button {
+                                        HapticsService.shared.fire(.tap)
+                                        isHostingMultiplayerRoom = true
+                                    } label: {
+                                        Label(Strings.multiplayerCreateRoom, systemImage: "person.2.badge.plus")
+                                    }
+
+                                    Button {
+                                        HapticsService.shared.fire(.tap)
+                                        showJoinMultiplayerSheet = true
+                                    } label: {
+                                        Label(Strings.multiplayerJoinRoom, systemImage: "arrow.right.circle")
+                                    }
+                                } label: {
                                     Image(systemName: "person.2.fill")
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundStyle(Color.primaryColor)
@@ -100,8 +115,7 @@ struct MenuView: View {
                                                 .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                                         )
                                 }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel(Strings.multiplayerJoinRoom)
+                                .accessibilityLabel(Strings.multiplayerTitle)
 
                                 Button(action: { HapticsService.shared.fire(.tap); self.showCreateSheet = true }) {
                                     Image(systemName: "plus")
@@ -279,6 +293,13 @@ struct MenuView: View {
                     .navigationDestination(item: $joinDeepLink) { link in
                         MultiplayerRoomView(entryMode: .join(link.code))
                     }
+                    .navigationDestination(isPresented: $isHostingMultiplayerRoom) {
+                        MultiplayerRoomView(
+                            entryMode: .host,
+                            availableMemoramas: multiplayerAvailableGames,
+                            defaultDifficulty: viewModel.selectedDifficulty
+                        )
+                    }
                     .sheet(isPresented: $showCreateSheet) {
                         CreateMemoramaView(
                             currentDifficulty: viewModel.currentDifficulty,
@@ -409,7 +430,6 @@ struct MenuView: View {
                 WaterfallGrid(games) { (memorama: Memorama) in
                     MemoramaGridCell(
                         memorama: memorama,
-                        availableMemoramas: multiplayerAvailableGames,
                         stats: viewModel.stats(for: memorama.id),
                         isFavorite: viewModel.isFavorite(id: memorama.id),
                         onStatsChanged: { statsRefreshID = UUID() },
@@ -435,7 +455,6 @@ struct MenuView: View {
 
 private struct MemoramaGridCell: View {
     let memorama: Memorama
-    let availableMemoramas: [Memorama]
     let stats: GameStats
     let isFavorite: Bool
     let onStatsChanged: () -> Void
@@ -443,7 +462,6 @@ private struct MemoramaGridCell: View {
     let onDelete: (() -> Void)?
 
     @State private var isNavigating = false
-    @State private var isStartingMultiplayer = false
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -461,28 +479,20 @@ private struct MemoramaGridCell: View {
                 )
                     .onDisappear(perform: onStatsChanged)
             }
-            .contextMenu {
-                Button {
-                    HapticsService.shared.fire(.tap)
-                    isStartingMultiplayer = true
-                } label: {
-                    Label(Strings.multiplayerCreateRoom, systemImage: "person.2.fill")
-                }
-
-                if let onDelete {
-                    Button(role: .destructive, action: onDelete) {
-                        Label(Strings.delete, systemImage: "trash")
-                    }
-                }
-            }
+            // Delete is the only remaining context-menu action, and it only
+            // applies to custom memoramas. Attaching `.contextMenu` only
+            // when there is an action avoids presenting an empty long-press
+            // menu on every catalog card now that "Create room" is gone.
+            .modifier(DeleteContextMenu(onDelete: onDelete))
 
             // A single, properly sized action on the card face: the favorite
             // toggle. Its previous 31pt frame sat well under Apple's 44pt
             // minimum tap target; it now gets a real 44pt hit area with a
             // visible tinted circle so the state (and the button itself) is
-            // easy to see and to hit. Multiplayer's per-card icon was
-            // removed — "Create room" already lives one long-press away in
-            // the context menu below, and the top bar keeps its join button.
+            // easy to see and to hit. Multiplayer moved off the card
+            // entirely — starting a room no longer starts from a specific
+            // game at all; the top bar's "host a room" button opens an empty
+            // room and the game is picked inside the lobby instead.
             Button(action: { HapticsService.shared.fire(.tap); onToggleFavorite() }) {
                 ZStack {
                     Circle()
@@ -499,8 +509,24 @@ private struct MemoramaGridCell: View {
             .accessibilityLabel(isFavorite ? Strings.menuFavoriteRemove : Strings.menuFavoriteAdd)
             .padding(.top, 4)
         }
-        .navigationDestination(isPresented: $isStartingMultiplayer) {
-            MultiplayerRoomView(entryMode: .create(memorama), availableMemoramas: availableMemoramas)
+    }
+}
+
+/// Attaches `.contextMenu` only when there is an action to show. A `nil`
+/// `onDelete` (every catalog board) skips the modifier entirely rather than
+/// presenting a context menu with zero items.
+private struct DeleteContextMenu: ViewModifier {
+    let onDelete: (() -> Void)?
+
+    func body(content: Content) -> some View {
+        if let onDelete {
+            content.contextMenu {
+                Button(role: .destructive, action: onDelete) {
+                    Label(Strings.delete, systemImage: "trash")
+                }
+            }
+        } else {
+            content
         }
     }
 }

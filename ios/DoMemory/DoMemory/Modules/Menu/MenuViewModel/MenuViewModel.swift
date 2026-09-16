@@ -46,6 +46,15 @@ class MenuViewModel {
         difficulty ?? .medium
     }
 
+    /// The full catalog across every difficulty, plus custom memoramas —
+    /// unlike `memoramaArray`, which is already filtered to the player's
+    /// current All-tab difficulty. The multiplayer game picker uses this so
+    /// its own difficulty filter can show every board, not just whichever
+    /// one the All tab happened to be showing when the room opened.
+    var multiplayerCatalog: [Memorama] {
+        allGames + customMemoramas
+    }
+
     /// Updates the All-tab catalog immediately while keeping the global setting used by
     /// subsequent games and the Settings screen in sync.
     func setDifficulty(_ difficulty: Difficulty) {
