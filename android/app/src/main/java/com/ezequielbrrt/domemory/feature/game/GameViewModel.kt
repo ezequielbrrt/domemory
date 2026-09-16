@@ -7,6 +7,8 @@ import com.ezequielbrrt.domemory.core.model.ChoiceOutcome
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.core.model.GameMode
 import com.ezequielbrrt.domemory.core.model.MemoryGame
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.daily.DailyChallengeService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.levels.LevelCurve
@@ -133,6 +135,24 @@ class GameViewModel(
      * deliberately doesn't hold — same bare-callback shape as [onCompletionInterstitial].
      */
     private val onGameWon: (() -> Unit)? = null,
+    /**
+     * Fired for every named moment this class decides on its own (a game/level/Daily
+     * Challenge start or finish, a card tap, pause/resume, a power-up or lose-screen
+     * purchase, a mistake-budget loss) — the exact same rationale and bare-callback shape
+     * as [onHaptic], the Android counterpart of iOS's direct `AnalyticsService.log(...)`
+     * call sites inside `MemorizeViewModel`. Null-default so every existing test/preview
+     * call site is unaffected; production wires this to `AnalyticsService::log` from
+     * `NavGraph.kt`. A few purely navigational events with no view-model state to hang
+     * them off (`quit_confirmed`, `retry_tapped` for free play/the Daily Challenge) fire
+     * directly from `NavGraph.kt` instead — see that file's own comments at each site.
+     */
+    private val onAnalytics: ((AnalyticsEvent) -> Unit)? = null,
+    /** The `game_started.source` for the very first start of this instance (`"menu"`,
+     * `"level_map"`, `"season_map"`, `"daily_challenge"`, `"random"`, ...); every later
+     * start via [restart] always reports `"retry"`, matching iOS's `restartGame()`
+     * unconditionally calling `trackGameStarted(source: "retry")` regardless of which
+     * caller triggered it. */
+    private val initialSource: String = "menu",
 ) : ViewModel() {
 
     private val workScope: CoroutineScope get() = scope ?: viewModelScope
@@ -163,6 +183,34 @@ class GameViewModel(
 
     init {
         start()
+        trackGameStarted(initialSource)
+    }
+
+    /**
+     * Mirrors iOS's `trackGameStarted(source:)`: one `game_started` for every start of this
+     * instance (initial or [restart]), plus the mode-specific companion events
+     * (`level_started` / `daily_challenge_started`) — one call site instead of duplicating
+     * the "what kind of start is this" logic at every caller.
+     */
+    private fun trackGameStarted(source: String) {
+        onAnalytics?.invoke(
+            AnalyticsEvent.GameStarted(
+                source = source,
+                difficulty = _state.value.recordedDifficulty.key,
+                cardsCount = game.cards.size,
+                isCustom = board.isCustom,
+            ),
+        )
+        (mode as? GameMode.Level)?.context?.let { context ->
+            onAnalytics?.invoke(AnalyticsEvent.LevelStarted(level = context.number, seasonId = context.seasonId))
+        }
+        if (mode is GameMode.DailyChallenge) {
+            dailyChallenge?.let { daily ->
+                workScope.launch {
+                    onAnalytics?.invoke(AnalyticsEvent.DailyChallengeStarted(streak = daily.currentStreak()))
+                }
+            }
+        }
     }
 
     private fun initialState(): GameUiState {
@@ -226,6 +274,18 @@ class GameViewModel(
 
         publishCards()
 
+        // Every tap would be far too high a volume to log unsampled — mirrors iOS's
+        // `AnalyticsService.shouldSample` guard in front of `MemorizeViewModel.choose(card:)`.
+        if (AnalyticsService.shouldSample(AnalyticsService.CARD_TAP_SAMPLE_RATE)) {
+            onAnalytics?.invoke(
+                AnalyticsEvent.CardTapped(
+                    difficulty = _state.value.recordedDifficulty.key,
+                    cardsCount = game.cards.size,
+                    failedTries = game.failedTries,
+                ),
+            )
+        }
+
         when (outcome) {
             ChoiceOutcome.FLIPPED_UP -> onHaptic?.invoke(HapticIntent.CARD_FLIP)
             ChoiceOutcome.MATCH -> {
@@ -281,6 +341,19 @@ class GameViewModel(
             // Deferred so the player sees the pair that finished them (spec 7.5).
             delay(MISTAKE_LOSS_MILLIS)
             mistakeLossJob = null
+            // Whichever failure landed first wins — a timeout reaching `finish()` first
+            // during this delay must not also be reported as a mistake-budget loss.
+            if (_state.value.outcome == null) {
+                (mode as? GameMode.Level)?.context?.let { context ->
+                    onAnalytics?.invoke(
+                        AnalyticsEvent.LevelFailedByMistakes(
+                            level = context.number,
+                            maxFailures = max,
+                            timeRemaining = _state.value.timeRemaining.toInt(),
+                        ),
+                    )
+                }
+            }
             finish(GameOutcome.Lost(LoseReason.TOO_MANY_MISTAKES))
         }
     }
@@ -321,7 +394,10 @@ class GameViewModel(
      * spend lives (spec 7.4), and Level losses never take this path.
      */
     private fun commit(outcome: GameOutcome) {
+        // Only ever reached with a Level context on a win — a Level loss always takes
+        // [commitLossIfNeeded] instead (see [finish]).
         (mode as? GameMode.Level)?.context?.let { context ->
+            val alreadyUnlockedNext = context.store.isUnlocked(context.number + 1)
             val starsEarned = context.store.recordCompletion(
                 level = context.number,
                 didWin = outcome is GameOutcome.Won,
@@ -332,6 +408,23 @@ class GameViewModel(
             if (outcome is GameOutcome.Won) {
                 _state.value = _state.value.copy(starsEarned = starsEarned)
             }
+            onAnalytics?.invoke(
+                AnalyticsEvent.LevelFinished(
+                    level = context.number,
+                    result = if (outcome is GameOutcome.Won) "win" else "lose",
+                    stars = starsEarned,
+                    seasonId = context.seasonId,
+                ),
+            )
+            // "A new playable level became available" — gated on there actually being one,
+            // and on it not already having been unlocked by an earlier attempt, so a
+            // completed season doesn't emit one unlock for a level that doesn't exist, and
+            // a replay of an already-cleared level doesn't re-emit the same unlock.
+            if (outcome is GameOutcome.Won && !alreadyUnlockedNext) {
+                context.store.nextLevel(context.number)?.let { nextLevel ->
+                    onAnalytics?.invoke(AnalyticsEvent.LevelUnlocked(level = nextLevel, seasonId = context.seasonId))
+                }
+            }
         }
         // Any finish — win or loss — consumes the day (spec 8); recordCompletion is itself
         // idempotent, but winReported already guards this call to at most once per instance.
@@ -340,15 +433,41 @@ class GameViewModel(
         if (mode is GameMode.DailyChallenge) {
             dailyChallenge?.let { daily ->
                 statsWorkScope.launch {
-                    daily.recordCompletion(outcome is GameOutcome.Won)
+                    val result = daily.recordCompletion(outcome is GameOutcome.Won)
+                    onAnalytics?.invoke(
+                        AnalyticsEvent.DailyChallengeFinished(
+                            result = if (outcome is GameOutcome.Won) "win" else "lose",
+                            streak = result.streak,
+                        ),
+                    )
+                    if (result.isNewMilestone) {
+                        onAnalytics?.invoke(AnalyticsEvent.StreakMilestone(days = result.streak))
+                    }
                     onDailyChallengeFinished?.invoke()
                 }
             }
         }
         if (outcome is GameOutcome.Won) onGameWon?.invoke()
+        logGameFinished(outcome)
         recordStats(outcome)
         recordProfileStats(outcome)
         notifyCompletionInterstitial()
+    }
+
+    /** [commit] and [commitLossIfNeeded]'s shared `game_finished` — mirrors iOS's
+     * `logGameFinishedIfNeeded`, which logs this unconditionally alongside whichever
+     * mode-specific event applies. */
+    private fun logGameFinished(outcome: GameOutcome) {
+        onAnalytics?.invoke(
+            AnalyticsEvent.GameFinished(
+                result = if (outcome is GameOutcome.Won) "win" else "lose",
+                difficulty = _state.value.recordedDifficulty.key,
+                cardsCount = game.cards.size,
+                failedTries = _state.value.failedTries,
+                timeRemaining = _state.value.timeRemaining.toInt(),
+                isCustom = board.isCustom,
+            ),
+        )
     }
 
     /**
@@ -367,15 +486,27 @@ class GameViewModel(
         val outcome = _state.value.outcome as? GameOutcome.Lost ?: return
         lossCommitted = true
         (mode as? GameMode.Level)?.context?.let { context ->
-            context.store.recordCompletion(
+            val starsAfter = context.store.recordCompletion(
                 level = context.number,
                 didWin = false,
                 timeRemaining = _state.value.timeRemaining,
                 totalTime = _state.value.totalTime,
                 failedTries = _state.value.failedTries,
             )
+            onAnalytics?.invoke(
+                AnalyticsEvent.LevelFinished(
+                    level = context.number,
+                    result = "lose",
+                    stars = starsAfter,
+                    seasonId = context.seasonId,
+                ),
+            )
         }
         levelLives?.spendOnLoss()
+        levelLives?.remaining()?.let { remaining ->
+            onAnalytics?.invoke(AnalyticsEvent.LevelLifeConsumed(livesRemaining = remaining))
+        }
+        logGameFinished(outcome)
         recordStats(outcome)
         recordProfileStats(outcome)
         notifyCompletionInterstitial(allowInterstitial)
@@ -420,6 +551,9 @@ class GameViewModel(
     fun pause() {
         if (_state.value.isFinished) return
         onHaptic?.invoke(HapticIntent.TAP)
+        onAnalytics?.invoke(
+            AnalyticsEvent.PauseOpened(_state.value.recordedDifficulty.key, _state.value.timeRemaining.toInt()),
+        )
         // Pausing during the mistake-loss deferral must not let the player play on past
         // the budget "for free" by never letting the delay elapse — cancelling it here
         // and re-arming a fresh one from `resume()` is the actual spec 7.5 rule.
@@ -434,6 +568,9 @@ class GameViewModel(
     fun resume() {
         if (_state.value.isFinished) return
         onHaptic?.invoke(HapticIntent.TAP)
+        onAnalytics?.invoke(
+            AnalyticsEvent.ResumeTapped(_state.value.recordedDifficulty.key, _state.value.timeRemaining.toInt()),
+        )
         _state.value = _state.value.copy(isPaused = false)
         checkMistakeBudget()
     }
@@ -483,6 +620,7 @@ class GameViewModel(
         game = MemoryGame(board.buildCards())
         _state.value = initialState()
         start()
+        trackGameStarted("retry")
     }
 
     /**
@@ -497,6 +635,17 @@ class GameViewModel(
     suspend fun retry(): Boolean {
         onHaptic?.invoke(HapticIntent.TAP)
         val hadLevelLoss = mode is GameMode.Level && _state.value.outcome is GameOutcome.Lost
+        // The pause sheet's "Try Again" (state.outcome == null) and the lose screen's "Try
+        // Again" (state.outcome is Lost) share this one entry point — reading `outcome`
+        // before it's cleared below is how the two sources are told apart, mirroring iOS's
+        // separate `tapOnReloadGame`/`tapOnTryAgain` each logging their own fixed source.
+        onAnalytics?.invoke(
+            AnalyticsEvent.RetryTapped(
+                difficulty = _state.value.recordedDifficulty.key,
+                cardsCount = game.cards.size,
+                source = if (hadLevelLoss) "lose_modal" else "pause_modal",
+            ),
+        )
         commitLossIfNeeded()
         if (hadLevelLoss && levelLives?.hasLivesRemaining() == false) return false
         restart()
@@ -586,7 +735,7 @@ class GameViewModel(
      * refunded via [StarWalletService.credit] so a failed power-up never costs stars.
      */
     private suspend fun spendOnPowerUp(powerUp: LevelPowerUp, apply: () -> Boolean): Boolean {
-        if (mode !is GameMode.Level) return false
+        val context = (mode as? GameMode.Level)?.context ?: return false
         if (_state.value.isPaused || _state.value.isFinished) return false
         val wallet = starWallet ?: return false
         if (!wallet.spend(powerUp.cost)) {
@@ -601,6 +750,14 @@ class GameViewModel(
             return false
         }
         onHaptic?.invoke(HapticIntent.REWARD)
+        onAnalytics?.invoke(
+            AnalyticsEvent.LevelPowerUpUsed(
+                powerUp = powerUp.analyticsKey,
+                level = context.number,
+                cost = powerUp.cost,
+                balanceAfter = wallet.balance.value,
+            ),
+        )
         return true
     }
 
@@ -612,7 +769,7 @@ class GameViewModel(
      * recorded, matching spec 7.5's rescue exactly.
      */
     suspend fun forgiveMistakesWithStars(): Boolean {
-        if (mode !is GameMode.Level) return false
+        val context = (mode as? GameMode.Level)?.context ?: return false
         val outcome = _state.value.outcome as? GameOutcome.Lost ?: return false
         if (outcome.reason != LoseReason.TOO_MANY_MISTAKES) return false
         val wallet = starWallet ?: return false
@@ -630,6 +787,9 @@ class GameViewModel(
         )
         start()
         onHaptic?.invoke(HapticIntent.REWARD)
+        onAnalytics?.invoke(
+            AnalyticsEvent.LevelMistakesForgiven(level = context.number, amount = LevelPowerUp.FORGIVE_AMOUNT, source = "stars"),
+        )
         return true
     }
 
@@ -647,6 +807,9 @@ class GameViewModel(
             return false
         }
         lives.refill(1)
+        onAnalytics?.invoke(
+            AnalyticsEvent.LevelLifePurchasedWithStars(cost = LevelPowerUp.LIFE_COST, balanceAfter = wallet.balance.value),
+        )
         restart()
         onHaptic?.invoke(HapticIntent.REWARD)
         return true
@@ -673,6 +836,14 @@ class GameViewModel(
         // anything the way the power-ups and rescues above do.
         commitLossIfNeeded(allowInterstitial = false)
         context.store.skipLevel(context.number)
+        onAnalytics?.invoke(
+            AnalyticsEvent.LevelSkipped(level = context.number, cost = LevelPowerUp.SKIP_LEVEL_COST, balanceAfter = wallet.balance.value),
+        )
+        // Same ceiling as the win path: buying the skip on a season's final level completes
+        // the season, it does not make an out-of-range level playable.
+        context.store.nextLevel(context.number)?.let { nextLevel ->
+            onAnalytics?.invoke(AnalyticsEvent.LevelUnlocked(level = nextLevel, seasonId = context.seasonId))
+        }
         return true
     }
 
@@ -685,7 +856,7 @@ class GameViewModel(
 
     /** Ad-earned equivalent of [forgiveMistakesWithStars]. */
     suspend fun applyForgiveMistakesReward(): Boolean {
-        if (mode !is GameMode.Level) return false
+        val context = (mode as? GameMode.Level)?.context ?: return false
         val outcome = _state.value.outcome as? GameOutcome.Lost ?: return false
         if (outcome.reason != LoseReason.TOO_MANY_MISTAKES) return false
         game.forgiveFailures(LevelPowerUp.FORGIVE_AMOUNT)
@@ -697,6 +868,9 @@ class GameViewModel(
         )
         start()
         onHaptic?.invoke(HapticIntent.REWARD)
+        onAnalytics?.invoke(
+            AnalyticsEvent.LevelMistakesForgiven(level = context.number, amount = LevelPowerUp.FORGIVE_AMOUNT, source = "ad"),
+        )
         return true
     }
 
@@ -705,7 +879,8 @@ class GameViewModel(
         if (mode !is GameMode.Level) return false
         if (_state.value.outcome !is GameOutcome.Lost) return false
         val lives = levelLives ?: return false
-        lives.refill(1)
+        val livesRemaining = lives.refill(1)
+        onAnalytics?.invoke(AnalyticsEvent.LevelLifeGrantedFromAd(livesRemaining = livesRemaining))
         restart()
         onHaptic?.invoke(HapticIntent.REWARD)
         return true
@@ -724,3 +899,13 @@ class GameViewModel(
         const val MISTAKE_LOSS_MILLIS = 800L
     }
 }
+
+/** `level_power_up_used.power_up` value, matching iOS's `LevelPowerUp: String` raw values
+ * (`extraTime`/`peek`/`freeze`/`revealPair`) exactly. */
+private val LevelPowerUp.analyticsKey: String
+    get() = when (this) {
+        LevelPowerUp.EXTRA_TIME -> "extraTime"
+        LevelPowerUp.PEEK -> "peek"
+        LevelPowerUp.FREEZE -> "freeze"
+        LevelPowerUp.REVEAL_PAIR -> "revealPair"
+    }

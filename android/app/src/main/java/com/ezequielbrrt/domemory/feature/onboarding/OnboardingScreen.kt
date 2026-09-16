@@ -14,17 +14,23 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 
 @Composable
 fun OnboardingScreen(state: OnboardingUiState, onNext: () -> Unit, onSkip: () -> Unit) {
+    LaunchedEffect(Unit) {
+        AnalyticsService.log(AnalyticsEvent.ScreenView(screenName = "onboarding_intro", screenClass = "OnboardingScreen"))
+    }
     val p = LocalPalette.current
     Column(Modifier.fillMaxSize().background(p.appBackground).padding(24.dp), verticalArrangement = Arrangement.SpaceBetween) {
         val titles = listOf(

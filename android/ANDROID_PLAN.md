@@ -1418,6 +1418,32 @@ carousel (catching and fixing the full-screen-coverage bug above). **Not verifie
 out-of-lives modal's actual on-screen appearance (would need spending down to 0 lives on
 device) and RTL/dark-mode-specific rendering of the new components.
 
+**Phase 8 implementation, fifth slice (2026-09-16): analytics instrumentation.** Closes the
+"Haptics and analytics — still absent everywhere" gap noted earlier in this log (analytics
+half only; haptics landed in an earlier slice above). Added `services/analytics/` —
+`AnalyticsEvent` (a sealed class, one case per event, each owning its own `name`/`parameters`)
+and `AnalyticsService` (the single `object` gate; `log` is the only sanctioned
+`FirebaseAnalytics.logEvent` call site in the app) — matching §16's spec table verbatim: same
+event names and parameter keys as iOS's `enum AnalyticsEvent`, since both platforms log into
+one Firebase project. Wired into `DoMemoryApplication.onCreate` and ~20 existing screens/view
+models: `GameViewModel` (start/finish for every mode, sampled `card_tapped` at 20%, pause/
+resume, retry, power-ups, lose-screen rescues, mistake-budget losses, level unlock gating),
+`MenuViewModel` (load, difficulty, favorites), `CreateMemoramaViewModel`, `LevelsViewModel`/
+`LevelsScreen`, `SeasonLevelsViewModel`/`SeasonLevelsScreen`, `MultiplayerViewModel`/
+`MultiplayerScreen`, `OnboardingViewModel`/`OnboardingScreen`, `NotificationPrimerDialog`,
+`WhatsNewManager`, `AchievementsScreen`, `SettingsScreen`, `ShareResultCard`, and the ads
+layer (`AdsService.showRewarded`, `AdMobNativeAdView`). Not ported: `level_stars_credited` —
+`LevelProgressService`/`SeasonProgressService` don't yet surface the improvement-only credit
+delta it needs (see `AnalyticsEvent`'s class doc for the full reasoning). A few call sites are
+intentionally less granular than iOS, each documented at its site in `NavGraph.kt`:
+`multiplayer_room_created.game_id` is blank at creation time (Android's host-first flow
+creates the room before a game is picked); free play's `game_started.source` can't
+distinguish a board-card tap from the random-game button; and a Levels/Seasons "next level"
+transition reports the same entry source as a normal map visit rather than iOS's dedicated
+`"next_level"` case. Verification: `./gradlew assembleDebug testDebugUnitTest` 416/416 passing
+(35 new `AnalyticsEventTest` cases pinning every event's name/parameters). Not verified on
+device — no emulator/device session run for this slice.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links

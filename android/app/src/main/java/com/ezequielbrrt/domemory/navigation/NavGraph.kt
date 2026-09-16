@@ -47,6 +47,8 @@ import com.ezequielbrrt.domemory.feature.whatsnew.WhatsNewDialog
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.ads.findActivity
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.review.AppReviews
@@ -134,6 +136,9 @@ fun NavGraph(
                 },
             )
             val state by viewModel.state.collectAsState()
+            LaunchedEffect(Unit) {
+                AnalyticsService.log(AnalyticsEvent.ScreenView(screenName = "menu", screenClass = "MenuScreen"))
+            }
             val levelsViewModel: LevelsViewModel = viewModel(
                 factory = viewModelFactory {
                     initializer {
@@ -143,6 +148,7 @@ fun NavGraph(
                             wallet = container.starWallet,
                             introGate = container.levelsIntroGate,
                             onHaptic = HapticsService::fire,
+                            onAnalytics = AnalyticsService::log,
                         )
                     }
                 },
@@ -200,7 +206,7 @@ fun NavGraph(
                 // as the Levels tab's content, below that chrome — see LevelsScreen.kt's own
                 // comment on this exact point.
                 if (levelsUiState.showIntro) {
-                    LevelsIntroOverlay(onDismiss = levelsViewModel::dismissIntro)
+                    LevelsIntroOverlay(source = levelsUiState.introSource, onDismiss = levelsViewModel::dismissIntro)
                 }
 
                 // Spec 11.3: "Shown once per install on the menu, and reused by the Settings
@@ -226,6 +232,7 @@ fun NavGraph(
                             container.multiplayer,
                             UserPreferencesProfileStatsRecorder(container.prefs),
                             onHaptic = HapticsService::fire,
+                            onAnalytics = AnalyticsService::log,
                         )
                     }
                 },
@@ -267,6 +274,8 @@ fun NavGraph(
                             },
                             onHaptic = HapticsService::fire,
                             onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onAnalytics = AnalyticsService::log,
+                            initialSource = "daily_challenge",
                         )
                     }
                 },
@@ -277,8 +286,30 @@ fun NavGraph(
                 state,
                 viewModel::choose,
                 { if (state.isPaused) viewModel.resume() else viewModel.pause() },
-                { HapticsService.fire(HapticIntent.TAP); navController.popBackStack() },
-                { HapticsService.fire(HapticIntent.TAP); viewModel.restart() },
+                {
+                    // The Daily Challenge has no lose-screen rescue to protect, so — like
+                    // free play's own onQuit below — this doubles as the mid-game abandon.
+                    AnalyticsService.log(
+                        AnalyticsEvent.QuitConfirmed(
+                            difficulty = state.recordedDifficulty.key,
+                            timeRemaining = state.timeRemaining.toInt(),
+                            failedTries = state.failedTries,
+                        ),
+                    )
+                    HapticsService.fire(HapticIntent.TAP)
+                    navController.popBackStack()
+                },
+                {
+                    AnalyticsService.log(
+                        AnalyticsEvent.RetryTapped(
+                            difficulty = state.recordedDifficulty.key,
+                            cardsCount = state.cards.size,
+                            source = if (state.outcome != null) "lose_modal" else "pause_modal",
+                        ),
+                    )
+                    HapticsService.fire(HapticIntent.TAP)
+                    viewModel.restart()
+                },
                 onWatchAdForHint = { onFinished ->
                     HapticsService.fire(HapticIntent.TAP)
                     AdsService.showRewarded(
@@ -370,6 +401,14 @@ fun NavGraph(
                             },
                             onHaptic = HapticsService::fire,
                             onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onAnalytics = AnalyticsService::log,
+                            // This route's own `onNextLevel` below re-navigates here for the
+                            // following level rather than advancing in place, so a "next
+                            // level" transition reports the same "season_levels" source as
+                            // a normal map entry — unlike iOS's `trackGameStarted`, which has
+                            // a dedicated "next_level" source for that case. Documented
+                            // simplification: less granular in Analytics, no behavior change.
+                            initialSource = "season_levels",
                         )
                     }
                 },
@@ -391,6 +430,7 @@ fun NavGraph(
                             lives = container.levelLives,
                             wallet = container.starWallet,
                             onHaptic = HapticsService::fire,
+                            onAnalytics = AnalyticsService::log,
                         )
                     }
                 },
@@ -413,7 +453,15 @@ fun NavGraph(
                 },
                 onQuitDuringPlay = {
                     // Mid-game abandon (spec §3.6) — no outcome exists yet, so unlike
-                    // [onQuit] above this must not spend a life or touch stats.
+                    // [onQuit] above this must not spend a life or touch stats. Mirrors
+                    // iOS's `tapOnExit()`, the Quit modal's confirm handler.
+                    AnalyticsService.log(
+                        AnalyticsEvent.QuitConfirmed(
+                            difficulty = state.recordedDifficulty.key,
+                            timeRemaining = state.timeRemaining.toInt(),
+                            failedTries = state.failedTries,
+                        ),
+                    )
                     HapticsService.fire(HapticIntent.TAP)
                     navController.popBackStack()
                 },
@@ -495,6 +543,14 @@ fun NavGraph(
                             },
                             onHaptic = HapticsService::fire,
                             onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onAnalytics = AnalyticsService::log,
+                            // Same simplification as the Season route above: this route's
+                            // own `onNextLevel` below re-navigates here for the following
+                            // level, so a "next level" transition reports the same
+                            // "levels_tab" source as a normal map entry rather than iOS's
+                            // dedicated "next_level" source. Documented simplification: less
+                            // granular in Analytics, no behavior change.
+                            initialSource = "levels_tab",
                         )
                     }
                 },
@@ -517,6 +573,7 @@ fun NavGraph(
                             wallet = container.starWallet,
                             introGate = container.levelsIntroGate,
                             onHaptic = HapticsService::fire,
+                            onAnalytics = AnalyticsService::log,
                         )
                     }
                 },
@@ -535,7 +592,15 @@ fun NavGraph(
                 },
                 onQuitDuringPlay = {
                     // Mid-game abandon (spec §3.6) — no outcome exists yet, so unlike
-                    // [onQuit] above this must not spend a life or touch stats.
+                    // [onQuit] above this must not spend a life or touch stats. Mirrors
+                    // iOS's `tapOnExit()`, the Quit modal's confirm handler.
+                    AnalyticsService.log(
+                        AnalyticsEvent.QuitConfirmed(
+                            difficulty = state.recordedDifficulty.key,
+                            timeRemaining = state.timeRemaining.toInt(),
+                            failedTries = state.failedTries,
+                        ),
+                    )
                     HapticsService.fire(HapticIntent.TAP)
                     navController.popBackStack()
                 },
@@ -707,6 +772,16 @@ fun NavGraph(
                             },
                             onHaptic = HapticsService::fire,
                             onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onAnalytics = AnalyticsService::log,
+                            // Free play's two entry points (a board card, or the "random
+                            // game" button) both navigate into this same route with no
+                            // distinguishing state, so — unlike Levels/Seasons/Daily, each
+                            // reached from exactly one place — this can't tell them apart
+                            // the way iOS's separate `gameStartSource` literals
+                            // ("menu_card"/"random_menu_button") do. Documented
+                            // simplification, not a missed case: "menu_card" is the common
+                            // path and is reported for both.
+                            initialSource = "menu_card",
                         )
                     }
                 },
@@ -718,8 +793,30 @@ fun NavGraph(
                 onPauseToggle = {
                     if (state.isPaused) viewModel.resume() else viewModel.pause()
                 },
-                onQuit = { HapticsService.fire(HapticIntent.TAP); navController.popBackStack() },
-                onRetry = { HapticsService.fire(HapticIntent.TAP); viewModel.restart() },
+                onQuit = {
+                    // Free play has no lose-screen rescue to protect, so this doubles as
+                    // the mid-game abandon (mirrors iOS's `tapOnExit()`).
+                    AnalyticsService.log(
+                        AnalyticsEvent.QuitConfirmed(
+                            difficulty = state.recordedDifficulty.key,
+                            timeRemaining = state.timeRemaining.toInt(),
+                            failedTries = state.failedTries,
+                        ),
+                    )
+                    HapticsService.fire(HapticIntent.TAP)
+                    navController.popBackStack()
+                },
+                onRetry = {
+                    AnalyticsService.log(
+                        AnalyticsEvent.RetryTapped(
+                            difficulty = state.recordedDifficulty.key,
+                            cardsCount = state.cards.size,
+                            source = if (state.outcome != null) "lose_modal" else "pause_modal",
+                        ),
+                    )
+                    HapticsService.fire(HapticIntent.TAP)
+                    viewModel.restart()
+                },
                 onWatchAdForHint = { onFinished ->
                     HapticsService.fire(HapticIntent.TAP)
                     AdsService.showRewarded(

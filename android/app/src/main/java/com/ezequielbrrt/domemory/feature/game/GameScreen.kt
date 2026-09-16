@@ -58,6 +58,8 @@ import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.services.ads.AdMobBanner
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.ui.anim.NumericTransition
 import com.ezequielbrrt.domemory.ui.anim.rememberReduceMotion
 import com.ezequielbrrt.domemory.ui.lottie.BundledLottie
@@ -117,6 +119,13 @@ fun GameScreen(
     val context = LocalContext.current
     var isHintAdInProgress by remember { mutableStateOf(false) }
     var showQuitConfirm by remember { mutableStateOf(false) }
+
+    // Serves every mode (free play, Levels, Seasons, the Daily Challenge) — fires once per
+    // composable entry, mirroring iOS's single `MemorizeView.onAppear` screenView across the
+    // same shared gameplay screen.
+    LaunchedEffect(Unit) {
+        AnalyticsService.log(AnalyticsEvent.ScreenView(screenName = "gameplay", screenClass = "GameScreen"))
+    }
 
     // Drives the pie only. Repainting on frames is cheap; recomputing the model is not.
     var frameTime by remember { mutableLongStateOf(System.currentTimeMillis()) }

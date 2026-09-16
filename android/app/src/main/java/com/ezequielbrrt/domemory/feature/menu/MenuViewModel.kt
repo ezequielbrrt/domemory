@@ -6,6 +6,8 @@ import com.ezequielbrrt.domemory.core.model.Board
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.data.prefs.UserPreferences
 import com.ezequielbrrt.domemory.data.repository.BoardCatalogRepository
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +52,19 @@ class MenuViewModel(
             catalog.refresh()
             catalog.refreshCustomBoards()
             refreshFromPrefs()
+            // Fired once at startup, after the catalog settles — mirrors iOS's `menuLoaded`
+            // (logged before the fetch) and `gameListLoaded` (logged once it resolves),
+            // collapsed into one post-load pair here since Android's catalog read is a
+            // single suspend chain rather than two separately-timed steps.
+            val current = _state.value
+            AnalyticsService.log(AnalyticsEvent.MenuLoaded(difficulty = current.difficulty.key))
+            AnalyticsService.log(
+                AnalyticsEvent.GameListLoaded(
+                    difficulty = current.difficulty.key,
+                    gameCount = current.allBoards.size,
+                    customCount = current.myBoards.size,
+                ),
+            )
         }
     }
 
@@ -63,6 +78,7 @@ class MenuViewModel(
         workScope.launch {
             prefs.setPlayerDifficulty(difficulty)
             refreshFromPrefs()
+            AnalyticsService.log(AnalyticsEvent.DifficultySelected(difficulty = difficulty.key))
         }
     }
 
@@ -70,6 +86,9 @@ class MenuViewModel(
         workScope.launch {
             prefs.toggleFavorite(boardId)
             refreshFromPrefs()
+            AnalyticsService.log(
+                AnalyticsEvent.FavoriteToggled(gameId = boardId, isFavorite = _state.value.favoriteIds.contains(boardId)),
+            )
         }
     }
 
@@ -79,6 +98,7 @@ class MenuViewModel(
             prefs.removeCustomMemorama(boardId)
             catalog.refreshCustomBoards()
             refreshFromPrefs()
+            AnalyticsService.log(AnalyticsEvent.CustomMemoramaDeleted(gameId = boardId))
         }
     }
 
