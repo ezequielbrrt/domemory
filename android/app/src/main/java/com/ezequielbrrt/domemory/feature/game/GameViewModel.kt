@@ -309,7 +309,19 @@ class GameViewModel(
         onHaptic?.invoke(if (outcome is GameOutcome.Won) HapticIntent.SUCCESS else HapticIntent.FAILURE)
         onGameFinished?.invoke()
         val isDeferredLevelLoss = mode is GameMode.Level && outcome is GameOutcome.Lost
-        if (!isDeferredLevelLoss) {
+        if (isDeferredLevelLoss) {
+            // Read *before* this loss is committed — matching iOS's `LoseModal`, which
+            // shows `levelLivesRemaining` as whatever `LevelLivesService` currently holds
+            // at the instant `loseReason` is set, not a value that already anticipates
+            // this loss's own spend (that only happens on "Try Again" / "Go to menu",
+            // via `commitLossIfNeeded` below).
+            levelLives?.let { lives ->
+                workScope.launch {
+                    val remaining = lives.remaining()
+                    _state.value = _state.value.copy(livesRemaining = remaining)
+                }
+            }
+        } else {
             commit(outcome)
         }
     }
@@ -376,6 +388,11 @@ class GameViewModel(
             )
         }
         levelLives?.spendOnLoss()
+        // Re-read post-spend so the lose overlay, still on screen, re-renders into its
+        // out-of-lives state in place — the Android counterpart of iOS's LoseModal
+        // "re-rendering" once `logGameFinishedIfNeeded` updates `levelLivesRemaining`
+        // (see `retry()`'s doc and `NavGraph.kt`'s matching `onRetry` wiring).
+        levelLives?.let { _state.value = _state.value.copy(livesRemaining = it.remaining()) }
         recordStats(outcome)
         recordProfileStats(outcome)
         notifyCompletionInterstitial(allowInterstitial)

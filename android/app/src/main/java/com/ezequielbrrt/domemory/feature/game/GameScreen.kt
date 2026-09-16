@@ -16,13 +16,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -51,15 +57,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.feature.levels.LivesEffect
 import com.ezequielbrrt.domemory.feature.share.ResultShareData
 import com.ezequielbrrt.domemory.feature.share.ShareResultCardView
 import com.ezequielbrrt.domemory.feature.share.shareResultCard
+import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.services.ads.AdMobBanner
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.ui.anim.NumericTransition
 import com.ezequielbrrt.domemory.ui.anim.rememberReduceMotion
+import com.ezequielbrrt.domemory.ui.components.LivesRow
 import com.ezequielbrrt.domemory.ui.lottie.BundledLottie
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
@@ -101,8 +110,12 @@ fun GameScreen(
     onBuyLifeWithStars: () -> Unit = {},
     onForgiveMistakesWithStars: () -> Unit = {},
     onSkipLevelWithStars: () -> Unit = {},
-    onWatchAdForLife: () -> Unit = {},
-    onWatchAdToForgive: () -> Unit = {},
+    /** Mirrors [onWatchAdForHint]'s shape: the callback always runs after the ad closes,
+     * which is what drives the lose screen's loading state (spec: iOS's
+     * `isRewardedAdInProgress`, disabling the button and swapping its label while the ad
+     * is in flight). */
+    onWatchAdForLife: (onFinished: () -> Unit) -> Unit = { onFinished -> onFinished() },
+    onWatchAdToForgive: (onFinished: () -> Unit) -> Unit = { onFinished -> onFinished() },
     /** Starts the pause-sheet rewarded hint. The callback always runs after the ad closes. */
     onWatchAdForHint: (onFinished: () -> Unit) -> Unit = { onFinished -> onFinished() },
     /** True only for the Daily Challenge (spec: the share card's title and streak row
@@ -223,7 +236,14 @@ fun GameScreen(
                 onDismissRequest = { showQuitConfirm = false; onPauseToggle() },
                 title = { Text(stringResource(R.string.game_quit_confirmation)) },
                 confirmButton = {
-                    TextButton(onClick = { showQuitConfirm = false; onQuitDuringPlay() }) {
+                    // Deliberately leaves `showQuitConfirm` true: `onQuitDuringPlay` pops
+                    // the back stack, which unmounts this screen a frame later rather than
+                    // immediately. Clearing the flag here left `isPaused` (still true from
+                    // this dialog's own pause) as the only condition guarding the pause
+                    // sheet, so it flashed on screen for that one frame during the exit
+                    // transition. Leaving the dialog's own condition true keeps it — not
+                    // the pause sheet — showing until the screen is actually gone.
+                    TextButton(onClick = { onQuitDuringPlay() }) {
                         Text(stringResource(R.string.common_accept))
                     }
                 },
@@ -601,15 +621,19 @@ private fun OutcomeOverlay(
     onSkipLevelWithStars: () -> Unit,
     canWatchAdForLife: Boolean = false,
     canWatchAdToForgive: Boolean = false,
-    onWatchAdForLife: () -> Unit = {},
-    onWatchAdToForgive: () -> Unit = {},
+    onWatchAdForLife: (onFinished: () -> Unit) -> Unit = { onFinished -> onFinished() },
+    onWatchAdToForgive: (onFinished: () -> Unit) -> Unit = { onFinished -> onFinished() },
 ) {
     val palette = LocalPalette.current
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var showSkipConfirm by remember { mutableStateOf(false) }
+    var isRewardedAdInProgress by remember { mutableStateOf(false) }
     val won = outcome is GameOutcome.Won
     val lostToMistakes = outcome is GameOutcome.Lost && outcome.reason == LoseReason.TOO_MANY_MISTAKES
+    // Mirrors iOS's `LoseModal.isOutOfLives`: null outside Levels/Seasons, so this is
+    // always false for free play and the Daily Challenge.
+    val isOutOfLives = state.isOutOfLives
 
     // Built once per outcome — the pairs/time/mistakes/difficulty of the game that just
     // finished (spec: "renders the card from the just-finished game's own state").
@@ -664,17 +688,6 @@ private fun OutcomeOverlay(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        // A one-shot celebratory burst behind the card, as on iOS's WinModal. Skipped for
-        // reduce-motion players, who see the card with no motion at all rather than a
-        // burst that plays regardless of the setting. Drawn before the Surface so it sits
-        // behind the card, and it takes no input so the card's buttons stay reachable.
-        if (won && !reduceMotion) {
-            BundledLottie(
-                name = "confetti-burst",
-                modifier = Modifier.size(400.dp),
-            )
-        }
-
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = palette.surfacePrimary,
@@ -691,7 +704,7 @@ private fun OutcomeOverlay(
                 )
             } else {
                 Column(
-                    Modifier.padding(24.dp),
+                    Modifier.padding(28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
@@ -708,106 +721,241 @@ private fun OutcomeOverlay(
                             modifier = Modifier.size(72.dp),
                         )
                     }
-                    Text(
-                        text = stringResource(
-                            if (lostToMistakes) R.string.levels_lose_too_many_mistakes else R.string.game_lose_message,
-                        ),
-                        style = DoMemoryType.display(24),
-                        color = palette.textPrimary,
-                    )
-                    Text(
-                        text = "${stringResource(R.string.game_errors_label)}: ${state.failedTries}",
-                        color = palette.textSecondary,
-                    )
 
-                    // Lose-screen star purchases (spec 7.7) — Levels/Seasons only.
-                    if (isLevel && starBalance != null) {
-                    if (lostToMistakes && canWatchAdToForgive) {
-                        Button(
-                            onClick = onWatchAdToForgive,
-                            colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
-                        ) {
-                            Text(stringResource(R.string.levels_forgive_ad_format, LevelPowerUp.FORGIVE_AMOUNT))
+                    // Reason pill chip — port of iOS's capsule (icon + "You lose" /
+                    // "Too many mistakes"), tinted `secondary` at ~10% background opacity.
+                    // Replaces the plain heading iOS's LoseModal never actually has.
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .background(palette.secondary.copy(alpha = 0.1f), RoundedCornerShape(50))
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                    ) {
+                        Icon(
+                            imageVector = if (lostToMistakes) Icons.Filled.Cancel else Icons.Filled.Timer,
+                            contentDescription = null,
+                            tint = palette.secondary,
+                            modifier = Modifier.size(15.dp),
+                        )
+                        Text(
+                            text = stringResource(
+                                if (lostToMistakes) R.string.levels_lose_too_many_mistakes else R.string.game_lose_message,
+                            ),
+                            color = palette.secondary,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+
+                    // Lives row (spec 7.4/7.7) — Levels/Seasons only, port of iOS's
+                    // `LivesRow(remaining:effect:)`. `livesRemaining` is already the value
+                    // `GameViewModel` reads at loss time, so the just-lost heart is the
+                    // first empty slot (see `GameUiState.livesRemaining`'s doc).
+                    state.livesRemaining?.let { lives ->
+                        LivesRow(
+                            remaining = lives,
+                            fontSize = 15.sp,
+                            effect = if (lives < LevelLivesService.MAX_LIVES) LivesEffect.Lost(lives) else null,
+                        )
+                        if (isOutOfLives) {
+                            Text(
+                                text = stringResource(
+                                    if (canWatchAdForLife) R.string.levels_out_of_lives_message
+                                    else R.string.levels_out_of_lives_message_no_ad,
+                                ),
+                                color = palette.textSecondary,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Center,
+                            )
                         }
                     }
-                    if (lostToMistakes && starBalance >= LevelPowerUp.FORGIVE_COST) {
-                        Button(
-                            onClick = onForgiveMistakesWithStars,
-                            colors = ButtonDefaults.buttonColors(containerColor = palette.hardAmber),
-                        ) {
-                            Text(
-                                stringResource(
+
+                    // Ad / star rescues (spec 7.7) — Levels/Seasons only, gating mirrored
+                    // exactly from iOS's `LoseModal.body`: the ad slot offers at most one
+                    // rescue (life > forgive; iOS's third, lives-agnostic "extra time" ad
+                    // offer has no Android call site yet — see `AdsService.kt`'s
+                    // `game_rewarded_extra_time` note and `ANDROID_PLAN.md` Phase 7), buy-
+                    // life-with-stars only out of lives, forgive-with-stars only mid-budget
+                    // and not out of lives.
+                    if (isLevel && starBalance != null) {
+                        if (isOutOfLives && canWatchAdForLife) {
+                            LoseAdButton(
+                                text = stringResource(R.string.levels_watch_ad_for_life),
+                                isLoading = isRewardedAdInProgress,
+                                onClick = {
+                                    isRewardedAdInProgress = true
+                                    onWatchAdForLife { isRewardedAdInProgress = false }
+                                },
+                            )
+                        } else if (!isOutOfLives && lostToMistakes && canWatchAdToForgive) {
+                            LoseAdButton(
+                                text = stringResource(R.string.levels_forgive_ad_format, LevelPowerUp.FORGIVE_AMOUNT),
+                                isLoading = isRewardedAdInProgress,
+                                onClick = {
+                                    isRewardedAdInProgress = true
+                                    onWatchAdToForgive { isRewardedAdInProgress = false }
+                                },
+                            )
+                        }
+
+                        if (isOutOfLives && starBalance >= LevelPowerUp.LIFE_COST) {
+                            LoseStarButton(
+                                text = stringResource(R.string.levels_buy_life_format, LevelPowerUp.LIFE_COST),
+                                onClick = onBuyLifeWithStars,
+                            )
+                        }
+
+                        if (!isOutOfLives && lostToMistakes && starBalance >= LevelPowerUp.FORGIVE_COST) {
+                            LoseStarButton(
+                                text = stringResource(
                                     R.string.levels_forgive_stars_format,
                                     LevelPowerUp.FORGIVE_AMOUNT,
                                     LevelPowerUp.FORGIVE_COST,
                                 ),
+                                onClick = onForgiveMistakesWithStars,
                             )
                         }
-                    }
-                    if (canWatchAdForLife) {
-                        Button(
-                            onClick = onWatchAdForLife,
-                            colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
-                        ) {
-                            Text(stringResource(R.string.levels_watch_ad_for_life))
-                        }
-                    }
-                    if (starBalance >= LevelPowerUp.LIFE_COST) {
-                        Button(
-                            onClick = onBuyLifeWithStars,
-                            colors = ButtonDefaults.buttonColors(containerColor = palette.hardAmber),
-                        ) {
-                            Text(stringResource(R.string.levels_buy_life_format, LevelPowerUp.LIFE_COST))
-                        }
-                    }
-                    if (starBalance >= LevelPowerUp.SKIP_LEVEL_COST) {
-                        TextButton(onClick = { showSkipConfirm = true }) {
-                            Text(
-                                stringResource(R.string.levels_skip_level_format, LevelPowerUp.SKIP_LEVEL_COST),
-                                color = palette.secondary,
-                            )
-                        }
-                    }
                     }
 
-                    Button(
-                        onClick = onRetry,
-                        colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
-                    ) {
-                        Text(stringResource(R.string.game_try_again))
-                    }
-                    TextButton(onClick = onQuit) {
-                        Text(
-                            text = stringResource(R.string.game_go_to_menu),
-                            color = palette.textSecondary,
+                    // "Try again" — filled `secondary` (not primary), hidden for the Daily
+                    // Challenge or while out of lives (spec 7.7: `tapOnTryAgain` has nothing
+                    // useful to do in either case).
+                    if (!isDailyChallenge && !isOutOfLives) {
+                        PauseActionButton(
+                            text = stringResource(R.string.game_try_again),
+                            color = palette.secondary,
+                            onClick = onRetry,
                         )
                     }
+
+                    if (isLevel && starBalance != null && starBalance >= LevelPowerUp.SKIP_LEVEL_COST) {
+                        LoseStarButton(
+                            text = stringResource(R.string.levels_skip_level_format, LevelPowerUp.SKIP_LEVEL_COST),
+                            onClick = { showSkipConfirm = true },
+                        )
+                    }
+
+                    LoseOutlineButton(
+                        text = stringResource(R.string.game_go_to_menu),
+                        color = palette.primary,
+                        onClick = onQuit,
+                    )
                 }
             }
+        }
+
+        // A one-shot celebratory burst in front of the card. Skipped for reduce-motion
+        // players, who see the card with no motion at all rather than a burst that plays
+        // regardless of the setting. Drawn after the Surface so it sits in front of the
+        // card; it takes no input (LottieAnimation adds no pointer input of its own), so
+        // the card's buttons stay reachable underneath it.
+        if (won && !reduceMotion) {
+            BundledLottie(
+                name = "confetti-burst",
+                modifier = Modifier.size(400.dp),
+            )
         }
     }
 
     // Skip level requires a confirmation dialog (spec 7.7) — every other power-up and
-    // lose-screen purchase deliberately does not.
+    // lose-screen purchase deliberately does not. iOS replaces the whole modal's content
+    // in place with its own `skipConfirmCard`; a native `AlertDialog` reads fine as the
+    // Android convention for a confirmation step, so only the button copy/styling (cost +
+    // star icon on confirm) is ported, not the inline-card replacement mechanic.
     if (showSkipConfirm) {
         AlertDialog(
             onDismissRequest = { showSkipConfirm = false },
             title = { Text(stringResource(R.string.levels_skip_level_confirm_title)) },
             text = { Text(stringResource(R.string.levels_skip_level_confirm_message)) },
             confirmButton = {
-                TextButton(onClick = {
-                    showSkipConfirm = false
-                    onSkipLevelWithStars()
-                }) {
-                    Text(stringResource(R.string.levels_skip_level_confirm_action))
+                Button(
+                    onClick = {
+                        showSkipConfirm = false
+                        onSkipLevelWithStars()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = palette.hardAmber),
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "${stringResource(R.string.levels_skip_level_confirm_action)} ${LevelPowerUp.SKIP_LEVEL_COST}",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Icon(Icons.Filled.Star, contentDescription = null, tint = Color.White, modifier = Modifier.size(13.dp))
+                    }
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showSkipConfirm = false }) {
-                    Text(stringResource(R.string.common_cancel))
+                OutlinedButton(
+                    onClick = { showSkipConfirm = false },
+                    border = androidx.compose.foundation.BorderStroke(1.5.dp, palette.primary.copy(alpha = 0.4f)),
+                ) {
+                    Text(stringResource(R.string.common_cancel), color = palette.primary, fontWeight = FontWeight.SemiBold)
                 }
             },
         )
+    }
+}
+
+/** Rewarded-ad rescue on the lose screen (spec 7.7) — port of iOS's `LoseModal.adButton`:
+ * filled `hardAmber`, white bold text, swaps to the loading copy and disables itself while
+ * the ad is in flight. The free path, so it always leads its star-priced alternative. */
+@Composable
+private fun LoseAdButton(text: String, isLoading: Boolean, onClick: () -> Unit) {
+    val palette = LocalPalette.current
+    Button(
+        onClick = onClick,
+        enabled = !isLoading,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(50),
+        contentPadding = PaddingValues(vertical = 16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = palette.hardAmber),
+    ) {
+        Text(
+            text = if (isLoading) stringResource(R.string.ads_loading) else text,
+            color = Color.White,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+/** Star-priced lose-screen rescue (spec 7.7) — port of iOS's `LoseModal.starButton`:
+ * outlined (not filled) `hardAmber`, so it reads as an alternative to the ad path above
+ * rather than a replacement for it, with a trailing star glyph. */
+@Composable
+private fun LoseStarButton(text: String, onClick: () -> Unit) {
+    val palette = LocalPalette.current
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(50),
+        contentPadding = PaddingValues(vertical = 16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, palette.hardAmber.copy(alpha = 0.5f)),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(text, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = palette.hardAmber)
+            Icon(Icons.Filled.Star, contentDescription = null, tint = palette.hardAmber, modifier = Modifier.size(13.dp))
+        }
+    }
+}
+
+/** Outlined capsule text action — port of iOS's LoseModal "Go to menu" style (and its
+ * `skipConfirmCard`'s "Cancel"): an outlined [color] border rather than the muted plain
+ * text button Android used to render here. */
+@Composable
+private fun LoseOutlineButton(text: String, color: Color, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(50),
+        contentPadding = PaddingValues(vertical = 16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, color.copy(alpha = 0.4f)),
+    ) {
+        Text(text, color = color, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
