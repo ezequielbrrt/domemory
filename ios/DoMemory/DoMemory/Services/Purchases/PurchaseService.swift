@@ -178,6 +178,16 @@ final class PurchaseService {
         )
     }
 
+    #if targetEnvironment(simulator)
+    /// Debug/QA only: clears both the purchased entitlement and any active
+    /// rewarded grant, so the ad-suppressed state from `grantRewardedRemoveAds`
+    /// can be toggled back off without relaunching.
+    func debugClearRemoveAds() {
+        hasPurchasedRemoveAds = false
+        rewardedRemoveAdsExpirationDate = nil
+    }
+    #endif
+
     private func listenForTransactionUpdates() -> Task<Void, Never> {
         Task.detached { [weak self] in
             for await result in Transaction.updates {

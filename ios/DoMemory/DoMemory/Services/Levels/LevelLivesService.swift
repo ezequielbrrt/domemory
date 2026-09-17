@@ -65,6 +65,13 @@ final class LevelLivesService {
         return updated
     }
 
+    /// Debug/QA only: refills today's budget back to `maxLives` immediately,
+    /// without waiting for tomorrow's reset.
+    func restoreFullLives(for date: Date = Date()) {
+        resetIfNeeded(for: date)
+        defaults.set(Self.maxLives, forKey: Key.livesRemaining)
+    }
+
     private func resetIfNeeded(for date: Date) {
         let today = dailyChallengeSeed(for: date)
         guard defaults.string(forKey: Key.lastResetDay) != today else { return }

@@ -43,6 +43,7 @@
 		20BCEC98B7CA25F4CA946BDA /* LevelProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 737FDD2F5DDB03FA10D988FF /* LevelProgressStore.swift */; };
 		25F959A45E5B241C87BB5039 /* QuitModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A3BFCC62F4EDCCADF052E7 /* QuitModalViewModel.swift */; };
 		26B9822B16831B8F1906743E /* LoseModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B6FFF22771A630BAF8E510 /* LoseModalViewModel.swift */; };
+		2766811914A049CAF4DE4F63 /* DebugMenuTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = E780661E603811F960442D7C /* DebugMenuTrigger.swift */; };
 		28626CC640B8CC5DAE8880E9 /* LevelsIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DA5D519E535B1B8A11EF502 /* LevelsIntroView.swift */; };
 		2A7D9EC4DEC534040B0D27ED /* FirebaseInstallations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBE87180FD35D86645C021C /* FirebaseInstallations.framework */; };
 		2AAD5F98D904597B0861D0ED /* FirebaseCoreInternal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CACD36A2DC7F0CED097F5467 /* FirebaseCoreInternal.framework */; };
@@ -217,6 +218,7 @@
 		D95CEF8E4409237FF9059590 /* PauseModalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74D7C0E2D38275CEF21BFC18 /* PauseModalViewModel.swift */; };
 		D965D41EF13D904954ACCA30 /* GoogleDataTransport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D835B045B37D3747427E4EAF /* GoogleDataTransport.framework */; };
 		DB8DC74EFE04AA2EC832344A /* UserMessagingPlatform.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D10B9A4ED7D9F1714BB8ED8 /* UserMessagingPlatform.xcframework */; };
+		DBC2314E3BCCC9B485ADE55A /* DebugMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5060DC731B08118613708865 /* DebugMenuView.swift */; };
 		DC569BF56254AA9A924FA016 /* MenuDifficultyPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F7FDDBD6A3DE130C019A481 /* MenuDifficultyPicker.swift */; };
 		DD4381BCEB0392B05AEFA274 /* MemoryDataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29064A22F609A3B4658FD28 /* MemoryDataType.swift */; };
 		DE77C2B6D3D765BAF11B4966 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F992BEFFC4EA6E521ADF8968 /* QRCodeView.swift */; };
@@ -386,6 +388,7 @@
 		4D35CFFCA6F3980718FF4856 /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
 		4E1EC874C62818D2861978C3 /* GoogleUtilities_GoogleUtilities_Environment.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GoogleUtilities_GoogleUtilities_Environment.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FE0A2BA268E9FA6895BF115 /* PatrickHand-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PatrickHand-Regular.ttf"; sourceTree = "<group>"; };
+		5060DC731B08118613708865 /* DebugMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenuView.swift; sourceTree = "<group>"; };
 		5070A7E4DB167B4C28F41737 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		50CEA5F0D8204663156E3B29 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		51A3BFCC62F4EDCCADF052E7 /* QuitModalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitModalViewModel.swift; sourceTree = "<group>"; };
@@ -534,6 +537,7 @@
 		E64C85D3E8090D9C63F98FC9 /* RemoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImage.swift; sourceTree = "<group>"; };
 		E72E135C04E414919D3E2CC7 /* FirebaseDatabase.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseDatabase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E743AB2239A2350BBB1B35BC /* RemoteImageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImageServiceTests.swift; sourceTree = "<group>"; };
+		E780661E603811F960442D7C /* DebugMenuTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenuTrigger.swift; sourceTree = "<group>"; };
 		E8C23C30CED74E626BCED2EC /* GoogleAppMeasurementTarget.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GoogleAppMeasurementTarget.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9254FC734FC769362A75CC3 /* WhatsNewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewManager.swift; sourceTree = "<group>"; };
 		EA299133E2AF446D94617640 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -762,6 +766,7 @@
 		335A5FEB9D6D398877BB3145 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				CEA82BCDAF91BCEF44BC4D94 /* Debug */,
 				A92943351A96DA47230E4399 /* Home */,
 				68521E66881DB940BC14B4A2 /* Levels */,
 				5A88AD75839187B356080C01 /* Main */,
@@ -1062,6 +1067,15 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		B0E704D8F986BE11BB3BF275 /* DebugMenuView */ = {
+			isa = PBXGroup;
+			children = (
+				E780661E603811F960442D7C /* DebugMenuTrigger.swift */,
+				5060DC731B08118613708865 /* DebugMenuView.swift */,
+			);
+			path = DebugMenuView;
+			sourceTree = "<group>";
+		};
 		B36EF5FBF23C17A515DF47FD /* Pause */ = {
 			isa = PBXGroup;
 			children = (
@@ -1132,6 +1146,14 @@
 				607E57326F2CE57BE643D353 /* MultiplayerService.swift */,
 			);
 			path = Service;
+			sourceTree = "<group>";
+		};
+		CEA82BCDAF91BCEF44BC4D94 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				B0E704D8F986BE11BB3BF275 /* DebugMenuView */,
+			);
+			path = Debug;
 			sourceTree = "<group>";
 		};
 		D39B570DED7C3797F79BCF9A /* Project */ = {
@@ -1543,6 +1565,8 @@
 				ED3909D9FF702A3908E129DD /* TuistStrings+DoMemory.swift in Sources */,
 				5807478050D8BB618D3F7CF1 /* AppConfiguration.swift in Sources */,
 				54AE93C8661F68224812F271 /* Strings.swift in Sources */,
+				2766811914A049CAF4DE4F63 /* DebugMenuTrigger.swift in Sources */,
+				DBC2314E3BCCC9B485ADE55A /* DebugMenuView.swift in Sources */,
 				58D05942EE5FFA546A64781F /* FeatureIntroView.swift in Sources */,
 				66664DBCD421345596F278E4 /* HomeView.swift in Sources */,
 				0DBD2D85DC585E573987354D /* LevelMapView.swift in Sources */,

@@ -20,6 +20,9 @@ struct SettingsView: View {
     @State private var showAchievements = false
     @State private var showWhatsNew = false
     @State private var showNotificationPrimer = false
+    #if targetEnvironment(simulator)
+    @State private var showDebugMenu = false
+    #endif
     @AppStorage(UserDefaultsKeys.themePreference) private var themePreference = AppTheme.system.rawValue
     @AppStorage(UserDefaultsKeys.notificationsEnabled) private var notificationsEnabled = false
     @AppStorage(UserDefaultsKeys.hapticsEnabled) private var hapticsEnabled = true
@@ -40,6 +43,9 @@ struct SettingsView: View {
                         Text(Strings.settingsTitle)
                             .font(.righteous(size: 38))
                             .foregroundStyle(Color.primaryColor)
+                            #if targetEnvironment(simulator)
+                            .debugMenuTapTrigger { showDebugMenu = true }
+                            #endif
 
                         Text(Strings.settingsDescription)
                             .font(.patrickHand(size: 17))
@@ -262,6 +268,14 @@ struct SettingsView: View {
                 showNotificationPrimer = false
             }
         }
+        #if targetEnvironment(simulator)
+        .sheet(isPresented: $showDebugMenu) {
+            DebugMenuView()
+        }
+        .onChange(of: showDebugMenu) { _, isShowing in
+            AdsService.shared.setFullScreenAdsSuppressed(isShowing)
+        }
+        #endif
         // MenuView stays alive underneath this screen, so its `didBecomeActive`
         // handler still fires — and both of these surfaces cause exactly that
         // cycle: the primer through its system alert, What's New through its own
