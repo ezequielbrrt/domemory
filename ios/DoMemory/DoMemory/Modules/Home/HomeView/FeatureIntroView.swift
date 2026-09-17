@@ -13,19 +13,22 @@ struct FeatureIntroView: View {
             symbol: "person.2.fill",
             color: .primaryColor,
             title: Strings.introMultiplayerTitle,
-            subtitle: Strings.introMultiplayerSubtitle
+            subtitle: Strings.introMultiplayerSubtitle,
+            illustration: "onboarding-play-with-friends"
         ),
         IntroSlide(
             symbol: "square.grid.2x2.fill",
             color: .easyGreen,
             title: Strings.introCustomTitle,
-            subtitle: Strings.introCustomSubtitle
+            subtitle: Strings.introCustomSubtitle,
+            illustration: "onboarding-make-it-yours"
         ),
         IntroSlide(
             symbol: "flame.fill",
             color: .hardAmber,
             title: Strings.introDailyTitle,
-            subtitle: Strings.introDailySubtitle
+            subtitle: Strings.introDailySubtitle,
+            illustration: "onboarding-come-back-daily"
         )
     ]
 
