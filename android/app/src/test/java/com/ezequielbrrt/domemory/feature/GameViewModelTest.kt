@@ -540,6 +540,43 @@ class GameViewModelTest {
         assertEquals(1, store.completions.size)
         // The clock was not reset — the caller is expected to leave the screen instead.
         assertEquals(GameOutcome.Lost(LoseReason.OUT_OF_TIME), vm.state.value.outcome)
+        // The lose overlay's out-of-lives state (spec 7.7) — GameUiState.livesRemaining is
+        // re-read post-commit so NavGraph.kt's onRetry can leave the screen mounted instead
+        // of navigating away, matching iOS's LoseModal re-rendering in place.
+        assertEquals(0, vm.state.value.livesRemaining)
+        assertTrue(vm.state.value.isOutOfLives)
+        vm.stop()
+    }
+
+    @Test
+    fun `a standing Level loss reports lives remaining before it is committed`() = runTest {
+        val store = RecordingStore()
+        val lives = levelLives()
+        lives.spendOnLoss() // one earlier loss this session; 3 of 4 lives left
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = store)),
+            levelLives = lives,
+        )
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+        runCurrent()
+
+        // Mirrors iOS's LoseModal: `levelLivesRemaining` reads whatever the store
+        // currently holds at loss time — not yet decremented for *this* loss, since
+        // that only happens once the player commits via retry()/acknowledgeLossAndQuit().
+        assertEquals(3, vm.state.value.livesRemaining)
+        assertFalse(vm.state.value.isOutOfLives)
+        assertEquals(3, lives.remaining())
+        vm.stop()
+    }
+
+    @Test
+    fun `free play never reports a lives-remaining value`() = runTest {
+        val vm = viewModel(mode = GameMode.Free)
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+        runCurrent()
+
+        assertNull(vm.state.value.livesRemaining)
+        assertFalse(vm.state.value.isOutOfLives)
         vm.stop()
     }
 

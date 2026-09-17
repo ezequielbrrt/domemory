@@ -34,10 +34,22 @@ data class GameUiState(
     /** Seasons can end; endless Levels always has another board. */
     val hasNextLevel: Boolean = false,
     val outcome: GameOutcome? = null,
+    /**
+     * Lives left today for Levels/Seasons, mirroring iOS's `levelLivesRemaining` (spec
+     * 7.4, 7.7): null outside level play. Set from [com.ezequielbrrt.domemory.services.levels.LevelLivesService]
+     * the moment a Level loss occurs — *before* that loss is committed, exactly like
+     * iOS's own read timing — then refreshed once the loss actually commits (lose-screen
+     * "Try Again" / "Go to menu"), so the lose overlay can re-render into its
+     * out-of-lives state in place instead of navigating away.
+     */
+    val livesRemaining: Int? = null,
 ) {
     val isFinished: Boolean get() = outcome != null
     val timeFraction: Float
         get() = if (totalTime <= 0.0) 0f else (timeRemaining / totalTime).toFloat()
     val mistakesAreCritical: Boolean
         get() = maxFailures != null && maxFailures - failedTries <= 2
+    /** Mirrors iOS's `LoseModal.isOutOfLives`: `(levelLivesRemaining ?? -1) == 0`. */
+    val isOutOfLives: Boolean
+        get() = livesRemaining == 0
 }

@@ -466,15 +466,13 @@ fun NavGraph(
                     navController.popBackStack()
                 },
                 onRetry = {
-                    coroutineScope.launch {
-                        if (!viewModel.retry()) {
-                            // Out of lives after this loss committed — stay put; the season
-                            // map's own out-of-lives prompt (SeasonLevelsViewModel, matching
-                            // the endless map) is where the player buys back in, same as
-                            // LEVEL_GAME's identical bounce-back above.
-                            navController.popBackStack()
-                        }
-                    }
+                    // Out of lives after this loss commits: stay put rather than navigate
+                    // away. `GameUiState.livesRemaining` is updated by the same `retry()`
+                    // call, so the still-mounted lose overlay re-renders into its
+                    // out-of-lives state in place — matching iOS's `LoseModal`, which
+                    // re-renders instead of dismissing once `tapOnTryAgain` finds no lives
+                    // left (spec 7.7).
+                    coroutineScope.launch { viewModel.retry() }
                 },
                 onNextLevel = {
                     navController.popBackStack()
@@ -493,17 +491,26 @@ fun NavGraph(
                         if (viewModel.skipLevelWithStars()) navController.popBackStack()
                     }
                 },
-                onWatchAdForLife = {
+                onWatchAdForLife = { onFinished ->
                     HapticsService.fire(HapticIntent.TAP)
-                    AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_LIFE, onReward = {
-                        coroutineScope.launch { viewModel.applyLifeReward() }
-                    })
+                    AdsService.showRewarded(
+                        activity,
+                        AdPlacement.LEVELS_REWARDED_LIFE,
+                        onReward = { coroutineScope.launch { viewModel.applyLifeReward() } },
+                        // Drives the lose overlay's loading state (spec: iOS's
+                        // `isRewardedAdInProgress`) regardless of whether the ad was
+                        // actually earned — mirrors `onWatchAdForHint` below.
+                        onDismissed = { onFinished() },
+                    )
                 },
-                onWatchAdToForgive = {
+                onWatchAdToForgive = { onFinished ->
                     HapticsService.fire(HapticIntent.TAP)
-                    AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_FORGIVE, onReward = {
-                        coroutineScope.launch { viewModel.applyForgiveMistakesReward() }
-                    })
+                    AdsService.showRewarded(
+                        activity,
+                        AdPlacement.LEVELS_REWARDED_FORGIVE,
+                        onReward = { coroutineScope.launch { viewModel.applyForgiveMistakesReward() } },
+                        onDismissed = { onFinished() },
+                    )
                 },
                 onWatchAdForHint = { onFinished ->
                     HapticsService.fire(HapticIntent.TAP)
@@ -605,15 +612,13 @@ fun NavGraph(
                     navController.popBackStack()
                 },
                 onRetry = {
-                    coroutineScope.launch {
-                        if (!viewModel.retry()) {
-                            // Out of lives after this loss committed — stay put; the
-                            // Levels map's own out-of-lives prompt is where the player
-                            // buys back in, matching iOS's LoseModal that re-renders into
-                            // its out-of-lives state instead of restarting (spec 7.4).
-                            navController.popBackStack()
-                        }
-                    }
+                    // Out of lives after this loss commits: stay put rather than navigate
+                    // away. `GameUiState.livesRemaining` is updated by the same `retry()`
+                    // call, so the still-mounted lose overlay re-renders into its
+                    // out-of-lives state in place — matching iOS's `LoseModal`, which
+                    // re-renders instead of dismissing once `tapOnTryAgain` finds no lives
+                    // left (spec 7.4, 7.7).
+                    coroutineScope.launch { viewModel.retry() }
                 },
                 onNextLevel = {
                     navController.popBackStack()
@@ -632,17 +637,23 @@ fun NavGraph(
                         if (viewModel.skipLevelWithStars()) navController.popBackStack()
                     }
                 },
-                onWatchAdForLife = {
+                onWatchAdForLife = { onFinished ->
                     HapticsService.fire(HapticIntent.TAP)
-                    AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_LIFE, onReward = {
-                        coroutineScope.launch { viewModel.applyLifeReward() }
-                    })
+                    AdsService.showRewarded(
+                        activity,
+                        AdPlacement.LEVELS_REWARDED_LIFE,
+                        onReward = { coroutineScope.launch { viewModel.applyLifeReward() } },
+                        onDismissed = { onFinished() },
+                    )
                 },
-                onWatchAdToForgive = {
+                onWatchAdToForgive = { onFinished ->
                     HapticsService.fire(HapticIntent.TAP)
-                    AdsService.showRewarded(activity, AdPlacement.LEVELS_REWARDED_FORGIVE, onReward = {
-                        coroutineScope.launch { viewModel.applyForgiveMistakesReward() }
-                    })
+                    AdsService.showRewarded(
+                        activity,
+                        AdPlacement.LEVELS_REWARDED_FORGIVE,
+                        onReward = { coroutineScope.launch { viewModel.applyForgiveMistakesReward() } },
+                        onDismissed = { onFinished() },
+                    )
                 },
                 onWatchAdForHint = { onFinished ->
                     HapticsService.fire(HapticIntent.TAP)
