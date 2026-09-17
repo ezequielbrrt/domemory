@@ -251,6 +251,12 @@
 "whats_new_tap_to_play_description" = "レベルマップは次に進む場所を示すように脈動するようになり、すべてのタイルがタップに反応します。";
 "whats_new_season_progress_title" = "シーズンの進行状況";
 "whats_new_season_progress_description" = "ライブの進行状況バーとカウントダウンで各シーズンの進み具合を確認。時間切れになる前にすべてのレベルをクリアしよう。";
+
+/* What's New v4.3.0 */
+"whats_new_multiplayer_host_title" = "すぐに作成・参加";
+"whats_new_multiplayer_host_description" = "1つのボタンでマルチプレイヤーを開始し、対戦が始まる前ならいつでも一緒にゲームを選んだり変更したりできます。";
+"whats_new_multiplayer_ready_title" = "準備確認";
+"whats_new_multiplayer_ready_description" = "両プレイヤーが準備完了を確認して初めて対戦が始まるようになり、見ていないゲームに放り込まれることがなくなりました。";
 "levels_timer_frozen_format" = "時間停止中、残り%d秒";
 
 /* Notification permission primer */

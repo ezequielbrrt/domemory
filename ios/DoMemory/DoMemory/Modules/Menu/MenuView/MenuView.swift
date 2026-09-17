@@ -14,11 +14,6 @@ import UserNotifications
 private enum GameTab { case all, mine, levels }
 
 struct MenuView: View {
-    /// Whether a launch surface `ContentView` owns — currently the What's New
-    /// sheet — is on screen. Folded into `canPresentLevelsIntro` so the intro
-    /// does not open underneath it.
-    var isLaunchSurfacePresented: Bool = false
-
     @State private var viewModel = MenuViewModel()
     @State var showNewView = false
     @State var showBanner = false
@@ -35,15 +30,6 @@ struct MenuView: View {
     @ObservedObject private var deepLinkRouter = DeepLinkRouter.shared
     @State private var joinDeepLink: JoinDeepLink?
     @State private var showNotificationPrimer = false
-    @State private var launchSequenceFinished = false
-
-    /// The Levels tab's one-shot intro waits for the launch sequence to clear
-    /// the screen. Levels is the landing tab, so its cover would otherwise race
-    /// the ATT prompt, the What's New sheet and the notification primer — the
-    /// same collision each of those already guards against.
-    private var canPresentLevelsIntro: Bool {
-        launchSequenceFinished && !showNotificationPrimer && !isLaunchSurfacePresented
-    }
 
     private var displayedGames: [Memorama] {
         switch selectedTab {
@@ -242,7 +228,7 @@ struct MenuView: View {
 
                             // Tab bar with per-tab content
                             TabView(selection: $selectedTab) {
-                                LevelsView(canPresentIntro: canPresentLevelsIntro)
+                                LevelsView()
                                     .tabItem {
                                         Label(Strings.tabLevels, systemImage: "trophy.fill")
                                     }
@@ -321,9 +307,6 @@ struct MenuView: View {
             await ATTrackingManager.requestTrackingAuthorization()
             await MobileAds.shared.start()
             await presentNotificationPrimerIfNeeded()
-            // Runs after the primer has been decided, so the Levels intro
-            // never opens while the primer is still on its way in.
-            launchSequenceFinished = true
         }
         .sheet(isPresented: $showNotificationPrimer) {
             NotificationPrimerView(source: "menu") {

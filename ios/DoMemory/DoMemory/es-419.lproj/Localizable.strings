@@ -251,6 +251,12 @@
 "whats_new_tap_to_play_description" = "El mapa de niveles ahora pulsa para mostrarte cuál sigue, y cada casilla responde a tu toque.";
 "whats_new_season_progress_title" = "Progreso de temporada";
 "whats_new_season_progress_description" = "Sigue tu avance en cada temporada con una barra de progreso en vivo y una cuenta regresiva: completa todos los niveles antes de que se acabe el tiempo.";
+
+/* What's New v4.3.0 */
+"whats_new_multiplayer_host_title" = "Crea o únete al instante";
+"whats_new_multiplayer_host_description" = "Inicia el modo multijugador desde un solo botón y elige o cambia el juego juntos, en cualquier momento antes de que comience la partida.";
+"whats_new_multiplayer_ready_title" = "Confirmación de listos";
+"whats_new_multiplayer_ready_description" = "Las partidas ahora comienzan solo cuando ambos jugadores confirman que están listos, así nadie entra a un juego que no ha visto.";
 "levels_timer_frozen_format" = "Reloj congelado, quedan %d segundos";
 
 /* Notification permission primer */

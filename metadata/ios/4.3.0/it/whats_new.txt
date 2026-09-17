@@ -1,0 +1,9 @@
+La modalità multiplayer ha ricevuto un grande aggiornamento! Crea o unisciti a una stanza con un solo pulsante, scegli il gioco dalla lobby in qualsiasi momento prima dell'inizio, e ora entrambi i giocatori confermano di essere pronti prima che la partita cominci.
+
+• Multiplayer con host prima: crea una stanza vuota all'istante, poi scegli o cambia il gioco direttamente dalla lobby.
+• Conferma di prontezza: le partite iniziano solo quando entrambi i giocatori confermano di essere pronti.
+• Nuove animazioni in Livelli e Stagioni — coriandoli alle vittorie, stelle che compaiono una alla volta, effetti di crepa e scossa alle sconfitte, cuori che si rompono e si riempiono, e altro ancora.
+• Carte memorama ridisegnate con un pulsante preferiti più grande e facile da toccare.
+• Tocca il distintivo di difficoltà nella scheda Tutti per filtrare all'istante.
+• Onboarding semplificato — scegli la tua difficoltà quando vuoi invece che all'inizio.
+• Risolto un problema che poteva far fallire l'accesso a una stanza per un nuovo ospite, e vittorie non sempre registrate nelle rivincite.

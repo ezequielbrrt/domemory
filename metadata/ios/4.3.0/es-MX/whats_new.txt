@@ -1,0 +1,9 @@
+¡El modo multijugador tuvo una gran mejora! Crea o únete a una sala desde un solo botón, elige el juego desde la sala de espera en cualquier momento antes de empezar, y ahora ambos jugadores confirman que están listos antes de que inicie la partida.
+
+• Multijugador con anfitrión primero: crea una sala vacía al instante y elige o cambia el juego directamente desde la sala de espera.
+• Confirmación de listo: las partidas ahora inician solo cuando ambos jugadores confirman que están listos.
+• Nuevas animaciones en Niveles y Temporadas — confeti al ganar, estrellas que aparecen una a una, efectos de grieta y sacudida al perder, corazones que se rompen y se rellenan, y más.
+• Rediseñamos las tarjetas de memorama con un botón de favoritos más grande y fácil de tocar.
+• Toca la insignia de dificultad en la pestaña Todos para filtrar al instante.
+• Simplificamos el inicio — elige tu dificultad cuando quieras en vez de hacerlo desde el principio.
+• Corregimos que unirse a una sala fallara para un nuevo invitado, y que algunas victorias no se registraran en revanchas.

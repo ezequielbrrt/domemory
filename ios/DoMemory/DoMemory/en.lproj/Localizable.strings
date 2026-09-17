@@ -251,6 +251,12 @@
 "whats_new_tap_to_play_description" = "The level map now pulses to show you what's next, and every tile responds to your tap.";
 "whats_new_season_progress_title" = "Season Progress";
 "whats_new_season_progress_description" = "Track your climb through each season with a live progress bar and countdown — clear every level before time runs out.";
+
+/* What's New v4.3.0 */
+"whats_new_multiplayer_host_title" = "Host or Join Instantly";
+"whats_new_multiplayer_host_description" = "Start multiplayer from a single button, then pick or change the game together — any time before the match starts.";
+"whats_new_multiplayer_ready_title" = "Ready Check";
+"whats_new_multiplayer_ready_description" = "Matches now begin only once both players confirm they're ready, so no one gets dropped into a game they haven't seen yet.";
 "levels_timer_frozen_format" = "Timer frozen, %d seconds left";
 
 /* Notification permission primer */

@@ -3,18 +3,13 @@
 //  DoMemory
 //
 //  Explains Levels mode — progression, stars, daily lives, and the mistake
-//  budget — the first time the tab is opened, and any time the player taps the
-//  info button on the map.
+//  budget — any time the player taps the info button on the map.
 //
 
 import SwiftUI
 
 struct LevelsIntroView: View {
-    /// `"auto"` for the one-shot first showing, `"info_button"` when reopened.
-    let source: String
     let onDismiss: () -> Void
-
-    private let gate = LevelsIntroGate()
 
     private var slides: [IntroSlide] {
         [
@@ -53,27 +48,20 @@ struct LevelsIntroView: View {
             finishTitle: Strings.levelsIntroDone,
             onSkip: {
                 AnalyticsService.log(.levelsIntroSkipped)
-                finish()
+                onDismiss()
             },
             onFinish: {
                 AnalyticsService.log(.levelsIntroCompleted)
-                finish()
+                onDismiss()
             }
         )
         .onAppear {
             AnalyticsService.log(.screenView(name: "levels_intro", screenClass: "LevelsIntroView"))
-            AnalyticsService.log(.levelsIntroShown(source: source))
+            AnalyticsService.log(.levelsIntroShown(source: "info_button"))
         }
-    }
-
-    /// Persisted on dismissal rather than on appearance, so a kill mid-intro
-    /// leaves the player eligible to see it again.
-    private func finish() {
-        gate.markSeen()
-        onDismiss()
     }
 }
 
 #Preview {
-    LevelsIntroView(source: "preview", onDismiss: {})
+    LevelsIntroView(onDismiss: {})
 }

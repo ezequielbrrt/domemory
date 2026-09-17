@@ -251,6 +251,12 @@
 "whats_new_tap_to_play_description" = "레벨 맵이 이제 다음에 할 레벨을 알려주기 위해 맥동하며, 모든 타일이 탭에 반응합니다.";
 "whats_new_season_progress_title" = "시즌 진행 상황";
 "whats_new_season_progress_description" = "실시간 진행 바와 카운트다운으로 각 시즌의 진행 상황을 확인하세요 — 시간이 끝나기 전에 모든 레벨을 클리어하세요.";
+
+/* What's New v4.3.0 */
+"whats_new_multiplayer_host_title" = "즉시 만들거나 참가";
+"whats_new_multiplayer_host_description" = "버튼 하나로 멀티플레이어를 시작하고, 매치가 시작되기 전 언제든 함께 게임을 선택하거나 변경하세요.";
+"whats_new_multiplayer_ready_title" = "준비 확인";
+"whats_new_multiplayer_ready_description" = "이제 두 플레이어가 모두 준비 완료를 확인해야 매치가 시작되어, 아무도 보지 못한 게임에 들어가지 않습니다.";
 "levels_timer_frozen_format" = "시간 정지, %d초 남음";
 
 /* Notification permission primer */

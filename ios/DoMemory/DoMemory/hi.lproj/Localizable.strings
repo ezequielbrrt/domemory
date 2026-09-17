@@ -251,6 +251,12 @@
 "whats_new_tap_to_play_description" = "लेवल मैप अब यह दिखाने के लिए स्पंदित होता है कि आगे क्या है, और हर टाइल आपके टैप पर प्रतिक्रिया देती है।";
 "whats_new_season_progress_title" = "सीज़न प्रगति";
 "whats_new_season_progress_description" = "लाइव प्रोग्रेस बार और काउंटडाउन के साथ हर सीज़न में अपनी प्रगति ट्रैक करें — समय खत्म होने से पहले हर लेवल पूरा करें।";
+
+/* What's New v4.3.0 */
+"whats_new_multiplayer_host_title" = "तुरंत बनाएं या जॉइन करें";
+"whats_new_multiplayer_host_description" = "एक ही बटन से मल्टीप्लेयर शुरू करें, फिर मैच शुरू होने से पहले कभी भी मिलकर गेम चुनें या बदलें।";
+"whats_new_multiplayer_ready_title" = "तैयार-पुष्टि";
+"whats_new_multiplayer_ready_description" = "अब मैच तभी शुरू होता है जब दोनों खिलाड़ी तैयार होने की पुष्टि करते हैं, ताकि कोई भी बिना देखे गेम में न पहुंचे।";
 "levels_timer_frozen_format" = "घड़ी रुकी है, %d सेकंड बाकी";
 
 /* Notification permission primer */

@@ -251,6 +251,12 @@
 "whats_new_tap_to_play_description" = "关卡地图现在会脉动提示你接下来要玩哪一关，每个关卡节点都会响应你的点击。";
 "whats_new_season_progress_title" = "赛季进度";
 "whats_new_season_progress_description" = "通过实时进度条和倒计时追踪你在每个赛季中的进度——在时间耗尽前通关所有关卡。";
+
+/* What's New v4.3.0 */
+"whats_new_multiplayer_host_title" = "即刻创建或加入";
+"whats_new_multiplayer_host_description" = "一键开启多人对战，比赛开始前随时可以一起选择或更改游戏。";
+"whats_new_multiplayer_ready_title" = "准备确认";
+"whats_new_multiplayer_ready_description" = "现在只有双方玩家都确认准备就绪，比赛才会开始，这样谁都不会被拉进一场没看过的对局。";
 "levels_timer_frozen_format" = "时间已冻结，剩余 %d 秒";
 
 /* Notification permission primer */

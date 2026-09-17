@@ -11,10 +11,19 @@ Open `DoMemory/DoMemory.xcodeproj` in Xcode. There is no SPM-only build; Xcode i
 **Command line** (from `DoMemory/`) — always build the **workspace**, never the project. `-project DoMemory.xcodeproj` fails with spurious missing-resource-bundle errors because it does not build the Tuist dependency projects.
 ```
 xcodebuild -workspace DoMemory.xcworkspace -scheme DoMemory -sdk iphonesimulator \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -configuration Debug build
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5' -configuration Debug build
 xcodebuild -workspace DoMemory.xcworkspace -scheme DoMemory -sdk iphonesimulator \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -configuration Debug test
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5' -configuration Debug test
 ```
+A destination with no explicit `OS=` resolves to `OS:latest`, i.e. whatever Simulator runtime
+Xcode most recently installed — currently iOS 27.0 on this machine, alongside iOS 26.5. Apple's
+simulator device catalog rotates the "Pro" name forward every runtime (the iOS 27.0 runtime
+offers "iPhone 18 Pro"/"iPhone 18 Pro Max", not "iPhone 17 Pro"), so `-destination 'platform=iOS
+Simulator,name=iPhone 17 Pro'` with no `OS=` fails with "Unable to find a device matching the
+provided destination specifier" the moment a newer runtime is installed, even though a perfectly
+usable "iPhone 17 Pro" simulator still exists on 26.5. Pin `OS=26.5` as above, or run `xcrun
+simctl list runtimes` / `xcrun simctl list devices available` and adjust both the device name and
+`OS=` together next time Apple's catalog rotates again.
 **Always run `Tuist/fix-deployment-targets.sh` right after `tuist generate`/`tuist install`,
 before building** (whether from the command line or opening the project in Xcode — Xcode
 reads whatever is already on disk, it does not regenerate on its own). Several vendored
@@ -130,9 +139,8 @@ Also: `DoMemory/DoMemoryWidget/` — a home-screen widget showing the Daily Chal
 2. ATT prompt.
 3. Start `MobileAds` — **only after** ATT resolves, or Google marks requests non-personalized even when the user later grants permission.
 4. Notification permission primer, if due.
-5. Set `launchSequenceFinished`, which unblocks the Levels intro.
 
-Separately, the What's New sheet, the notification primer and the Levels intro each call `AdsService.setFullScreenAdsSuppressed(_:)` while on screen: the app-open ad rides `didBecomeActive`, which fires **again** when a system dialog is dismissed, landing the ad on top of whatever the player was meant to read.
+Separately, the What's New sheet, the notification primer and the Levels intro each call `AdsService.setFullScreenAdsSuppressed(_:)` while on screen: the app-open ad rides `didBecomeActive`, which fires **again** when a system dialog is dismissed, landing the ad on top of whatever the player was meant to read. The Levels intro only opens from the info ("?") button in the Levels map header — it is no longer shown automatically on a player's first visit, so it does not need to wait on this sequence.
 
 ### Persistence
 

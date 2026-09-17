@@ -1,0 +1,9 @@
+O multijogador ganhou uma grande atualização! Crie ou entre em uma sala com um único botão, escolha o jogo na sala de espera a qualquer momento antes de começar, e agora os dois jogadores confirmam que estão prontos antes da partida começar.
+
+• Multijogador com anfitrião primeiro: crie uma sala vazia instantaneamente e escolha ou troque o jogo direto na sala de espera.
+• Confirmação de pronto: as partidas só começam quando os dois jogadores confirmam que estão prontos.
+• Novas animações em Níveis e Temporadas — confete nas vitórias, estrelas aparecendo uma a uma, efeitos de rachadura e tremor nas derrotas, corações que quebram e se recarregam, e mais.
+• Redesenhamos os cartões de memorama com um botão de favorito maior e mais fácil de tocar.
+• Toque no selo de dificuldade na aba Todos para filtrar na hora.
+• Simplificamos o onboarding — escolha sua dificuldade quando quiser, em vez de logo no início.
+• Corrigimos entradas em salas que podiam falhar para um novo convidado, e vitórias que nem sempre eram registradas em revanches.
