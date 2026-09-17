@@ -107,15 +107,6 @@ struct WinModal: View {
                 .ignoresSafeArea()
                 .background(.ultraThinMaterial)
 
-            // A one-shot celebratory burst behind the card. Skipped for
-            // reduce-motion players, who see the modal with no motion at all
-            // rather than a burst that plays regardless of the setting.
-            if !reduceMotion {
-                LottieView(name: "confetti-burst", loopMode: .playOnce)
-                    .allowsHitTesting(false)
-                    .frame(width: 400, height: 400)
-            }
-
             VStack(spacing: 6) {
                 Text("😎")
                     .font(.system(size: 68))
@@ -232,6 +223,15 @@ struct WinModal: View {
                     .shadow(color: Color.shadowColor.opacity(1.2), radius: 60, x: 0, y: 20)
             )
             .padding(.horizontal, 32)
+
+            // A one-shot celebratory burst in front of the card. Skipped for
+            // reduce-motion players, who see the modal with no motion at all
+            // rather than a burst that plays regardless of the setting.
+            if !reduceMotion {
+                LottieView(name: "confetti-burst", loopMode: .playOnce)
+                    .allowsHitTesting(false)
+                    .frame(width: 400, height: 400)
+            }
         }
     }
 }
