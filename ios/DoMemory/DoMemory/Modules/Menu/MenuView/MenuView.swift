@@ -526,8 +526,27 @@ private struct CompactCardLayout<Badge: View>: View {
     let background: Color
     let badge: Badge
     /// Firebase-supplied artwork drawn over `background`. Declared last and
-    /// defaulted so the daily challenge card, which has none, is unchanged.
+    /// defaulted so a card without artwork is unchanged.
     var artworkURL: URL? = nil
+    /// Asset-catalog artwork drawn over `background`, for cards whose art ships
+    /// in the bundle instead of arriving from Firebase. A season's art cannot be
+    /// bundled — it is authored per season, after the build — and the daily
+    /// challenge's is fixed, so the two are never both set.
+    var artworkName: String? = nil
+
+    private var hasArtwork: Bool { artworkURL != nil || artworkName != nil }
+
+    @ViewBuilder
+    private var artwork: some View {
+        if let artworkURL {
+            RemoteImage(url: artworkURL) { Color.clear }
+                .scaledToFill()
+        } else if let artworkName {
+            Image(artworkName)
+                .resizable()
+                .scaledToFill()
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -559,23 +578,20 @@ private struct CompactCardLayout<Badge: View>: View {
             ZStack {
                 background
 
-                if let artworkURL {
+                if hasArtwork {
                     // `Color.clear` takes exactly the card's size and an
                     // overlay cannot grow its parent, so the filled artwork
                     // crops to the card instead of stretching the ZStack — and
                     // with it the rounded corners and the shadow below.
                     Color.clear
-                        .overlay {
-                            RemoteImage(url: artworkURL) { Color.clear }
-                                .scaledToFill()
-                        }
+                        .overlay { artwork }
                         .clipped()
 
                     // The title and badge are pure white at 15pt and 12pt with
-                    // no shadow behind them, and the art is authored remotely.
-                    // This keeps the reading side of the card close to the flat
-                    // accent it used to be while the artwork stays legible on
-                    // the trailing edge.
+                    // no shadow behind them, and the art is authored outside
+                    // this file. This keeps the reading side of the card close
+                    // to the flat accent it used to be while the artwork stays
+                    // legible on the trailing edge.
                     LinearGradient(
                         colors: [background.opacity(0.85), background.opacity(0.25)],
                         startPoint: .leading,
@@ -587,9 +603,18 @@ private struct CompactCardLayout<Badge: View>: View {
             // shadowed after, so the glow still falls outside it.
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .shadow(color: background.opacity(0.3), radius: 12, x: 0, y: 4)
+            // Decoration only, for the reason spelled out on `DailyChallengeCard`.
+            // The overflow is a few points here rather than ninety, because this
+            // card's proportions nearly match the art's, but it is the same bug.
+            .allowsHitTesting(false)
         }
+        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
+
+/// The daily challenge's bundled card artwork, shared by the full-width and the
+/// compact card so the two layouts cannot drift onto different images.
+private let dailyChallengeArtworkName = "daily-challenge-card"
 
 private struct CompactDailyChallengeCard: View {
     let streak: Int
@@ -611,7 +636,8 @@ private struct CompactDailyChallengeCard: View {
                 ),
                 title: Strings.dailyChallengeTitle,
                 background: Color.primaryColor,
-                badge: Text(badgeText)
+                badge: Text(badgeText),
+                artworkName: dailyChallengeArtworkName
             )
             .opacity(isCompleted ? 0.85 : 1)
         }
@@ -706,12 +732,48 @@ private struct DailyChallengeCard: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color.primaryColor)
-                    .shadow(color: Color.primaryColor.opacity(0.3), radius: 12, x: 0, y: 4)
-            )
+            .background {
+                ZStack {
+                    Color.primaryColor
+
+                    // Sized the same way as `CompactCardLayout`: `Color.clear`
+                    // fixes the frame so the filled artwork crops to the card
+                    // rather than stretching it, and with it the corners below.
+                    Color.clear
+                        .overlay {
+                            Image(dailyChallengeArtworkName)
+                                .resizable()
+                                .scaledToFill()
+                        }
+                        .clipped()
+
+                    // A heavier scrim than the compact card's. This layout is
+                    // roughly four times as wide as it is tall, so filling it
+                    // from 4:3 art crops a narrow band from the middle and
+                    // scales the motif up — and the title, subtitle and streak
+                    // badge all sit on top of it in unshadowed white.
+                    LinearGradient(
+                        colors: [Color.primaryColor.opacity(0.92), Color.primaryColor.opacity(0.35)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                }
+                // Clipped first, so the artwork takes the card's corner radius;
+                // shadowed after, so the glow still falls outside it.
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .shadow(color: Color.primaryColor.opacity(0.3), radius: 12, x: 0, y: 4)
+                // `clipped()` and `clipShape` only clip *drawing*. This card is
+                // roughly four times as wide as it is tall, so filling it from
+                // 4:3 art leaves the image about 90pt taller than the card at
+                // each edge, and that overflow still answers touches — it sat
+                // over the header buttons and opened the daily challenge
+                // instead. The art is decoration; it takes no input.
+                .allowsHitTesting(false)
+            }
             .opacity(isCompleted ? 0.85 : 1)
+            // With the background inert, the tappable region is the card
+            // itself rather than only the glyphs and text inside it.
+            .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
         .buttonStyle(.plain)
         .disabled(isCompleted)
