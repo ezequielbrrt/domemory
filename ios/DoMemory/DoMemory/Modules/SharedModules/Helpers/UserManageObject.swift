@@ -58,6 +58,7 @@ class UserManageObject: NSObject {
             for object in result {
                 persistentContainer.viewContext.delete(object)
             }
+            try persistentContainer.viewContext.save()
         } catch {
             return
         }

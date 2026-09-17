@@ -73,6 +73,17 @@ final class LevelLivesServiceTests: XCTestCase {
         XCTAssertFalse(scoped.hasLivesRemaining())
     }
 
+    /// Debug/QA only: refills immediately, without waiting for the day boundary.
+    func testRestoreFullLivesRefillsImmediately() {
+        for _ in 0..<LevelLivesService.maxLives {
+            service.consumeLife()
+        }
+        XCTAssertEqual(service.livesRemaining(), 0)
+
+        service.restoreFullLives()
+        XCTAssertEqual(service.livesRemaining(), LevelLivesService.maxLives)
+    }
+
     func testDailyResetRestoresMaxLives() {
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
 
