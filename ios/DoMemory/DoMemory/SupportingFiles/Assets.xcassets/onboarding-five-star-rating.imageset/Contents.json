@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "five-star-rating.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

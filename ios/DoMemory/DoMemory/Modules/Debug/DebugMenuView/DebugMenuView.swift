@@ -94,7 +94,7 @@ struct DebugMenuView: View {
                     } label: {
                         DebugRowLabel(
                             title: "Show ReviewFlow invitation view",
-                            subtitle: "ReviewFlow's own SwiftUI pre-prompt sheet — not currently adopted by the app, but renders normally on Simulator, unlike the native prompt above"
+                            subtitle: "ReviewFlow's own SwiftUI full-screen pre-prompt — not currently adopted by the app, but renders normally on Simulator, unlike the native prompt above"
                         )
                     }
                 }
@@ -128,8 +128,12 @@ struct DebugMenuView: View {
         .sheet(isPresented: $showNotificationPrimerPreview) {
             NotificationPrimerView(source: "debug_menu") { showNotificationPrimerPreview = false }
         }
-        .sheet(isPresented: $showReviewInvitationPreview) {
-            ReviewInvitationSheet(appID: InviteLink.appStoreID)
+        .fullScreenCover(isPresented: $showReviewInvitationPreview) {
+            ReviewInvitationFullScreen(
+                appID: InviteLink.appStoreID,
+                image: Image("onboarding-five-star-rating"),
+                accentColor: .primaryColor
+            )
         }
     }
 
