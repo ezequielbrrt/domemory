@@ -8,6 +8,7 @@ import coil3.disk.DiskCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.ezequielbrrt.domemory.widget.DailyChallengeWidgetScheduler
 import com.ezequielbrrt.domemory.services.ads.AdsService
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import okio.Path.Companion.toOkioPath
 
@@ -19,6 +20,7 @@ class DoMemoryApplication : Application(), SingletonImageLoader.Factory {
         super.onCreate()
         container = AppContainer(context = this)
         AdsService.initialize(this)
+        AnalyticsService.initialize(this)
         HapticsService.initialize(this, container.prefs, container.applicationScope)
         // Spec 8.1's midnight refresh. Idempotent across process restarts: KEEP (see the
         // scheduler's doc) leaves an already-armed job's phase alone rather than recomputing

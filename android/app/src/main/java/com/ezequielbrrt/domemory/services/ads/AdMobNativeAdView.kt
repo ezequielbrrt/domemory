@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
@@ -41,14 +43,20 @@ fun AdMobNativeAdView(placement: AdPlacement, modifier: Modifier = Modifier) {
     var nativeAd by remember(placement) { mutableStateOf<NativeAd?>(null) }
 
     DisposableEffect(placement) {
+        // Mirrors iOS's `AdsService.swift` native-loading trio (`native_requested`/
+        // `native_loaded`/`native_failed`) — the only `ad_lifecycle` actions iOS logs
+        // outside the rewarded-ad funnel that [AdsService.showRewarded] already covers.
+        AnalyticsService.log(AnalyticsEvent.AdLifecycle(placement = placement.analyticsKey, action = "native_requested"))
         val adLoader = AdLoader.Builder(context, AdUnitConfiguration.unitId(placement))
             .forNativeAd { ad ->
                 nativeAd?.destroy()
                 nativeAd = ad
+                AnalyticsService.log(AnalyticsEvent.AdLifecycle(placement = placement.analyticsKey, action = "native_loaded"))
             }
             .withAdListener(object : AdListener() {
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     nativeAd = null
+                    AnalyticsService.log(AnalyticsEvent.AdLifecycle(placement = placement.analyticsKey, action = "native_failed"))
                 }
             })
             .build()

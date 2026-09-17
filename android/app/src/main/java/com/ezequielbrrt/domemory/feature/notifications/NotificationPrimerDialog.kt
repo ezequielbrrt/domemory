@@ -16,6 +16,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 
@@ -41,14 +44,35 @@ import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 @Composable
 fun NotificationPrimerHost(visible: Boolean, onEnable: () -> Unit, onDismiss: () -> Unit) {
     if (!visible) return
+    // Spec 11.3: "shown once per install on the menu" — the only call site, so `source` is
+    // fixed rather than threaded in as a parameter.
+    LaunchedEffect(Unit) {
+        AnalyticsService.log(AnalyticsEvent.NotificationPrimerShown(source = "menu"))
+    }
     // onEnable only ever fires after a confirmed grant (or "not needed", pre-API 33) —
     // see rememberNotificationPermissionRequester's doc. Either outcome dismisses the
     // primer; spec 11.3 shows it once per install regardless of the answer given.
     val requestPermission = rememberNotificationPermissionRequester(
-        onGranted = { onEnable(); onDismiss() },
-        onDenied = onDismiss,
+        onGranted = {
+            AnalyticsService.log(AnalyticsEvent.NotificationPrimerCompleted(source = "menu", outcome = "authorized"))
+            onEnable()
+            onDismiss()
+        },
+        onDenied = {
+            AnalyticsService.log(AnalyticsEvent.NotificationPrimerCompleted(source = "menu", outcome = "denied"))
+            onDismiss()
+        },
     )
-    NotificationPrimerDialog(onEnable = requestPermission, onLater = onDismiss)
+    NotificationPrimerDialog(
+        onEnable = requestPermission,
+        onLater = {
+            // "Later" dismisses without ever asking the OS — the primer can still be shown
+            // again on a future install/session, matching iOS's `.deferred` outcome (as
+            // opposed to `.denied`, which is a real OS refusal).
+            AnalyticsService.log(AnalyticsEvent.NotificationPrimerCompleted(source = "menu", outcome = "deferred"))
+            onDismiss()
+        },
+    )
 }
 
 @Composable

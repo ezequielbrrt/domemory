@@ -2,6 +2,7 @@ package com.ezequielbrrt.domemory.feature.levels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
@@ -33,6 +34,9 @@ class LevelsViewModel(
     // for the same reason `GameViewModel.onHaptic` is: this class stays Android-framework-free
     // so it can be constructed and tested with no `HapticsService.initialize` ever having run.
     private val onHaptic: ((HapticIntent) -> Unit)? = null,
+    /** Same bare-callback shape as [onHaptic], for the same reason — see
+     * [com.ezequielbrrt.domemory.feature.game.GameViewModel]'s `onAnalytics` doc. */
+    private val onAnalytics: ((AnalyticsEvent) -> Unit)? = null,
 ) : ViewModel() {
 
     data class UiState(
@@ -40,6 +44,11 @@ class LevelsViewModel(
         val starBalance: Int = 0,
         val showOutOfLivesPrompt: Boolean = false,
         val showIntro: Boolean = false,
+        /** `levels_intro_shown.source` for the currently-showing (or most recently shown)
+         * intro — `"launch"` for the one-shot gate, `"info_button"` for [presentIntro]'s
+         * manual reopen. Mirrors iOS's `LevelsView`, which passes a fixed `source` per call
+         * site into `LevelsIntroView`. */
+        val introSource: String = "launch",
         /** A one-shot heart animation the header owes the player; see [HeaderEffects.kt]. */
         val livesEffect: LivesEffect? = null,
         /** Sparkle over the star chip for a credit that just landed; never for a spend. */
@@ -114,7 +123,7 @@ class LevelsViewModel(
 
     /** Reopens the one-shot intro from the map header's info button. */
     fun presentIntro() {
-        _uiState.update { it.copy(showIntro = true) }
+        _uiState.update { it.copy(showIntro = true, introSource = "info_button") }
     }
 
     /** Persisted on dismissal, not on presentation — a kill mid-intro leaves the player
@@ -138,6 +147,7 @@ class LevelsViewModel(
             // Refusal, not a selection — mirrors iOS's LevelsView.onSelect: "the modal
             // that follows is bad news."
             onHaptic?.invoke(HapticIntent.WARNING)
+            onAnalytics?.invoke(AnalyticsEvent.LevelOutOfLivesShown(source = "level_tile"))
             _uiState.update { it.copy(showOutOfLivesPrompt = true) }
             return false
         }
@@ -161,6 +171,9 @@ class LevelsViewModel(
                 lives.refill(1)
                 val livesRemaining = lives.remaining()
                 val starBalance = wallet.balance.value
+                onAnalytics?.invoke(
+                    AnalyticsEvent.LevelLifePurchasedWithStars(cost = LevelPowerUp.LIFE_COST, balanceAfter = starBalance),
+                )
                 _uiState.update {
                     it.withCounters(livesRemaining = livesRemaining, starBalance = starBalance)
                         .copy(showOutOfLivesPrompt = false)
@@ -182,6 +195,7 @@ class LevelsViewModel(
             onHaptic?.invoke(HapticIntent.REWARD)
             lives.refill(1)
             val livesRemaining = lives.remaining()
+            onAnalytics?.invoke(AnalyticsEvent.LevelLifeGrantedFromAd(livesRemaining = livesRemaining))
             _uiState.update {
                 it.withCounters(livesRemaining = livesRemaining).copy(showOutOfLivesPrompt = false)
             }

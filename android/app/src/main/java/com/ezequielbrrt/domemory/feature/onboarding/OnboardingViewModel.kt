@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.data.prefs.UserPreferences
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,8 +26,19 @@ class OnboardingViewModel(
     val state: StateFlow<OnboardingUiState> = _state.asStateFlow()
 
     fun next(onComplete: () -> Unit) {
-        if (_state.value.page == 2) finish(onComplete) else _state.value = _state.value.copy(page = _state.value.page + 1)
+        if (_state.value.page == 2) {
+            finish(onComplete) { AnalyticsEvent.OnboardingIntroCompleted }
+        } else {
+            _state.value = _state.value.copy(page = _state.value.page + 1)
+        }
     }
-    fun skipIntro(onComplete: () -> Unit) { finish(onComplete) }
-    private fun finish(onComplete: () -> Unit) { workScope.launch { _state.value = _state.value.copy(isSaving = true); prefs.completeOnboarding(Difficulty.MEDIUM); onComplete() } }
+    fun skipIntro(onComplete: () -> Unit) { finish(onComplete) { AnalyticsEvent.OnboardingIntroSkipped } }
+    private fun finish(onComplete: () -> Unit, event: () -> AnalyticsEvent) {
+        workScope.launch {
+            _state.value = _state.value.copy(isSaving = true)
+            prefs.completeOnboarding(Difficulty.MEDIUM)
+            AnalyticsService.log(event())
+            onComplete()
+        }
+    }
 }
