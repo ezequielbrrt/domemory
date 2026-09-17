@@ -15,51 +15,61 @@
   "english_approved": true,
   "localizations": {
     "en-US": {
+      "subtitle": "Match Pairs, Levels & Duels",
       "whats_new": "Multiplayer just got a big upgrade! Host or join a room from a single button, pick the game from inside the lobby at any time before it starts, and both players now confirm they're ready before the match begins.\n\n• Host-first multiplayer: create an empty room instantly, then choose or change the game right from the lobby.\n• Ready check: matches now start only once both players confirm they're ready.\n• New animations throughout Levels and Seasons — confetti on wins, star pops, cracking and shaking effects on losses, hearts that break and refill, and more.\n• Redesigned memorama cards with a bigger, easier-to-tap favorite button.\n• Tap the difficulty badge on the All tab to filter instantly.\n• Simplified onboarding — pick your difficulty any time instead of upfront.\n• Fixed multiplayer room joins that could fail for a new guest, and wins not always being recorded on rematches.",
       "promotional_text": "Multiplayer just got easier — host or join with one tap, pick your game in the lobby, and enjoy new win, loss, and level-up animations throughout Levels and Seasons.",
       "status": "approved"
     },
     "es-MX": {
+      "subtitle": "Parejas, niveles y duelos",
       "whats_new": "¡El modo multijugador tuvo una gran mejora! Crea o únete a una sala desde un solo botón, elige el juego desde la sala de espera en cualquier momento antes de empezar, y ahora ambos jugadores confirman que están listos antes de que inicie la partida.\n\n• Multijugador con anfitrión primero: crea una sala vacía al instante y elige o cambia el juego directamente desde la sala de espera.\n• Confirmación de listo: las partidas ahora inician solo cuando ambos jugadores confirman que están listos.\n• Nuevas animaciones en Niveles y Temporadas — confeti al ganar, estrellas que aparecen una a una, efectos de grieta y sacudida al perder, corazones que se rompen y se rellenan, y más.\n• Rediseñamos las tarjetas de memorama con un botón de favoritos más grande y fácil de tocar.\n• Toca la insignia de dificultad en la pestaña Todos para filtrar al instante.\n• Simplificamos el inicio — elige tu dificultad cuando quieras en vez de hacerlo desde el principio.\n• Corregimos que unirse a una sala fallara para un nuevo invitado, y que algunas victorias no se registraran en revanchas.",
       "promotional_text": "El multijugador es más fácil: crea o únete con un toque, elige tu juego en la sala de espera y disfruta nuevas animaciones en Niveles y Temporadas.",
       "status": "approved"
     },
     "pt-BR": {
+      "subtitle": "Pares, níveis e duelos",
       "whats_new": "O multijogador ganhou uma grande atualização! Crie ou entre em uma sala com um único botão, escolha o jogo na sala de espera a qualquer momento antes de começar, e agora os dois jogadores confirmam que estão prontos antes da partida começar.\n\n• Multijogador com anfitrião primeiro: crie uma sala vazia instantaneamente e escolha ou troque o jogo direto na sala de espera.\n• Confirmação de pronto: as partidas só começam quando os dois jogadores confirmam que estão prontos.\n• Novas animações em Níveis e Temporadas — confete nas vitórias, estrelas aparecendo uma a uma, efeitos de rachadura e tremor nas derrotas, corações que quebram e se recarregam, e mais.\n• Redesenhamos os cartões de memorama com um botão de favorito maior e mais fácil de tocar.\n• Toque no selo de dificuldade na aba Todos para filtrar na hora.\n• Simplificamos o onboarding — escolha sua dificuldade quando quiser, em vez de logo no início.\n• Corrigimos entradas em salas que podiam falhar para um novo convidado, e vitórias que nem sempre eram registradas em revanches.",
       "promotional_text": "O multijogador ficou mais fácil: crie ou entre com um toque, escolha seu jogo na sala de espera e aproveite as novas animações em Níveis e Temporadas.",
       "status": "approved"
     },
     "fr-FR": {
+      "subtitle": "Paires, niveaux et duels",
       "whats_new": "Le multijoueur vient de connaître une belle mise à jour ! Créez ou rejoignez une salle en un seul bouton, choisissez la partie depuis le salon à tout moment avant le début, et les deux joueurs confirment désormais qu'ils sont prêts avant que la partie ne commence.\n\n• Multijoueur avec hôte en premier : créez une salle vide instantanément, puis choisissez ou changez la partie directement depuis le salon.\n• Confirmation de disponibilité : les parties ne démarrent que lorsque les deux joueurs confirment qu'ils sont prêts.\n• Nouvelles animations dans Niveaux et Niveaux saisonniers — confettis à la victoire, étoiles qui apparaissent une à une, effets de fissure et de tremblement en cas de défaite, cœurs qui se brisent et se remplissent, et plus encore.\n• Cartes de memorama repensées avec un bouton favori plus grand et plus facile à toucher.\n• Touchez le badge de difficulté dans l'onglet Tous pour filtrer instantanément.\n• Intégration simplifiée — choisissez votre difficulté quand vous le souhaitez plutôt que dès le départ.\n• Correction des tentatives de rejoindre une salle qui pouvaient échouer pour un nouvel invité, et des victoires qui n'étaient pas toujours enregistrées lors des revanches.",
       "promotional_text": "Le multijoueur est plus simple : créez ou rejoignez en un geste et découvrez les nouvelles animations dans Niveaux et Niveaux saisonniers.",
       "status": "approved"
     },
     "de-DE": {
+      "subtitle": "Paare, Level & Duelle",
       "whats_new": "Der Mehrspielermodus hat ein großes Upgrade erhalten! Erstelle oder tritt einem Raum über einen einzigen Button bei, wähle das Spiel jederzeit vor dem Start direkt in der Lobby aus, und beide Spieler bestätigen jetzt, dass sie bereit sind, bevor das Match beginnt.\n\n• Mehrspieler mit Host zuerst: Erstelle sofort einen leeren Raum und wähle oder wechsle das Spiel direkt in der Lobby.\n• Bereitschaftscheck: Matches starten jetzt erst, wenn beide Spieler bestätigt haben, dass sie bereit sind.\n• Neue Animationen in Level und Saisons — Konfetti bei Siegen, Sterne, die einzeln erscheinen, Riss- und Wackeleffekte bei Niederlagen, Herzen, die zerbrechen und sich wieder füllen, und mehr.\n• Memorama-Karten neu gestaltet mit einem größeren, leichter zu tippenden Favoriten-Button.\n• Tippe auf das Schwierigkeitsabzeichen im Tab Alle, um sofort zu filtern.\n• Einstieg vereinfacht — wähle deine Schwierigkeit jederzeit statt schon am Anfang.\n• Fehler behoben, durch den ein Raumbeitritt für einen neuen Gast fehlschlagen konnte und Siege bei Revanchen nicht immer gezählt wurden.",
       "promotional_text": "Mehrspieler ist jetzt einfacher: mit einem Tipp erstellen oder beitreten, das Spiel in der Lobby wählen und die neuen Animationen in Level und Saisons genießen.",
       "status": "approved"
     },
     "it": {
+      "subtitle": "Coppie, livelli e duelli",
       "whats_new": "La modalità multiplayer ha ricevuto un grande aggiornamento! Crea o unisciti a una stanza con un solo pulsante, scegli il gioco dalla lobby in qualsiasi momento prima dell'inizio, e ora entrambi i giocatori confermano di essere pronti prima che la partita cominci.\n\n• Multiplayer con host prima: crea una stanza vuota all'istante, poi scegli o cambia il gioco direttamente dalla lobby.\n• Conferma di prontezza: le partite iniziano solo quando entrambi i giocatori confermano di essere pronti.\n• Nuove animazioni in Livelli e Stagioni — coriandoli alle vittorie, stelle che compaiono una alla volta, effetti di crepa e scossa alle sconfitte, cuori che si rompono e si riempiono, e altro ancora.\n• Carte memorama ridisegnate con un pulsante preferiti più grande e facile da toccare.\n• Tocca il distintivo di difficoltà nella scheda Tutti per filtrare all'istante.\n• Onboarding semplificato — scegli la tua difficoltà quando vuoi invece che all'inizio.\n• Risolto un problema che poteva far fallire l'accesso a una stanza per un nuovo ospite, e vittorie non sempre registrate nelle rivincite.",
       "promotional_text": "Il multiplayer è più semplice: crea o unisciti con un tocco, scegli il gioco nella lobby e goditi le nuove animazioni in Livelli e Stagioni.",
       "status": "approved"
     },
     "hi": {
+      "subtitle": "जोड़े, स्तर और मुकाबले",
       "whats_new": "मल्टीप्लेयर में एक बड़ा अपडेट आया है! एक ही बटन से रूम बनाएं या जॉइन करें, शुरू होने से पहले कभी भी लॉबी के अंदर से गेम चुनें, और अब मैच शुरू होने से पहले दोनों खिलाड़ी तैयार होने की पुष्टि करते हैं।\n\n• होस्ट-पहले मल्टीप्लेयर: तुरंत एक खाली रूम बनाएं, फिर लॉबी से सीधे गेम चुनें या बदलें।\n• तैयार-जांच: मैच अब तभी शुरू होता है जब दोनों खिलाड़ी तैयार होने की पुष्टि करें।\n• स्तर और सीज़न में नए एनिमेशन — जीत पर कंफेटी, एक-एक करके दिखते सितारे, हार पर दरार और हिलने वाले प्रभाव, टूटते और फिर से भरते दिल, और भी बहुत कुछ।\n• मेमोरामा कार्ड्स को फिर से डिज़ाइन किया — अब पसंदीदा बटन बड़ा और टैप करने में आसान है।\n• तुरंत फ़िल्टर करने के लिए सभी टैब पर कठिनाई बैज को टैप करें।\n• ऑनबोर्डिंग को आसान बनाया — शुरुआत में ही नहीं, जब चाहें तब अपनी कठिनाई चुनें।\n• एक बग ठीक किया जिसकी वजह से नए मेहमान के लिए रूम जॉइन करना विफल हो सकता था, और रीमैच में जीत हमेशा दर्ज नहीं होती थी।",
       "promotional_text": "मल्टीप्लेयर अब आसान है — एक टैप से बनाएं या जॉइन करें, लॉबी में अपना गेम चुनें, और स्तर और सीज़न में जीत, हार और प्रगति के नए एनिमेशन देखें।",
       "status": "approved"
     },
     "ko": {
+      "subtitle": "짝 맞추기, 레벨, 대결",
       "whats_new": "멀티플레이어가 크게 업그레이드되었습니다! 버튼 하나로 방을 만들거나 참가하고, 시작 전 언제든 로비에서 게임을 선택하며, 이제 두 플레이어 모두 준비 완료를 확인해야 매치가 시작됩니다.\n\n• 호스트 우선 멀티플레이어: 빈 방을 즉시 만들고, 로비에서 바로 게임을 선택하거나 변경하세요.\n• 준비 확인: 이제 두 플레이어가 모두 준비되었다고 확인해야 매치가 시작됩니다.\n• 레벨과 시즌 전반에 새로운 애니메이션 추가 — 승리 시 색종이 효과, 하나씩 나타나는 별, 패배 시 금이 가거나 흔들리는 효과, 깨졌다가 다시 채워지는 하트 등.\n• 메모라마 카드를 다시 디자인해 즐겨찾기 버튼을 더 크고 누르기 쉽게 만들었습니다.\n• 전체 탭의 난이도 배지를 탭하면 바로 필터링됩니다.\n• 온보딩을 단순화했습니다 — 처음부터가 아니라 언제든 원할 때 난이도를 선택하세요.\n• 새로운 게스트의 방 참가가 실패할 수 있던 문제와 재대결에서 승리가 항상 기록되지는 않던 문제를 수정했습니다.",
       "promotional_text": "멀티플레이어가 더 쉬워졌습니다 — 한 번의 탭으로 만들거나 참가하고, 로비에서 게임을 선택하며, 레벨과 시즌 전반의 새로운 승패·진행 애니메이션을 즐겨보세요.",
       "status": "approved"
     },
     "ja": {
+      "subtitle": "ペア合わせ・レベル・対戦",
       "whats_new": "マルチプレイヤーが大幅にアップグレードされました！1つのボタンでルームを作成・参加でき、開始前ならいつでもロビー内でゲームを選べます。さらに、対戦開始前に両プレイヤーが準備完了を確認するようになりました。\n\n• ホスト優先のマルチプレイヤー: 空のルームを即座に作成し、ロビーから直接ゲームを選択・変更できます。\n• 準備確認: 両プレイヤーが準備完了を確認して初めて対戦が始まります。\n• レベルとシーズン全体に新しいアニメーションを追加 — 勝利時の紙吹雪、1つずつ表示される星、敗北時のひび割れや揺れの演出、割れて元に戻るハートなど。\n• メモラマカードをリデザインし、お気に入りボタンを大きくタップしやすくしました。\n• 「すべて」タブの難易度バッジをタップすると、その場で絞り込めます。\n• オンボーディングを簡略化 — 最初にではなく、いつでも好きなときに難易度を選べます。\n• 新しいゲストのルーム参加が失敗することがあった不具合と、再戦時に勝利が記録されないことがあった不具合を修正しました。",
       "promotional_text": "マルチプレイヤーがさらに簡単に — ワンタップで作成・参加し、ロビーでゲームを選んで、レベルとシーズン全体の新しい勝敗・進行アニメーションをお楽しみください。",
       "status": "approved"
     },
     "zh-Hans": {
+      "subtitle": "配对、关卡与对战",
       "whats_new": "多人对战迎来重大升级！一键创建或加入房间，开始前随时可在等待室中选择游戏，现在双方玩家都需确认准备就绪后比赛才会开始。\n\n• 房主优先的多人对战：立即创建空房间，然后直接在等待室中选择或更改游戏。\n• 准备确认：只有双方玩家都确认准备就绪，比赛才会开始。\n• 关卡和赛季新增多种动画——获胜时的彩带特效、逐颗点亮的星星、失败时的裂纹与晃动效果、破碎后重新填满的爱心等等。\n• 重新设计了记忆卡片，收藏按钮更大、更易点击。\n• 点击“全部”标签页中的难度徽章即可立即筛选。\n• 简化了新手引导——不必一开始就选难度，随时都能调整。\n• 修复了新访客加入房间可能失败的问题，以及重赛胜利有时未被记录的问题。",
       "promotional_text": "多人对战更简单了——一键创建或加入，在等待室选择游戏，畅享关卡和赛季中全新的胜负与进度动画。",
       "status": "approved"
