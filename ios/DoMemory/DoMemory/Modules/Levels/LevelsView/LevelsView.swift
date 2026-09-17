@@ -49,7 +49,7 @@ struct LevelsView: View {
                 }
             }
             .fullScreenCover(isPresented: $showIntro) {
-                LevelsIntroView { showIntro = false }
+                LevelsIntroView(source: "info_button") { showIntro = false }
             }
             .onAppear {
                 viewModel.refresh()

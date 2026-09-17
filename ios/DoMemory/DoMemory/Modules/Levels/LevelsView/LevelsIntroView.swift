@@ -9,6 +9,8 @@
 import SwiftUI
 
 struct LevelsIntroView: View {
+    /// Where this intro was opened from, logged verbatim on `.levelsIntroShown`.
+    let source: String
     let onDismiss: () -> Void
 
     private var slides: [IntroSlide] {
@@ -57,11 +59,11 @@ struct LevelsIntroView: View {
         )
         .onAppear {
             AnalyticsService.log(.screenView(name: "levels_intro", screenClass: "LevelsIntroView"))
-            AnalyticsService.log(.levelsIntroShown(source: "info_button"))
+            AnalyticsService.log(.levelsIntroShown(source: source))
         }
     }
 }
 
 #Preview {
-    LevelsIntroView(onDismiss: {})
+    LevelsIntroView(source: "preview", onDismiss: {})
 }
