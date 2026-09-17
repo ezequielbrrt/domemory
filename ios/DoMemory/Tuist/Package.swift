@@ -42,7 +42,7 @@ let package = Package(
         .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads.git", from: "12.0.0"),
         .package(url: "https://github.com/ezequielbrrt/whats-new-ios.git", from: "2.0.0"),
         .package(url: "https://github.com/ezequielbrrt/NotificationPermissionKit.git", from: "1.0.0"),
-        .package(url: "https://github.com/ezequielbrrt/ReviewFlow.git", from: "1.0.0"),
+        .package(url: "https://github.com/ezequielbrrt/ReviewFlow.git", from: "2.0.0"),
         .package(url: "https://github.com/airbnb/lottie-ios", from: "4.6.1"),
     ]
 )

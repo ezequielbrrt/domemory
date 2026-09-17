@@ -140,8 +140,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ezequielbrrt/ReviewFlow.git",
       "state" : {
-        "revision" : "83e00d819b9498c317227c670b43d17c88af40d9",
-        "version" : "1.0.0"
+        "revision" : "02e43fcfb138fc9bc2379a5e3aa420c309fc4e32",
+        "version" : "2.0.0"
       }
     },
     {
