@@ -224,15 +224,6 @@
     <string name="share_result_caption">Combinei %d pares no DoMemory! Consegue me superar?</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_pairs_title">Combine os pares</string>
-    <string name="onboarding_pairs_subtitle">Encontre cada par antes que o tempo acabe.</string>
-    <string name="onboarding_pace_title">Jogue no seu ritmo</string>
-    <string name="onboarding_pace_subtitle">Os jogos começam em um ritmo confortável que você pode ajustar a qualquer momento nas Configurações.</string>
-    <string name="onboarding_custom_title">Deixe do seu jeito</string>
-    <string name="onboarding_custom_subtitle">Crie seus próprios memoramas e mantenha os favoritos por perto.</string>
-    <string name="onboarding_skip">Pular</string>
-    <string name="onboarding_continue">Continuar</string>
-    <string name="onboarding_get_started">Começar</string>
 
     <!-- Onboarding intro -->
     <string name="intro_multiplayer_title">Jogue com amigos</string>

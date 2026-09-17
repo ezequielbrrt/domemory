@@ -224,15 +224,6 @@
     <string name="share_result_caption">Ich habe %d Paare in DoMemory gefunden! Schaffst du mehr?</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_pairs_title">Finde die Paare</string>
-    <string name="onboarding_pairs_subtitle">Finde jedes passende Paar, bevor die Zeit abläuft.</string>
-    <string name="onboarding_pace_title">Spiele in deinem Tempo</string>
-    <string name="onboarding_pace_subtitle">Spiele starten in einem angenehmen Tempo, das du jederzeit in den Einstellungen anpassen kannst.</string>
-    <string name="onboarding_custom_title">Mach es zu deinem</string>
-    <string name="onboarding_custom_subtitle">Erstelle deine eigenen Memoramas und behalte deine Favoriten griffbereit.</string>
-    <string name="onboarding_skip">Überspringen</string>
-    <string name="onboarding_continue">Fortsetzen</string>
-    <string name="onboarding_get_started">Los geht\'s</string>
 
     <!-- Onboarding intro -->
     <string name="intro_multiplayer_title">Spiele mit Freunden</string>

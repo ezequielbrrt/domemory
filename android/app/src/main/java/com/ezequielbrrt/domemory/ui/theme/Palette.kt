@@ -22,6 +22,14 @@ data class Palette(
     val textSecondary: Color,
     val shadow: Color,
     val overlayBackdrop: Color,
+    /**
+     * Whether this is the dark palette. The app has its own [ThemePreference], so a
+     * player can force light while the system is dark; a `-night` resource qualifier
+     * follows the *system* configuration and would hand that player dark artwork on a
+     * light background. Anything picking an appearance-dependent resource reads this
+     * instead, so it cannot disagree with the colours around it.
+     */
+    val isDark: Boolean,
 )
 
 private fun rgb(r: Int, g: Int, b: Int, alpha: Float = 1f) =
@@ -41,6 +49,7 @@ val LightPalette = Palette(
     textSecondary = rgb(122, 114, 145),
     shadow = rgb(28, 24, 48, alpha = 0.08f),
     overlayBackdrop = rgb(247, 243, 237, alpha = 0.88f),
+    isDark = false,
 )
 
 val DarkPalette = Palette(
@@ -57,4 +66,5 @@ val DarkPalette = Palette(
     textSecondary = rgb(164, 171, 196),
     shadow = rgb(0, 0, 0, alpha = 0.32f),
     overlayBackdrop = rgb(9, 11, 18, alpha = 0.74f),
+    isDark = true,
 )

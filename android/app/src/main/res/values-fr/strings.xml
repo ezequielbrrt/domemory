@@ -224,15 +224,6 @@
     <string name="share_result_caption">J\'ai associé %d paires sur DoMemory ! Peux-tu me battre ?</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_pairs_title">Forme les paires</string>
-    <string name="onboarding_pairs_subtitle">Trouve chaque paire avant la fin du temps imparti.</string>
-    <string name="onboarding_pace_title">Joue à ton rythme</string>
-    <string name="onboarding_pace_subtitle">Les parties commencent à un rythme confortable que tu peux ajuster à tout moment dans les Réglages.</string>
-    <string name="onboarding_custom_title">Personnalise-le</string>
-    <string name="onboarding_custom_subtitle">Crée tes propres memoramas et garde tes favoris à portée de main.</string>
-    <string name="onboarding_skip">Passer</string>
-    <string name="onboarding_continue">Continuer</string>
-    <string name="onboarding_get_started">Commencer</string>
 
     <!-- Onboarding intro -->
     <string name="intro_multiplayer_title">Joue avec des amis</string>

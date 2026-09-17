@@ -125,7 +125,7 @@ fun NavGraph(
             val onOnboardingComplete = { navController.navigate(Routes.MENU) { popUpTo(Routes.ONBOARDING) { inclusive = true } } }
             OnboardingScreen(
                 state,
-                onNext = { viewModel.next(onOnboardingComplete) },
+                onNext = { viewModel.completeIntro(onOnboardingComplete) },
                 onSkip = { viewModel.skipIntro(onOnboardingComplete) },
             )
         }

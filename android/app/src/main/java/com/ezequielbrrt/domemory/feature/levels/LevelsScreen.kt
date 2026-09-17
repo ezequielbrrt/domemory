@@ -74,6 +74,8 @@ import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.ui.anim.pressScaleClickable
 import com.ezequielbrrt.domemory.ui.anim.rememberReduceMotion
+import com.ezequielbrrt.domemory.ui.components.IntroCarousel
+import com.ezequielbrrt.domemory.ui.components.IntroSlide
 import com.ezequielbrrt.domemory.ui.components.LivesRow
 import com.ezequielbrrt.domemory.ui.lottie.BundledLottie
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
@@ -540,28 +542,11 @@ fun OutOfLivesModal(
     }
 }
 
-/** One slide of [LevelsIntroOverlay]: a big tinted circle + icon, a heavy title and a
- * muted subtitle, matching iOS's `IntroSlideView` (`IntroCarouselView.swift:80-115`). */
-private data class LevelIntroSlideSpec(
-    val icon: ImageVector,
-    val color: (Palette) -> Color,
-    val titleRes: Int,
-)
-
-private val levelIntroSlides = listOf(
-    LevelIntroSlideSpec(Icons.Filled.EmojiEvents, { it.easyGreen }, R.string.levels_intro_progress_title),
-    LevelIntroSlideSpec(Icons.Filled.Star, { it.hardAmber }, R.string.levels_intro_stars_title),
-    LevelIntroSlideSpec(Icons.Filled.Favorite, { it.secondary }, R.string.levels_intro_lives_title),
-    // Neutral primary rather than the success green — a green X reads as "you passed",
-    // the opposite of what this slide teaches (mirrors IntroCarouselView.swift's own comment).
-    LevelIntroSlideSpec(Icons.Filled.Cancel, { it.primary }, R.string.levels_intro_mistakes_title),
-)
-
 /**
- * A full-screen, swipeable 4-slide carousel (spec 7.9), reachable again from the map's
- * info button. Rebuilt to match iOS's `IntroCarouselView.swift` exactly: a paged
- * `HorizontalPager` with dot indicators, a Skip button top-right, and a full-width
- * capsule Next/Done button — replacing the earlier static stacked-dialog placeholder.
+ * A full-screen, swipeable 4-slide carousel (spec 7.9), reachable from the map's info
+ * button. The chrome — pager, dots, Skip, capsule Next/Done button — lives in the shared
+ * [IntroCarousel], the same way iOS's `LevelsIntroView` and `FeatureIntroView` share
+ * `IntroCarouselView`, so the two intros cannot drift apart.
  *
  * Public, and deliberately **not** called from [LevelsScreen] itself: iOS presents this
  * with `.fullScreenCover`, which covers the whole screen — Menu's header, cards and tab
@@ -570,123 +555,51 @@ private val levelIntroSlides = listOf(
  * `NotificationPrimerHost`, to get that same true full-screen coverage.
  */
 @Composable
-fun LevelsIntroOverlay(onDismiss: () -> Unit, source: String = "launch") {
-    val palette = LocalPalette.current
-    val pagerState = rememberPagerState(pageCount = { levelIntroSlides.size })
-    val coroutineScope = rememberCoroutineScope()
-    val isLastPage = pagerState.currentPage == levelIntroSlides.size - 1
-
+fun LevelsIntroOverlay(onDismiss: () -> Unit, source: String = "info_button") {
     LaunchedEffect(Unit) {
         AnalyticsService.log(AnalyticsEvent.ScreenView(screenName = "levels_intro", screenClass = "LevelsIntroOverlay"))
         AnalyticsService.log(AnalyticsEvent.LevelsIntroShown(source = source))
     }
 
-    Box(Modifier.fillMaxSize().background(palette.appBackground)) {
-        Column(Modifier.fillMaxSize()) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                TextButton(
-                    onClick = {
-                        HapticsService.fire(HapticIntent.TAP)
-                        AnalyticsService.log(AnalyticsEvent.LevelsIntroSkipped)
-                        onDismiss()
-                    },
-                ) {
-                    Text(
-                        stringResource(R.string.intro_skip),
-                        color = palette.textSecondary,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
-            }
+    val slides = listOf(
+        IntroSlide(
+            icon = Icons.Filled.EmojiEvents,
+            color = { it.easyGreen },
+            title = stringResource(R.string.levels_intro_progress_title),
+            subtitle = stringResource(R.string.levels_intro_progress_subtitle),
+        ),
+        IntroSlide(
+            icon = Icons.Filled.Star,
+            color = { it.hardAmber },
+            title = stringResource(R.string.levels_intro_stars_title),
+            subtitle = stringResource(R.string.levels_intro_stars_subtitle),
+        ),
+        IntroSlide(
+            icon = Icons.Filled.Favorite,
+            color = { it.secondary },
+            title = stringResource(R.string.levels_intro_lives_title),
+            subtitle = stringResource(R.string.levels_intro_lives_subtitle, LevelLivesService.MAX_LIVES),
+        ),
+        // Neutral primary rather than the success green — a green X reads as "you passed",
+        // the opposite of what this slide teaches (mirrors IntroCarouselView.swift's own comment).
+        IntroSlide(
+            icon = Icons.Filled.Cancel,
+            color = { it.primary },
+            title = stringResource(R.string.levels_intro_mistakes_title),
+            subtitle = stringResource(R.string.levels_intro_mistakes_subtitle),
+        ),
+    )
 
-            HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
-                LevelIntroSlideView(levelIntroSlides[page])
-            }
-
-            Row(
-                Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                repeat(levelIntroSlides.size) { index ->
-                    val selected = index == pagerState.currentPage
-                    Box(
-                        Modifier
-                            .padding(horizontal = 4.dp)
-                            .size(if (selected) 8.dp else 6.dp)
-                            .background(if (selected) palette.primary else palette.surfaceBorder, CircleShape),
-                    )
-                }
-            }
-
-            Button(
-                onClick = {
-                    if (isLastPage) {
-                        HapticsService.fire(HapticIntent.TAP)
-                        AnalyticsService.log(AnalyticsEvent.LevelsIntroCompleted)
-                        onDismiss()
-                    } else {
-                        HapticsService.fire(HapticIntent.SELECT)
-                        coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 32.dp),
-                shape = RoundedCornerShape(50),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = palette.primary),
-            ) {
-                Text(
-                    if (isLastPage) stringResource(R.string.levels_intro_done) else stringResource(R.string.intro_next),
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun LevelIntroSlideView(spec: LevelIntroSlideSpec) {
-    val palette = LocalPalette.current
-    val color = spec.color(palette)
-    val subtitle = levelIntroSubtitle(spec.titleRes)
-    Column(
-        Modifier.fillMaxSize().padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Box(
-            Modifier.size(140.dp).background(color.copy(alpha = 0.15f), CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(spec.icon, contentDescription = null, tint = color, modifier = Modifier.size(60.dp))
-        }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            stringResource(spec.titleRes),
-            style = DoMemoryType.display(26),
-            color = palette.textPrimary,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            subtitle,
-            color = palette.textSecondary,
-            fontSize = 16.sp,
-            textAlign = TextAlign.Center,
-            lineHeight = 22.sp,
-        )
-    }
-}
-
-/** Each slide's subtitle string, keyed off its title resource — kept as one `when` so the
- * lives slide's `%d` (max daily lives) stays next to the title it belongs to. */
-@Composable
-private fun levelIntroSubtitle(titleRes: Int): String = when (titleRes) {
-    R.string.levels_intro_progress_title -> stringResource(R.string.levels_intro_progress_subtitle)
-    R.string.levels_intro_stars_title -> stringResource(R.string.levels_intro_stars_subtitle)
-    R.string.levels_intro_lives_title -> stringResource(R.string.levels_intro_lives_subtitle, LevelLivesService.MAX_LIVES)
-    else -> stringResource(R.string.levels_intro_mistakes_subtitle)
+    IntroCarousel(
+        slides = slides,
+        finishTitle = stringResource(R.string.levels_intro_done),
+        onSkip = {
+            AnalyticsService.log(AnalyticsEvent.LevelsIntroSkipped)
+            onDismiss()
+        },
+        onFinish = {
+            AnalyticsService.log(AnalyticsEvent.LevelsIntroCompleted)
+            onDismiss()
+        },
+    )
 }

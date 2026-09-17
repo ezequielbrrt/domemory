@@ -224,15 +224,6 @@
     <string name="share_result_caption">DoMemoryで%dペアそろえたよ！勝てるかな？</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_pairs_title">ペアを揃えよう</string>
-    <string name="onboarding_pairs_subtitle">時間が切れる前に、すべてのペアを見つけよう。</string>
-    <string name="onboarding_pace_title">自分のペースで遊べる</string>
-    <string name="onboarding_pace_subtitle">ゲームは無理のないペースで始まり、設定からいつでも調整できます。</string>
-    <string name="onboarding_custom_title">自分だけのメモラマを</string>
-    <string name="onboarding_custom_subtitle">オリジナルのメモラマを作って、お気に入りをいつでも遊べます。</string>
-    <string name="onboarding_skip">スキップ</string>
-    <string name="onboarding_continue">続ける</string>
-    <string name="onboarding_get_started">はじめる</string>
 
     <!-- Onboarding intro -->
     <string name="intro_multiplayer_title">友達と対戦</string>
