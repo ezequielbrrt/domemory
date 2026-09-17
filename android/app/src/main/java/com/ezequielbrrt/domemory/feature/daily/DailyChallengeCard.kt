@@ -1,5 +1,6 @@
 package com.ezequielbrrt.domemory.feature.daily
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +23,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -81,57 +85,86 @@ fun DailyChallengeCard(
                 )
             },
             modifier = cardModifier,
+            artworkRes = R.drawable.daily_challenge_card,
         )
     } else {
-        Row(
+        Box(
             cardModifier
                 .clip(RoundedCornerShape(18.dp))
-                .background(palette.primary)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                .background(palette.primary),
         ) {
+            // Sized the same way as `CompactCardLayout`: `matchParentSize` takes the
+            // card's measured size without influencing it, so the filled artwork crops to
+            // the card rather than stretching it.
+            Image(
+                painter = painterResource(R.drawable.daily_challenge_card),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+            )
+            // A heavier scrim than the compact card's. This layout is roughly four times
+            // as wide as it is tall, so filling it from 4:3 art crops a narrow band from
+            // the middle and scales the motif up — and the title, subtitle and streak
+            // badge all sit on top of it in unshadowed white.
             Box(
-                Modifier.size(48.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.18f)),
-                contentAlignment = Alignment.Center,
+                Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                palette.primary.copy(alpha = 0.92f),
+                                palette.primary.copy(alpha = 0.35f),
+                            ),
+                        ),
+                    ),
+            )
+            Row(
+                Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                Icon(
-                    if (isCompletedToday) Icons.Filled.Check else Icons.Filled.CalendarMonth,
-                    contentDescription = null,
-                    tint = Color.White,
-                )
-            }
-            Column(Modifier.weight(1f)) {
-                Text(
-                    stringResource(R.string.daily_challenge_title),
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    style = DoMemoryType.display(17),
-                )
-                Text(
-                    text = if (isCompletedToday) {
-                        stringResource(R.string.daily_challenge_completed)
-                    } else {
-                        stringResource(R.string.daily_challenge_subtitle)
-                    },
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
-            if (streak > 0) {
                 Box(
-                    Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.2f)).padding(horizontal = 10.dp, vertical = 6.dp),
+                    Modifier.size(48.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.18f)),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        stringResource(R.string.daily_challenge_streak_format, streak),
-                        color = Color.White,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 13.sp,
+                    Icon(
+                        if (isCompletedToday) Icons.Filled.Check else Icons.Filled.CalendarMonth,
+                        contentDescription = null,
+                        tint = Color.White,
                     )
                 }
-            } else if (!isCompletedToday) {
-                Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = Color.White)
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.daily_challenge_title),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = DoMemoryType.display(17),
+                    )
+                    Text(
+                        text = if (isCompletedToday) {
+                            stringResource(R.string.daily_challenge_completed)
+                        } else {
+                            stringResource(R.string.daily_challenge_subtitle)
+                        },
+                        color = Color.White.copy(alpha = 0.85f),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                if (streak > 0) {
+                    Box(
+                        Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.2f)).padding(horizontal = 10.dp, vertical = 6.dp),
+                    ) {
+                        Text(
+                            stringResource(R.string.daily_challenge_streak_format, streak),
+                            color = Color.White,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 13.sp,
+                        )
+                    }
+                } else if (!isCompletedToday) {
+                    Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = Color.White)
+                }
             }
         }
     }
