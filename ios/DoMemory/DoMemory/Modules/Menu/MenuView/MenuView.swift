@@ -607,6 +607,11 @@ private struct CompactCardLayout<Badge: View>: View {
             // The overflow is a few points here rather than ninety, because this
             // card's proportions nearly match the art's, but it is the same bug.
             .allowsHitTesting(false)
+            // Decoration to VoiceOver too. `Image(_:)` built from an asset
+            // name carries that name as its accessibility label, and this
+            // layout is a button's content, so the label would be read out
+            // after the title and badge — untranslated, in all ten locales.
+            .accessibilityHidden(true)
         }
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
@@ -769,6 +774,9 @@ private struct DailyChallengeCard: View {
                 // over the header buttons and opened the daily challenge
                 // instead. The art is decoration; it takes no input.
                 .allowsHitTesting(false)
+                // And no accessibility label either, for the reason spelled
+                // out on `CompactCardLayout`.
+                .accessibilityHidden(true)
             }
             .opacity(isCompleted ? 0.85 : 1)
             // With the background inert, the tappable region is the card
