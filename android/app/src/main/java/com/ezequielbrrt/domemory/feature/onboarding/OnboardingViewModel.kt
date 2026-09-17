@@ -12,8 +12,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Paging deliberately lives in `IntroCarousel`, not here. The carousel is swipeable, so
+ * a page index owned by the view model could only ever be told "next" and would desync
+ * the moment the player swiped. iOS splits it the same way: `IntroCarouselView` owns
+ * `@State page` and `FeatureIntroView` owns only persistence and analytics.
+ */
 data class OnboardingUiState(
-    val page: Int = 0,
     val isSaving: Boolean = false,
 )
 
@@ -25,13 +30,9 @@ class OnboardingViewModel(
     private val _state = MutableStateFlow(OnboardingUiState())
     val state: StateFlow<OnboardingUiState> = _state.asStateFlow()
 
-    fun next(onComplete: () -> Unit) {
-        if (_state.value.page == 2) {
-            finish(onComplete) { AnalyticsEvent.OnboardingIntroCompleted }
-        } else {
-            _state.value = _state.value.copy(page = _state.value.page + 1)
-        }
-    }
+    /** The player reached the end of the carousel and tapped "Get Started". */
+    fun completeIntro(onComplete: () -> Unit) { finish(onComplete) { AnalyticsEvent.OnboardingIntroCompleted } }
+
     fun skipIntro(onComplete: () -> Unit) { finish(onComplete) { AnalyticsEvent.OnboardingIntroSkipped } }
     private fun finish(onComplete: () -> Unit, event: () -> AnalyticsEvent) {
         workScope.launch {

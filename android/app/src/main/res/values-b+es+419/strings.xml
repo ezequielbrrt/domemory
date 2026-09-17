@@ -224,15 +224,6 @@
     <string name="share_result_caption">¡Emparejé %d pares en DoMemory! ¿Puedes superarme?</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_pairs_title">Empareja las cartas</string>
-    <string name="onboarding_pairs_subtitle">Encuentra cada par antes de que se acabe el tiempo.</string>
-    <string name="onboarding_pace_title">Juega a tu ritmo</string>
-    <string name="onboarding_pace_subtitle">Las partidas comienzan a un ritmo cómodo que puedes ajustar cuando quieras desde Configuración.</string>
-    <string name="onboarding_custom_title">Hazlo tuyo</string>
-    <string name="onboarding_custom_subtitle">Crea tus propios memoramas y guarda tus favoritos.</string>
-    <string name="onboarding_skip">Omitir</string>
-    <string name="onboarding_continue">Continuar</string>
-    <string name="onboarding_get_started">Empezar</string>
 
     <!-- Onboarding intro -->
     <string name="intro_multiplayer_title">Juega con amigos</string>

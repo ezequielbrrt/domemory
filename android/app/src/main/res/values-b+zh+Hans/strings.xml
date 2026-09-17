@@ -224,15 +224,6 @@
     <string name="share_result_caption">我在 DoMemory 里配对了 %d 对！你能赢我吗？</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_pairs_title">配对卡片</string>
-    <string name="onboarding_pairs_subtitle">在时间耗尽前找出所有配对。</string>
-    <string name="onboarding_pace_title">按自己的节奏玩</string>
-    <string name="onboarding_pace_subtitle">游戏以舒适的节奏开始，你可以随时在设置中调整。</string>
-    <string name="onboarding_custom_title">打造专属于你的</string>
-    <string name="onboarding_custom_subtitle">创建自己的记忆卡组，并保存收藏。</string>
-    <string name="onboarding_skip">跳过</string>
-    <string name="onboarding_continue">继续</string>
-    <string name="onboarding_get_started">开始</string>
 
     <!-- Onboarding intro -->
     <string name="intro_multiplayer_title">和朋友一起玩</string>

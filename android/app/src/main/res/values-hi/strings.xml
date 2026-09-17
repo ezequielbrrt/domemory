@@ -224,15 +224,6 @@
     <string name="share_result_caption">मैंने DoMemory में %d जोड़े मिलाए! क्या तुम मुझे हरा सकते हो?</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_pairs_title">जोड़े मिलाएं</string>
-    <string name="onboarding_pairs_subtitle">समय खत्म होने से पहले हर मिलता-जुलता जोड़ा ढूंढें।</string>
-    <string name="onboarding_pace_title">अपनी गति से खेलें</string>
-    <string name="onboarding_pace_subtitle">गेम एक आरामदायक गति से शुरू होते हैं, जिसे आप कभी भी सेटिंग्स से बदल सकते हैं।</string>
-    <string name="onboarding_custom_title">इसे अपना बनाएं</string>
-    <string name="onboarding_custom_subtitle">अपने खुद के मेमोरामा बनाएं और पसंदीदा को पास रखें।</string>
-    <string name="onboarding_skip">छोड़ें</string>
-    <string name="onboarding_continue">जारी रखें</string>
-    <string name="onboarding_get_started">शुरू करें</string>
 
     <!-- Onboarding intro -->
     <string name="intro_multiplayer_title">दोस्तों के साथ खेलें</string>

@@ -224,15 +224,6 @@
     <string name="share_result_caption">DoMemory에서 %d쌍을 맞췄어요! 이길 수 있나요?</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_pairs_title">짝을 맞춰보세요</string>
-    <string name="onboarding_pairs_subtitle">시간이 끝나기 전에 모든 짝을 찾아보세요.</string>
-    <string name="onboarding_pace_title">나만의 속도로 플레이</string>
-    <string name="onboarding_pace_subtitle">게임은 편안한 속도로 시작되며, 설정에서 언제든지 조절할 수 있습니다.</string>
-    <string name="onboarding_custom_title">나만의 메모라마 만들기</string>
-    <string name="onboarding_custom_subtitle">직접 메모라마를 만들고 즐겨찾기를 가까이 두세요.</string>
-    <string name="onboarding_skip">건너뛰기</string>
-    <string name="onboarding_continue">계속</string>
-    <string name="onboarding_get_started">시작하기</string>
 
     <!-- Onboarding intro -->
     <string name="intro_multiplayer_title">친구와 플레이</string>

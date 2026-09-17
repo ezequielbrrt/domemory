@@ -45,10 +45,11 @@ class LevelsViewModel(
         val showOutOfLivesPrompt: Boolean = false,
         val showIntro: Boolean = false,
         /** `levels_intro_shown.source` for the currently-showing (or most recently shown)
-         * intro — `"launch"` for the one-shot gate, `"info_button"` for [presentIntro]'s
-         * manual reopen. Mirrors iOS's `LevelsView`, which passes a fixed `source` per call
-         * site into `LevelsIntroView`. */
-        val introSource: String = "launch",
+         * intro. Only ever `"info_button"` now that the automatic first-visit
+         * presentation is gone, but kept as state so a future entry point reports itself
+         * rather than inflating the button's numbers — the same reason iOS's
+         * `LevelsIntroView` takes `source` as a parameter. */
+        val introSource: String = "info_button",
         /** A one-shot heart animation the header owes the player; see [HeaderEffects.kt]. */
         val livesEffect: LivesEffect? = null,
         /** Sparkle over the star chip for a credit that just landed; never for a spend. */
@@ -98,7 +99,6 @@ class LevelsViewModel(
 
     init {
         refresh()
-        presentIntroIfNeeded()
     }
 
     /** Call after returning from a game so newly-earned stars/unlocks and the lives
@@ -115,13 +115,15 @@ class LevelsViewModel(
         }
     }
 
-    private fun presentIntroIfNeeded() {
-        workScope.launch {
-            if (introGate.shouldPresent()) _uiState.update { it.copy(showIntro = true) }
-        }
-    }
-
-    /** Reopens the one-shot intro from the map header's info button. */
+    /**
+     * Opens the intro from the map header's info button — the only way in.
+     *
+     * It is deliberately no longer presented automatically on a player's first visit.
+     * iOS dropped that in 4.3.0: Levels is the landing tab, so the intro landed on top
+     * of a player who had not asked for it and raced the launch sequence's own covers.
+     * [LevelsIntroGate] is still written on dismissal so the "seen it" flag stays
+     * truthful for anything that wants it later.
+     */
     fun presentIntro() {
         _uiState.update { it.copy(showIntro = true, introSource = "info_button") }
     }

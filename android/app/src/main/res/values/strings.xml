@@ -224,15 +224,6 @@
     <string name="share_result_caption">I matched %d pairs in DoMemory! Can you beat me?</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_pairs_title">Match the pairs</string>
-    <string name="onboarding_pairs_subtitle">Find every matching pair before time runs out.</string>
-    <string name="onboarding_pace_title">Play at your pace</string>
-    <string name="onboarding_pace_subtitle">Games start at a comfortable pace you can fine-tune anytime from Settings.</string>
-    <string name="onboarding_custom_title">Make it yours</string>
-    <string name="onboarding_custom_subtitle">Create your own memoramas and keep favourites close.</string>
-    <string name="onboarding_skip">Skip</string>
-    <string name="onboarding_continue">Continue</string>
-    <string name="onboarding_get_started">Get started</string>
 
     <!-- Onboarding intro -->
     <string name="intro_multiplayer_title">Play with Friends</string>
