@@ -1,0 +1,9 @@
+Le multijoueur vient de connaître une belle mise à jour ! Créez ou rejoignez une salle en un seul bouton, choisissez la partie depuis le salon à tout moment avant le début, et les deux joueurs confirment désormais qu'ils sont prêts avant que la partie ne commence.
+
+• Multijoueur avec hôte en premier : créez une salle vide instantanément, puis choisissez ou changez la partie directement depuis le salon.
+• Confirmation de disponibilité : les parties ne démarrent que lorsque les deux joueurs confirment qu'ils sont prêts.
+• Nouvelles animations dans Niveaux et Niveaux saisonniers — confettis à la victoire, étoiles qui apparaissent une à une, effets de fissure et de tremblement en cas de défaite, cœurs qui se brisent et se remplissent, et plus encore.
+• Cartes de memorama repensées avec un bouton favori plus grand et plus facile à toucher.
+• Touchez le badge de difficulté dans l'onglet Tous pour filtrer instantanément.
+• Intégration simplifiée — choisissez votre difficulté quand vous le souhaitez plutôt que dès le départ.
+• Correction des tentatives de rejoindre une salle qui pouvaient échouer pour un nouvel invité, et des victoires qui n'étaient pas toujours enregistrées lors des revanches.

@@ -251,6 +251,12 @@
 "whats_new_tap_to_play_description" = "Die Levelkarte pulsiert jetzt, um dir zu zeigen, was als Nächstes kommt, und jedes Feld reagiert auf deinen Tipp.";
 "whats_new_season_progress_title" = "Saisonfortschritt";
 "whats_new_season_progress_description" = "Verfolge deinen Fortschritt in jeder Saison mit einer Live-Fortschrittsanzeige und einem Countdown – schließe jedes Level ab, bevor die Zeit abläuft.";
+
+/* What's New v4.3.0 */
+"whats_new_multiplayer_host_title" = "Sofort erstellen oder beitreten";
+"whats_new_multiplayer_host_description" = "Starte den Mehrspielermodus mit einem einzigen Button und wählt gemeinsam das Spiel — jederzeit vor Beginn des Matches.";
+"whats_new_multiplayer_ready_title" = "Bereitschaftscheck";
+"whats_new_multiplayer_ready_description" = "Matches starten jetzt erst, wenn beide Spieler bestätigt haben, dass sie bereit sind, damit niemand in ein Spiel startet, das er noch nicht gesehen hat.";
 "levels_timer_frozen_format" = "Zeit eingefroren, noch %d Sekunden";
 
 /* Notification permission primer */

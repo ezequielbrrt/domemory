@@ -1,0 +1,9 @@
+Der Mehrspielermodus hat ein großes Upgrade erhalten! Erstelle oder tritt einem Raum über einen einzigen Button bei, wähle das Spiel jederzeit vor dem Start direkt in der Lobby aus, und beide Spieler bestätigen jetzt, dass sie bereit sind, bevor das Match beginnt.
+
+• Mehrspieler mit Host zuerst: Erstelle sofort einen leeren Raum und wähle oder wechsle das Spiel direkt in der Lobby.
+• Bereitschaftscheck: Matches starten jetzt erst, wenn beide Spieler bestätigt haben, dass sie bereit sind.
+• Neue Animationen in Level und Saisons — Konfetti bei Siegen, Sterne, die einzeln erscheinen, Riss- und Wackeleffekte bei Niederlagen, Herzen, die zerbrechen und sich wieder füllen, und mehr.
+• Memorama-Karten neu gestaltet mit einem größeren, leichter zu tippenden Favoriten-Button.
+• Tippe auf das Schwierigkeitsabzeichen im Tab Alle, um sofort zu filtern.
+• Einstieg vereinfacht — wähle deine Schwierigkeit jederzeit statt schon am Anfang.
+• Fehler behoben, durch den ein Raumbeitritt für einen neuen Gast fehlschlagen konnte und Siege bei Revanchen nicht immer gezählt wurden.

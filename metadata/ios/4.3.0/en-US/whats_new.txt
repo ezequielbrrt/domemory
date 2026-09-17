@@ -1,0 +1,9 @@
+Multiplayer just got a big upgrade! Host or join a room from a single button, pick the game from inside the lobby at any time before it starts, and both players now confirm they're ready before the match begins.
+
+• Host-first multiplayer: create an empty room instantly, then choose or change the game right from the lobby.
+• Ready check: matches now start only once both players confirm they're ready.
+• New animations throughout Levels and Seasons — confetti on wins, star pops, cracking and shaking effects on losses, hearts that break and refill, and more.
+• Redesigned memorama cards with a bigger, easier-to-tap favorite button.
+• Tap the difficulty badge on the All tab to filter instantly.
+• Simplified onboarding — pick your difficulty any time instead of upfront.
+• Fixed multiplayer room joins that could fail for a new guest, and wins not always being recorded on rematches.

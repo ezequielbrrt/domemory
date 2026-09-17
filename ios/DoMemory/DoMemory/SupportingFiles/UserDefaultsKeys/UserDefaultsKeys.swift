@@ -22,7 +22,6 @@ class UserDefaultsKeys: NSObject {
     static var notificationPrimerShown: String = "notificationPrimerShown"
     static var whatsNewLastSeenVersion: String = "whatsNewLastSeenVersion"
     static var onboardingIntroShown: String = "onboardingIntroShown"
-    static var levelsIntroShown: String = "levelsIntroShown"
     static var hapticsEnabled: String = "hapticsEnabled"
     /// Cached `/seasons` payload, so the season card renders on cold launch and offline.
     static var seasonCatalog: String = "seasonCatalog"

@@ -341,4 +341,10 @@ enum Strings {
     static let whatsNewTapToPlayDescription = NSLocalizedString("whats_new_tap_to_play_description", comment: "Level map tap feedback description in What's New")
     static let whatsNewSeasonProgressTitle = NSLocalizedString("whats_new_season_progress_title", comment: "Season progress title in What's New")
     static let whatsNewSeasonProgressDescription = NSLocalizedString("whats_new_season_progress_description", comment: "Season progress description in What's New")
+
+    // What's New sheet (v4.3.0)
+    static let whatsNewMultiplayerHostTitle = NSLocalizedString("whats_new_multiplayer_host_title", comment: "Host-first multiplayer title in What's New")
+    static let whatsNewMultiplayerHostDescription = NSLocalizedString("whats_new_multiplayer_host_description", comment: "Host-first multiplayer description in What's New")
+    static let whatsNewMultiplayerReadyTitle = NSLocalizedString("whats_new_multiplayer_ready_title", comment: "Multiplayer ready check title in What's New")
+    static let whatsNewMultiplayerReadyDescription = NSLocalizedString("whats_new_multiplayer_ready_description", comment: "Multiplayer ready check description in What's New")
 }

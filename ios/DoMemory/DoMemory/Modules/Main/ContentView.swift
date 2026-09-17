@@ -23,7 +23,7 @@ struct ContentView: View {
         ZStack {
             Group {
                 if hasOnboarded {
-                    MenuView(isLaunchSurfacePresented: whatsNewManager.shouldShow)
+                    MenuView()
                         .sheet(isPresented: $whatsNewManager.shouldShow) {
                             WhatsNewView(whatsNew: .current, theme: .doMemory) {
                                 whatsNewManager.markSeen()
