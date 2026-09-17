@@ -165,10 +165,7 @@ Season titles are a separate problem: they come from the Firebase payload, not t
 
 ### App Store artwork
 
-Screenshots live in `assets/screenshots/<device>/<locale>/` (moved out of `ios/`
-so the Google Play listing can share them). The catalog's App Store artwork
-agent owns Paper export, validation and upload; the app no longer carries its
-own export or upload scripts.
+Screenshots live in `ios/screenshots/<device>/<locale>/`. The catalog's App Store artwork agent owns Paper export, validation and upload; the app no longer carries its own export or upload scripts.
 
 ### Backend (`firebase/`, shared with Android)
 
