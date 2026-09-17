@@ -73,6 +73,14 @@ There are six product surfaces: the **curated board catalog** (Firebase `/data`)
 | `Settings` | Difficulty, theme, haptics, reminders, purchases, Achievements, What's New, review link |
 | `SharedModules` | `Difficulty`, `UserManageObject` (CoreData), `RemoteImage`, `LottieView`, `LivesRow`, `LoaderView`, intro carousel |
 
+A menu card that fills itself with artwork (`Season`, `Daily Challenge`) must mark that artwork
+`allowsHitTesting(false)` and give the card an explicit `contentShape`. `clipped()` and `clipShape`
+clip **drawing** only — a `scaledToFill` image is still tappable wherever it overflows the card, and
+on the full-width Daily Challenge card that overflow (roughly 90pt, from 4:3 art in a 4:1 frame)
+reached over the header's settings, create and multiplayer buttons and swallowed their taps. The art
+is also `accessibilityHidden(true)`, because an `Image(_:)` built from an asset name would otherwise
+read that name out inside the card's button label.
+
 Also: `DoMemory/DoMemoryWidget/` — a home-screen widget showing the Daily Challenge streak, reading App-Group-shared state via `DailyChallengeShared.swift` (member of **both** targets).
 
 ### Data flow
