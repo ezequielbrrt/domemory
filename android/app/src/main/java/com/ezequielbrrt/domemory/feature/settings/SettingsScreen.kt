@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.feature.notifications.rememberNotificationPermissionRequester
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.share.PlayStoreLinks
@@ -101,12 +103,22 @@ fun SettingsScreen(
             SettingRow(
                 title = stringResource(R.string.settings_review_title),
                 description = stringResource(R.string.settings_review_description),
-                onClick = { HapticsService.fire(HapticIntent.TAP); openPlayStoreListing(context) },
+                onClick = {
+                    HapticsService.fire(HapticIntent.TAP)
+                    AnalyticsService.log(AnalyticsEvent.ReviewLinkOpened(source = "settings"))
+                    openPlayStoreListing(context)
+                },
             )
             SettingRow(
                 title = stringResource(R.string.settings_whats_new_title),
                 description = stringResource(R.string.settings_whats_new_description),
-                onClick = { HapticsService.fire(HapticIntent.TAP); onWhatsNew() },
+                onClick = {
+                    HapticsService.fire(HapticIntent.TAP)
+                    AnalyticsService.log(
+                        AnalyticsEvent.WhatsNewOpenedFromSettings(version = com.ezequielbrrt.domemory.BuildConfig.VERSION_NAME),
+                    )
+                    onWhatsNew()
+                },
             )
         }
     }

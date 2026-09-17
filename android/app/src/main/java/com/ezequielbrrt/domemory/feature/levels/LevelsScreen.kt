@@ -66,6 +66,8 @@ import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.ads.findActivity
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
@@ -86,6 +88,9 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun LevelsScreen(viewModel: LevelsViewModel, onLevelSelected: (Int) -> Unit) {
+    LaunchedEffect(Unit) {
+        AnalyticsService.log(AnalyticsEvent.ScreenView(screenName = "levels", screenClass = "LevelsScreen"))
+    }
     // Recomposes the tile grid whenever cached progress changes (spec 2's fix: stars
     // and unlocks now arrive as a StateFlow, not a manually-invalidated cache).
     viewModel.progressRevision.collectAsState().value
@@ -565,11 +570,16 @@ private val levelIntroSlides = listOf(
  * `NotificationPrimerHost`, to get that same true full-screen coverage.
  */
 @Composable
-fun LevelsIntroOverlay(onDismiss: () -> Unit) {
+fun LevelsIntroOverlay(onDismiss: () -> Unit, source: String = "launch") {
     val palette = LocalPalette.current
     val pagerState = rememberPagerState(pageCount = { levelIntroSlides.size })
     val coroutineScope = rememberCoroutineScope()
     val isLastPage = pagerState.currentPage == levelIntroSlides.size - 1
+
+    LaunchedEffect(Unit) {
+        AnalyticsService.log(AnalyticsEvent.ScreenView(screenName = "levels_intro", screenClass = "LevelsIntroOverlay"))
+        AnalyticsService.log(AnalyticsEvent.LevelsIntroShown(source = source))
+    }
 
     Box(Modifier.fillMaxSize().background(palette.appBackground)) {
         Column(Modifier.fillMaxSize()) {
@@ -577,7 +587,13 @@ fun LevelsIntroOverlay(onDismiss: () -> Unit) {
                 Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
                 horizontalArrangement = Arrangement.End,
             ) {
-                TextButton(onClick = { HapticsService.fire(HapticIntent.TAP); onDismiss() }) {
+                TextButton(
+                    onClick = {
+                        HapticsService.fire(HapticIntent.TAP)
+                        AnalyticsService.log(AnalyticsEvent.LevelsIntroSkipped)
+                        onDismiss()
+                    },
+                ) {
                     Text(
                         stringResource(R.string.intro_skip),
                         color = palette.textSecondary,
@@ -609,6 +625,7 @@ fun LevelsIntroOverlay(onDismiss: () -> Unit) {
                 onClick = {
                     if (isLastPage) {
                         HapticsService.fire(HapticIntent.TAP)
+                        AnalyticsService.log(AnalyticsEvent.LevelsIntroCompleted)
                         onDismiss()
                     } else {
                         HapticsService.fire(HapticIntent.SELECT)

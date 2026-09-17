@@ -3,9 +3,12 @@ package com.ezequielbrrt.domemory.feature.menu
 import androidx.lifecycle.ViewModel
 import com.ezequielbrrt.domemory.core.model.Board
 import com.ezequielbrrt.domemory.data.prefs.UserPreferences
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import java.util.UUID
 
 /**
@@ -67,6 +70,19 @@ class CreateMemoramaViewModel(private val prefs: UserPreferences) : ViewModel() 
         )
         val added = prefs.addCustomMemorama(board)
         _state.value = _state.value.copy(isSaving = false, rejected = !added)
+        if (added) {
+            // A custom board carries no difficulty of its own — falls back to the player's
+            // setting, the same resolution every other analytics/gameplay read of a board's
+            // difficulty already uses (see [Board.resolvedDifficulty]'s own doc).
+            val difficulty = board.resolvedDifficulty(prefs.playerDifficulty.first())
+            AnalyticsService.log(
+                AnalyticsEvent.CustomMemoramaCreated(
+                    gameId = board.id,
+                    difficulty = difficulty.key,
+                    cardsCount = board.items.size,
+                ),
+            )
+        }
         return added
     }
 }

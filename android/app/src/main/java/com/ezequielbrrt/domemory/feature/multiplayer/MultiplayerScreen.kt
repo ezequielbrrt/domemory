@@ -26,6 +26,8 @@ import com.ezequielbrrt.domemory.feature.game.CardView
 import com.ezequielbrrt.domemory.services.ads.AdMobNativeAdView
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.multiplayer.*
@@ -57,12 +59,20 @@ class MultiplayerViewModel(
     private val service: MultiplayerService,
     private val profileStats: ProfileStatsRecorder? = null,
     private val onHaptic: ((HapticIntent) -> Unit)? = null,
+    /** Same bare-callback shape as [onHaptic], for the same reason — see
+     * [com.ezequielbrrt.domemory.feature.game.GameViewModel]'s `onAnalytics` doc. */
+    private val onAnalytics: ((AnalyticsEvent) -> Unit)? = null,
 ) : ViewModel() {
     private val _state = MutableStateFlow(MultiplayerUiState()); val state = _state.asStateFlow()
     private var observer: kotlinx.coroutines.Job? = null
     private var reconnectDeadline: kotlinx.coroutines.Job? = null
     private val winGuard = MultiplayerWinGuard()
     private val hapticsTracker = MultiplayerHapticsTracker()
+
+    /** Tracks the last room status a `multiplayer_game_finished` was logged for, so a
+     * rematch (status leaves and re-enters `FINISHED`) logs a fresh event instead of
+     * re-firing on every unrelated snapshot of an already-finished room. */
+    private var lastLoggedFinishedStatus: MultiplayerRoomStatus? = null
 
     // The catalog list the UI has in scope (container.boardCatalog.boards, merged with custom
     // boards at the call site) — the auto-start trigger below needs it to resolve a
@@ -79,8 +89,20 @@ class MultiplayerViewModel(
     // (e.g. after the host changes the game and both players ready up again) can trigger again.
     private var hasTriggeredAutoStart = false
 
-    fun create() = launchRoomAction { service.createRoom().id }
-    fun join(code: String) = launchRoomAction { service.joinRoom(code) }
+    fun create() = launchRoomAction {
+        // Android's host-first protocol (spec 10.4 step 1) creates the room *empty* — no
+        // game chosen yet — unlike iOS, which creates a room from an already-selected
+        // memorama. `game_id` is therefore blank at this exact moment; it's the actual room
+        // being created, so this fires here rather than waiting for [selectGame].
+        val room = service.createRoom()
+        onAnalytics?.invoke(AnalyticsEvent.MultiplayerRoomCreated(gameId = room.gameId, isCustom = false))
+        room.id
+    }
+    fun join(code: String) = launchRoomAction {
+        val roomId = service.joinRoom(code)
+        onAnalytics?.invoke(AnalyticsEvent.MultiplayerRoomJoined)
+        roomId
+    }
     fun joinScannedInvite(rawValue: String?) {
         MultiplayerQrScan.roomCode(rawValue)?.let(::join) ?: run {
             _state.value = _state.value.copy(error = "This QR code is not a DoMemory room.")
@@ -135,6 +157,7 @@ class MultiplayerViewModel(
                     scheduleMismatchClear(room)
                     reconcilePresence(room)
                     recordMultiplayerWinIfNeeded(room)
+                    logGameFinishedIfNeeded(room)
                     triggerAutoStartIfNeeded(room)
                 }.onFailure(::fail)
             }
@@ -192,6 +215,19 @@ class MultiplayerViewModel(
         viewModelScope.launch { recorder.recordMultiplayerWin() }
     }
 
+    /** `multiplayer_game_finished`, once per transition *into* [MultiplayerRoomStatus.FINISHED]
+     * — a rematch (status leaves FINISHED for PLAYING, then returns) logs a fresh event, but
+     * repeated snapshots of an already-finished room don't re-fire. `result` distinguishes a
+     * normal finish from [MultiplayerService.reconcilePresence]'s reconnect-grace forfeit,
+     * matching iOS's own "completed"/"disconnect" values. */
+    private fun logGameFinishedIfNeeded(room: MultiplayerRoom) {
+        if (room.status == MultiplayerRoomStatus.FINISHED && lastLoggedFinishedStatus != MultiplayerRoomStatus.FINISHED) {
+            val result = if (room.disconnectPlayerId != null) "disconnect" else "completed"
+            onAnalytics?.invoke(AnalyticsEvent.MultiplayerGameFinished(result = result))
+        }
+        lastLoggedFinishedStatus = room.status
+    }
+
     /** Spec 10.4 step 5: reactive, host-only start once [MultiplayerRoom.readyToAutoStart].
      * Latches on the write, not the room snapshot, so an unrelated snapshot arriving while
      * `service.start` is still in flight (e.g. a presence heartbeat) can't fire it twice; the
@@ -205,10 +241,12 @@ class MultiplayerViewModel(
             ?: return
         hasTriggeredAutoStart = true
         viewModelScope.launch {
-            runCatching { service.start(room.id, board) }.onFailure {
-                hasTriggeredAutoStart = false
-                fail(it)
-            }
+            runCatching { service.start(room.id, board) }
+                .onSuccess { onAnalytics?.invoke(AnalyticsEvent.MultiplayerGameStarted(gameId = board.id)) }
+                .onFailure {
+                    hasTriggeredAutoStart = false
+                    fail(it)
+                }
         }
     }
 
@@ -217,6 +255,13 @@ class MultiplayerViewModel(
 @Composable fun MultiplayerScreen(boards: List<Board>, vm: MultiplayerViewModel, initialCode: String = "", onBack: () -> Unit) {
     val state by vm.state.collectAsState(); var code by rememberSaveable { mutableStateOf(initialCode) }; val p = LocalPalette.current; val context = LocalContext.current
     var showGamePicker by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        AnalyticsService.log(AnalyticsEvent.ScreenView(screenName = "multiplayer_room", screenClass = "MultiplayerScreen"))
+        // A non-blank initialCode only ever arrives via the domemory://join/<code> deep link
+        // (`NavGraph.kt`'s `DeepLink.Join` route) — mirrors iOS's `InviteLink.swift` logging
+        // this the moment a shared invite link is opened, before the join attempt itself.
+        if (initialCode.isNotBlank()) AnalyticsService.log(AnalyticsEvent.MultiplayerInviteOpened)
+    }
     LaunchedEffect(boards) { vm.setBoards(boards) }
     LaunchedEffect(initialCode) { if (initialCode.isNotBlank() && state.room == null) vm.join(initialCode) }
     Column(Modifier.fillMaxSize().background(p.appBackground).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -250,6 +295,7 @@ class MultiplayerViewModel(
                 MultiplayerQrCode(room.code)
                 Button(
                     onClick = {
+                        AnalyticsService.log(AnalyticsEvent.MultiplayerInviteSent(source = "lobby"))
                         val caption = context.getString(R.string.multiplayer_invite_message, room.code)
                         context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"

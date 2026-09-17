@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Difficulty
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.share.PlayStoreLinks
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
@@ -150,6 +152,9 @@ private fun Difficulty.labelRes(): Int = when (this) {
  * an invisible, alpha-0 instance of the card purely so there's real content to capture).
  */
 suspend fun shareResultCard(context: Context, graphicsLayer: GraphicsLayer, data: ResultShareData) {
+    // Mirrors iOS's WinModal: source is "daily_challenge" for the Daily Challenge, "win"
+    // for every other mode's share button.
+    AnalyticsService.log(AnalyticsEvent.ResultShared(source = if (data.isDailyChallenge) "daily_challenge" else "win"))
     val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
     val file = writeShareBitmap(context, bitmap) ?: return
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)

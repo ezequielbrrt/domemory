@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ezequielbrrt.domemory.feature.levels.LivesEffect
 import com.ezequielbrrt.domemory.feature.levels.livesEffect
 import com.ezequielbrrt.domemory.feature.levels.starsCredited
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
@@ -41,6 +42,9 @@ class SeasonLevelsViewModel(
     private val wallet: StarWalletService,
     private val scope: CoroutineScope? = null,
     private val onHaptic: ((HapticIntent) -> Unit)? = null,
+    /** Same bare-callback shape as [onHaptic], for the same reason — see
+     * [com.ezequielbrrt.domemory.feature.game.GameViewModel]'s `onAnalytics` doc. */
+    private val onAnalytics: ((AnalyticsEvent) -> Unit)? = null,
 ) : ViewModel() {
 
     data class UiState(
@@ -110,6 +114,7 @@ class SeasonLevelsViewModel(
         _uiState.update { it.copy(livesRemaining = remaining) }
         if (remaining <= 0) {
             onHaptic?.invoke(HapticIntent.WARNING)
+            onAnalytics?.invoke(AnalyticsEvent.LevelOutOfLivesShown(source = "season_tile"))
             _uiState.update { it.copy(showOutOfLivesPrompt = true) }
             return false
         }
@@ -132,6 +137,9 @@ class SeasonLevelsViewModel(
                 lives.refill(1)
                 val livesRemaining = lives.remaining()
                 val starBalance = wallet.balance.value
+                onAnalytics?.invoke(
+                    AnalyticsEvent.LevelLifePurchasedWithStars(cost = LevelPowerUp.LIFE_COST, balanceAfter = starBalance),
+                )
                 _uiState.update {
                     it.withCounters(livesRemaining = livesRemaining, starBalance = starBalance)
                         .copy(showOutOfLivesPrompt = false)
@@ -147,6 +155,7 @@ class SeasonLevelsViewModel(
             onHaptic?.invoke(HapticIntent.REWARD)
             lives.refill(1)
             val livesRemaining = lives.remaining()
+            onAnalytics?.invoke(AnalyticsEvent.LevelLifeGrantedFromAd(livesRemaining = livesRemaining))
             _uiState.update {
                 it.withCounters(livesRemaining = livesRemaining).copy(showOutOfLivesPrompt = false)
             }

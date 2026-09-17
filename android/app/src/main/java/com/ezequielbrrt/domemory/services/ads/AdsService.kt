@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.ContextWrapper
 import com.ezequielbrrt.domemory.BuildConfig
 import com.ezequielbrrt.domemory.core.model.Difficulty
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -233,6 +235,16 @@ object AdsService {
      * with whether a reward was actually earned, including the "not ready" path (`false`,
      * fired synchronously) so a caller mid-navigation never hangs waiting on it.
      */
+    /**
+     * The single funnel every rewarded-ad call site (`NavGraph.kt`'s watch-ad buttons) goes
+     * through — `ad_lifecycle` is logged once here rather than at each of those call sites,
+     * mirroring iOS's own `MemorizeViewModel.presentRewardedAd(for:reward:)` wrapper, which
+     * logs `"requested"` unconditionally before presenting, `"reward_earned"` from the reward
+     * handler, and `"dismissed_rewarded"`/`"dismissed_unrewarded"` from the completion
+     * handler — the same three-event shape, just centralized in the SDK adapter instead of a
+     * per-view-model wrapper, since Android has no single shared view model every rewarded
+     * placement flows through the way iOS's `MemorizeViewModel` does.
+     */
     fun showRewarded(
         activity: Activity?,
         placement: AdPlacement,
@@ -240,9 +252,11 @@ object AdsService {
         onDismissed: (rewarded: Boolean) -> Unit = {},
         nowMillis: Long = System.currentTimeMillis(),
     ) {
+        AnalyticsService.log(AnalyticsEvent.AdLifecycle(placement = placement.analyticsKey, action = "requested"))
         val ad = rewardedAds[placement]
         if (activity == null || ad == null) {
             activity?.applicationContext?.let { loadRewarded(it, placement) }
+            AnalyticsService.log(AnalyticsEvent.AdLifecycle(placement = placement.analyticsKey, action = "dismissed_unrewarded"))
             onDismissed(false)
             return
         }
@@ -252,21 +266,34 @@ object AdsService {
         ad.setFullScreenContentCallback(object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 loadRewarded(activity.applicationContext, placement)
+                AnalyticsService.log(
+                    AnalyticsEvent.AdLifecycle(
+                        placement = placement.analyticsKey,
+                        action = if (earnedReward) "dismissed_rewarded" else "dismissed_unrewarded",
+                    ),
+                )
                 onDismissed(earnedReward)
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 loadRewarded(activity.applicationContext, placement)
+                AnalyticsService.log(AnalyticsEvent.AdLifecycle(placement = placement.analyticsKey, action = "dismissed_unrewarded"))
                 onDismissed(false)
             }
         })
         ad.show(activity, OnUserEarnedRewardListener {
             earnedReward = true
             frequencyState = AdFrequencyCap.recordRewardedPresented(frequencyState, nowMillis)
+            AnalyticsService.log(AnalyticsEvent.AdLifecycle(placement = placement.analyticsKey, action = "reward_earned"))
             onReward()
         })
     }
 }
+
+/** `ad_lifecycle.placement` value, matching iOS's `AdPlacement: String` raw values exactly —
+ * every Android placement name is already the same identifier, just `SCREAMING_SNAKE_CASE`
+ * instead of `snake_case`. */
+internal val AdPlacement.analyticsKey: String get() = name.lowercase()
 
 /** Unwraps a possibly-decorated [Context] (e.g. a Compose `LocalContext`) down to the
  * [Activity] a full-screen ad needs to present against, or null if none wraps one — a

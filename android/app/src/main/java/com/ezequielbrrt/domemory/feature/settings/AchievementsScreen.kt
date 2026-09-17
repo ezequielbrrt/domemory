@@ -19,6 +19,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,6 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.stats.Achievement
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
@@ -42,6 +45,9 @@ import kotlin.math.roundToInt
 @Composable
 fun AchievementsScreen(state: AchievementsUiState, onBack: () -> Unit) {
     BackHandler(onBack = onBack)
+    LaunchedEffect(Unit) {
+        AnalyticsService.log(AnalyticsEvent.ScreenView(screenName = "achievements", screenClass = "AchievementsScreen"))
+    }
     val p = LocalPalette.current
     val winRateText = "${(state.stats.winRate * 100).roundToInt()}%"
 

@@ -53,6 +53,8 @@ import com.ezequielbrrt.domemory.feature.levels.StarBalancePill
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.ads.findActivity
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.seasons.Season
@@ -83,6 +85,13 @@ fun SeasonLevelsScreen(
     onLevelSelected: (Int) -> Unit,
     onBack: () -> Unit,
 ) {
+    // Fires every time the season's map appears, including returning to it from a level —
+    // mirrors iOS's `SeasonLevelsView.onAppear`, which logs both the generic screenView and
+    // `seasonLevelsEntered` (season-identity-bearing) every time, not just the first visit.
+    LaunchedEffect(season.id) {
+        AnalyticsService.log(AnalyticsEvent.ScreenView(screenName = "season_levels", screenClass = "SeasonLevelsScreen"))
+        AnalyticsService.log(AnalyticsEvent.SeasonLevelsEntered(seasonId = season.id))
+    }
     val palette = LocalPalette.current
     val progress = store.progress
     val revision by progress.revision.collectAsState()
