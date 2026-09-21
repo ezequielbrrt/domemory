@@ -1444,6 +1444,23 @@ transition reports the same entry source as a normal map visit rather than iOS's
 (35 new `AnalyticsEventTest` cases pinning every event's name/parameters). Not verified on
 device — no emulator/device session run for this slice.
 
+**Multiplayer join-by-QR fix and lobby centering, 2026-09-21.** Scanning an iOS-created room's QR on a
+cold Android client failed with "Multiplayer is unavailable." while typing the same code joined. Root
+cause: `MultiplayerService.transaction` aborted whenever `data.value` was null, and Firebase runs a
+transaction's first pass against the *local cache* — empty for a room this client has never observed —
+so the first join of any room surfaced as `InvalidMove` without ever asking the server; the SDK's
+internal listener then cached the room, which is why a retry (or typing the code afterwards) worked.
+`RoomTransactionPlan` now returns `AwaitServer` for an empty cache (commit the unchanged null so the
+SDK re-runs the handler with the server's data), and `transaction`'s `onComplete` reports `NotFound`
+if the server has no room either. The Multiplayer screens (join, lobby, board status) are now
+horizontally centered like iOS's `VStack`s, with the back button kept on the leading edge.
+Verification: `./gradlew assembleDebug testDebugUnitTest` green (4 new `RoomTransactionPlanTest`
+cases); reproduced and fixed on the `Pixel_10` emulator by scanning a CoreImage-generated QR (the same
+generator iOS uses) for a real room from a force-stopped app — before: error, after: joins first try.
+Still open: every `MultiplayerException` has a null message, so the UI shows the same generic English
+"Multiplayer is unavailable." for `NotFound`/`Full`/`InvalidCode`/`InvalidMove` alike, and the
+"This QR code is not a DoMemory room." text is a hardcoded English literal.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links

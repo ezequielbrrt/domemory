@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -264,8 +265,13 @@ class MultiplayerViewModel(
     }
     LaunchedEffect(boards) { vm.setBoards(boards) }
     LaunchedEffect(initialCode) { if (initialCode.isNotBlank() && state.room == null) vm.join(initialCode) }
-    Column(Modifier.fillMaxSize().background(p.appBackground).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        TextButton(onClick = { HapticsService.fire(HapticIntent.TAP); onBack() }) { Text("‹") }; Text(stringResource(R.string.multiplayer_title))
+    Column(
+        Modifier.fillMaxSize().background(p.appBackground).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        TextButton(onClick = { HapticsService.fire(HapticIntent.TAP); onBack() }, modifier = Modifier.align(Alignment.Start)) { Text("‹") }
+        Text(stringResource(R.string.multiplayer_title), textAlign = TextAlign.Center)
         state.room?.let { room ->
             if (room.status in setOf(MultiplayerRoomStatus.PLAYING, MultiplayerRoomStatus.RECONNECTING, MultiplayerRoomStatus.FINISHED)) {
                 MultiplayerGameBoard(room, vm, Modifier.weight(1f))
@@ -290,7 +296,7 @@ class MultiplayerViewModel(
                 // Unreachable here — PLAYING/RECONNECTING/FINISHED already returned above.
                 else -> stringResource(R.string.multiplayer_reconnecting)
             }
-            Text("$message\n${room.code}")
+            Text("$message\n${room.code}", textAlign = TextAlign.Center)
             if (room.status in setOf(MultiplayerRoomStatus.WAITING, MultiplayerRoomStatus.READY)) {
                 MultiplayerQrCode(room.code)
                 Button(
@@ -309,7 +315,11 @@ class MultiplayerViewModel(
                 // Guests see nothing here — the status message above already tells them the
                 // host hasn't picked, or what was picked.
                 if (room.hasSelectedGame) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Text(room.gameName, fontWeight = FontWeight.Bold, color = p.textPrimary)
                         if (vm.canPickGame(room)) {
                             Text(
@@ -371,7 +381,7 @@ class MultiplayerViewModel(
             ) { Text(stringResource(R.string.multiplayer_create_room)) }
         }
         if (state.loading) CircularProgressIndicator(color = p.primary)
-        state.error?.let { Text(it, color = p.secondary) }
+        state.error?.let { Text(it, color = p.secondary, textAlign = TextAlign.Center) }
     }
 
     if (showGamePicker) {
@@ -493,6 +503,8 @@ private fun MultiplayerGameBoard(room: MultiplayerRoom, vm: MultiplayerViewModel
     Text(
         text = statusText,
         color = if (myTurn) palette.easyGreen else palette.textSecondary,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth(),
     )
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text("${stringResource(R.string.multiplayer_you)}: ${room.players.values.firstOrNull { vm.isCurrentUser(it.id) }?.score ?: 0}")
