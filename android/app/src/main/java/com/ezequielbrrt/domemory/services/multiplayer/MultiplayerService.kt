@@ -201,14 +201,24 @@ class MultiplayerService(
     private suspend fun transaction(id: String, transform: (MultiplayerRoom) -> MultiplayerRoom?) = suspendCancellableCoroutine<Unit> { continuation ->
         database.reference.child(ROOMS).child(id).runTransaction(object : Transaction.Handler {
             override fun doTransaction(data: com.google.firebase.database.MutableData): Transaction.Result {
-                val current = MultiplayerRoomCodec.decode(data.value) ?: return Transaction.abort()
-                val next = transform(current) ?: return Transaction.abort()
-                data.value = MultiplayerRoomCodec.encode(next)
-                return Transaction.success(data)
+                return when (val plan = RoomTransactionPlan.of(data.value, transform)) {
+                    RoomTransactionPlan.AwaitServer -> Transaction.success(data)
+                    RoomTransactionPlan.Abort -> Transaction.abort()
+                    is RoomTransactionPlan.Commit -> {
+                        data.value = MultiplayerRoomCodec.encode(plan.room)
+                        Transaction.success(data)
+                    }
+                }
             }
             override fun onComplete(error: com.google.firebase.database.DatabaseError?, committed: Boolean, snapshot: com.google.firebase.database.DataSnapshot?) {
                 if (!continuation.isActive) return
-                when { error != null -> continuation.resumeWithException(error.toException()); !committed -> continuation.resumeWithException(MultiplayerException.InvalidMove); else -> continuation.resume(Unit) }
+                when {
+                    error != null -> continuation.resumeWithException(error.toException())
+                    !committed -> continuation.resumeWithException(MultiplayerException.InvalidMove)
+                    // An AwaitServer pass commits nothing: if the server has no room either, it was deleted.
+                    snapshot?.value == null -> continuation.resumeWithException(MultiplayerException.NotFound)
+                    else -> continuation.resume(Unit)
+                }
             }
         })
     }
