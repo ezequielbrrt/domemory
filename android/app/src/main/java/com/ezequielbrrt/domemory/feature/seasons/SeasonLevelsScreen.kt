@@ -22,10 +22,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +55,7 @@ import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
+import com.ezequielbrrt.domemory.ui.components.BackButton
 import com.ezequielbrrt.domemory.services.seasons.Season
 import com.ezequielbrrt.domemory.services.seasons.SeasonLevelProgressStore
 import com.ezequielbrrt.domemory.services.seasons.SeasonLocaleResolver
@@ -124,7 +123,6 @@ fun SeasonLevelsScreen(
         label = "seasonProgress",
     )
     val progressDescription = stringResource(R.string.season_progress_accessibility_format, clearedCount, season.levelCount)
-    val backAccessibilityLabel = stringResource(R.string.common_back)
 
     // Keep the artwork fixed behind the complete map, as LevelMapView does on iOS.
     // In particular, it must not be a short header-only image: the level grid scrolls
@@ -151,12 +149,7 @@ fun SeasonLevelsScreen(
                     .padding(horizontal = 4.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(
-                    onClick = { HapticsService.fire(HapticIntent.TAP); onBack() },
-                    modifier = Modifier.semantics { contentDescription = backAccessibilityLabel },
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = headerTextColor)
-                }
+                BackButton(onClick = { HapticsService.fire(HapticIntent.TAP); onBack() }, tint = headerTextColor)
             }
 
             Column(Modifier.padding(horizontal = 20.dp)) {

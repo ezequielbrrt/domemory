@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +35,7 @@ import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.services.share.PlayStoreLinks
+import com.ezequielbrrt.domemory.ui.components.BackButton
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
@@ -56,9 +60,22 @@ fun SettingsScreen(
     // calls onEnableReminders — which flips notificationsEnabled — once that resolves.
     // Denial leaves the flag untouched, matching spec 11.2's permission-sync rule.
     val requestPermission = rememberNotificationPermissionRequester(onGranted = onEnableReminders, onDenied = {})
-    Column(Modifier.fillMaxSize().background(p.appBackground).padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        Text("‹  " + stringResource(R.string.settings_title), style = DoMemoryType.display(26), color = p.primary, modifier = Modifier.clickable(onClick = onBack).padding(vertical = 8.dp))
+    Column(
+        Modifier.fillMaxSize().background(p.appBackground).verticalScroll(rememberScrollState()).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            BackButton(onClick = onBack)
+            Text(stringResource(R.string.settings_title), style = DoMemoryType.display(26), color = p.primary)
+        }
         SettingGroup(stringResource(R.string.settings_section_game)) {
+            // First row of the first section, as on iOS (`SettingsView`'s Game section).
+            SettingRow(
+                title = stringResource(R.string.achievements_title),
+                description = stringResource(R.string.achievements_subtitle),
+                onClick = { HapticsService.fire(HapticIntent.TAP); onAchievements() },
+            )
+            HorizontalDivider(color = p.surfaceBorder)
             Difficulty.entries.forEach { d ->
                 Choice(stringResource(d.labelRes()), state.difficulty == d) {
                     HapticsService.fire(HapticIntent.TAP)
@@ -88,11 +105,6 @@ fun SettingsScreen(
             if (turningOn) requestPermission() else onDisableReminders()
         }
         SettingGroup(stringResource(R.string.settings_section_about)) {
-            SettingRow(
-                title = stringResource(R.string.achievements_title),
-                description = stringResource(R.string.achievements_subtitle),
-                onClick = { HapticsService.fire(HapticIntent.TAP); onAchievements() },
-            )
             // Opens the Play Store listing directly — the standard manual "rate the app"
             // entry. This is deliberately separate from the win-triggered Play In-App Review
             // prompt (AppReviews.recordSuccessfulGameWin, fired from GameViewModel on a real

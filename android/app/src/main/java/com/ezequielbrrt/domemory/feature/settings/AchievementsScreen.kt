@@ -2,7 +2,6 @@ package com.ezequielbrrt.domemory.feature.settings
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +29,7 @@ import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.stats.Achievement
+import com.ezequielbrrt.domemory.ui.components.BackButton
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import kotlin.math.roundToInt
@@ -59,12 +59,10 @@ fun AchievementsScreen(state: AchievementsUiState, onBack: () -> Unit) {
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Text(
-            "‹  " + stringResource(R.string.achievements_title),
-            style = DoMemoryType.display(26),
-            color = p.primary,
-            modifier = Modifier.clickable(onClick = onBack).padding(vertical = 8.dp),
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            BackButton(onClick = onBack)
+            Text(stringResource(R.string.achievements_title), style = DoMemoryType.display(26), color = p.primary)
+        }
 
         if (state.loading) {
             Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), contentAlignment = Alignment.Center) {

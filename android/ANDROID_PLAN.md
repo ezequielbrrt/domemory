@@ -1461,6 +1461,15 @@ Still open: every `MultiplayerException` has a null message, so the UI shows the
 "Multiplayer is unavailable." for `NotFound`/`Full`/`InvalidCode`/`InvalidMove` alike, and the
 "This QR code is not a DoMemory room." text is a hardcoded English literal.
 
+**Settings/back-button polish, 2026-09-21.** Achievements moved to the first row of Settings' Game group,
+matching iOS's `SettingsView` (it was the first row of "About", at the bottom). The bare "‹" glyphs that
+served as back buttons on Multiplayer, Settings and Achievements (about 12dp tall, with a matching tap
+target) are replaced by the shared `ui/components/BackButton` (28dp arrow in a 48dp target, TalkBack label
+`common_back`); Season Levels' own icon button now uses it too. Settings also gained `verticalScroll` — the
+About group was clipped off the bottom of a 1080x2424 emulator screen once the extra Game-group row landed.
+Verification: `./gradlew assembleDebug testDebugUnitTest` green; Settings, Achievements, Multiplayer and Season
+Levels viewed on the `Pixel_10` emulator, including tapping through to Achievements and back.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links
