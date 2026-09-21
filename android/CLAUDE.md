@@ -86,7 +86,7 @@ graph in the same change.
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app |
 | `ui/lottie` | `BundledLottie` — plays a bundled Lottie JSON clip, mirroring iOS's `LottieView`; reads from a shared `assets/lottie/` at the repository root (an extra `assets.srcDir` in `app/build.gradle.kts`), the same JSON files iOS reaches through a `SupportingFiles/Lottie` symlink, so an animation cannot drift between platforms |
 | `ui/anim` | `ReduceMotion.kt` (`rememberReduceMotion`, the animator-duration-scale-off counterpart of iOS's `accessibilityReduceMotion`), `PressScale.kt`, `NumericTransition.kt` |
-| `ui/components` | `LivesRow` (the canonical hearts row, plays heart-break/heart-refill Lottie effects), `CompactCardLayout` (the shared icon-circle/title/badge layout `DailyChallengeCard` and `SeasonCard` both switch to when sharing the menu's card row, porting iOS's `CompactCardLayout`), `Pill`/capsule treatments |
+| `ui/components` | `BackButton` (the one back arrow for screens that draw their own header: 28dp icon in a 48dp target, replacing bare "‹" glyphs), `LivesRow` (the canonical hearts row, plays heart-break/heart-refill Lottie effects), `CompactCardLayout` (the shared icon-circle/title/badge layout `DailyChallengeCard` and `SeasonCard` both switch to when sharing the menu's card row, porting iOS's `CompactCardLayout`), `Pill`/capsule treatments |
 
 Everything else in the plan's package layout (`services/haptics`/`HapticIntent.fire`
 wiring beyond `feature/game/`'s own call sites, full `multiplayer/` feature gameplay UI)

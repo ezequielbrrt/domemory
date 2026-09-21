@@ -31,6 +31,7 @@ import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
+import com.ezequielbrrt.domemory.ui.components.BackButton
 import com.ezequielbrrt.domemory.services.multiplayer.*
 import com.ezequielbrrt.domemory.services.stats.ProfileStatsRecorder
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
@@ -270,7 +271,7 @@ class MultiplayerViewModel(
         verticalArrangement = Arrangement.spacedBy(14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        TextButton(onClick = { HapticsService.fire(HapticIntent.TAP); onBack() }, modifier = Modifier.align(Alignment.Start)) { Text("‹") }
+        BackButton(onClick = { HapticsService.fire(HapticIntent.TAP); onBack() }, modifier = Modifier.align(Alignment.Start))
         Text(stringResource(R.string.multiplayer_title), textAlign = TextAlign.Center)
         state.room?.let { room ->
             if (room.status in setOf(MultiplayerRoomStatus.PLAYING, MultiplayerRoomStatus.RECONNECTING, MultiplayerRoomStatus.FINISHED)) {
