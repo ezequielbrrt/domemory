@@ -1470,6 +1470,17 @@ About group was clipped off the bottom of a 1080x2424 emulator screen once the e
 Verification: `./gradlew assembleDebug testDebugUnitTest` green; Settings, Achievements, Multiplayer and Season
 Levels viewed on the `Pixel_10` emulator, including tapping through to Achievements and back.
 
+**Fonts, 2026-09-21.** `DoMemoryType.display`/`handwritten` now use Righteous and Patrick Hand, byte-for-byte
+copies of the TTFs in `ios/DoMemory/DoMemory/SupportingFiles/Fonts` placed in `res/font` (SIL OFL 1.1, notices
+embedded in the files). Discrepancy worth knowing: iOS bundles and registers those fonts but its
+`Font.righteous`/`Font.patrickHand` return `.system(design: .rounded)`, so iOS renders SF Rounded Heavy and
+Android now renders the real Righteous — the two platforms' headings are not visually identical. Both fonts
+ship one Regular weight, so the roles request `FontWeight.Normal` (heavier makes Compose synthesize a fake
+bold) and `LaunchScreen`'s two forced-`Black` overrides were dropped. Devanagari/CJK glyphs fall back to the
+system font per character. Verification: `assembleDebug testDebugUnitTest` green; menu title, "Levels" and
+Settings headings viewed on the `Pixel_10` emulator (Latin only). Not viewed: the in-app `LaunchScreen`, and
+any non-Latin locale.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links

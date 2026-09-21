@@ -21,9 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
@@ -66,10 +64,7 @@ fun LaunchScreen(preference: ThemePreference, modifier: Modifier = Modifier) {
             androidx.compose.material3.Text(
                 text = stringResource(R.string.common_app_name),
                 color = Color.White,
-                style = DoMemoryType.display(34).copy(
-                    fontWeight = FontWeight.Black,
-                    fontSize = 34.sp,
-                ),
+                style = DoMemoryType.display(34),
                 modifier = Modifier.offset(y = (-96).dp),
             )
         }
@@ -110,10 +105,7 @@ private fun LaunchCardMark(dark: Boolean) {
                 androidx.compose.material3.Text(
                     text = "?",
                     color = questionColor,
-                    style = DoMemoryType.display(120).copy(
-                        fontWeight = FontWeight.Black,
-                        fontSize = 120.sp,
-                    ),
+                    style = DoMemoryType.display(120),
                 )
             }
         }
