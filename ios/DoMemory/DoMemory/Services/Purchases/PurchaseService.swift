@@ -178,7 +178,7 @@ final class PurchaseService {
         )
     }
 
-    #if targetEnvironment(simulator)
+    #if DEBUG
     /// Debug/QA only: clears both the purchased entitlement and any active
     /// rewarded grant, so the ad-suppressed state from `grantRewardedRemoveAds`
     /// can be toggled back off without relaunching.

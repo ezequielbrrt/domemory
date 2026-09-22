@@ -20,7 +20,7 @@ struct SettingsView: View {
     @State private var showAchievements = false
     @State private var showWhatsNew = false
     @State private var showNotificationPrimer = false
-    #if targetEnvironment(simulator)
+    #if DEBUG
     @State private var showDebugMenu = false
     #endif
     @AppStorage(UserDefaultsKeys.themePreference) private var themePreference = AppTheme.system.rawValue
@@ -43,7 +43,7 @@ struct SettingsView: View {
                         Text(Strings.settingsTitle)
                             .font(.righteous(size: 38))
                             .foregroundStyle(Color.primaryColor)
-                            #if targetEnvironment(simulator)
+                            #if DEBUG
                             .debugMenuTapTrigger { showDebugMenu = true }
                             #endif
 
@@ -268,7 +268,7 @@ struct SettingsView: View {
                 showNotificationPrimer = false
             }
         }
-        #if targetEnvironment(simulator)
+        #if DEBUG
         .sheet(isPresented: $showDebugMenu) {
             DebugMenuView()
         }

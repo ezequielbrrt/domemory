@@ -2,14 +2,14 @@
 //  DebugMenuTrigger.swift
 //  DoMemory
 //
-//  A simulator-only hidden entry point for `DebugMenuView`: five taps within a
+//  A debug-build-only hidden entry point for `DebugMenuView`: five taps within a
 //  rolling window trigger it. A strict `.onTapGesture(count: 5)` requires all
 //  five taps to land as one fast, tightly-grouped gesture, which is too
 //  finicky for a real QA workflow — this instead resets the count whenever a
 //  tap arrives too long after the previous one.
 //
 
-#if targetEnvironment(simulator)
+#if DEBUG
 import SwiftUI
 
 private struct DebugMenuTapTrigger: ViewModifier {
@@ -42,10 +42,10 @@ private struct DebugMenuTapTrigger: ViewModifier {
 }
 
 extension View {
-    /// Simulator-only: fires `action` after five taps landing within 1.5s of
-    /// each other. Compiled out entirely on device builds — this modifier
-    /// does not exist at all outside `#if targetEnvironment(simulator)`, so
-    /// every call site must share the same guard.
+    /// Debug-only: fires `action` after five taps landing within 1.5s of
+    /// each other. Compiled out entirely in Release builds — this modifier
+    /// does not exist at all outside `#if DEBUG`, so every call site must
+    /// share the same guard.
     func debugMenuTapTrigger(action: @escaping () -> Void) -> some View {
         modifier(DebugMenuTapTrigger(action: action))
     }

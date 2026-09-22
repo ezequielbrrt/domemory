@@ -2,10 +2,11 @@
 //  DebugMenuView.swift
 //  DoMemory
 //
-//  Simulator-only QA panel, reachable via `debugMenuTapTrigger` on the
-//  Settings title. Every row is a single call into an existing service
-//  singleton — there is no local state to own beyond which nested preview
-//  cover is showing and the lives-reset feedback label below.
+//  Debug-build QA panel (simulator and device), reachable via
+//  `debugMenuTapTrigger` on the Settings title. Every row is a single call
+//  into an existing service singleton — there is no local state to own
+//  beyond which nested preview cover is showing and the lives-reset
+//  feedback label below.
 //
 //  Strings here are deliberately plain English literals rather than routed
 //  through Strings.swift/Localizable.strings: this view is unreachable by any
@@ -14,7 +15,7 @@
 //  ten locales.
 //
 
-#if targetEnvironment(simulator)
+#if DEBUG
 import ReviewFlow
 import StoreKit
 import SwiftUI
