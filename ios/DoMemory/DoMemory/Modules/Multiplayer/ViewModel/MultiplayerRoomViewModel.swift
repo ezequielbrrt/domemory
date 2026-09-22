@@ -121,6 +121,24 @@ final class MultiplayerRoomViewModel {
         max(1, Int(ceil(sqrt(Double(cards.count)))))
     }
 
+    /// How the match ended for the current player. `nil` until `room.status`
+    /// is `.finished` — the view uses this, rather than re-deriving it from
+    /// `winnerId`, so the result banner and `statusText` can never disagree.
+    enum ResultKind {
+        case won, lost, draw
+    }
+
+    var resultKind: ResultKind? {
+        guard let room, room.status == .finished else { return nil }
+        if room.winnerId == MultiplayerService.currentUserID {
+            return .won
+        }
+        if room.winnerId == nil {
+            return .draw
+        }
+        return .lost
+    }
+
     var statusText: String {
         guard let room else { return "" }
         switch room.status {
@@ -135,13 +153,11 @@ final class MultiplayerRoomViewModel {
         case .reconnecting:
             return Strings.multiplayerReconnecting
         case .finished:
-            if room.winnerId == MultiplayerService.currentUserID {
-                return Strings.multiplayerYouWon
+            switch resultKind {
+            case .won: return Strings.multiplayerYouWon
+            case .draw: return Strings.multiplayerDraw
+            case .lost, .none: return Strings.multiplayerYouLost
             }
-            if room.winnerId == nil {
-                return Strings.multiplayerDraw
-            }
-            return Strings.multiplayerYouLost
         case .abandoned:
             return Strings.multiplayerRoomClosed
         }

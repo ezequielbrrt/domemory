@@ -263,14 +263,11 @@ struct MultiplayerRoomView: View {
                 ScoreChip(title: Strings.multiplayerYou, score: viewModel.currentUserScore, color: Color.primaryColor)
 
                 VStack(spacing: 2) {
-                    Text(viewModel.statusText)
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.textPrimary)
-                        .multilineTextAlignment(.center)
-                    if let room = viewModel.room, room.status == .finished {
-                        Text(Strings.multiplayerFinalScore)
-                            .font(.system(size: 11, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Color.textMuted)
+                    if viewModel.resultKind == nil {
+                        Text(viewModel.statusText)
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.textPrimary)
+                            .multilineTextAlignment(.center)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -282,6 +279,10 @@ struct MultiplayerRoomView: View {
 
             if let room = viewModel.room, room.status == .finished {
                 Spacer(minLength: 12)
+
+                if let resultKind = viewModel.resultKind {
+                    resultBanner(kind: resultKind)
+                }
 
                 if AdsService.shared.isNativeConfigured(for: .multiplayerFinishedNative) {
                     AdMobNativeAdView(placement: .multiplayerFinishedNative)
@@ -384,6 +385,44 @@ struct MultiplayerRoomView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 12)
             }
+        }
+    }
+
+    /// Headline shown once a match ends, replacing the small mid-game status
+    /// label with the same big-emoji-plus-heavy-headline language the
+    /// single-player Win/Lose modals use, so a result reads as clearly here
+    /// as it does everywhere else in the app.
+    @ViewBuilder
+    private func resultBanner(kind: MultiplayerRoomViewModel.ResultKind) -> some View {
+        VStack(spacing: 6) {
+            Text(resultEmoji(for: kind))
+                .font(.system(size: 44))
+
+            Text(viewModel.statusText)
+                .font(.system(size: 30, weight: .heavy, design: .rounded))
+                .foregroundStyle(resultColor(for: kind))
+                .multilineTextAlignment(.center)
+
+            Text(Strings.multiplayerFinalScore)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(Color.textMuted)
+        }
+        .padding(.horizontal, 24)
+    }
+
+    private func resultEmoji(for kind: MultiplayerRoomViewModel.ResultKind) -> String {
+        switch kind {
+        case .won: return "😎"
+        case .lost: return "😳"
+        case .draw: return "🤝"
+        }
+    }
+
+    private func resultColor(for kind: MultiplayerRoomViewModel.ResultKind) -> Color {
+        switch kind {
+        case .won: return Color.primaryColor
+        case .lost: return Color.secundaryColor
+        case .draw: return Color.textPrimary
         }
     }
 
