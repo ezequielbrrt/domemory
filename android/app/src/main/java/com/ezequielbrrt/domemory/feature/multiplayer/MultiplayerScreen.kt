@@ -34,6 +34,7 @@ import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import com.ezequielbrrt.domemory.ui.components.BackButton
 import com.ezequielbrrt.domemory.services.multiplayer.*
 import com.ezequielbrrt.domemory.services.stats.ProfileStatsRecorder
+import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -485,31 +486,84 @@ private fun Difficulty.pickerLabelRes(): Int = when (this) {
     Difficulty.VERY_HARD -> R.string.difficulty_very_hard
 }
 
+/** How the match ended for the current player. Kept as the single source of truth for both
+ * [titleRes] and [MultiplayerResultBanner], so they can never disagree about the outcome. */
+private enum class MultiplayerResultKind { WON, LOST, DRAW }
+
+private fun MultiplayerRoom.resultKind(vm: MultiplayerViewModel): MultiplayerResultKind? {
+    if (status != MultiplayerRoomStatus.FINISHED) return null
+    return when {
+        winnerId == null -> MultiplayerResultKind.DRAW
+        vm.isCurrentUser(winnerId) -> MultiplayerResultKind.WON
+        else -> MultiplayerResultKind.LOST
+    }
+}
+
+private fun MultiplayerResultKind.titleRes(): Int = when (this) {
+    MultiplayerResultKind.WON -> R.string.multiplayer_you_won
+    MultiplayerResultKind.LOST -> R.string.multiplayer_you_lost
+    MultiplayerResultKind.DRAW -> R.string.multiplayer_draw
+}
+
+/** Shown once the room is finished, replacing the mid-game turn-indicator label with the same
+ * big-emoji-plus-display-headline language the single-player win/lose screens use (see
+ * `GameScreen.kt`'s `WinOutcomeContent`/lose branch), so a match's result reads as clearly here
+ * as it does everywhere else in the app. */
+@Composable
+private fun MultiplayerResultBanner(kind: MultiplayerResultKind, modifier: Modifier = Modifier) {
+    val palette = LocalPalette.current
+    val (emoji, color) = when (kind) {
+        MultiplayerResultKind.WON -> "😎" to palette.primary
+        MultiplayerResultKind.LOST -> "😳" to palette.secondary
+        MultiplayerResultKind.DRAW -> "🤝" to palette.textPrimary
+    }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Text(emoji, fontSize = 44.sp)
+        Text(
+            text = stringResource(kind.titleRes()),
+            style = DoMemoryType.display(28),
+            color = color,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text = stringResource(R.string.multiplayer_final_score),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = palette.textSecondary,
+        )
+    }
+}
+
 @Composable
 private fun MultiplayerGameBoard(room: MultiplayerRoom, vm: MultiplayerViewModel, modifier: Modifier = Modifier) {
     val palette = LocalPalette.current
     val myTurn = room.currentPlayerId?.let(vm::isCurrentUser) == true
     val columns = ceil(kotlin.math.sqrt(room.cards.size.toDouble())).toInt().coerceAtLeast(1)
     val rows = room.cards.chunked(columns)
+    val resultKind = room.resultKind(vm)
 
-    val statusText = when (room.status) {
-        MultiplayerRoomStatus.FINISHED -> when {
-            room.winnerId == null -> stringResource(R.string.multiplayer_draw)
-            vm.isCurrentUser(room.winnerId) -> stringResource(R.string.multiplayer_you_won)
-            else -> stringResource(R.string.multiplayer_you_lost)
+    if (resultKind == null) {
+        val statusText = when (room.status) {
+            MultiplayerRoomStatus.RECONNECTING -> stringResource(R.string.multiplayer_reconnecting)
+            else -> stringResource(if (myTurn) R.string.multiplayer_your_turn else R.string.multiplayer_opponent_turn)
         }
-        MultiplayerRoomStatus.RECONNECTING -> stringResource(R.string.multiplayer_reconnecting)
-        else -> stringResource(if (myTurn) R.string.multiplayer_your_turn else R.string.multiplayer_opponent_turn)
+        Text(
+            text = statusText,
+            color = if (myTurn) palette.easyGreen else palette.textSecondary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
-    Text(
-        text = statusText,
-        color = if (myTurn) palette.easyGreen else palette.textSecondary,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth(),
-    )
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text("${stringResource(R.string.multiplayer_you)}: ${room.players.values.firstOrNull { vm.isCurrentUser(it.id) }?.score ?: 0}")
         Text("${stringResource(R.string.multiplayer_opponent)}: ${room.players.values.firstOrNull { !vm.isCurrentUser(it.id) }?.score ?: 0}")
+    }
+    if (resultKind != null) {
+        MultiplayerResultBanner(kind = resultKind, modifier = Modifier.padding(vertical = 8.dp))
     }
     // Spec: iOS swaps the finished board for the native ad placement entirely rather than
     // showing both — a finished room's grid carries no further interaction anyway.
