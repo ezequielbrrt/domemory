@@ -1481,6 +1481,17 @@ system font per character. Verification: `assembleDebug testDebugUnitTest` green
 Settings headings viewed on the `Pixel_10` emulator (Latin only). Not viewed: the in-app `LaunchScreen`, and
 any non-Latin locale.
 
+**Multiplayer result banner, 2026-09-22.** `MultiplayerGameBoard`'s finished-room state reused the plain
+mid-game turn-indicator `Text` (no explicit size, Material's default body style) for "You won"/"You
+lost"/"Draw", so the result of a whole match read no bigger than "Your turn". Ported iOS's matching fix
+(PR #88): a `MultiplayerResultKind` (WON/LOST/DRAW) computed once from `room`+`vm.isCurrentUser`, and a new
+`MultiplayerResultBanner` shown only when finished — a 44sp emoji (😎/😳/🤝) plus a 28sp `DoMemoryType.display`
+headline in `palette.primary`/`secondary`/`textPrimary`, matching the single-player win/lose screens'
+existing visual language, with the previously-unused `multiplayer_final_score` string as a subtitle.
+Verification: `compileDebugKotlin` clean; `cleanTestDebugUnitTest testDebugUnitTest` 422/422 passing (no
+new tests — the change is purely presentational, no new branching logic beyond the existing win/lose/draw
+resolution `MultiplayerViewModel` already had). Not viewed on an emulator/device — no live session run.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links
