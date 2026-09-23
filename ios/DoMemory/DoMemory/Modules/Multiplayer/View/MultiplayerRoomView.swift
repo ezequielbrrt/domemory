@@ -189,7 +189,7 @@ struct MultiplayerRoomView: View {
                 .disabled(!viewModel.canMarkReady)
                 .padding(.horizontal, 16)
             }
-            .readableWidth(Layout.modalWidth)
+            .readableWidth(ContentWidth.modal)
 
             Spacer()
         }
@@ -303,7 +303,7 @@ struct MultiplayerRoomView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 270)
                         .padding(.horizontal, 16)
-                        .readableWidth(Layout.modalWidth)
+                        .readableWidth(ContentWidth.modal)
                 }
 
                 Spacer(minLength: 12)
@@ -399,7 +399,7 @@ struct MultiplayerRoomView: View {
                     .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 16)
-                .readableWidth(Layout.modalWidth)
+                .readableWidth(ContentWidth.modal)
                 .padding(.bottom, 12)
             }
         }

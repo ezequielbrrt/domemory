@@ -449,20 +449,26 @@ extension Color {
 
 // MARK:- LAYOUT
 /// Widths that keep a phone-shaped column readable on iPad. Every iPhone is
-/// narrower than both, so capping at them changes nothing on a phone.
-enum Layout {
+/// narrower than all of them, so capping at them changes nothing on a phone.
+///
+/// Deliberately not called `Layout`: a type with that name in this module
+/// would hide SwiftUI's `Layout` protocol everywhere in the app.
+enum ContentWidth {
     /// Lists and forms (Settings, Achievements).
-    static let readableWidth: CGFloat = 640
+    static let readable: CGFloat = 640
     /// The centred result, pause and quit cards shown over a board, and
     /// narrower stacks of controls (the multiplayer lobby, the finished-match
     /// actions, the intro carousels' buttons).
-    static let modalWidth: CGFloat = 460
+    static let modal: CGFloat = 460
+    /// An intro carousel slide's title and subtitle, which would otherwise
+    /// set as one very long line across a landscape iPad.
+    static let carouselText: CGFloat = 560
 }
 
 extension View {
     /// Caps the view at `maxWidth` and centres it in whatever space is left,
     /// instead of letting it stretch edge to edge across an iPad.
-    func readableWidth(_ maxWidth: CGFloat = Layout.readableWidth) -> some View {
+    func readableWidth(_ maxWidth: CGFloat = ContentWidth.readable) -> some View {
         frame(maxWidth: maxWidth)
             .frame(maxWidth: .infinity)
     }

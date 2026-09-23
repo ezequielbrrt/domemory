@@ -79,7 +79,7 @@ struct PauseModal: View {
                     )
                     .shadow(color: Color.shadowColor, radius: 24, x: 0, y: 8)
             )
-            .frame(maxWidth: Layout.modalWidth)
+            .frame(maxWidth: ContentWidth.modal)
             .padding(.horizontal, 32)
         }
     }
