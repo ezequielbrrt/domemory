@@ -451,10 +451,11 @@ extension Color {
 /// Widths that keep a phone-shaped column readable on iPad. Every iPhone is
 /// narrower than both, so capping at them changes nothing on a phone.
 enum Layout {
-    /// Lists, forms and single-column screens (Settings, Achievements, the
-    /// multiplayer lobby, the intro carousels' buttons).
+    /// Lists and forms (Settings, Achievements).
     static let readableWidth: CGFloat = 640
-    /// The centred result, pause and quit cards shown over a board.
+    /// The centred result, pause and quit cards shown over a board, and
+    /// narrower stacks of controls (the multiplayer lobby, the finished-match
+    /// actions, the intro carousels' buttons).
     static let modalWidth: CGFloat = 460
 }
 
