@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+[Unreleased]
+
+### Changed
+- Redrew the first-launch onboarding illustrations ("Play with Friends", "Make It Yours", "Come Back Daily", light and dark) and the review-invitation illustration (`onboarding-five-star-rating`) around Flippo, the app's card mascot, and a teal card friend, replacing the two human children they showed before. Composition, props and the soft 3D clay style are unchanged, and the art still carries no text, so no locale needs new assets. The onboarding backgrounds now match the app background colour in both appearances and each scene stays inside the top 48% that `IntroCarouselView` reserves for it; the review art remains a transparent 1200x1500 PNG. Players only see the new onboarding art. The review art appears only in the debug menu's `ReviewInvitationFullScreen` preview, because the app still does not present that view to players. Android's onboarding drawables are the same files, so both platforms change together, and the source art in `assets/onboarding/` is updated to match. No code changes.
+
 [4.3.0] 17-09-2026
 
 ### Fixed
