@@ -139,6 +139,16 @@ Also: `DoMemory/DoMemoryWidget/` — a home-screen widget showing the Daily Chal
 - **`level_unlocked`** means "a new playable level became available" — gate it on `nextLevelNumber` being non-nil, or every completed season emits one unlock for a level that does not exist.
 - **Season analytics** reuse the numbered-level events with a `season_id` parameter that is **omitted entirely** for endless Levels, so endless events stay byte-identical to their pre-Seasons shape and `season_id is null` cleanly means "endless".
 
+### iPad layout
+
+The app runs on iPad in every orientation and in Split View, Slide Over and Stage Manager windows, so a screen can be anything from a 320pt-wide column to a landscape 13-inch display. Most screens are a phone-shaped column; three rules keep them from stretching edge to edge:
+
+- **Single-column screens** (Settings, Achievements, the multiplayer lobby, the intro carousels' buttons) cap themselves with `.readableWidth()` (`Layout.readableWidth`, 640pt) from `AppConfiguration.swift`. **Centred cards over a board** (Win, Lose, Pause, Quit, Out of lives) cap at `Layout.modalWidth` (460pt). Every iPhone is narrower than both, so neither changes a phone. Give any new full-screen view the same treatment.
+- **Card boards** (single-player and multiplayer) are laid out by `BoardLayout` in `MemorizeView.swift`. iPhone keeps the square-root column rule with cards stretched to fill each cell, which is what Android's board also does. iPad instead picks the column count that fits the largest playing-card-shaped card (0.72 aspect, capped at 200pt), breaks ties toward the window's shape, and centres the grid. It is gated on the **idiom**, not the size class, because a one-third Split View column is compact width and would otherwise get the phone rule's sliver cards. `BoardLayoutTests` pins both paths.
+- **Grids with a fixed phone column count** read the horizontal size class: the Levels map shows 4 tiles a row in compact width and 6 in regular (capped at 760pt), and the menu's board grid shows 2 in compact and 3–5 in regular, depending on the window's width.
+
+Sheets (`CreateMemoramaView`, the join and game-picker sheets, What's New, the notification primer) need nothing: iPad presents them as centred form sheets. On iPadOS 18+ the menu's `TabView` renders as the system floating tab bar in regular width and as a bottom bar in compact. That is intended; don't restyle it.
+
 ### Launch sequence
 
 `MenuView`'s `.task` sequences first-run surfaces, and the ordering is load-bearing:

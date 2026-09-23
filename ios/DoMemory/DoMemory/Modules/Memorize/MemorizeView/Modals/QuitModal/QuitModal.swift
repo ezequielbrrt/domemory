@@ -70,6 +70,7 @@ struct QuitModal: View {
                     )
                     .shadow(color: Color.shadowColor, radius: 24, x: 0, y: 8)
             )
+            .frame(maxWidth: Layout.modalWidth)
             .padding(.horizontal, 32)
         }
     }

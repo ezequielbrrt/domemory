@@ -30,6 +30,8 @@ struct MenuView: View {
     @ObservedObject private var deepLinkRouter = DeepLinkRouter.shared
     @State private var joinDeepLink: JoinDeepLink?
     @State private var showNotificationPrimer = false
+    @State private var boardGridWidth: CGFloat = 0
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var displayedGames: [Memorama] {
         switch selectedTab {
@@ -371,6 +373,14 @@ struct MenuView: View {
         showNotificationPrimer = true
     }
 
+    /// Two cards a row on iPhone. A regular-width iPad window fits one more
+    /// column for roughly every 220pt, from three in a half-screen Split View
+    /// up to five on a landscape 13-inch screen, so the cards stay card-sized.
+    private var boardGridColumns: Int {
+        guard horizontalSizeClass == .regular else { return 2 }
+        return min(5, max(3, Int(boardGridWidth / 220)))
+    }
+
     private var selectedVisibleTab: MenuViewModel.VisibleTab {
         switch selectedTab {
         case .all, .levels:
@@ -423,7 +433,7 @@ struct MenuView: View {
                     )
                 }
                 .gridStyle(
-                    columns: 2,
+                    columns: boardGridColumns,
                     spacing: 14,
                     animation: Animation.spring(response: 0.35, dampingFraction: 0.85)
                 )
@@ -432,6 +442,7 @@ struct MenuView: View {
                 .padding(.bottom, 16)
             }
             .background(Color.appBackground)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { boardGridWidth = $0 }
         }
     }
 }

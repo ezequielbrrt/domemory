@@ -446,3 +446,23 @@ extension Color {
         )
     }
 }
+
+// MARK:- LAYOUT
+/// Widths that keep a phone-shaped column readable on iPad. Every iPhone is
+/// narrower than both, so capping at them changes nothing on a phone.
+enum Layout {
+    /// Lists, forms and single-column screens (Settings, Achievements, the
+    /// multiplayer lobby, the intro carousels' buttons).
+    static let readableWidth: CGFloat = 640
+    /// The centred result, pause and quit cards shown over a board.
+    static let modalWidth: CGFloat = 460
+}
+
+extension View {
+    /// Caps the view at `maxWidth` and centres it in whatever space is left,
+    /// instead of letting it stretch edge to edge across an iPad.
+    func readableWidth(_ maxWidth: CGFloat = Layout.readableWidth) -> some View {
+        frame(maxWidth: maxWidth)
+            .frame(maxWidth: .infinity)
+    }
+}

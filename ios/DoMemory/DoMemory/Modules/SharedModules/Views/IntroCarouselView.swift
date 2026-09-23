@@ -68,6 +68,7 @@ struct IntroCarouselView: View {
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 24)
+                .readableWidth(Layout.modalWidth)
                 .padding(.bottom, 32)
             }
         }
@@ -212,6 +213,8 @@ private struct IntroSlideText: View {
                 .lineSpacing(3)
                 .padding(.horizontal, 32)
         }
+        // A subtitle set across a landscape iPad is one very long line.
+        .readableWidth(Layout.modalWidth + 100)
     }
 }
 
