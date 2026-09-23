@@ -68,6 +68,7 @@ struct IntroCarouselView: View {
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 24)
+                .readableWidth(ContentWidth.modal)
                 .padding(.bottom, 32)
             }
         }
@@ -212,6 +213,7 @@ private struct IntroSlideText: View {
                 .lineSpacing(3)
                 .padding(.horizontal, 32)
         }
+        .readableWidth(ContentWidth.carouselText)
     }
 }
 

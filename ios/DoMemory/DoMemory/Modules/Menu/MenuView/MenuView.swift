@@ -30,6 +30,7 @@ struct MenuView: View {
     @ObservedObject private var deepLinkRouter = DeepLinkRouter.shared
     @State private var joinDeepLink: JoinDeepLink?
     @State private var showNotificationPrimer = false
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var displayedGames: [Memorama] {
         switch selectedTab {
@@ -371,6 +372,17 @@ struct MenuView: View {
         showNotificationPrimer = true
     }
 
+    /// Two cards a row on iPhone. A regular-width iPad window fits one more
+    /// column for roughly every 220pt, from three in a half-screen Split View
+    /// up to five on a landscape 13-inch screen, so the cards stay card-sized.
+    /// Read from the enclosing geometry rather than measured into state, so
+    /// the grid's first frame already has the right column count instead of
+    /// springing from three to five once a measurement lands.
+    private func boardGridColumns(forWidth width: CGFloat) -> Int {
+        guard horizontalSizeClass == .regular else { return 2 }
+        return min(5, max(3, Int(width / 220)))
+    }
+
     private var selectedVisibleTab: MenuViewModel.VisibleTab {
         switch selectedTab {
         case .all, .levels:
@@ -409,27 +421,29 @@ struct MenuView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.appBackground)
         } else {
-            ScrollView {
-                WaterfallGrid(games) { (memorama: Memorama) in
-                    MemoramaGridCell(
-                        memorama: memorama,
-                        stats: viewModel.stats(for: memorama.id),
-                        isFavorite: viewModel.isFavorite(id: memorama.id),
-                        onStatsChanged: { statsRefreshID = UUID() },
-                        onToggleFavorite: { viewModel.toggleFavorite(id: memorama.id) },
-                        onDelete: memorama.id.hasPrefix("custom_")
-                            ? { viewModel.deleteCustomMemorama(id: memorama.id) }
-                            : nil
+            GeometryReader { geo in
+                ScrollView {
+                    WaterfallGrid(games) { (memorama: Memorama) in
+                        MemoramaGridCell(
+                            memorama: memorama,
+                            stats: viewModel.stats(for: memorama.id),
+                            isFavorite: viewModel.isFavorite(id: memorama.id),
+                            onStatsChanged: { statsRefreshID = UUID() },
+                            onToggleFavorite: { viewModel.toggleFavorite(id: memorama.id) },
+                            onDelete: memorama.id.hasPrefix("custom_")
+                                ? { viewModel.deleteCustomMemorama(id: memorama.id) }
+                                : nil
+                        )
+                    }
+                    .gridStyle(
+                        columns: boardGridColumns(forWidth: geo.size.width),
+                        spacing: 14,
+                        animation: Animation.spring(response: 0.35, dampingFraction: 0.85)
                     )
+                    .id(statsRefreshID)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
                 }
-                .gridStyle(
-                    columns: 2,
-                    spacing: 14,
-                    animation: Animation.spring(response: 0.35, dampingFraction: 0.85)
-                )
-                .id(statsRefreshID)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
             }
             .background(Color.appBackground)
         }

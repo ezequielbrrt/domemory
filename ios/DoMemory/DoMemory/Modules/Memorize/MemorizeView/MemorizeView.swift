@@ -166,24 +166,19 @@ struct MemorizeView: View {
                 }
 
                 GeometryReader { geo in
-                    let cols = gridColumns
-                    let rows = max(1, Int(ceil(Double(viewModel.cards.count) / Double(cols))))
-                    let spacing: CGFloat = 10
-                    let padding: CGFloat = 16
-                    // `geo.size` can briefly be smaller than the padding/spacing budget
-                    // during the transition into this screen (or an iPad split-view
-                    // resize), which would otherwise drive these negative for a frame.
-                    let rawCardWidth  = (geo.size.width  - padding * 2 - spacing * CGFloat(cols - 1)) / CGFloat(cols)
-                    let rawCardHeight = (geo.size.height - padding * 2 - spacing * CGFloat(rows - 1)) / CGFloat(rows)
-                    let cardWidth  = rawCardWidth.isFinite  ? max(0, rawCardWidth)  : 0
-                    let cardHeight = rawCardHeight.isFinite ? max(0, rawCardHeight) : 0
+                    let layout = BoardLayout.make(
+                        cardCount: viewModel.cards.count,
+                        in: geo.size,
+                        phoneColumns: gridColumns,
+                        adaptsShape: BoardLayout.adaptsToWindowShape
+                    )
                     LazyVGrid(
-                        columns: Array(repeating: GridItem(.fixed(cardWidth)), count: cols),
-                        spacing: spacing
+                        columns: Array(repeating: GridItem(.fixed(layout.cardSize.width)), count: layout.columns),
+                        spacing: BoardLayout.spacing
                     ) {
                         ForEach(viewModel.cards) { card in
                             CardView(card: card, shouldShowPie: viewModel.shouldShowPie)
-                                .frame(width: cardWidth, height: cardHeight)
+                                .frame(width: layout.cardSize.width, height: layout.cardSize.height)
                                 .onTapGesture {
                                     withAnimation(.linear(duration: 1)) {
                                         viewModel.choose(card: card)
@@ -192,7 +187,8 @@ struct MemorizeView: View {
                                 }
                         }
                     }
-                    .padding(padding)
+                    .padding(BoardLayout.padding)
+                    .frame(width: geo.size.width, height: geo.size.height)
                 }
 
                 if !purchaseService.hasRemovedAds,
@@ -259,6 +255,84 @@ struct MemorizeView: View {
                 dismiss()
             }
         }
+    }
+}
+
+/// How a board's cards are arranged in the space the screen gives them.
+///
+/// iPhone keeps the rule the board has always used — `phoneColumns` columns,
+/// each card stretched to fill its cell — so phone boards, and their Android
+/// twins, are unchanged. An iPad window can be any shape, from a third-width
+/// Split View column to a landscape 13-inch screen, and that rule turns cards
+/// into slivers or wide tiles there. So on iPad the column count is the one
+/// that fits the largest card of a fixed playing-card shape, capped so a
+/// small board doesn't grow to poster size; the caller centres the grid in
+/// whatever space the cap leaves.
+struct BoardLayout: Equatable {
+    let columns: Int
+    let cardSize: CGSize
+
+    static let spacing: CGFloat = 10
+    static let padding: CGFloat = 16
+    /// Width over height of an iPad card: a playing card's proportions.
+    static let cardAspect: CGFloat = 0.72
+    static let maxCardWidth: CGFloat = 200
+
+    static var adaptsToWindowShape: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
+
+    static func make(cardCount: Int, in size: CGSize, phoneColumns: Int, adaptsShape: Bool) -> BoardLayout {
+        let count = max(1, cardCount)
+        // `size` can briefly be smaller than the padding/spacing budget while
+        // the screen transitions in or a Split View divider moves, which would
+        // otherwise drive the card size negative for a frame.
+        let width = max(0, size.width - padding * 2)
+        let height = max(0, size.height - padding * 2)
+
+        guard adaptsShape else {
+            let columns = max(1, phoneColumns)
+            return BoardLayout(columns: columns, cardSize: cell(columns: columns, count: count, width: width, height: height))
+        }
+
+        let windowShape = max(width, 1) / max(height, 1)
+        var best = BoardLayout(columns: 1, cardSize: .zero)
+        var bestGaps = Int.max
+        var bestMismatch = CGFloat.infinity
+        for columns in 1...count {
+            let cell = cell(columns: columns, count: count, width: width, height: height)
+            let cardWidth = min(cell.width, cell.height * cardAspect, maxCardWidth)
+            let card = CGSize(width: cardWidth, height: cardWidth / cardAspect)
+            let rows = Int(ceil(Double(count) / Double(columns)))
+            let gridWidth = CGFloat(columns) * card.width + spacing * CGFloat(columns - 1)
+            let gridHeight = CGFloat(rows) * card.height + spacing * CGFloat(rows - 1)
+            // Two tie-breakers, used only once several column counts give the
+            // same card (typically because they all reach the size cap): first
+            // the fewest empty slots in the last row, then the grid whose shape
+            // is closest to the window's — so 6 capped cards sit 3 × 2 in a
+            // landscape window and 2 × 3 in a portrait one, never 4 + 2.
+            let gaps = columns * rows - count
+            let mismatch = abs(log(max(gridWidth, 1) / max(gridHeight, 1) / windowShape))
+            let isLarger = cardWidth > best.cardSize.width + 0.5
+            let isAsLarge = abs(cardWidth - best.cardSize.width) <= 0.5
+            let isTidier = gaps < bestGaps || (gaps == bestGaps && mismatch < bestMismatch)
+            if isLarger || (isAsLarge && isTidier) {
+                best = BoardLayout(columns: columns, cardSize: card)
+                bestGaps = gaps
+                bestMismatch = mismatch
+            }
+        }
+        return best
+    }
+
+    private static func cell(columns: Int, count: Int, width: CGFloat, height: CGFloat) -> CGSize {
+        let rows = Int(ceil(Double(count) / Double(columns)))
+        let cellWidth = (width - spacing * CGFloat(columns - 1)) / CGFloat(columns)
+        let cellHeight = (height - spacing * CGFloat(rows - 1)) / CGFloat(rows)
+        return CGSize(
+            width: cellWidth.isFinite ? max(0, cellWidth) : 0,
+            height: cellHeight.isFinite ? max(0, cellHeight) : 0
+        )
     }
 }
 

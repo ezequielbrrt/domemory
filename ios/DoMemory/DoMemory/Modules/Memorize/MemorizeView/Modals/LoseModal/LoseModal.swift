@@ -159,6 +159,7 @@ struct LoseModal: View {
                     )
                     .shadow(color: Color.shadowColor, radius: 24, x: 0, y: 8)
             )
+            .frame(maxWidth: ContentWidth.modal)
             .padding(.horizontal, 32)
             .opacity(showSkipConfirm ? 0 : 1)
             // Opacity alone still accepts taps: the confirm card is shorter
@@ -262,6 +263,7 @@ struct LoseModal: View {
                 )
                 .shadow(color: Color.shadowColor, radius: 24, x: 0, y: 8)
         )
+        .frame(maxWidth: ContentWidth.modal)
         .padding(.horizontal, 32)
     }
 }

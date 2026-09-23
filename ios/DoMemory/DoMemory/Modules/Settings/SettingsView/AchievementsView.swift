@@ -44,6 +44,7 @@ struct AchievementsView: View {
                     }
                 }
                 .padding(20)
+                .readableWidth()
             }
         }
         .navigationTitle(Strings.achievementsTitle)

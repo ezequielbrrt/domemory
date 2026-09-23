@@ -222,6 +222,7 @@ struct WinModal: View {
                     )
                     .shadow(color: Color.shadowColor.opacity(1.2), radius: 60, x: 0, y: 20)
             )
+            .frame(maxWidth: ContentWidth.modal)
             .padding(.horizontal, 32)
 
             // A one-shot celebratory burst in front of the card. Skipped for

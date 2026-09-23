@@ -81,7 +81,20 @@ struct MultiplayerRoomView: View {
         }
     }
 
+    /// The lobby centres itself vertically while it fits, and scrolls once
+    /// it doesn't — a landscape iPad mini, or Split View on a small iPad, is
+    /// shorter than the QR code, room code, scores and actions stacked up.
     private var lobby: some View {
+        GeometryReader { geo in
+            ScrollView {
+                lobbyContent
+                    .frame(minHeight: geo.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+    }
+
+    private var lobbyContent: some View {
         VStack(spacing: 20) {
             header
 
@@ -176,6 +189,7 @@ struct MultiplayerRoomView: View {
                 .disabled(!viewModel.canMarkReady)
                 .padding(.horizontal, 16)
             }
+            .readableWidth(ContentWidth.modal)
 
             Spacer()
         }
@@ -289,21 +303,22 @@ struct MultiplayerRoomView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 270)
                         .padding(.horizontal, 16)
+                        .readableWidth(ContentWidth.modal)
                 }
 
                 Spacer(minLength: 12)
             } else {
                 GeometryReader { geo in
-                    let cols = viewModel.gridColumns
-                    let rows = max(1, Int(ceil(Double(viewModel.cards.count) / Double(cols))))
-                    let spacing: CGFloat = 10
-                    let padding: CGFloat = 16
-                    let cardWidth = (geo.size.width - padding * 2 - spacing * CGFloat(cols - 1)) / CGFloat(cols)
-                    let cardHeight = (geo.size.height - padding * 2 - spacing * CGFloat(rows - 1)) / CGFloat(rows)
+                    let layout = BoardLayout.make(
+                        cardCount: viewModel.cards.count,
+                        in: geo.size,
+                        phoneColumns: viewModel.gridColumns,
+                        adaptsShape: BoardLayout.adaptsToWindowShape
+                    )
 
                     LazyVGrid(
-                        columns: Array(repeating: GridItem(.fixed(cardWidth)), count: cols),
-                        spacing: spacing
+                        columns: Array(repeating: GridItem(.fixed(layout.cardSize.width)), count: layout.columns),
+                        spacing: BoardLayout.spacing
                     ) {
                         ForEach(viewModel.cards) { card in
                             Button {
@@ -314,13 +329,14 @@ struct MultiplayerRoomView: View {
                                 }
                             } label: {
                                 CardView(card: card, shouldShowPie: false)
-                                    .frame(width: cardWidth, height: cardHeight)
+                                    .frame(width: layout.cardSize.width, height: layout.cardSize.height)
                             }
                             .buttonStyle(.plain)
                             .disabled(!viewModel.isInteractionEnabled || card.isFaceUp || card.isMatched)
                         }
                     }
-                    .padding(padding)
+                    .padding(BoardLayout.padding)
+                    .frame(width: geo.size.width, height: geo.size.height)
                 }
             }
 
@@ -383,6 +399,7 @@ struct MultiplayerRoomView: View {
                     .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 16)
+                .readableWidth(ContentWidth.modal)
                 .padding(.bottom, 12)
             }
         }

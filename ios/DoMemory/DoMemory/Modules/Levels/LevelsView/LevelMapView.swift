@@ -52,7 +52,17 @@ struct LevelMapView<Header: View, Background: View>: View {
     /// a season passes its own Firebase-supplied artwork.
     let background: Background
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 18), count: 4)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// Four tiles a row on iPhone. A regular-width iPad window has room for
+    /// six before the row gets hard to scan, and the whole map is capped at
+    /// `mapWidth` so the rows don't spread across a landscape 13-inch screen.
+    private var columns: [GridItem] {
+        let count = horizontalSizeClass == .regular ? 6 : 4
+        return Array(repeating: GridItem(.flexible(), spacing: 18), count: count)
+    }
+
+    private static var mapWidth: CGFloat { 760 }
 
     init(
         tiles: [LevelTile],
@@ -92,6 +102,7 @@ struct LevelMapView<Header: View, Background: View>: View {
                 .padding(.bottom, 16)
             }
             .padding(.top, 8)
+            .readableWidth(Self.mapWidth)
         }
         // The artwork is fixed while the tiles scroll over it, and reaches
         // under the safe areas so nothing bands at the top or bottom.
