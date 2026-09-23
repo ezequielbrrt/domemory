@@ -2,4 +2,4 @@
 # Everyone generating the project must use this version, so project.pbxproj
 # does not churn between machines.
 [tools]
-tuist = "4.195.6"
+tuist = "4.208.0"
