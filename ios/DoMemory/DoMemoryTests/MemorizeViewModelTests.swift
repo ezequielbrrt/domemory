@@ -23,6 +23,8 @@ final class MemorizeViewModelTests: XCTestCase {
         defaults.removeObject(forKey: "levels.highestUnlocked")
         defaults.removeObject(forKey: "levels.lifetimeStars")
         defaults.removeObject(forKey: "levels.wallet.balance")
+        defaults.removeObject(forKey: "levels.lives.remaining")
+        defaults.removeObject(forKey: "levels.lives.lastResetDay")
         for level in testedLevels {
             defaults.removeObject(forKey: "levels.stars.\(level)")
         }
@@ -153,5 +155,97 @@ final class MemorizeViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.isFrozen)
         viewModel.tapOnTryAgain()
         XCTAssertFalse(viewModel.isFrozen, "a fresh board must not look frozen")
+    }
+
+    // MARK: - Lose modal: the life at stake
+
+    /// Runs the clock out on a real board, the way the tick loop ends a game.
+    private func loseOnTime(_ viewModel: MemorizeViewModel) async {
+        viewModel.timeRemaining = 1
+        viewModel.startTimer()
+        for _ in 0..<40 where !viewModel.hasLost {
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        XCTAssertTrue(viewModel.hasLost, "the clock running out must end the game")
+    }
+
+    private func spendLives(_ count: Int) {
+        for _ in 0..<count {
+            LevelLivesService.shared.consumeLife()
+        }
+    }
+
+    /// The lose modal shows before the loss is booked: the heart it would cost
+    /// is still there, which is what a rescue keeps.
+    func testALossKeepsItsLifeAtStakeUntilThePlayerLeavesIt() async {
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+        XCTAssertFalse(viewModel.isLifeAtStake, "nothing is at stake mid-game")
+
+        await loseOnTime(viewModel)
+
+        XCTAssertTrue(viewModel.isLifeAtStake)
+        XCTAssertEqual(viewModel.levelLivesRemaining, LevelLivesService.maxLives, "the life is not spent yet")
+
+        viewModel.tapOnGoToMenuAfterLose()
+
+        XCTAssertFalse(viewModel.isLifeAtStake, "leaving the loss books it")
+        XCTAssertEqual(viewModel.levelLivesRemaining, LevelLivesService.maxLives - 1)
+    }
+
+    func testFreePlayNeverHasALifeAtStake() async {
+        let board = Memorama(
+            id: "test",
+            name: "test",
+            category: "test",
+            difficulty: Difficulty.medium.rawValue,
+            description: "",
+            publishedDate: "",
+            items: ["a", "b", "c"],
+            itemType: "string",
+            isDoubleItem: true
+        )
+        let viewModel = MemorizeViewModel(memorama: board, mode: .free)
+        defer { viewModel.stopTimer() }
+
+        await loseOnTime(viewModel)
+
+        XCTAssertFalse(viewModel.isLifeAtStake)
+    }
+
+    /// Skipping books the loss. With one life left that spends it, and the map
+    /// would then refuse to open the level the player just paid to unlock.
+    func testSkipIsNotOfferedWhenItWouldSpendTheLastLife() async {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.skipLevelCost)
+        spendLives(LevelLivesService.maxLives - 1)
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+
+        await loseOnTime(viewModel)
+
+        XCTAssertFalse(viewModel.canSkipLevelWithStars)
+    }
+
+    func testSkipIsOfferedWhenALifeIsLeftAfterIt() async {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.skipLevelCost)
+        spendLives(LevelLivesService.maxLives - 2)
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+
+        await loseOnTime(viewModel)
+
+        XCTAssertTrue(viewModel.canSkipLevelWithStars)
+    }
+
+    func testSkipIsNotOfferedWhenOutOfLives() {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.skipLevelCost)
+        spendLives(LevelLivesService.maxLives)
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+
+        XCTAssertFalse(viewModel.canSkipLevelWithStars)
     }
 }

@@ -14,7 +14,6 @@
 "game_continue" = "जारी रखें";
 "game_go_to_menu" = "मेनू पर जाएं";
 "game_lose_message" = "माफ़ करें, आपका समय समाप्त हो गया";
-"game_rewarded_extra_time" = "विज्ञापन देखकर 30 सेकंड जोड़ें";
 "game_rewarded_hint" = "विज्ञापन देखकर संकेत पाएं";
 "ads_loading" = "विज्ञापन लोड हो रहा है...";
 "ads_label" = "विज्ञापन";
@@ -216,8 +215,6 @@
 
 /* Levels mistake budget */
 "levels_lose_too_many_mistakes" = "बहुत सारी गलतियाँ";
-"levels_forgive_ad_format" = "%d गलतियाँ माफ़ करने के लिए विज्ञापन देखें";
-"levels_forgive_stars_format" = "%1$d गलतियाँ माफ़ करें — %2$d";
 "levels_mistakes_remaining_format" = "%2$d में से %1$d गलतियाँ";
 
 /* Levels intro */
@@ -292,3 +289,11 @@
 "season_complete_badge" = "पूर्ण";
 "season_complete_title" = "सीज़न पूरा हुआ!";
 "season_complete_message" = "आपने सभी स्तर पूरे कर लिए। इनमें से किसी को दोबारा खेलकर उसके सितारे बेहतर करें।";
+
+/* Lose modal rescue offers */
+"lose_offer_forgive_format" = "%d गलतियाँ माफ़ करें";
+"lose_offer_extra_time" = "30 सेकंड जोड़ें";
+"lose_offer_extra_life" = "1 और जीवन पाएं";
+"lose_offer_watch_ad" = "विज्ञापन देखें";
+"lose_pay_stars_format" = "%d सितारे खर्च करें";
+"lose_life_at_stake" = "यह खेल जारी रखें, आपका जीवन नहीं जाएगा।";

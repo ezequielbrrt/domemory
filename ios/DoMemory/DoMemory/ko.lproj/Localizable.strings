@@ -14,7 +14,6 @@
 "game_continue" = "계속";
 "game_go_to_menu" = "메뉴로";
 "game_lose_message" = "시간이 초과되었습니다";
-"game_rewarded_extra_time" = "광고를 보고 30초 추가";
 "game_rewarded_hint" = "광고 보고 힌트 보기";
 "ads_loading" = "광고 로드 중...";
 "ads_label" = "광고";
@@ -216,8 +215,6 @@
 
 /* Levels mistake budget */
 "levels_lose_too_many_mistakes" = "실수가 너무 많습니다";
-"levels_forgive_ad_format" = "광고 보고 실수 %d회 취소";
-"levels_forgive_stars_format" = "실수 %1$d회 취소 — %2$d";
 "levels_mistakes_remaining_format" = "실수 %1$d / %2$d";
 
 /* Levels intro */
@@ -292,3 +289,11 @@
 "season_complete_badge" = "완료";
 "season_complete_title" = "시즌 완료!";
 "season_complete_message" = "모든 레벨을 클리어했습니다. 아무 레벨이나 다시 플레이해 별을 올려 보세요.";
+
+/* Lose modal rescue offers */
+"lose_offer_forgive_format" = "실수 %d회 취소";
+"lose_offer_extra_time" = "30초 추가";
+"lose_offer_extra_life" = "생명 1개 더 받기";
+"lose_offer_watch_ad" = "광고 보기";
+"lose_pay_stars_format" = "별 %d개 사용";
+"lose_life_at_stake" = "이 게임을 이어서 하면 생명을 잃지 않습니다.";

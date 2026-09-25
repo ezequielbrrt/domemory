@@ -69,8 +69,6 @@
 
     <!-- Levels mistake budget -->
     <string name="levels_lose_too_many_mistakes">ミスが多すぎます</string>
-    <string name="levels_forgive_ad_format">広告を見てミスを%d回取り消す</string>
-    <string name="levels_forgive_stars_format">ミスを%1$d回取り消す — %2$d</string>
     <string name="levels_mistakes_remaining_format">ミス %1$d / %2$d</string>
     <string name="levels_timer_frozen_format">時間停止中、残り%d秒</string>
 
@@ -292,4 +290,11 @@
     <!-- Android shell strings with no iOS counterpart -->
     <string name="common_loading">読み込み中…</string>
     <string name="menu_offline_boards">オフライン — 内蔵メモラマを表示しています</string>
+
+    <!-- Lose screen rescue offers -->
+    <string name="lose_offer_forgive_format">ミスを%d回取り消す</string>
+    <string name="lose_offer_extra_life">ライフを1つ追加</string>
+    <string name="lose_offer_watch_ad">広告を見る</string>
+    <string name="lose_pay_stars_format">スター%d個で支払う</string>
+    <string name="lose_life_at_stake">このゲームを続ければライフは減りません。</string>
 </resources>

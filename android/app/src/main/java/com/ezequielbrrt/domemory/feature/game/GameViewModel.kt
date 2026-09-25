@@ -383,6 +383,7 @@ class GameViewModel(
         onGameFinished?.invoke()
         val isDeferredLevelLoss = mode is GameMode.Level && outcome is GameOutcome.Lost
         if (isDeferredLevelLoss) {
+            _state.value = _state.value.copy(isLossPending = true)
             // Read *before* this loss is committed — matching iOS's `LoseModal`, which
             // shows `levelLivesRemaining` as whatever `LevelLivesService` currently holds
             // at the instant `loseReason` is set, not a value that already anticipates
@@ -497,6 +498,7 @@ class GameViewModel(
         if (lossCommitted || mode !is GameMode.Level) return
         val outcome = _state.value.outcome as? GameOutcome.Lost ?: return
         lossCommitted = true
+        _state.value = _state.value.copy(isLossPending = false)
         (mode as? GameMode.Level)?.context?.let { context ->
             val starsAfter = context.store.recordCompletion(
                 level = context.number,
@@ -845,6 +847,14 @@ class GameViewModel(
     suspend fun skipLevelWithStars(): Boolean {
         val context = (mode as? GameMode.Level)?.context ?: return false
         if (_state.value.outcome !is GameOutcome.Lost) return false
+        // Skipping books the loss and returns to the map, whose lives gate then decides
+        // whether the unlocked level is playable. When the skip would leave no life — the
+        // player is already out, or it would spend their last — it sells an unlock they
+        // can't use today (mirrors iOS's `canSkipLevelWithStars`).
+        levelLives?.let { lives ->
+            val livesAfterSkip = lives.remaining() - if (lossCommitted) 0 else 1
+            if (livesAfterSkip <= 0) return false
+        }
         val wallet = starWallet ?: return false
         if (!wallet.spend(LevelPowerUp.SKIP_LEVEL_COST)) {
             onHaptic?.invoke(HapticIntent.WARNING)

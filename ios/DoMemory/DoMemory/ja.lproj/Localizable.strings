@@ -14,7 +14,6 @@
 "game_continue" = "続ける";
 "game_go_to_menu" = "メニューへ";
 "game_lose_message" = "時間切れです";
-"game_rewarded_extra_time" = "広告を見て30秒追加する";
 "game_rewarded_hint" = "広告を見てヒント";
 "ads_loading" = "広告を読み込み中...";
 "ads_label" = "広告";
@@ -216,8 +215,6 @@
 
 /* Levels mistake budget */
 "levels_lose_too_many_mistakes" = "ミスが多すぎます";
-"levels_forgive_ad_format" = "広告を見てミスを%d回取り消す";
-"levels_forgive_stars_format" = "ミスを%1$d回取り消す — %2$d";
 "levels_mistakes_remaining_format" = "ミス %1$d / %2$d";
 
 /* Levels intro */
@@ -292,3 +289,11 @@
 "season_complete_badge" = "クリア";
 "season_complete_title" = "シーズンクリア!";
 "season_complete_message" = "すべてのレベルをクリアしました。どのレベルでも再挑戦してスターを増やせます。";
+
+/* Lose modal rescue offers */
+"lose_offer_forgive_format" = "ミスを%d回取り消す";
+"lose_offer_extra_time" = "30秒追加する";
+"lose_offer_extra_life" = "ライフを1つ追加";
+"lose_offer_watch_ad" = "広告を見る";
+"lose_pay_stars_format" = "スター%d個で支払う";
+"lose_life_at_stake" = "このゲームを続ければライフは減りません。";

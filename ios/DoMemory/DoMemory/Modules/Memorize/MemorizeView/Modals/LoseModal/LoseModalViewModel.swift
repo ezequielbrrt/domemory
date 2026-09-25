@@ -14,6 +14,8 @@ protocol LoseModalViewModelListener {
     var isDailyChallenge: Bool { get }
     var levelNumber: Int? { get }
     var levelLivesRemaining: Int? { get }
+    var isLifeAtStake: Bool { get }
+    var starBalance: Int { get }
     var canWatchAdForLife: Bool { get }
     var canBuyLifeWithStars: Bool { get }
     var canSkipLevelWithStars: Bool { get }

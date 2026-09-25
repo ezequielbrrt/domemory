@@ -69,8 +69,6 @@
 
     <!-- Levels mistake budget -->
     <string name="levels_lose_too_many_mistakes">Too many mistakes</string>
-    <string name="levels_forgive_ad_format">Watch ad to forgive %d mistakes</string>
-    <string name="levels_forgive_stars_format">Forgive %1$d mistakes — %2$d</string>
     <string name="levels_mistakes_remaining_format">%1$d of %2$d mistakes used</string>
     <string name="levels_timer_frozen_format">Timer frozen, %d seconds left</string>
 
@@ -292,4 +290,11 @@
     <!-- Android shell strings with no iOS counterpart -->
     <string name="common_loading">Loading…</string>
     <string name="menu_offline_boards">Offline — showing built-in boards</string>
+
+    <!-- Lose screen rescue offers -->
+    <string name="lose_offer_forgive_format">Forgive %d mistakes</string>
+    <string name="lose_offer_extra_life">Get 1 more life</string>
+    <string name="lose_offer_watch_ad">Watch ad</string>
+    <string name="lose_pay_stars_format">Pay %d stars</string>
+    <string name="lose_life_at_stake">Continue now and you won\'t lose a life.</string>
 </resources>

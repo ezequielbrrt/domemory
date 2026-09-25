@@ -704,8 +704,21 @@ extension MemorizeViewModel {
         levelNumber != nil && starBalance >= LevelPowerUp.lifeCost
     }
 
+    /// True while the lose modal is up and the loss has not been booked yet.
+    /// The life is only spent when the player leaves the loss behind — Try
+    /// again, Menu or Skip — so a rescue (forgive, +30s) still keeps it.
+    var isLifeAtStake: Bool {
+        levelNumber != nil && hasLost && !hasLoggedGameFinished && (levelLivesRemaining ?? 0) > 0
+    }
+
+    /// Skipping books the loss and returns to the map, whose lives gate then
+    /// decides whether the unlocked level is playable. When the skip would
+    /// leave no life — the player is already out, or it would spend their
+    /// last — it sells an unlock they can't use today, so it isn't offered.
     var canSkipLevelWithStars: Bool {
-        levelNumber != nil && starBalance >= LevelPowerUp.skipLevelCost
+        guard levelNumber != nil, starBalance >= LevelPowerUp.skipLevelCost else { return false }
+        let livesAfterSkip = (levelLivesRemaining ?? 0) - (isLifeAtStake ? 1 : 0)
+        return livesAfterSkip > 0
     }
 
     func tapOnBuyLifeWithStars() {

@@ -69,8 +69,6 @@
 
     <!-- Levels mistake budget -->
     <string name="levels_lose_too_many_mistakes">बहुत सारी गलतियाँ</string>
-    <string name="levels_forgive_ad_format">%d गलतियाँ माफ़ करने के लिए विज्ञापन देखें</string>
-    <string name="levels_forgive_stars_format">%1$d गलतियाँ माफ़ करें — %2$d</string>
     <string name="levels_mistakes_remaining_format">%1$d में से %2$d गलतियाँ</string>
     <string name="levels_timer_frozen_format">घड़ी रुकी है, %d सेकंड बाकी</string>
 
@@ -292,4 +290,11 @@
     <!-- Android shell strings with no iOS counterpart -->
     <string name="common_loading">लोड हो रहा है…</string>
     <string name="menu_offline_boards">ऑफ़लाइन — शामिल मेमोरामा दिखाए जा रहे हैं</string>
+
+    <!-- Lose screen rescue offers -->
+    <string name="lose_offer_forgive_format">%d गलतियाँ माफ़ करें</string>
+    <string name="lose_offer_extra_life">1 और जीवन पाएं</string>
+    <string name="lose_offer_watch_ad">विज्ञापन देखें</string>
+    <string name="lose_pay_stars_format">%d सितारे खर्च करें</string>
+    <string name="lose_life_at_stake">यह खेल जारी रखें, आपका जीवन नहीं जाएगा।</string>
 </resources>

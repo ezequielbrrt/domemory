@@ -69,8 +69,6 @@
 
     <!-- Levels mistake budget -->
     <string name="levels_lose_too_many_mistakes">실수가 너무 많습니다</string>
-    <string name="levels_forgive_ad_format">광고 보고 실수 %d회 취소</string>
-    <string name="levels_forgive_stars_format">실수 %1$d회 취소 — %2$d</string>
     <string name="levels_mistakes_remaining_format">실수 %1$d / %2$d</string>
     <string name="levels_timer_frozen_format">시간 정지, %d초 남음</string>
 
@@ -292,4 +290,11 @@
     <!-- Android shell strings with no iOS counterpart -->
     <string name="common_loading">불러오는 중…</string>
     <string name="menu_offline_boards">오프라인 — 내장 메모라마를 표시합니다</string>
+
+    <!-- Lose screen rescue offers -->
+    <string name="lose_offer_forgive_format">실수 %d회 취소</string>
+    <string name="lose_offer_extra_life">생명 1개 더 받기</string>
+    <string name="lose_offer_watch_ad">광고 보기</string>
+    <string name="lose_pay_stars_format">별 %d개 사용</string>
+    <string name="lose_life_at_stake">이 게임을 이어서 하면 생명을 잃지 않습니다.</string>
 </resources>
