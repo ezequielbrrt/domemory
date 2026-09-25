@@ -14,7 +14,6 @@
 "game_continue" = "Continue";
 "game_go_to_menu" = "Menu";
 "game_lose_message" = "Sorry, you ran out of time";
-"game_rewarded_extra_time" = "Watch ad to add 30s";
 "game_rewarded_hint" = "Watch ad for a hint";
 "ads_loading" = "Loading ad...";
 "ads_label" = "Ad";
@@ -216,8 +215,6 @@
 
 /* Levels mistake budget */
 "levels_lose_too_many_mistakes" = "Too many mistakes";
-"levels_forgive_ad_format" = "Watch ad to forgive %d mistakes";
-"levels_forgive_stars_format" = "Forgive %1$d mistakes — %2$d";
 "levels_mistakes_remaining_format" = "%1$d of %2$d mistakes used";
 
 /* Levels intro */
@@ -292,3 +289,11 @@
 "season_complete_badge" = "Complete";
 "season_complete_title" = "Season complete!";
 "season_complete_message" = "You cleared every level. Replay any of them to improve its stars.";
+
+/* Lose modal rescue offers */
+"lose_offer_forgive_format" = "Forgive %d mistakes";
+"lose_offer_extra_time" = "Add 30 seconds";
+"lose_offer_extra_life" = "Get 1 more life";
+"lose_offer_watch_ad" = "Watch ad";
+"lose_pay_stars_format" = "Pay %d stars";
+"lose_life_at_stake" = "Continue now and you won't lose a life.";

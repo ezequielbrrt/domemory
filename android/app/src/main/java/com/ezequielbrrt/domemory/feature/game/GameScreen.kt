@@ -7,8 +7,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.SmartDisplay
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
@@ -50,7 +53,9 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,10 +63,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.feature.levels.LivesEffect
+import com.ezequielbrrt.domemory.feature.levels.StarBalancePill
+import com.ezequielbrrt.domemory.feature.levels.livesEffect
 import com.ezequielbrrt.domemory.feature.share.ResultShareData
 import com.ezequielbrrt.domemory.feature.share.ShareResultCardView
 import com.ezequielbrrt.domemory.feature.share.shareResultCard
-import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
 import com.ezequielbrrt.domemory.services.ads.AdMobBanner
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
@@ -638,6 +644,17 @@ private fun OutcomeOverlay(
     val coroutineScope = rememberCoroutineScope()
     var showSkipConfirm by remember { mutableStateOf(false) }
     var isRewardedAdInProgress by remember { mutableStateOf(false) }
+    // Plays when a life is actually booked while the lose screen is up — the out-of-lives
+    // path, where Try again spends the last heart in place. Never on arrival: the loss
+    // isn't committed yet, so no heart has gone.
+    var heartEffect by remember { mutableStateOf<LivesEffect?>(null) }
+    var previousLives by remember { mutableStateOf(state.livesRemaining) }
+    LaunchedEffect(state.livesRemaining) {
+        val previous = previousLives
+        val current = state.livesRemaining
+        if (previous != null && current != null) heartEffect = livesEffect(previous, current)
+        previousLives = current
+    }
     val won = outcome is GameOutcome.Won
     val lostToMistakes = outcome is GameOutcome.Lost && outcome.reason == LoseReason.TOO_MANY_MISTAKES
     // Mirrors iOS's `LoseModal.isOutOfLives`: null outside Levels/Seasons, so this is
@@ -757,16 +774,28 @@ private fun OutcomeOverlay(
                         )
                     }
 
-                    // Lives row (spec 7.4/7.7) — Levels/Seasons only, port of iOS's
-                    // `LivesRow(remaining:effect:)`. `livesRemaining` is already the value
-                    // `GameViewModel` reads at loss time, so the just-lost heart is the
-                    // first empty slot (see `GameUiState.livesRemaining`'s doc).
+                    // Lives on the left, spendable stars on the right, so every star price
+                    // below can be read against the balance that pays it (iOS's
+                    // `LoseModal.statusRow`). Levels/Seasons only.
                     state.livesRemaining?.let { lives ->
-                        LivesRow(
-                            remaining = lives,
-                            fontSize = 15.sp,
-                            effect = if (lives < LevelLivesService.MAX_LIVES) LivesEffect.Lost(lives) else null,
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            // The loss isn't booked until the player leaves it, so the heart
+                            // it would cost is still full — it pulses instead of breaking.
+                            LivesRow(
+                                remaining = lives,
+                                fontSize = 15.sp,
+                                effect = heartEffect,
+                                onEffectFinished = { heartEffect = null },
+                                atRiskSlot = if (state.isLifeAtStake) lives - 1 else null,
+                            )
+                            Spacer(Modifier.weight(1f))
+                            if (starBalance != null) {
+                                StarBalancePill(balance = starBalance)
+                            }
+                        }
                         if (isOutOfLives) {
                             Text(
                                 text = stringResource(
@@ -781,57 +810,47 @@ private fun OutcomeOverlay(
                         }
                     }
 
-                    // Ad / star rescues (spec 7.7) — Levels/Seasons only, gating mirrored
-                    // exactly from iOS's `LoseModal.body`: the ad slot offers at most one
-                    // rescue (life > forgive; iOS's third, lives-agnostic "extra time" ad
-                    // offer has no Android call site yet — see `AdsService.kt`'s
-                    // `game_rewarded_extra_time` note and `ANDROID_PLAN.md` Phase 7), buy-
-                    // life-with-stars only out of lives, forgive-with-stars only mid-budget
-                    // and not out of lives.
-                    if (isLevel && starBalance != null) {
-                        if (isOutOfLives && canWatchAdForLife) {
-                            LoseAdButton(
-                                text = stringResource(R.string.levels_watch_ad_for_life),
-                                isLoading = isRewardedAdInProgress,
-                                onClick = {
-                                    isRewardedAdInProgress = true
-                                    onWatchAdForLife { isRewardedAdInProgress = false }
-                                },
-                            )
-                        } else if (!isOutOfLives && lostToMistakes && canWatchAdToForgive) {
-                            LoseAdButton(
-                                text = stringResource(R.string.levels_forgive_ad_format, LevelPowerUp.FORGIVE_AMOUNT),
-                                isLoading = isRewardedAdInProgress,
-                                onClick = {
-                                    isRewardedAdInProgress = true
-                                    onWatchAdToForgive { isRewardedAdInProgress = false }
-                                },
-                            )
-                        }
+                    // One rescue per loss, payable by ad, stars or either (iOS's
+                    // `LoseModal.offer`): a life when there are none left, forgiven mistakes
+                    // when the budget ran out. iOS's third, "add 30 seconds" ad offer has no
+                    // Android call site yet — see `AdsService.kt`'s `game_rewarded_extra_time`
+                    // note and `ANDROID_PLAN.md` Phase 7.
+                    val offer = when {
+                        !isLevel || starBalance == null -> null
+                        isOutOfLives -> LoseOffer(
+                            title = stringResource(R.string.lose_offer_extra_life),
+                            hasAd = canWatchAdForLife,
+                            starCost = LevelPowerUp.LIFE_COST.takeIf { starBalance >= it },
+                            onWatchAd = onWatchAdForLife,
+                            onPayStars = onBuyLifeWithStars,
+                        )
+                        lostToMistakes -> LoseOffer(
+                            title = stringResource(R.string.lose_offer_forgive_format, LevelPowerUp.FORGIVE_AMOUNT),
+                            hasAd = canWatchAdToForgive,
+                            starCost = LevelPowerUp.FORGIVE_COST.takeIf { starBalance >= it },
+                            onWatchAd = onWatchAdToForgive,
+                            onPayStars = onForgiveMistakesWithStars,
+                        )
+                        else -> null
+                    }?.takeIf { it.hasAd || it.starCost != null }
 
-                        if (isOutOfLives && starBalance >= LevelPowerUp.LIFE_COST) {
-                            LoseStarButton(
-                                text = stringResource(R.string.levels_buy_life_format, LevelPowerUp.LIFE_COST),
-                                onClick = onBuyLifeWithStars,
-                            )
-                        }
-
-                        if (!isOutOfLives && lostToMistakes && starBalance >= LevelPowerUp.FORGIVE_COST) {
-                            LoseStarButton(
-                                text = stringResource(
-                                    R.string.levels_forgive_stars_format,
-                                    LevelPowerUp.FORGIVE_AMOUNT,
-                                    LevelPowerUp.FORGIVE_COST,
-                                ),
-                                onClick = onForgiveMistakesWithStars,
-                            )
-                        }
+                    offer?.let {
+                        LoseOfferBlock(
+                            offer = it,
+                            showsLifeAtStake = state.isLifeAtStake,
+                            isRewardedAdInProgress = isRewardedAdInProgress,
+                            onWatchAd = {
+                                isRewardedAdInProgress = true
+                                it.onWatchAd { isRewardedAdInProgress = false }
+                            },
+                        )
                     }
 
                     // "Try again" — filled `secondary` (not primary), hidden for the Daily
                     // Challenge or while out of lives (spec 7.7: `tapOnTryAgain` has nothing
                     // useful to do in either case).
-                    if (!isDailyChallenge && !isOutOfLives) {
+                    val showsTryAgain = !isDailyChallenge && !isOutOfLives
+                    if (showsTryAgain) {
                         PauseActionButton(
                             text = stringResource(R.string.game_try_again),
                             color = palette.secondary,
@@ -839,18 +858,61 @@ private fun OutcomeOverlay(
                         )
                     }
 
-                    if (isLevel && starBalance != null && starBalance >= LevelPowerUp.SKIP_LEVEL_COST) {
-                        LoseStarButton(
-                            text = stringResource(R.string.levels_skip_level_format, LevelPowerUp.SKIP_LEVEL_COST),
-                            onClick = { showSkipConfirm = true },
-                        )
-                    }
+                    // Skip needs a life left after it books this loss; otherwise the map's
+                    // lives gate refuses the very level it unlocks.
+                    val showsSkip = isLevel && starBalance != null &&
+                        starBalance >= LevelPowerUp.SKIP_LEVEL_COST &&
+                        (state.livesAfterLoss ?: 0) > 0
 
-                    LoseOutlineButton(
-                        text = stringResource(R.string.game_go_to_menu),
-                        color = palette.primary,
-                        onClick = onQuit,
-                    )
+                    // Skip and Menu drop to text buttons: neither rescues this game, and Skip
+                    // still confirms before it spends anything. Menu keeps its outlined
+                    // button when it is the only way out.
+                    if (offer == null && !showsTryAgain && !showsSkip) {
+                        LoseOutlineButton(
+                            text = stringResource(R.string.game_go_to_menu),
+                            color = palette.primary,
+                            onClick = onQuit,
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = if (showsSkip) Arrangement.SpaceBetween else Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (showsSkip) {
+                                TextButton(
+                                    onClick = { showSkipConfirm = true },
+                                    modifier = Modifier.weight(1f, fill = false),
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            stringResource(R.string.levels_skip_level_format, LevelPowerUp.SKIP_LEVEL_COST),
+                                            color = palette.hardAmber,
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                        )
+                                        Icon(
+                                            Icons.Filled.Star,
+                                            contentDescription = null,
+                                            tint = palette.hardAmber,
+                                            modifier = Modifier.size(12.dp),
+                                        )
+                                    }
+                                }
+                            }
+                            TextButton(onClick = onQuit) {
+                                Text(
+                                    stringResource(R.string.game_go_to_menu),
+                                    color = palette.primary,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -908,45 +970,128 @@ private fun OutcomeOverlay(
     }
 }
 
-/** Rewarded-ad rescue on the lose screen (spec 7.7) — port of iOS's `LoseModal.adButton`:
- * filled `hardAmber`, white bold text, swaps to the loading copy and disables itself while
- * the ad is in flight. The free path, so it always leads its star-priced alternative. */
+/** A rescue the lose screen can sell. Either payment may be missing — no ad filled, or
+ * not enough stars — and an offer with neither isn't shown. */
+private class LoseOffer(
+    val title: String,
+    val hasAd: Boolean,
+    /** Null when the player can't afford it. */
+    val starCost: Int?,
+    val onWatchAd: (onFinished: () -> Unit) -> Unit,
+    val onPayStars: () -> Unit,
+)
+
+/** Port of iOS's `LoseModal.offerBlock`: a title naming what the rescue buys, the note
+ * that it keeps the life at stake, then the ad and star payments side by side. */
 @Composable
-private fun LoseAdButton(text: String, isLoading: Boolean, onClick: () -> Unit) {
+private fun LoseOfferBlock(
+    offer: LoseOffer,
+    showsLifeAtStake: Boolean,
+    isRewardedAdInProgress: Boolean,
+    onWatchAd: () -> Unit,
+) {
+    val palette = LocalPalette.current
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                offer.title,
+                color = palette.textPrimary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.semantics { heading() },
+            )
+            if (showsLifeAtStake) {
+                Text(
+                    stringResource(R.string.lose_life_at_stake),
+                    color = palette.textSecondary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            if (offer.hasAd) {
+                LoseAdButton(
+                    isLoading = isRewardedAdInProgress,
+                    onClick = onWatchAd,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                )
+            }
+            offer.starCost?.let { cost ->
+                LoseStarPriceButton(
+                    cost = cost,
+                    onClick = offer.onPayStars,
+                    // Sized to its price when it shares the row, so the ad button keeps
+                    // the width its label needs.
+                    modifier = if (offer.hasAd) Modifier.fillMaxHeight() else Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+/** Rewarded-ad payment — port of iOS's `LoseModal.adButton`: filled `hardAmber`, white
+ * bold text, swaps to the loading copy and disables itself while the ad is in flight.
+ * The free path, so it leads its star-priced alternative. */
+@Composable
+private fun LoseAdButton(isLoading: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val palette = LocalPalette.current
     Button(
         onClick = onClick,
         enabled = !isLoading,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         shape = RoundedCornerShape(50),
-        contentPadding = PaddingValues(vertical = 16.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp),
         colors = ButtonDefaults.buttonColors(containerColor = palette.hardAmber),
     ) {
-        Text(
-            text = if (isLoading) stringResource(R.string.ads_loading) else text,
-            color = Color.White,
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (!isLoading) {
+                Icon(Icons.Filled.SmartDisplay, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+            }
+            // A long translation wraps rather than shrinking below the price's type size.
+            Text(
+                text = stringResource(if (isLoading) R.string.ads_loading else R.string.lose_offer_watch_ad),
+                color = Color.White,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+            )
+        }
     }
 }
 
-/** Star-priced lose-screen rescue (spec 7.7) — port of iOS's `LoseModal.starButton`:
- * outlined (not filled) `hardAmber`, so it reads as an alternative to the ad path above
- * rather than a replacement for it, with a trailing star glyph. */
+/** Star payment — port of iOS's `LoseModal.starButton`: outlined (not filled) `hardAmber`,
+ * so it reads as an alternative to the ad path rather than a replacement for it. */
 @Composable
-private fun LoseStarButton(text: String, onClick: () -> Unit) {
+private fun LoseStarPriceButton(cost: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val palette = LocalPalette.current
+    val accessibilityLabel = stringResource(R.string.lose_pay_stars_format, cost)
     OutlinedButton(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.semantics { contentDescription = accessibilityLabel },
         shape = RoundedCornerShape(50),
-        contentPadding = PaddingValues(vertical = 16.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
         border = androidx.compose.foundation.BorderStroke(1.5.dp, palette.hardAmber.copy(alpha = 0.5f)),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(text, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = palette.hardAmber)
+        Row(
+            modifier = Modifier.clearAndSetSemantics {},
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("$cost", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = palette.hardAmber)
             Icon(Icons.Filled.Star, contentDescription = null, tint = palette.hardAmber, modifier = Modifier.size(13.dp))
         }
     }

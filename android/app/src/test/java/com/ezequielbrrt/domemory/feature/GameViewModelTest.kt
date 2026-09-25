@@ -805,6 +805,81 @@ class GameViewModelTest {
         vm.stop()
     }
 
+    @Test
+    fun `a standing Level loss keeps its life at stake until the player leaves it`() = runTest {
+        val store = RecordingStore()
+        val lives = levelLives()
+        repeat(3) { lives.spendOnLoss() } // the last life of the day
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = store)),
+            levelLives = lives,
+        )
+        assertFalse(vm.state.value.isLifeAtStake)
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+        runCurrent()
+
+        // The lose screen is up and the heart it would cost is still full.
+        assertTrue(vm.state.value.isLifeAtStake)
+        assertEquals(1, vm.state.value.livesRemaining)
+        assertEquals(0, vm.state.value.livesAfterLoss)
+
+        vm.retry()
+        runCurrent()
+
+        assertFalse("committing the loss spends the heart", vm.state.value.isLifeAtStake)
+        assertEquals(0, vm.state.value.livesRemaining)
+        vm.stop()
+    }
+
+    @Test
+    fun `skipping is refused when it would spend the last life`() = runTest {
+        val store = RecordingStore()
+        val lives = levelLives()
+        repeat(3) { lives.spendOnLoss() }
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.SKIP_LEVEL_COST)
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = store)),
+            levelLives = lives,
+            starWallet = wallet,
+        )
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+
+        val skipped = vm.skipLevelWithStars()
+        runCurrent()
+
+        // The map would refuse the level this unlocks, so nothing is sold or booked.
+        assertFalse(skipped)
+        assertTrue(store.skippedLevels.isEmpty())
+        assertTrue(store.completions.isEmpty())
+        assertEquals(1, lives.remaining())
+        assertEquals(LevelPowerUp.SKIP_LEVEL_COST, wallet.balance.value)
+        vm.stop()
+    }
+
+    @Test
+    fun `skipping is refused once the player is out of lives`() = runTest {
+        val store = RecordingStore()
+        val lives = levelLives()
+        repeat(3) { lives.spendOnLoss() }
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.SKIP_LEVEL_COST)
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = store)),
+            levelLives = lives,
+            starWallet = wallet,
+        )
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+        vm.retry() // books the loss, spending the last life; the lose screen stays up
+        runCurrent()
+        assertTrue(vm.state.value.isOutOfLives)
+
+        assertFalse(vm.skipLevelWithStars())
+        assertTrue(store.skippedLevels.isEmpty())
+        assertEquals(LevelPowerUp.SKIP_LEVEL_COST, wallet.balance.value)
+        vm.stop()
+    }
+
     // --- Haptics (spec: iOS's fireChooseHaptic) -------------------------------------
 
     @Test

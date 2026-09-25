@@ -69,8 +69,6 @@
 
     <!-- Levels mistake budget -->
     <string name="levels_lose_too_many_mistakes">错误次数过多</string>
-    <string name="levels_forgive_ad_format">观看广告抵消 %d 次错误</string>
-    <string name="levels_forgive_stars_format">抵消 %1$d 次错误 — %2$d</string>
     <string name="levels_mistakes_remaining_format">已用错误 %1$d / %2$d</string>
     <string name="levels_timer_frozen_format">时间已冻结，剩余 %d 秒</string>
 
@@ -292,4 +290,11 @@
     <!-- Android shell strings with no iOS counterpart -->
     <string name="common_loading">正在加载…</string>
     <string name="menu_offline_boards">离线 — 正在显示内置记忆游戏</string>
+
+    <!-- Lose screen rescue offers -->
+    <string name="lose_offer_forgive_format">抵消 %d 次错误</string>
+    <string name="lose_offer_extra_life">再获得 1 条生命</string>
+    <string name="lose_offer_watch_ad">观看广告</string>
+    <string name="lose_pay_stars_format">支付 %d 颗星星</string>
+    <string name="lose_life_at_stake">继续这局游戏，就不会失去生命。</string>
 </resources>

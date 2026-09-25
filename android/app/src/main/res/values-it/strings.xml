@@ -69,8 +69,6 @@
 
     <!-- Levels mistake budget -->
     <string name="levels_lose_too_many_mistakes">Troppi errori</string>
-    <string name="levels_forgive_ad_format">Guarda un annuncio per cancellare %d errori</string>
-    <string name="levels_forgive_stars_format">Cancella %1$d errori — %2$d</string>
     <string name="levels_mistakes_remaining_format">%1$d errori su %2$d</string>
     <string name="levels_timer_frozen_format">Tempo congelato, %d secondi rimasti</string>
 
@@ -292,4 +290,11 @@
     <!-- Android shell strings with no iOS counterpart -->
     <string name="common_loading">Caricamento…</string>
     <string name="menu_offline_boards">Offline — vengono mostrati i memory inclusi</string>
+
+    <!-- Lose screen rescue offers -->
+    <string name="lose_offer_forgive_format">Cancella %d errori</string>
+    <string name="lose_offer_extra_life">Ottieni 1 vita in più</string>
+    <string name="lose_offer_watch_ad">Guarda un annuncio</string>
+    <string name="lose_pay_stars_format">Paga %d stelle</string>
+    <string name="lose_life_at_stake">Continua questa partita e non perderai una vita.</string>
 </resources>

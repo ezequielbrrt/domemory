@@ -73,7 +73,6 @@ enum Strings {
     static let cancel = NSLocalizedString("common_cancel", comment: "Cancel action")
     static let accept = NSLocalizedString("common_accept", comment: "Accept action")
     static let youLose = NSLocalizedString("game_lose_message", comment: "Lose modal description")
-    static let rewardedExtraTime = NSLocalizedString("game_rewarded_extra_time", comment: "Rewarded ad action for extra game time")
     static let rewardedHint = NSLocalizedString("game_rewarded_hint", comment: "Rewarded ad action for a game hint")
     static let adLoading = NSLocalizedString("ads_loading", comment: "Ad loading state")
     static let adLabel = NSLocalizedString("ads_label", comment: "Ad disclosure label")
@@ -136,14 +135,21 @@ enum Strings {
     static let skipLevelConfirmMessage = NSLocalizedString("levels_skip_level_confirm_message", comment: "Confirmation body explaining that a skipped level earns no stars")
     static let skipLevelConfirmAction = NSLocalizedString("levels_skip_level_confirm_action", comment: "Confirm action for skipping a level")
 
+    // Lose modal rescue offers: a title naming what the player gets, then an
+    // ad button and a star-price button side by side.
+    static func loseOfferForgiveFormat(_ amount: Int) -> String {
+        String(format: NSLocalizedString("lose_offer_forgive_format", comment: "Lose modal offer title: forgive mistakes and keep playing, %d = mistakes forgiven"), amount)
+    }
+    static let loseOfferExtraTime = NSLocalizedString("lose_offer_extra_time", comment: "Lose modal offer title: add 30 seconds to the clock and keep playing")
+    static let loseOfferExtraLife = NSLocalizedString("lose_offer_extra_life", comment: "Lose modal offer title when out of lives: get one more life")
+    static let loseOfferWatchAd = NSLocalizedString("lose_offer_watch_ad", comment: "Short button that pays for a lose modal offer with a rewarded ad")
+    static func losePayStarsFormat(_ cost: Int) -> String {
+        String(format: NSLocalizedString("lose_pay_stars_format", comment: "Accessibility label for the button that pays for a lose modal offer with stars, %d = star cost"), cost)
+    }
+    static let loseLifeAtStake = NSLocalizedString("lose_life_at_stake", comment: "Lose modal note: rescuing the current game means no life is spent")
+
     // Mistake budget
     static let loseTooManyMistakes = NSLocalizedString("levels_lose_too_many_mistakes", comment: "Lose modal message when the mistake budget is spent")
-    static func forgiveAdFormat(_ amount: Int) -> String {
-        String(format: NSLocalizedString("levels_forgive_ad_format", comment: "Rewarded ad action forgiving mistakes, %d = mistakes forgiven"), amount)
-    }
-    static func forgiveStarsFormat(_ amount: Int, _ cost: Int) -> String {
-        String(format: NSLocalizedString("levels_forgive_stars_format", comment: "Star-priced action forgiving mistakes, %1$d = mistakes forgiven, %2$d = star cost"), amount, cost)
-    }
     static func timerFrozenFormat(_ seconds: Int) -> String {
         String(format: NSLocalizedString("levels_timer_frozen_format", comment: "Accessibility label while the Freeze power-up holds the clock, %d = seconds left"), seconds)
     }

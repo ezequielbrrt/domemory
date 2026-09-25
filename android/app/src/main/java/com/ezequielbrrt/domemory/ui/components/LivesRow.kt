@@ -1,7 +1,12 @@
 package com.ezequielbrrt.domemory.ui.components
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -47,6 +52,9 @@ fun LivesRow(
     fontSize: TextUnit = 16.sp,
     effect: LivesEffect? = null,
     onEffectFinished: (() -> Unit)? = null,
+    /** A still-filled heart a pending loss will take unless the player rescues the game.
+     * It pulses rather than breaking, because it hasn't gone yet (iOS's `atRiskSlot`). */
+    atRiskSlot: Int? = null,
 ) {
     val palette = LocalPalette.current
     val reduceMotion = rememberReduceMotion()
@@ -55,6 +63,19 @@ fun LivesRow(
     // back in at its centre rather than just decorating one.
     var bumpedSlot by remember { mutableStateOf<Int?>(null) }
     val activeEffect = effect?.takeUnless { reduceMotion }
+    val atRiskAlpha = if (atRiskSlot == null) {
+        1f
+    } else if (reduceMotion) {
+        0.45f
+    } else {
+        val pulse by rememberInfiniteTransition(label = "atRiskHeart").animateFloat(
+            initialValue = 1f,
+            targetValue = 0.3f,
+            animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
+            label = "atRiskHeartAlpha",
+        )
+        pulse
+    }
 
     LaunchedEffect(activeEffect) {
         if (activeEffect is LivesEffect.Gained) {
@@ -80,7 +101,14 @@ fun LivesRow(
                     fontSize = fontSize,
                     fontWeight = FontWeight.SemiBold,
                     color = if (index < remaining) palette.secondary else palette.textSecondary.copy(alpha = 0.3f),
-                    modifier = Modifier.graphicsLayer { scaleX = bump; scaleY = bump },
+                    modifier = Modifier.graphicsLayer {
+                        val atRisk = index == atRiskSlot && index < remaining
+                        // Dims and shrinks together, like iOS's phase-animated heart.
+                        val pulse = if (atRisk) atRiskAlpha else 1f
+                        alpha = pulse
+                        scaleX = bump * (0.85f + 0.15f * pulse)
+                        scaleY = bump * (0.85f + 0.15f * pulse)
+                    },
                 )
                 if (activeEffect != null && activeEffect.slot == index) {
                     val glyph = with(androidx.compose.ui.platform.LocalDensity.current) { fontSize.toDp() }

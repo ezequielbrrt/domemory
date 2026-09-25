@@ -14,7 +14,6 @@
 "game_continue" = "Continuar";
 "game_go_to_menu" = "Ir al menú";
 "game_lose_message" = "Lo siento, se te acabó el tiempo";
-"game_rewarded_extra_time" = "Ver anuncio para sumar 30 s";
 "game_rewarded_hint" = "Ver anuncio por una pista";
 "ads_loading" = "Cargando anuncio...";
 "ads_label" = "Anuncio";
@@ -216,8 +215,6 @@
 
 /* Levels mistake budget */
 "levels_lose_too_many_mistakes" = "Demasiados errores";
-"levels_forgive_ad_format" = "Ver anuncio para perdonar %d errores";
-"levels_forgive_stars_format" = "Perdonar %1$d errores — %2$d";
 "levels_mistakes_remaining_format" = "%1$d de %2$d errores usados";
 
 /* Levels intro */
@@ -292,3 +289,11 @@
 "season_complete_badge" = "Completa";
 "season_complete_title" = "¡Temporada completada!";
 "season_complete_message" = "Superaste todos los niveles. Vuelve a jugar cualquiera para mejorar sus estrellas.";
+
+/* Lose modal rescue offers */
+"lose_offer_forgive_format" = "Perdonar %d errores";
+"lose_offer_extra_time" = "Sumar 30 segundos";
+"lose_offer_extra_life" = "Obtener 1 vida más";
+"lose_offer_watch_ad" = "Ver anuncio";
+"lose_pay_stars_format" = "Pagar %d estrellas";
+"lose_life_at_stake" = "Continúa esta partida y no perderás una vida.";

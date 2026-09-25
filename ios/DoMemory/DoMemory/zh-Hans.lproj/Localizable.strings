@@ -14,7 +14,6 @@
 "game_continue" = "继续";
 "game_go_to_menu" = "返回菜单";
 "game_lose_message" = "很遗憾，时间到了";
-"game_rewarded_extra_time" = "观看广告增加30秒";
 "game_rewarded_hint" = "观看广告获得提示";
 "ads_loading" = "广告加载中...";
 "ads_label" = "广告";
@@ -216,8 +215,6 @@
 
 /* Levels mistake budget */
 "levels_lose_too_many_mistakes" = "错误次数过多";
-"levels_forgive_ad_format" = "观看广告抵消 %d 次错误";
-"levels_forgive_stars_format" = "抵消 %1$d 次错误 — %2$d";
 "levels_mistakes_remaining_format" = "已用错误 %1$d / %2$d";
 
 /* Levels intro */
@@ -292,3 +289,11 @@
 "season_complete_badge" = "已完成";
 "season_complete_title" = "赛季完成！";
 "season_complete_message" = "你已通关所有关卡。随时重玩任意一关来提升它的星数。";
+
+/* Lose modal rescue offers */
+"lose_offer_forgive_format" = "抵消 %d 次错误";
+"lose_offer_extra_time" = "增加30秒";
+"lose_offer_extra_life" = "再获得 1 条生命";
+"lose_offer_watch_ad" = "观看广告";
+"lose_pay_stars_format" = "支付 %d 颗星星";
+"lose_life_at_stake" = "继续这局游戏，就不会失去生命。";

@@ -43,6 +43,12 @@ data class GameUiState(
      * out-of-lives state in place instead of navigating away.
      */
     val livesRemaining: Int? = null,
+    /**
+     * True from a Level loss until it is committed. The life is only spent when the
+     * player leaves the loss behind (Try again, Menu, Skip), so a rescue still keeps it —
+     * mirrors iOS's `hasLoggedGameFinished` guard behind `isLifeAtStake`.
+     */
+    val isLossPending: Boolean = false,
 ) {
     val isFinished: Boolean get() = outcome != null
     val timeFraction: Float
@@ -52,4 +58,11 @@ data class GameUiState(
     /** Mirrors iOS's `LoseModal.isOutOfLives`: `(levelLivesRemaining ?? -1) == 0`. */
     val isOutOfLives: Boolean
         get() = livesRemaining == 0
+    /** Mirrors iOS's `MemorizeViewModel.isLifeAtStake`: the lose screen is up and the
+     * heart it would cost is still full. */
+    val isLifeAtStake: Boolean
+        get() = isLossPending && outcome is GameOutcome.Lost && (livesRemaining ?: 0) > 0
+    /** Lives left once the standing loss is booked — what Skip would leave the player. */
+    val livesAfterLoss: Int?
+        get() = livesRemaining?.let { if (isLifeAtStake) it - 1 else it }
 }
