@@ -71,7 +71,7 @@
 "settings_rewarded_remove_ads_action" = "보기";
 "settings_rewarded_remove_ads_active" = "활성";
 "settings_rewarded_remove_ads_active_format" = "%@까지 광고가 비활성화됩니다";
-"settings_rewarded_remove_ads_description" = "광고를 보고 24시간 동안 광고를 끄세요";
+"settings_rewarded_remove_ads_description" = "짧은 광고 %d개를 보면 24시간 동안 광고를 끌 수 있어요";
 "settings_rewarded_remove_ads_success_message" = "앞으로 24시간 동안 광고가 비활성화됩니다.";
 "settings_rewarded_remove_ads_success_title" = "광고 비활성화됨";
 "settings_rewarded_remove_ads_title" = "무료 광고 없는 하루";
@@ -292,3 +292,23 @@
 "season_complete_badge" = "완료";
 "season_complete_title" = "시즌 완료!";
 "season_complete_message" = "모든 레벨을 클리어했습니다. 아무 레벨이나 다시 플레이해 별을 올려 보세요.";
+
+// Ad-free day offer (pill + sheet)
+"ad_free_day_pill_title" = "광고 없음";
+"ad_free_day_pill_progress_format" = "광고 없음 %d/%d";
+"ad_free_day_pill_active_format" = "%@ 남음";
+"ad_free_day_intro_title" = "광고에 대해 죄송해요";
+"ad_free_day_intro_message" = "광고 덕분에 DoMemory가 무료로 제공되지만, 방법이 있어요. 짧은 광고 %d개를 보면 앞으로 24시간 동안 광고를 꺼 드려요.";
+"ad_free_day_intro_watch_format" = "좋아요, 광고 %d/%d 보기";
+"ad_free_day_title" = "하루 동안 광고 없이 즐기기";
+"ad_free_day_message" = "짧은 광고 %d개를 보면 배너와 전면 광고를 24시간 동안 꺼 드려요.";
+"ad_free_day_watch_format" = "광고 %d/%d 보기";
+"ad_free_day_step_ad_format" = "광고 %d";
+"ad_free_day_step_reward" = "광고 없는 하루";
+"ad_free_day_halfway_hint" = "하나만 더 보면 끝";
+"ad_free_day_no_fill" = "지금은 볼 수 있는 광고가 없어요. 진행 상황은 저장되어 있어요.";
+"ad_free_day_try_again" = "다시 시도";
+"ad_free_day_active_format" = "%@까지 광고 꺼짐";
+"ad_free_day_back" = "게임으로 돌아가기";
+"ad_free_day_remove_forever_format" = "광고 영구 제거 · %@";
+"ad_free_day_not_now" = "나중에";

@@ -50,6 +50,15 @@ struct DebugMenuView: View {
                             subtitle: "Grants/clears a year-long rewarded remove-ads window"
                         )
                     }
+
+                    Button {
+                        AdFreeDayService.shared.reset()
+                    } label: {
+                        DebugRowLabel(
+                            title: "Reset ad-free day offer",
+                            subtitle: "Forgets today's watched ads and replays the apology copy on the next open"
+                        )
+                    }
                 }
 
                 Section {

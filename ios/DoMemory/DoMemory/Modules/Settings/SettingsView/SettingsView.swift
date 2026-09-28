@@ -15,7 +15,7 @@ struct SettingsView: View {
     @Bindable private var purchaseService = PurchaseService.shared
     @State private var showDifficultyPicker = false
     @State private var showThemePicker = false
-    @State private var isRewardedAdInProgress = false
+    @State private var showAdFreeDay = false
     @State private var showNotificationsDeniedAlert = false
     @State private var showAchievements = false
     @State private var showWhatsNew = false
@@ -152,7 +152,7 @@ struct SettingsView: View {
                             // someone who already owns ad-free forever. This one reward
                             // is genuinely worthless to them, unlike the in-game ones.
                             if !purchaseService.hasPurchasedRemoveAds,
-                               AdsService.shared.isRewardedConfigured(for: .settingsRewardedRemoveAds)
+                               AdsService.shared.isRewardedConfigured(for: .adFreeDayRewarded)
                                 || purchaseService.hasActiveRewardedRemoveAds {
                                 SettingsRowSeparator()
 
@@ -161,10 +161,10 @@ struct SettingsView: View {
                                     subtitle: rewardedRemoveAdsSubtitle,
                                     actionTitle: rewardedRemoveAdsActionTitle,
                                     systemImage: "play.rectangle.fill",
-                                    isDisabled: purchaseService.hasRemovedAds || isRewardedAdInProgress
+                                    isDisabled: purchaseService.hasRemovedAds
                                 ) {
                                     HapticsService.shared.fire(.tap)
-                                    presentRewardedRemoveAds()
+                                    showAdFreeDay = true
                                 }
                             }
 
@@ -225,6 +225,9 @@ struct SettingsView: View {
         .navigationDestination(isPresented: $showAchievements) {
             AchievementsView()
         }
+        .sheet(isPresented: $showAdFreeDay) {
+            AdFreeDayOfferView(source: "settings")
+        }
         .alert(item: $purchaseService.purchaseAlert) { alert in
             Alert(
                 title: Text(alert.title),
@@ -237,7 +240,7 @@ struct SettingsView: View {
             Task {
                 await purchaseService.refreshPurchasedProducts()
                 await purchaseService.loadProducts()
-                AdsService.shared.loadRewardedAd(for: .settingsRewardedRemoveAds)
+                AdsService.shared.loadRewardedAd(for: .adFreeDayRewarded)
                 await NotificationService.shared.syncAuthorizationStatus()
             }
         }
@@ -368,16 +371,12 @@ struct SettingsView: View {
             )
         }
 
-        return Strings.settingsRewardedRemoveAdsDescription
+        return Strings.settingsRewardedRemoveAdsDescription(AdFreeDayService.requiredAds)
     }
 
     private var rewardedRemoveAdsActionTitle: String {
         if purchaseService.hasActiveRewardedRemoveAds {
             return Strings.settingsRewardedRemoveAdsActive
-        }
-
-        if isRewardedAdInProgress {
-            return Strings.adLoading
         }
 
         return Strings.settingsRewardedRemoveAdsAction
@@ -387,22 +386,6 @@ struct SettingsView: View {
         AppTheme(rawValue: themePreference)?.title ?? Strings.themeSystem
     }
 
-    private func presentRewardedRemoveAds() {
-        guard !isRewardedAdInProgress else { return }
-        isRewardedAdInProgress = true
-        AnalyticsService.log(.adLifecycle(placement: AdPlacement.settingsRewardedRemoveAds.rawValue, action: "requested"))
-        AdsService.shared.presentRewardedAd(
-            for: .settingsRewardedRemoveAds,
-            rewardHandler: {
-                purchaseService.grantRewardedRemoveAds()
-                AnalyticsService.log(.adLifecycle(placement: AdPlacement.settingsRewardedRemoveAds.rawValue, action: "reward_earned"))
-            },
-            completion: { didEarnReward in
-                isRewardedAdInProgress = false
-                AnalyticsService.log(.adLifecycle(placement: AdPlacement.settingsRewardedRemoveAds.rawValue, action: didEarnReward ? "dismissed_rewarded" : "dismissed_unrewarded"))
-            }
-        )
-    }
 }
 
 /// A titled card grouping related rows.

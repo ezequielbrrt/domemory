@@ -49,7 +49,9 @@ enum Strings {
     static let settingsRemoveAdsPending = NSLocalizedString("settings_remove_ads_pending", comment: "Remove ads pending message")
     static let settingsRemoveAdsNoRestore = NSLocalizedString("settings_remove_ads_no_restore", comment: "No restorable remove ads purchase message")
     static let settingsRewardedRemoveAdsTitle = NSLocalizedString("settings_rewarded_remove_ads_title", comment: "Rewarded temporary remove ads setting title")
-    static let settingsRewardedRemoveAdsDescription = NSLocalizedString("settings_rewarded_remove_ads_description", comment: "Rewarded temporary remove ads setting description")
+    static func settingsRewardedRemoveAdsDescription(_ adCount: Int) -> String {
+        String(format: NSLocalizedString("settings_rewarded_remove_ads_description", comment: "Rewarded temporary remove ads setting description, %d = ads to watch"), adCount)
+    }
     static let settingsRewardedRemoveAdsAction = NSLocalizedString("settings_rewarded_remove_ads_action", comment: "Rewarded temporary remove ads button title")
     static let settingsRewardedRemoveAdsActive = NSLocalizedString("settings_rewarded_remove_ads_active", comment: "Rewarded temporary remove ads active state")
     static let settingsRewardedRemoveAdsActiveFormat = NSLocalizedString("settings_rewarded_remove_ads_active_format", comment: "Rewarded temporary remove ads active state with expiry time")
@@ -347,4 +349,42 @@ enum Strings {
     static let whatsNewMultiplayerHostDescription = NSLocalizedString("whats_new_multiplayer_host_description", comment: "Host-first multiplayer description in What's New")
     static let whatsNewMultiplayerReadyTitle = NSLocalizedString("whats_new_multiplayer_ready_title", comment: "Multiplayer ready check title in What's New")
     static let whatsNewMultiplayerReadyDescription = NSLocalizedString("whats_new_multiplayer_ready_description", comment: "Multiplayer ready check description in What's New")
+
+    // Ad-free day offer (pill + sheet)
+    static let adFreeDayPillTitle = NSLocalizedString("ad_free_day_pill_title", comment: "Floating No Ads pill, idle")
+    static func adFreeDayPillProgress(_ watched: Int, of required: Int) -> String {
+        String(format: NSLocalizedString("ad_free_day_pill_progress_format", comment: "Floating No Ads pill with chain progress, %d = ads watched, %d = ads required"), watched, required)
+    }
+    static func adFreeDayPillActive(_ remaining: String) -> String {
+        String(format: NSLocalizedString("ad_free_day_pill_active_format", comment: "Floating pill while the ad-free day runs, %@ = time left like 18h"), remaining)
+    }
+    static let adFreeDayIntroTitle = NSLocalizedString("ad_free_day_intro_title", comment: "Ad-free day sheet title on the first open (apology)")
+    static func adFreeDayIntroMessage(_ adCount: Int) -> String {
+        String(format: NSLocalizedString("ad_free_day_intro_message", comment: "Ad-free day sheet message on the first open, %d = ads to watch"), adCount)
+    }
+    static func adFreeDayIntroWatch(_ index: Int, of required: Int) -> String {
+        String(format: NSLocalizedString("ad_free_day_intro_watch_format", comment: "Ad-free day primary button on the first open, %d = ad number, %d = ads required"), index, required)
+    }
+    static let adFreeDayTitle = NSLocalizedString("ad_free_day_title", comment: "Ad-free day sheet title on return visits")
+    static func adFreeDayMessage(_ adCount: Int) -> String {
+        String(format: NSLocalizedString("ad_free_day_message", comment: "Ad-free day sheet message on return visits, %d = ads to watch"), adCount)
+    }
+    static func adFreeDayWatch(_ index: Int, of required: Int) -> String {
+        String(format: NSLocalizedString("ad_free_day_watch_format", comment: "Ad-free day primary button, %d = ad number, %d = ads required"), index, required)
+    }
+    static func adFreeDayStepAd(_ index: Int) -> String {
+        String(format: NSLocalizedString("ad_free_day_step_ad_format", comment: "Ad-free day stepper label under an ad node, %d = ad number"), index)
+    }
+    static let adFreeDayStepReward = NSLocalizedString("ad_free_day_step_reward", comment: "Ad-free day stepper label under the reward node")
+    static let adFreeDayHalfwayHint = NSLocalizedString("ad_free_day_halfway_hint", comment: "Ad-free day status line after the first ad")
+    static let adFreeDayNoFill = NSLocalizedString("ad_free_day_no_fill", comment: "Ad-free day status line when no rewarded ad is available")
+    static let adFreeDayTryAgain = NSLocalizedString("ad_free_day_try_again", comment: "Ad-free day primary button when no ad was available")
+    static func adFreeDayActive(_ until: String) -> String {
+        String(format: NSLocalizedString("ad_free_day_active_format", comment: "Ad-free day status line while the grant runs, %@ = expiry time"), until)
+    }
+    static let adFreeDayBack = NSLocalizedString("ad_free_day_back", comment: "Ad-free day primary button once the day is granted")
+    static func adFreeDayRemoveForever(_ price: String) -> String {
+        String(format: NSLocalizedString("ad_free_day_remove_forever_format", comment: "Ad-free day upsell link to the Remove Ads purchase, %@ = localized price"), price)
+    }
+    static let adFreeDayNotNow = NSLocalizedString("ad_free_day_not_now", comment: "Ad-free day dismiss button")
 }

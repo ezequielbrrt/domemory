@@ -169,9 +169,17 @@ final class PurchaseService {
         clearExpiredRewardedRemoveAdsIfNeeded()
     }
 
-    func grantRewardedRemoveAds(duration: TimeInterval = 24 * 60 * 60) {
+    /// Extends the ad-free window by `duration` from now, or from the current
+    /// expiry when one is still running.
+    ///
+    /// `purchaseAlert` is only ever presented by Settings, so a grant made from
+    /// the ad-free day sheet passes `showsAlert: false` — the sheet's own
+    /// active state is the confirmation, and the alert would otherwise sit
+    /// queued until the player next opened Settings.
+    func grantRewardedRemoveAds(duration: TimeInterval = 24 * 60 * 60, showsAlert: Bool = true) {
         let currentExpiration = hasActiveRewardedRemoveAds ? rewardedRemoveAdsExpirationDate ?? Date() : Date()
         rewardedRemoveAdsExpirationDate = currentExpiration.addingTimeInterval(duration)
+        guard showsAlert else { return }
         purchaseAlert = PurchaseAlert(
             title: Strings.settingsRewardedRemoveAdsSuccessTitle,
             message: Strings.settingsRewardedRemoveAdsSuccessMessage

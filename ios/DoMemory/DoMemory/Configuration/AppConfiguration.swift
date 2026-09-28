@@ -71,6 +71,11 @@ enum AnalyticsEvent {
     /// carries no season identity. Lets a season's entry funnel be filtered
     /// on its own in Firebase.
     case seasonLevelsEntered(seasonID: String)
+    // The ad-free day offer. The rewarded ad itself is tracked through
+    // `adLifecycle` under the `ad_free_day_rewarded` placement; these two add
+    // the funnel ends around it.
+    case adFreeDayOfferShown(source: String, isIntro: Bool, adsWatched: Int)
+    case adFreeDayGranted(source: String)
 
     var name: String {
         switch self {
@@ -123,6 +128,8 @@ enum AnalyticsEvent {
         case .levelsIntroCompleted: return "levels_intro_completed"
         case .levelsIntroSkipped: return "levels_intro_skipped"
         case .seasonLevelsEntered: return "season_levels_entered"
+        case .adFreeDayOfferShown: return "ad_free_day_offer_shown"
+        case .adFreeDayGranted: return "ad_free_day_granted"
         }
     }
 
@@ -312,6 +319,14 @@ enum AnalyticsEvent {
             return [:]
         case .seasonLevelsEntered(let seasonID):
             return ["season_id": seasonID]
+        case .adFreeDayOfferShown(let source, let isIntro, let adsWatched):
+            return [
+                "source": source,
+                "is_intro": isIntro ? 1 : 0,
+                "ads_watched": adsWatched
+            ]
+        case .adFreeDayGranted(let source):
+            return ["source": source]
         }
     }
 
