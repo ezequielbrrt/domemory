@@ -91,6 +91,13 @@ final class AdFreeDayOfferViewModel {
         if purchases.hasPurchasedRemoveAds {
             phase = .active
         }
+        // `purchaseAlert` is only ever presented by Settings. When the sheet was
+        // opened from anywhere else, the sheet closing on success (and the pill
+        // and ads disappearing) is the confirmation; drop the alert the purchase
+        // queued so it does not pop up the next time Settings opens.
+        if source != "settings" {
+            purchases.purchaseAlert = nil
+        }
     }
 
     private func watchAd() {
