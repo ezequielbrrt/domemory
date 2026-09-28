@@ -35,7 +35,7 @@ six things that make it a live product rather than a toy:
 6. **Custom memoramas** — player-authored emoji card sets stored locally.
 
 Android monetization is currently AdMob (banner / interstitial / rewarded / app-open /
-native). Remove Ads purchases and the temporary rewarded ad-free day are deferred.
+native). Remove Ads purchases and the two-ad rewarded ad-free day (§12.3) are deferred.
 
 ### Platform targets (iOS, for reference)
 
@@ -1010,6 +1010,7 @@ landing the ad directly on top of the release announcement.
 | `levels_rewarded_forgive` | rewarded | mistake bust → forgive 3 |
 | `app_open` | app-open | on foreground |
 | `multiplayer_finished_native` | native | multiplayer end screen |
+| `ad_free_day_rewarded` | rewarded | ad-free day sheet (pill on menu tabs, season map, multiplayer lobby; Settings row) → two ads = 24 h without involuntary ads |
 
 Ad unit ids are per-platform — **Android needs its own AdMob app id and its own
 unit ids.** Do not reuse the iOS ones. The iOS app id is
@@ -1036,12 +1037,43 @@ The rules that stop the app feeling like an ad delivery mechanism:
   full-screen ad is presenting, only if no first-run surface is up, and only if
   the cached ad is **fresher than 4 hours**.
 
-### 12.3 Remove Ads — deferred on Android
+### 12.3 Remove Ads and the ad-free day — deferred on Android
 
 The non-consumable `com.ezequielbrrt.domemory.removeads` product, restore flow, and
-the Settings-only rewarded 24-hour ad-free day are intentionally absent from the
-current Android scope. This deferral does not affect normal opt-in rewarded ads for
-extra time, hints, lives, or mistake forgiveness.
+the rewarded ad-free day below are intentionally absent from the current Android
+scope. This deferral does not affect normal opt-in rewarded ads for extra time,
+hints, lives, or mistake forgiveness.
+
+**Ad-free day (iOS 4.4.0, to port).** Watching **two** rewarded ads
+(`ad_free_day_rewarded`), each on its own tap, sets a 24-hour expiry during which
+`hasRemovedAds` is true and every *involuntary* placement (banners, natives,
+interstitials, app-open) is suppressed. Rewarded placements stay available.
+
+- **Entry points:** a floating capsule pill, bottom-trailing, on the three menu
+  tabs, the season map and the multiplayer lobby (never on gameplay, modals or the
+  multiplayer board). Hidden for Remove Ads purchasers, and when the rewarded unit
+  is unconfigured unless a grant is running. Pill text: "No Ads" idle, "No Ads 1/2"
+  mid-chain, "18h left" while active (one unit, hours or minutes). The Settings row
+  "Free ad-free day" opens the same sheet.
+- **Sheet:** Flippo illustration, title, message, a three-node stepper
+  (Ad 1 → Ad 2 → Ad-free day), one primary button, a "Remove ads forever · price"
+  link to the purchase, and "Not now". The **first** presentation ever uses the
+  apology copy (`ad_free_day_intro_*`); a persisted flag switches every later one
+  to the neutral copy. States: loading (button disabled, "Loading ad..."), ready
+  ("Watch ad N of 2"), presenting, no fill ("Try again", progress kept), active
+  ("Ads are off until <time>", "Back to the game").
+- **Progress:** ads watched today (0 or 1) persists in preferences keyed to the
+  local day seed (same as lives); it resets on the first read of a new day and
+  after a completed chain. One ad grants nothing. The second ad is never
+  auto-launched after the first closes.
+- **Grant:** extends the existing `rewardedRemoveAdsExpirationDate` by 24 h from
+  now, or from the current expiry when one is still running.
+- **Analytics:** `ad_free_day_offer_shown{source, is_intro (1/0), ads_watched}`,
+  `ad_free_day_granted{source}`, plus `ad_lifecycle` for the ad itself under
+  placement `ad_free_day_rewarded`. Sources: `menu_levels`, `menu_mine`,
+  `menu_all`, `season_levels`, `multiplayer_lobby`, `settings`.
+- **Constants:** required ads 2, grant 24 h, both plain constants (candidates for
+  Remote Config later).
 
 ---
 
@@ -1654,7 +1686,7 @@ settings_remove_ads_unavailable = Remove Ads is unavailable right now
 settings_remove_ads_pending = Purchase pending approval
 settings_remove_ads_no_restore = No Remove Ads purchase was found
 settings_rewarded_remove_ads_title = Free ad-free day
-settings_rewarded_remove_ads_description = Watch an ad to disable ads for 24 hours
+settings_rewarded_remove_ads_description = Watch %d short ads to disable ads for 24 hours
 settings_rewarded_remove_ads_action = Watch
 settings_rewarded_remove_ads_active = Active
 settings_rewarded_remove_ads_active_format = Ads are disabled until %@
@@ -1666,6 +1698,24 @@ settings_restore_purchases_action = Restore
 settings_purchase_success_title = Purchase Successful
 settings_purchase_success_message = Ads have been removed. Enjoy the game!
 settings_restore_success_title = Purchases Restored
+ad_free_day_pill_title = No Ads
+ad_free_day_pill_progress_format = No Ads %d/%d
+ad_free_day_pill_active_format = %@ left
+ad_free_day_intro_title = Sorry about the ads
+ad_free_day_intro_message = They keep DoMemory free, but here's a way out: watch %d short ads and we turn them off for the next 24 hours.
+ad_free_day_intro_watch_format = Sounds fair, watch ad %d of %d
+ad_free_day_title = Play a day without ads
+ad_free_day_message = Watch %d short ads and we turn off banners and interstitials for 24 hours.
+ad_free_day_watch_format = Watch ad %d of %d
+ad_free_day_step_ad_format = Ad %d
+ad_free_day_step_reward = Ad-free day
+ad_free_day_halfway_hint = One more and you're done
+ad_free_day_no_fill = No ad available right now. Your progress is saved.
+ad_free_day_try_again = Try again
+ad_free_day_active_format = Ads are off until %@
+ad_free_day_back = Back to the game
+ad_free_day_remove_forever_format = Remove ads forever · %@
+ad_free_day_not_now = Not now
 settings_restore_success_message = Your previous purchase has been restored.
 
 # Achievements
@@ -1822,7 +1872,7 @@ Every tunable number in one place, for cross-checking an implementation.
 | Interstitial suppressed after a rewarded ad | 60 s |
 | Minimum gap between full-screen ads | 90 s |
 | App-open ad freshness | 4 h |
-| Rewarded ad-free day | 24 h |
+| Rewarded ad-free day | 24 h, after 2 rewarded ads |
 
 ### Other
 

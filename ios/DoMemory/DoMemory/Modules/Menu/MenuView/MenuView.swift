@@ -230,18 +230,21 @@ struct MenuView: View {
                             // Tab bar with per-tab content
                             TabView(selection: $selectedTab) {
                                 LevelsView()
+                                    .adFreeDayEntryPoint(source: "menu_levels")
                                     .tabItem {
                                         Label(Strings.tabLevels, systemImage: "trophy.fill")
                                     }
                                     .tag(GameTab.levels)
 
                                 gamesTabContent(for: .mine, games: myGames)
+                                    .adFreeDayEntryPoint(source: "menu_mine")
                                     .tabItem {
                                         Label(Strings.tabMine, systemImage: "square.and.pencil")
                                     }
                                     .tag(GameTab.mine)
 
                                 gamesTabContent(for: .all, games: allGames)
+                                    .adFreeDayEntryPoint(source: "menu_all")
                                     .tabItem {
                                         Label(Strings.tabAll, systemImage: "square.grid.2x2.fill")
                                     }

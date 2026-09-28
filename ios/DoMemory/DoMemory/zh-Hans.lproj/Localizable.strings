@@ -71,7 +71,7 @@
 "settings_rewarded_remove_ads_action" = "观看";
 "settings_rewarded_remove_ads_active" = "已启用";
 "settings_rewarded_remove_ads_active_format" = "广告已停用至 %@";
-"settings_rewarded_remove_ads_description" = "观看广告即可停用广告24小时";
+"settings_rewarded_remove_ads_description" = "观看 %d 条短广告即可关闭广告 24 小时";
 "settings_rewarded_remove_ads_success_message" = "接下来24小时内广告已停用。";
 "settings_rewarded_remove_ads_success_title" = "广告已停用";
 "settings_rewarded_remove_ads_title" = "免费无广告一天";
@@ -292,3 +292,23 @@
 "season_complete_badge" = "已完成";
 "season_complete_title" = "赛季完成！";
 "season_complete_message" = "你已通关所有关卡。随时重玩任意一关来提升它的星数。";
+
+// Ad-free day offer (pill + sheet)
+"ad_free_day_pill_title" = "免广告";
+"ad_free_day_pill_progress_format" = "免广告 %d/%d";
+"ad_free_day_pill_active_format" = "剩余 %@";
+"ad_free_day_intro_title" = "抱歉打扰你的广告";
+"ad_free_day_intro_message" = "广告让 DoMemory 保持免费，但这里有个办法：观看 %d 条短广告，接下来 24 小时我们会关闭广告。";
+"ad_free_day_intro_watch_format" = "好的，观看第 %d/%d 条广告";
+"ad_free_day_title" = "畅玩一天无广告";
+"ad_free_day_message" = "观看 %d 条短广告，我们会关闭横幅和插页广告 24 小时。";
+"ad_free_day_watch_format" = "观看第 %d/%d 条广告";
+"ad_free_day_step_ad_format" = "广告 %d";
+"ad_free_day_step_reward" = "无广告的一天";
+"ad_free_day_halfway_hint" = "再看一条就完成了";
+"ad_free_day_no_fill" = "当前没有可用的广告。你的进度已保存。";
+"ad_free_day_try_again" = "重试";
+"ad_free_day_active_format" = "广告已关闭，直到 %@";
+"ad_free_day_back" = "返回游戏";
+"ad_free_day_remove_forever_format" = "永久移除广告 · %@";
+"ad_free_day_not_now" = "暂不";

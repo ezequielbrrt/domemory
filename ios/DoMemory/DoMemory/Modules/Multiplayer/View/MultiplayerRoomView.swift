@@ -39,6 +39,7 @@ struct MultiplayerRoomView: View {
                 multiplayerBoard
             } else {
                 lobby
+                    .adFreeDayEntryPoint(source: "multiplayer_lobby")
             }
         }
         .navigationBarHidden(true)

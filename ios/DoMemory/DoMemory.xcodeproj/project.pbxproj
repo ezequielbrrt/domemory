@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1C0950B7BA9F8984190A7C85 /* AdFreeDayOfferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 874F9FB4F7FEBFD45CB4D114 /* AdFreeDayOfferView.swift */; };
+		5C241BDAD8C96A5F46A8D221 /* AdFreeDayPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC23FB0E5D801024895FC71E /* AdFreeDayPill.swift */; };
+		B19EF17D7818D58D56ED7B54 /* AdFreeDayServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2372F5D1CDC4D44E3F80D7A7 /* AdFreeDayServiceTests.swift */; };
+		E46195E0270EE0171959A16A /* AdFreeDayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC21D208BD838C3BE8082CE /* AdFreeDayService.swift */; };
+		F0CA8A37E76746EF6585DD83 /* AdFreeDayOfferViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C42097A389B56867D7E7B40 /* AdFreeDayOfferViewModel.swift */; };
 		00CAC410571F3146892F6F1A /* Promises_Promises.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B6DDA0ECAFA7271075BEFBA2 /* Promises_Promises.bundle */; };
 		016F29D16C8382703965B812 /* GoogleUtilities_GoogleUtilities_Reachability.bundle in Resources */ = {isa = PBXBuildFile; fileRef = A76FD0D6130C9A5442555970 /* GoogleUtilities_GoogleUtilities_Reachability.bundle */; };
 		0211176CB11755BBCD29C19D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BA471F3ACC4F3F29066AFA /* AppDelegate.swift */; };
@@ -623,6 +628,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2372F5D1CDC4D44E3F80D7A7 /* AdFreeDayServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdFreeDayServiceTests.swift; sourceTree = "<group>"; };
+		3C42097A389B56867D7E7B40 /* AdFreeDayOfferViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdFreeDayOfferViewModel.swift; sourceTree = "<group>"; };
+		874F9FB4F7FEBFD45CB4D114 /* AdFreeDayOfferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdFreeDayOfferView.swift; sourceTree = "<group>"; };
+		8EC21D208BD838C3BE8082CE /* AdFreeDayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdFreeDayService.swift; sourceTree = "<group>"; };
+		BC23FB0E5D801024895FC71E /* AdFreeDayPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdFreeDayPill.swift; sourceTree = "<group>"; };
 		0001B619BB4CCC1E15C2B257 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		00CF396E68D2691DF578A188 /* FBLPromises.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FBLPromises.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0283AB373CB22F6AF224266F /* WhatsNewKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WhatsNewKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -939,6 +949,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3CD5FCEC5A3FDC816E069FE5 /* AdFreeDay */ = {
+			isa = PBXGroup;
+			children = (
+				874F9FB4F7FEBFD45CB4D114 /* AdFreeDayOfferView.swift */,
+				3C42097A389B56867D7E7B40 /* AdFreeDayOfferViewModel.swift */,
+				BC23FB0E5D801024895FC71E /* AdFreeDayPill.swift */,
+			);
+			path = AdFreeDay;
+			sourceTree = "<group>";
+		};
 		0406951A55F2103325EC85F9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1068,6 +1088,7 @@
 		335A5FEB9D6D398877BB3145 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				3CD5FCEC5A3FDC816E069FE5 /* AdFreeDay */,
 				CEA82BCDAF91BCEF44BC4D94 /* Debug */,
 				A92943351A96DA47230E4399 /* Home */,
 				68521E66881DB940BC14B4A2 /* Levels */,
@@ -1232,6 +1253,7 @@
 		7884AC0CBC0D3C234CC22ED6 /* Purchases */ = {
 			isa = PBXGroup;
 			children = (
+				8EC21D208BD838C3BE8082CE /* AdFreeDayService.swift */,
 				8CE112DBDE53DA20D32621AB /* PurchaseService.swift */,
 			);
 			path = Purchases;
@@ -1728,6 +1750,7 @@
 		F9F9BA0170F691DFC1581A4B /* DoMemoryTests */ = {
 			isa = PBXGroup;
 			children = (
+				2372F5D1CDC4D44E3F80D7A7 /* AdFreeDayServiceTests.swift */,
 				150CAB1CA541D864572E1D9C /* DoMemoryTests.swift */,
 				6FA198A68E2EE4BC1354BD80 /* HapticsServiceTests.swift */,
 				40372EFB8155DD5E5E6CFCFD /* Info.plist */,
@@ -2129,6 +2152,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E46195E0270EE0171959A16A /* AdFreeDayService.swift in Sources */,
+				5C241BDAD8C96A5F46A8D221 /* AdFreeDayPill.swift in Sources */,
+				F0CA8A37E76746EF6585DD83 /* AdFreeDayOfferViewModel.swift in Sources */,
+				1C0950B7BA9F8984190A7C85 /* AdFreeDayOfferView.swift in Sources */,
 				D54A24EA37B2FFA388126F3F /* TuistAssets+DoMemory.swift in Sources */,
 				5371A6B8EEC265C553FD4133 /* TuistBundle+DoMemory.swift in Sources */,
 				C8358CF3BC0B7C811AE05D41 /* TuistFonts+DoMemory.swift in Sources */,
@@ -2231,6 +2258,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B19EF17D7818D58D56ED7B54 /* AdFreeDayServiceTests.swift in Sources */,
 				1227F78842705605E6E77B84 /* DoMemoryTests.swift in Sources */,
 				C546A448FA8B56F11188F11F /* HapticsServiceTests.swift in Sources */,
 				1092E9B801AD6E9D2F2B0BB9 /* LevelCurveTests.swift in Sources */,

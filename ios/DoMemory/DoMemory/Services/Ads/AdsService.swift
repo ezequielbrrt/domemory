@@ -16,7 +16,7 @@ enum AdPlacement: String {
     case gameFinishedInterstitial = "game_finished_interstitial"
     case gameRewardedExtraTime = "game_rewarded_extra_time"
     case gameRewardedHint = "game_rewarded_hint"
-    case settingsRewardedRemoveAds = "settings_rewarded_remove_ads"
+    case adFreeDayRewarded = "ad_free_day_rewarded"
     case appOpen = "app_open"
     case multiplayerFinishedNative = "multiplayer_finished_native"
     case levelsRewardedLife = "levels_rewarded_life"
@@ -36,7 +36,7 @@ enum AdUnitConfiguration {
                 debugID: "ca-app-pub-3940256099942544/2435281174",
                 releaseID: "ca-app-pub-4297174845441653/5761017394"
             )
-        case .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .appOpen, .multiplayerFinishedNative, .levelsRewardedLife, .levelsRewardedForgive:
+        case .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .adFreeDayRewarded, .appOpen, .multiplayerFinishedNative, .levelsRewardedLife, .levelsRewardedForgive:
             return nil
         }
     }
@@ -48,7 +48,7 @@ enum AdUnitConfiguration {
                 debugID: "ca-app-pub-3940256099942544/4411468910",
                 releaseID: "ca-app-pub-4297174845441653/8078681089"
             )
-        case .homeBanner, .gameBanner, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .appOpen, .multiplayerFinishedNative, .levelsRewardedLife, .levelsRewardedForgive:
+        case .homeBanner, .gameBanner, .gameRewardedExtraTime, .gameRewardedHint, .adFreeDayRewarded, .appOpen, .multiplayerFinishedNative, .levelsRewardedLife, .levelsRewardedForgive:
             return nil
         }
     }
@@ -65,10 +65,10 @@ enum AdUnitConfiguration {
                 debugID: "ca-app-pub-3940256099942544/1712485313",
                 releaseID: "ca-app-pub-4297174845441653/8937242230"
             )
-        case .settingsRewardedRemoveAds:
+        case .adFreeDayRewarded:
             return configuredUnitID(
                 debugID: "ca-app-pub-3940256099942544/1712485313",
-                releaseID: ""
+                releaseID: "ca-app-pub-4297174845441653/2933817840"
             )
         case .levelsRewardedLife:
             return configuredUnitID(
@@ -92,7 +92,7 @@ enum AdUnitConfiguration {
                 debugID: "ca-app-pub-3940256099942544/5575463023",
                 releaseID: "ca-app-pub-4297174845441653/6311078899"
             )
-        case .homeBanner, .gameBanner, .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .multiplayerFinishedNative, .levelsRewardedLife, .levelsRewardedForgive:
+        case .homeBanner, .gameBanner, .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .adFreeDayRewarded, .multiplayerFinishedNative, .levelsRewardedLife, .levelsRewardedForgive:
             return nil
         }
     }
@@ -104,7 +104,7 @@ enum AdUnitConfiguration {
                 debugID: "ca-app-pub-3940256099942544/3986624511",
                 releaseID: "ca-app-pub-4297174845441653/7396929856"
             )
-        case .homeBanner, .gameBanner, .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .settingsRewardedRemoveAds, .appOpen, .levelsRewardedLife, .levelsRewardedForgive:
+        case .homeBanner, .gameBanner, .gameFinishedInterstitial, .gameRewardedExtraTime, .gameRewardedHint, .adFreeDayRewarded, .appOpen, .levelsRewardedLife, .levelsRewardedForgive:
             return nil
         }
     }
@@ -126,6 +126,10 @@ final class AdsService: NSObject {
     private var interstitialPlacement: AdPlacement?
     private var pendingInterstitialPlacement: AdPlacement?
     private var rewardedAds: [AdPlacement: RewardedAd] = [:]
+    /// Placements with a `RewardedAd.load` in flight, so a second request while
+    /// one is loading joins it instead of firing a duplicate ad request.
+    private var rewardedLoadsInFlight: Set<AdPlacement> = []
+    private var rewardedLoadCompletions: [AdPlacement: [(Bool) -> Void]] = [:]
     private var presentingRewardedPlacement: AdPlacement?
     private var presentingRewardedCompletion: ((Bool) -> Void)?
     private var appOpenAd: AppOpenAd?
@@ -217,13 +221,30 @@ final class AdsService: NSObject {
         AdUnitConfiguration.rewardedUnitID(for: placement) != nil
     }
 
-    func loadRewardedAd(for placement: AdPlacement) {
-        guard rewardedAds[placement] == nil else { return }
+    /// Loads the next rewarded ad for `placement` unless one is already
+    /// cached. `completion` reports whether an ad is ready afterwards — true
+    /// immediately for a cached ad — so a surface that shows its own
+    /// "Loading ad…" state (the ad-free day sheet) can enable its button the
+    /// moment the ad lands instead of discovering the miss on tap. A call made
+    /// while a load is already in flight joins that load rather than starting
+    /// another.
+    func loadRewardedAd(for placement: AdPlacement, completion: ((Bool) -> Void)? = nil) {
+        guard rewardedAds[placement] == nil else {
+            completion?(true)
+            return
+        }
 
         guard let adUnitID = AdUnitConfiguration.rewardedUnitID(for: placement) else {
             log("Rewarded skipped. Missing AdMob unit ID for \(placement.rawValue).")
+            completion?(false)
             return
         }
+
+        if let completion {
+            rewardedLoadCompletions[placement, default: []].append(completion)
+        }
+        guard !rewardedLoadsInFlight.contains(placement) else { return }
+        rewardedLoadsInFlight.insert(placement)
 
         Task { [weak self] in
             guard let self else { return }
@@ -233,11 +254,24 @@ final class AdsService: NSObject {
                 ad.fullScreenContentDelegate = self
                 self.rewardedAds[placement] = ad
                 self.log("Rewarded loaded for \(placement.rawValue).")
+                self.finishRewardedLoad(for: placement, ready: true)
             } catch {
                 self.rewardedAds[placement] = nil
                 self.log("Rewarded failed for \(placement.rawValue): \(error.localizedDescription)")
+                self.finishRewardedLoad(for: placement, ready: false)
             }
         }
+    }
+
+    private func finishRewardedLoad(for placement: AdPlacement, ready: Bool) {
+        rewardedLoadsInFlight.remove(placement)
+        let completions = rewardedLoadCompletions.removeValue(forKey: placement) ?? []
+        completions.forEach { $0(ready) }
+    }
+
+    /// Whether a rewarded ad for `placement` is cached and can be presented now.
+    func isRewardedAdReady(for placement: AdPlacement) -> Bool {
+        rewardedAds[placement] != nil
     }
 
     func presentRewardedAd(

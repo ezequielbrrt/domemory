@@ -71,7 +71,7 @@
 "settings_rewarded_remove_ads_action" = "Ansehen";
 "settings_rewarded_remove_ads_active" = "Aktiv";
 "settings_rewarded_remove_ads_active_format" = "Werbung ist bis %@ deaktiviert";
-"settings_rewarded_remove_ads_description" = "Sieh dir eine Anzeige an, um Werbung 24 Stunden zu deaktivieren";
+"settings_rewarded_remove_ads_description" = "Sieh dir %d kurze Anzeigen an, um Werbung für 24 Stunden auszuschalten";
 "settings_rewarded_remove_ads_success_message" = "Werbung ist fur die nachsten 24 Stunden deaktiviert.";
 "settings_rewarded_remove_ads_success_title" = "Werbung deaktiviert";
 "settings_rewarded_remove_ads_title" = "Gratis Tag ohne Werbung";
@@ -292,3 +292,23 @@
 "season_complete_badge" = "Geschafft";
 "season_complete_title" = "Saison abgeschlossen!";
 "season_complete_message" = "Du hast jedes Level geschafft. Wiederhole eines davon, um seine Sterne zu verbessern.";
+
+// Ad-free day offer (pill + sheet)
+"ad_free_day_pill_title" = "Keine Werbung";
+"ad_free_day_pill_progress_format" = "Keine Werbung %d/%d";
+"ad_free_day_pill_active_format" = "noch %@";
+"ad_free_day_intro_title" = "Entschuldigung für die Werbung";
+"ad_free_day_intro_message" = "Sie hält DoMemory kostenlos, aber hier ist ein Ausweg: Sieh dir %d kurze Anzeigen an und wir schalten sie für die nächsten 24 Stunden aus.";
+"ad_free_day_intro_watch_format" = "Klingt fair, Anzeige %d von %d ansehen";
+"ad_free_day_title" = "Spiel einen Tag ohne Werbung";
+"ad_free_day_message" = "Sieh dir %d kurze Anzeigen an und wir schalten Banner und Interstitials für 24 Stunden aus.";
+"ad_free_day_watch_format" = "Anzeige %d von %d ansehen";
+"ad_free_day_step_ad_format" = "Anzeige %d";
+"ad_free_day_step_reward" = "Werbefreier Tag";
+"ad_free_day_halfway_hint" = "Noch eine und du bist fertig";
+"ad_free_day_no_fill" = "Gerade ist keine Anzeige verfügbar. Dein Fortschritt ist gespeichert.";
+"ad_free_day_try_again" = "Erneut versuchen";
+"ad_free_day_active_format" = "Werbung ist aus bis %@";
+"ad_free_day_back" = "Zurück zum Spiel";
+"ad_free_day_remove_forever_format" = "Werbung für immer entfernen · %@";
+"ad_free_day_not_now" = "Jetzt nicht";

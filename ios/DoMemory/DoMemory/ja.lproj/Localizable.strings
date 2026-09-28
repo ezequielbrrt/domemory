@@ -71,7 +71,7 @@
 "settings_rewarded_remove_ads_action" = "見る";
 "settings_rewarded_remove_ads_active" = "有効";
 "settings_rewarded_remove_ads_active_format" = "%@まで広告なし";
-"settings_rewarded_remove_ads_description" = "広告を見て24時間広告を無効にする";
+"settings_rewarded_remove_ads_description" = "短い広告を%d本見ると24時間広告を止められます";
 "settings_rewarded_remove_ads_success_message" = "今後24時間、広告が無効になりました。";
 "settings_rewarded_remove_ads_success_title" = "広告を無効化";
 "settings_rewarded_remove_ads_title" = "無料の広告なしデー";
@@ -292,3 +292,23 @@
 "season_complete_badge" = "クリア";
 "season_complete_title" = "シーズンクリア!";
 "season_complete_message" = "すべてのレベルをクリアしました。どのレベルでも再挑戦してスターを増やせます。";
+
+// Ad-free day offer (pill + sheet)
+"ad_free_day_pill_title" = "広告なし";
+"ad_free_day_pill_progress_format" = "広告なし %d/%d";
+"ad_free_day_pill_active_format" = "残り %@";
+"ad_free_day_intro_title" = "広告についてごめんなさい";
+"ad_free_day_intro_message" = "広告のおかげでDoMemoryは無料で遊べますが、抜け道があります。短い広告を%d本見ると、これから24時間は広告を止めます。";
+"ad_free_day_intro_watch_format" = "いいね、広告 %d/%d を見る";
+"ad_free_day_title" = "1日広告なしで遊ぼう";
+"ad_free_day_message" = "短い広告を%d本見ると、バナーとインタースティシャルを24時間止めます。";
+"ad_free_day_watch_format" = "広告 %d/%d を見る";
+"ad_free_day_step_ad_format" = "広告 %d";
+"ad_free_day_step_reward" = "広告なしの1日";
+"ad_free_day_halfway_hint" = "あと1本で完了";
+"ad_free_day_no_fill" = "今は広告がありません。進み具合は保存されています。";
+"ad_free_day_try_again" = "もう一度";
+"ad_free_day_active_format" = "%@ まで広告オフ";
+"ad_free_day_back" = "ゲームに戻る";
+"ad_free_day_remove_forever_format" = "広告を永久に削除 · %@";
+"ad_free_day_not_now" = "今はしない";

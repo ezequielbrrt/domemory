@@ -71,7 +71,7 @@
 "settings_rewarded_remove_ads_action" = "Watch";
 "settings_rewarded_remove_ads_active" = "Active";
 "settings_rewarded_remove_ads_active_format" = "Ads are disabled until %@";
-"settings_rewarded_remove_ads_description" = "Watch an ad to disable ads for 24 hours";
+"settings_rewarded_remove_ads_description" = "Watch %d short ads to disable ads for 24 hours";
 "settings_rewarded_remove_ads_success_message" = "Ads are disabled for the next 24 hours.";
 "settings_rewarded_remove_ads_success_title" = "Ads disabled";
 "settings_rewarded_remove_ads_title" = "Free ad-free day";
@@ -292,3 +292,23 @@
 "season_complete_badge" = "Complete";
 "season_complete_title" = "Season complete!";
 "season_complete_message" = "You cleared every level. Replay any of them to improve its stars.";
+
+// Ad-free day offer (pill + sheet)
+"ad_free_day_pill_title" = "No Ads";
+"ad_free_day_pill_progress_format" = "No Ads %d/%d";
+"ad_free_day_pill_active_format" = "%@ left";
+"ad_free_day_intro_title" = "Sorry about the ads";
+"ad_free_day_intro_message" = "They keep DoMemory free, but here's a way out: watch %d short ads and we turn them off for the next 24 hours.";
+"ad_free_day_intro_watch_format" = "Sounds fair, watch ad %d of %d";
+"ad_free_day_title" = "Play a day without ads";
+"ad_free_day_message" = "Watch %d short ads and we turn off banners and interstitials for 24 hours.";
+"ad_free_day_watch_format" = "Watch ad %d of %d";
+"ad_free_day_step_ad_format" = "Ad %d";
+"ad_free_day_step_reward" = "Ad-free day";
+"ad_free_day_halfway_hint" = "One more and you're done";
+"ad_free_day_no_fill" = "No ad available right now. Your progress is saved.";
+"ad_free_day_try_again" = "Try again";
+"ad_free_day_active_format" = "Ads are off until %@";
+"ad_free_day_back" = "Back to the game";
+"ad_free_day_remove_forever_format" = "Remove ads forever · %@";
+"ad_free_day_not_now" = "Not now";
