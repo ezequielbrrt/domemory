@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "app": {
+    "name": "DoMemory",
+    "version": "4.4.1",
+    "first_version": false
+  },
+  "base_locale": "en-US",
+  "protected_terms": [
+    "DoMemory",
+    "Flippo",
+    "Levels",
+    "Seasons",
+    "Achievements",
+    "Split View"
+  ],
+  "english_approved": true,
+  "localizations": {
+    "en-US": {
+      "whats_new": "This update includes bug fixes and minor improvements.",
+      "promotional_text": "Bug fixes and minor improvements to keep DoMemory running smoothly.",
+      "status": "approved"
+    },
+    "es-MX": {
+      "whats_new": "Esta actualización incluye corrección de errores y mejoras menores.",
+      "promotional_text": "Corrección de errores y mejoras menores para que DoMemory siga funcionando sin problemas.",
+      "status": "reviewed"
+    },
+    "pt-BR": {
+      "whats_new": "Esta atualização inclui correções de bugs e pequenas melhorias.",
+      "promotional_text": "Correções de bugs e pequenas melhorias para manter o DoMemory funcionando sem problemas.",
+      "status": "reviewed"
+    },
+    "fr-FR": {
+      "whats_new": "Cette mise à jour comprend des corrections de bugs et des améliorations mineures.",
+      "promotional_text": "Corrections de bugs et améliorations mineures pour que DoMemory continue de fonctionner sans accroc.",
+      "status": "reviewed"
+    },
+    "de-DE": {
+      "whats_new": "Dieses Update enthält Fehlerbehebungen und kleinere Verbesserungen.",
+      "promotional_text": "Fehlerbehebungen und kleinere Verbesserungen, damit DoMemory weiterhin reibungslos läuft.",
+      "status": "reviewed"
+    },
+    "it": {
+      "whats_new": "Questo aggiornamento include correzioni di bug e piccoli miglioramenti.",
+      "promotional_text": "Correzioni di bug e piccoli miglioramenti per far funzionare DoMemory senza intoppi.",
+      "status": "reviewed"
+    },
+    "hi": {
+      "whats_new": "इस अपडेट में बग फ़िक्स और छोटे-मोटे सुधार शामिल हैं।",
+      "promotional_text": "DoMemory को सुचारू रूप से चलाए रखने के लिए बग फ़िक्स और छोटे-मोटे सुधार।",
+      "status": "reviewed"
+    },
+    "ko": {
+      "whats_new": "이번 업데이트에는 버그 수정과 소소한 개선 사항이 포함되어 있습니다.",
+      "promotional_text": "DoMemory를 원활하게 즐기실 수 있도록 버그를 수정하고 소소한 개선을 진행했습니다.",
+      "status": "reviewed"
+    },
+    "ja": {
+      "whats_new": "このアップデートには、不具合の修正と細かな改善が含まれています。",
+      "promotional_text": "DoMemoryを快適にお使いいただけるよう、不具合の修正と細かな改善を行いました。",
+      "status": "reviewed"
+    },
+    "zh-Hans": {
+      "whats_new": "此更新包含错误修复和小幅改进。",
+      "promotional_text": "修复错误并进行小幅改进，让 DoMemory 持续流畅运行。",
+      "status": "reviewed"
+    }
+  }
+}
