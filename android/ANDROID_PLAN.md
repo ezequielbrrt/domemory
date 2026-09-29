@@ -1525,6 +1525,40 @@ is up. The automatic post-upgrade path was not exercised on the emulator (it nee
 `whatsNewLastSeenVersion` older than the running one) — its gate is untouched and remains covered
 by `WhatsNewManagerTest`.
 
+**ReviewFlow-Android adoption (2026-09-29).** The thin Play Core wrapper in
+`services/review/AppReviews.kt` is gone, and with it the Phase 8 decision above to diverge from
+iOS's local review policy: Android now uses
+[ReviewFlow-Android](https://github.com/zoratek/ReviewFlow-Android) 1.0.0, the Compose twin of the
+`ReviewFlow` package iOS wraps in `AppReviews.swift`, vendored exactly like WhatsNewKit-Android —
+private repository, git submodule at `android/ReviewFlow-Android` pinned to tag `1.0.0`, only its
+`reviewflow` module included as `:reviewflow`, built against this catalog (which gained
+`play-review-ktx` — renamed from `google-play-review-ktx`, since :app no longer depends on Play
+Core directly and the library re-exports it as `api` — plus `kotlinx-coroutines-core` and
+`compose-material-icons-core`). `AppContainer.reviews` holds the one `ReviewManager` (recommended
+policy: 3 wins, 7 days since first use, 120-day cooldown, one ask per version; history in the
+library's own `SharedPreferences` file, nothing to migrate on Android). `NavGraph.kt`'s four
+`onGameWon` sites now call `recordSuccessfulAction(BuildConfig.VERSION_NAME)` on it. Presentation
+is the library's **explicit invitation**, not its Play In-App Review bridge — the user asked for
+the iOS image to be used, and the image only exists in the invitation: `feature/review/
+ReviewInvitation.kt`'s `DoMemoryReviewInvitationHost` wraps `ReviewInvitationHost` with
+`palette.primary` as accent, the display face for the headline via `LocalReviewInvitationStyle`,
+the iOS `onboarding-five-star-rating` PNG copied byte-for-byte to
+`res/drawable-nodpi/review_invitation_five_star_rating.png`, and four new `review_invitation_*`
+strings translated into all ten locales (`LocalizationParityTest` green). `MainActivity` hosts it
+beside the What's New screen, mirroring iOS's `.reviewRequest(using:)` at the app root. iOS itself
+still uses the native StoreKit prompt in production and only shows `ReviewInvitationFullScreen`
+from its debug menu; switching Android to the same native path is a one-line swap to
+`ReviewRequestEffect(manager = container.reviews)`. The Settings "Rate DoMemory" row now calls the
+library's `Context.openPlayStoreReviewPage()` (same `market://` + web fallback the local helper
+had), so that helper was deleted; `services/share/PlayStoreLinks` stays for the share caption.
+Spec §15.2's Android paragraph was updated to match. Verification: `:app:assembleDebug` clean;
+`:app:testDebugUnitTest` 422/422 and `:reviewflow:testDebugUnitTest` 11/11 green; on the Pixel_10
+emulator the invitation was rendered in light and dark through a throwaway local patch that
+presented `ReviewInvitationDialog` unconditionally (not committed), and its "Write a Review" tap
+brought the Play Store app (`com.android.vending`) to the foreground — the policy-gated path itself
+(three wins, seven days) was not exercised end to end and rests on the library's
+`ReviewManagerTest`/`ReviewEligibilityEvaluatorTest`.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links

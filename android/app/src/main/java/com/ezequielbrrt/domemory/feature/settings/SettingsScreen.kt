@@ -1,9 +1,5 @@
 package com.ezequielbrrt.domemory.feature.settings
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,11 +30,11 @@ import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
-import com.ezequielbrrt.domemory.services.share.PlayStoreLinks
 import com.ezequielbrrt.domemory.ui.components.BackButton
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
+import com.ezequielbrrt.reviewflow.openPlayStoreReviewPage
 
 @Composable
 fun SettingsScreen(
@@ -106,19 +102,18 @@ fun SettingsScreen(
         }
         SettingGroup(stringResource(R.string.settings_section_about)) {
             // Opens the Play Store listing directly — the standard manual "rate the app"
-            // entry. This is deliberately separate from the win-triggered Play In-App Review
-            // prompt (AppReviews.recordSuccessfulGameWin, fired from GameViewModel on a real
-            // win): that flow cannot be launched on demand by design — Google's ReviewManager
-            // API has no "show the dialog now" call, only "request a flow, which Play Core
-            // may or may not actually present" — so a manual button can only ever be this
-            // storefront link, never a way to force the in-app prompt open.
+            // entry, and ReviewFlow's "persistent review link": `market://details` pinned to
+            // the Play Store app, falling back to the web listing. Deliberately separate from
+            // the win-triggered review invitation (`AppContainer.reviews`, presented by
+            // `MainActivity`), which ReviewFlow's cooldown and per-version policy gate; this
+            // row is always available, matching iOS's `AppStoreReviewLink` Settings row.
             SettingRow(
                 title = stringResource(R.string.settings_review_title),
                 description = stringResource(R.string.settings_review_description),
                 onClick = {
                     HapticsService.fire(HapticIntent.TAP)
                     AnalyticsService.log(AnalyticsEvent.ReviewLinkOpened(source = "settings"))
-                    openPlayStoreListing(context)
+                    context.openPlayStoreReviewPage()
                 },
             )
             SettingRow(
@@ -133,24 +128,6 @@ fun SettingsScreen(
                 },
             )
         }
-    }
-}
-
-/** `market://details` routes straight into the Play Store app when it's installed (the
- * common case); `setPackage` pins the intent to Play Store specifically so no other app
- * that happens to claim the `market` scheme can intercept it. Falls back to the plain
- * `https://play.google.com` listing URL — resolvable by any browser — when the Play Store
- * app can't handle it at all (an emulator with no Play Store image, mirrors this repo's own
- * `Pixel_10` note about `google_apis_playstore` vs plain `google_apis` images). */
-private fun openPlayStoreListing(context: Context) {
-    val appId = context.packageName
-    val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appId")).apply {
-        setPackage("com.android.vending")
-    }
-    try {
-        context.startActivity(marketIntent)
-    } catch (_: ActivityNotFoundException) {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PlayStoreLinks.listingUrl(context))))
     }
 }
 

@@ -1277,9 +1277,11 @@ cooldown and a per-version cap. Settings also carries a plain **"Rate DoMemory"*
 link to the store page, so leaving a review doesn't depend on catching the
 throttled system prompt.
 
-**Android:** Play In-App Review API (`ReviewManager`), which has its own quota.
-Keep the same "record wins, let the platform decide, plus an always-available
-link" structure.
+**Android:** ReviewFlow-Android (the same package's Android twin, vendored as a
+submodule) with its recommended policy, presenting its full-screen review
+invitation rather than Play's In-App Review sheet — Google Play has no direct
+"write a review" link, so the invitation opens the listing. Same "record wins,
+let the policy decide, plus an always-available link" structure.
 
 ### 15.3 Onboarding carousel
 

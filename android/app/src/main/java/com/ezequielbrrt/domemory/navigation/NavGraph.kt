@@ -21,6 +21,7 @@ import androidx.navigation.navArgument
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ezequielbrrt.domemory.AppContainer
+import com.ezequielbrrt.domemory.BuildConfig
 import com.ezequielbrrt.domemory.core.deeplink.DeepLink
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.core.model.GameMode
@@ -50,7 +51,6 @@ import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
-import com.ezequielbrrt.domemory.services.review.AppReviews
 import com.ezequielbrrt.domemory.services.stats.UserPreferencesProfileStatsRecorder
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -273,7 +273,7 @@ fun NavGraph(
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
                             onHaptic = HapticsService::fire,
-                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onGameWon = { container.reviews.recordSuccessfulAction(BuildConfig.VERSION_NAME) },
                             onAnalytics = AnalyticsService::log,
                             initialSource = "daily_challenge",
                         )
@@ -400,7 +400,7 @@ fun NavGraph(
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
                             onHaptic = HapticsService::fire,
-                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onGameWon = { container.reviews.recordSuccessfulAction(BuildConfig.VERSION_NAME) },
                             onAnalytics = AnalyticsService::log,
                             // This route's own `onNextLevel` below re-navigates here for the
                             // following level rather than advancing in place, so a "next
@@ -549,7 +549,7 @@ fun NavGraph(
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
                             onHaptic = HapticsService::fire,
-                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onGameWon = { container.reviews.recordSuccessfulAction(BuildConfig.VERSION_NAME) },
                             onAnalytics = AnalyticsService::log,
                             // Same simplification as the Season route above: this route's
                             // own `onNextLevel` below re-navigates here for the following
@@ -777,7 +777,7 @@ fun NavGraph(
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
                             onHaptic = HapticsService::fire,
-                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onGameWon = { container.reviews.recordSuccessfulAction(BuildConfig.VERSION_NAME) },
                             onAnalytics = AnalyticsService::log,
                             // Free play's two entry points (a board card, or the "random
                             // game" button) both navigate into this same route with no

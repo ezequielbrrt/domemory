@@ -85,7 +85,10 @@ dependencies {
     implementation(libs.google.mobile.ads)
     implementation(libs.google.code.scanner)
     implementation(libs.zxing.core)
-    implementation(libs.google.play.review.ktx)
+    // Review policy, Play In-App Review bridge and the full-screen review invitation — the
+    // Android counterpart of the iOS app's ReviewFlow package. Built from the submodule at
+    // android/ReviewFlow-Android (see settings.gradle.kts); it re-exports play-review-ktx.
+    implementation(project(":reviewflow"))
     implementation(libs.lottie.compose)
     // What's New screen, model and theme — the Android counterpart of the iOS app's
     // WhatsNewKit package. Built from the submodule at android/WhatsNewKit-Android (see
