@@ -1586,8 +1586,10 @@ once-per-install primer when notifications are already authorized, as iOS's `gua
 does. One deliberate deviation from the library's own status mapping: below API 33 there is no runtime
 permission and the system client reports `Authorized` whenever notifications are enabled, which would
 make the screen complete on its own and turn reminders on for every Android 8–12 player without a tap.
-A thin wrapper client reports `NotDetermined` there instead, so "Turn On Reminders" remains the consent
-(the request then answers with the system toggle's state); API 33+ passes through untouched. Not
+A thin wrapper client (`ConsentGatedNotificationAuthorizationClient`) reports `NotDetermined` there instead
+until the player taps, so "Turn On Reminders" remains the consent (the request then answers with the system
+toggle's state, and the mask lifts so the library's post-request re-read sees `Authorized`); API 33+ passes
+through untouched. `ConsentGatedNotificationAuthorizationClientTest` pins both sides of the line. Not
 ported: iOS's full-screen-ad suppression while the primer is up — Android's app-open ad is still
 unwired (§7's Phase 7 notes). Verification: `:app:assembleDebug` clean; `:app:testDebugUnitTest`
 423/423 (one new) and `:notificationpermissionkit:testDebugUnitTest` 10/10 green; on the Pixel_10

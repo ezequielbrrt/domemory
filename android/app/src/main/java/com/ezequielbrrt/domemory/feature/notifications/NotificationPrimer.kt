@@ -171,23 +171,40 @@ private fun doMemoryNotificationPermissionConfiguration(): NotificationPermissio
  * enabled and the screen would complete on its own before the player saw it — silently
  * turning reminders on for everyone on Android 8–12. iOS never has that problem (its fresh
  * state is `.notDetermined`), and neither did the primer this replaces, whose "Turn On
- * Reminders" was the consent. Reporting `NotDetermined` instead keeps that tap as the
- * consent; the request then simply answers with the system toggle's state. On API 33+ the
- * real permission state passes through untouched.
+ * Reminders" was the consent. [ConsentGatedNotificationAuthorizationClient] reports
+ * `NotDetermined` there instead until that tap, so the tap stays the consent; the request
+ * then answers with the system toggle's state. On API 33+ the real permission state passes
+ * through untouched.
  */
 @Composable
 private fun rememberDoMemoryNotificationAuthorizationClient(): NotificationAuthorizationClient {
     val system = rememberSystemNotificationAuthorizationClient()
-    return remember(system) {
-        object : NotificationAuthorizationClient {
-            override suspend fun authorizationStatus(): NotificationPermissionStatus {
-                val status = system.authorizationStatus()
-                val needsExplicitConsent = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU &&
-                    status == NotificationPermissionStatus.Authorized
-                return if (needsExplicitConsent) NotificationPermissionStatus.NotDetermined else status
-            }
+    return remember(system) { ConsentGatedNotificationAuthorizationClient(system) }
+}
 
-            override suspend fun requestAuthorization(): Boolean = system.requestAuthorization()
-        }
+/**
+ * Masks the system client's `Authorized` as `NotDetermined` below API 33 until
+ * [requestAuthorization] has run once. The mask has to lift after the tap: the library's
+ * model re-reads the status right after the request to decide the outcome, and an
+ * `Authorized` that stayed masked would read as [NotificationPermissionResult.Denied] —
+ * reminders would never turn on from the primer on Android 8–12. `sdkInt` is injected so
+ * the JVM test can exercise both sides of the API 33 line.
+ */
+internal class ConsentGatedNotificationAuthorizationClient(
+    private val system: NotificationAuthorizationClient,
+    private val sdkInt: Int = Build.VERSION.SDK_INT,
+) : NotificationAuthorizationClient {
+    private var requested = false
+
+    override suspend fun authorizationStatus(): NotificationPermissionStatus {
+        val status = system.authorizationStatus()
+        val needsExplicitConsent = sdkInt < Build.VERSION_CODES.TIRAMISU && !requested &&
+            status == NotificationPermissionStatus.Authorized
+        return if (needsExplicitConsent) NotificationPermissionStatus.NotDetermined else status
+    }
+
+    override suspend fun requestAuthorization(): Boolean {
+        requested = true
+        return system.requestAuthorization()
     }
 }
