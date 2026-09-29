@@ -24,6 +24,17 @@ provisions its own JDK 21 toolchain on first run even though nothing on the
 machine is pinned to it (Android Studio ships a JBR, but that is not the same
 JDK the toolchain targets).
 
+**`android/WhatsNewKit-Android` is a git submodule** — the What's New screen comes
+from [WhatsNewKit-Android](https://github.com/zoratek/WhatsNewKit-Android), the
+Android twin of the iOS app's WhatsNewKit package. Both repositories are private,
+so the JitPack coordinates in its README cannot resolve; instead
+`settings.gradle.kts` includes the submodule's `whatsnewkit` module directly as
+`:whatsnewkit` (never its `:demo` app), built against this build's version
+catalog. A fresh clone needs `git submodule update --init` before Gradle can
+configure, and upgrading the library means checking out a new tag inside the
+submodule and committing the new gitlink. Its own unit tests run with
+`./gradlew :whatsnewkit:testDebugUnitTest`.
+
 **`local.properties` is machine-local and gitignored** — it holds `sdk.dir`, an
 absolute path to one developer's SDK install. Never commit it; a fresh checkout
 regenerates it from the SDK location Android Studio or the wrapper detects.
@@ -76,7 +87,7 @@ graph in the same change.
 | `widget` | `DailyChallengeGlanceWidget`, receiver and calendar-aligned WorkManager refresh — the Daily Challenge home-screen widget (Phase 5) |
 | `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 in progress; create/join, invite sharing, QR rendering/scanning, gameplay, reconnect grace and rematch exist, while association deployment and live cross-platform verification remain follow-up work |
 | `services/ads` | AdMob initialization, debug/release placement configuration, the frequency-cap policy plus its presentation-trigger gate, and banner/interstitial/rewarded/native presentation — Phase 7 in progress; banners, the completion interstitial, both Levels rewarded rescues and the multiplayer-finished native ad are wired and presenting; `game_rewarded_extra_time`/`game_rewarded_hint` and app-open remain unwired (see `ANDROID_PLAN.md` §7) |
-| `services/whatsnew`, `feature/whatsnew` | Version-aware release-notes gate and dialog — Phase 8 complete; first installs stay silent and upgrades present once |
+| `services/whatsnew`, `feature/whatsnew` | Version-aware release-notes gate (`WhatsNewManager`, spec 15.1) and the screen content/theme (`WhatsNewContent.kt`) drawn by WhatsNewKit-Android — Phase 8 complete; first installs stay silent and upgrades present once. `MainActivity` is the single presentation site: the automatic showing marks the version seen on dismiss, the Settings row's reopen (routed up through `NavGraph`'s `onWhatsNew`) does not. The library's own `WhatsNewVersionTracker` is deliberately unused, as iOS keeps its own gate too |
 | `services/haptics` | `HapticIntent`, `HapticsService` — Phase 8 complete; single gated `fire(intent)` entry point wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue moments, a handful of `NavGraph.kt` view-only taps, and now (see `ANDROID_PLAN.md` §7's 2026-09-15 "Haptics expansion" note) every other screen: Menu, Levels (including `LevelsViewModel`'s select/warning/reward moments), Seasons, Multiplayer (`MultiplayerHapticsTracker` for remote room-update haptics, `MultiplayerRoom.canFlipNow` gating the optimistic card-flip tap), and Settings. Real-device vibration *feel* remains unverified — the emulator's `Vibrator` is a no-op and none was run this session; only the code paths and their unit tests are confirmed |
 | `services/analytics` | `AnalyticsEvent` (sealed class, one case per event, each owning its own `name`/`parameters` — see spec §16's catalog), `AnalyticsService` (the single gated `log(event)` entry point; the only sanctioned `FirebaseAnalytics.logEvent` call site in the app) — Phase 8 complete; wired into `GameViewModel`, `MenuViewModel`, `CreateMemoramaViewModel`, Levels/Seasons view models and screens, `MultiplayerViewModel`/`MultiplayerScreen`, onboarding, the notification primer, `WhatsNewManager`, `AchievementsScreen`, `SettingsScreen`, `ShareResultCard` and the ads layer. Event names/parameter keys are copied verbatim from iOS since both platforms log into one Firebase project. Not ported: `level_stars_credited` — Android's `LevelProgressService`/`SeasonProgressService` don't yet surface the improvement-only credit delta it needs (see `AnalyticsEvent`'s class doc) |
 | `services/review` | `AppReviews` — Play In-App Review wrapper (Phase 8 complete); fires on a genuine win via `GameViewModel.onGameWon`, deliberately thin (no local eligibility policy — see `ANDROID_PLAN.md` §7's Phase 8 note for why that diverges from iOS on purpose) |

@@ -1,0 +1,3 @@
+[submodule "android/WhatsNewKit-Android"]
+	path = android/WhatsNewKit-Android
+	url = https://github.com/zoratek/WhatsNewKit-Android.git

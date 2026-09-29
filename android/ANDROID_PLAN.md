@@ -1492,6 +1492,39 @@ Verification: `compileDebugKotlin` clean; `cleanTestDebugUnitTest testDebugUnitT
 new tests — the change is purely presentational, no new branching logic beyond the existing win/lose/draw
 resolution `MultiplayerViewModel` already had). Not viewed on an emulator/device — no live session run.
 
+**WhatsNewKit-Android adoption (2026-09-29).** The hand-rolled `AlertDialog` in
+`feature/whatsnew/WhatsNewDialog.kt` is gone; the What's New screen is now drawn by
+[WhatsNewKit-Android](https://github.com/zoratek/WhatsNewKit-Android) 1.0.0, the Compose twin of
+the `whats-new-ios` package iOS already uses. The library's README documents JitPack coordinates,
+but both the `zoratek` and `ezequielbrrt` repositories are private and JitPack answers 401 for
+them, so the repository is vendored as a git submodule at `android/WhatsNewKit-Android` (pinned to
+tag `1.0.0`) and `settings.gradle.kts` includes only its `whatsnewkit` module as `:whatsnewkit` —
+`:demo` is never configured. The module reads this build's version catalog, hence the new
+`android-library` plugin alias (declared `apply false` at the root, since it shares the AGP
+artifact with `android-application` and applying it with a version from a subproject fails with
+"already on the classpath with an unknown version") and the `androidx-compose-foundation`
+library alias. `feature/whatsnew/WhatsNewContent.kt` ports `WhatsNewContent.swift`: a
+`Palette.whatsNewTheme()` mirroring `WhatsNewTheme.doMemory` token for token (card tinted
+`surfacePrimary` over the library's material layer, borders/separators `surfaceBorder`, badge and
+icon chips `primary` at 14%, headline in `DoMemoryType.display(30)`), and the same four
+`whats_new_*` string pairs the dialog showed, now with Material icons (gift, palette, touch,
+timeline) standing in for iOS's SF Symbols. The version gate is unchanged —
+`services/whatsnew/WhatsNewManager` and spec 15.1's `whatsNewLastSeenVersion` stay, and the
+library's `WhatsNewVersionTracker` is deliberately not used, matching iOS, which keeps its own
+`WhatsNewManager` beside WhatsNewKit. Presentation moved to a single site: `MainActivity` now
+wraps the `Scaffold` in a `Box` and draws `DoMemoryWhatsNewScreen` edge to edge above the nav
+graph (the library pads for system bars itself and would have doubled the Scaffold's insets),
+with the launch overlay moved to the same `Box` so it still covers the screen during the 1.2s
+splash; a private `WhatsNewPresentation` enum (AUTOMATIC/MANUAL) decides whether dismissal calls
+`markSeen()`. `NavGraph` gained an `onWhatsNew` parameter so the Settings row reaches that site
+instead of hosting its own dialog. Verification: `:app:assembleDebug` clean;
+`:app:testDebugUnitTest` 422/422 and `:whatsnewkit:testDebugUnitTest` 21/21 green; on the
+Pixel_10 emulator the Settings row opens the screen in light and dark (status-bar icons flip with
+the appearance), "Let's Play" returns to Settings, and the system back key is consumed while it
+is up. The automatic post-upgrade path was not exercised on the emulator (it needs a stored
+`whatsNewLastSeenVersion` older than the running one) — its gate is untouched and remains covered
+by `WhatsNewManagerTest`.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links
