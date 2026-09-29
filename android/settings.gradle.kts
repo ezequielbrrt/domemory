@@ -35,3 +35,10 @@ include(":app")
 // `git submodule update --init` before Gradle can configure this project.
 include(":whatsnewkit")
 project(":whatsnewkit").projectDir = file("WhatsNewKit-Android/whatsnewkit")
+
+// Same arrangement for ReviewFlow-Android (android/ReviewFlow-Android, also private, also
+// pinned to a release tag): only its library module, built against this catalog — which is
+// why libs.versions.toml carries play-review-ktx, kotlinx-coroutines-core and
+// compose-material-icons-core for it.
+include(":reviewflow")
+project(":reviewflow").projectDir = file("ReviewFlow-Android/reviewflow")

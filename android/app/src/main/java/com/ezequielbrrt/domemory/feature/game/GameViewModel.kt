@@ -130,9 +130,10 @@ class GameViewModel(
      * "Continue" tap (`WinModalListener.tapOnContinue`). Android's win screen has no
      * separate Continue/Next-Level split yet (a documented gap in `ANDROID_PLAN.md` — the
      * win overlay only offers "Try Again" / "Go to menu"), so this fires from the commit
-     * itself rather than a distinct button tap. The object it would call
-     * (`services.review.AppReviews`) needs an `Activity`, which this framework-free class
-     * deliberately doesn't hold — same bare-callback shape as [onCompletionInterstitial].
+     * itself rather than a distinct button tap. Production wires it to
+     * `AppContainer.reviews.recordSuccessfulAction(BuildConfig.VERSION_NAME)` from
+     * `NavGraph.kt`; this framework-free class deliberately holds neither the
+     * `ReviewManager` nor `BuildConfig` — same bare-callback shape as [onCompletionInterstitial].
      */
     private val onGameWon: (() -> Unit)? = null,
     /**

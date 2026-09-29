@@ -24,16 +24,19 @@ provisions its own JDK 21 toolchain on first run even though nothing on the
 machine is pinned to it (Android Studio ships a JBR, but that is not the same
 JDK the toolchain targets).
 
-**`android/WhatsNewKit-Android` is a git submodule** — the What's New screen comes
-from [WhatsNewKit-Android](https://github.com/zoratek/WhatsNewKit-Android), the
-Android twin of the iOS app's WhatsNewKit package. Both repositories are private,
-so the JitPack coordinates in its README cannot resolve; instead
-`settings.gradle.kts` includes the submodule's `whatsnewkit` module directly as
-`:whatsnewkit` (never its `:demo` app), built against this build's version
-catalog. A fresh clone needs `git submodule update --init` before Gradle can
-configure, and upgrading the library means checking out a new tag inside the
-submodule and committing the new gitlink. Its own unit tests run with
-`./gradlew :whatsnewkit:testDebugUnitTest`.
+**`android/WhatsNewKit-Android` and `android/ReviewFlow-Android` are git
+submodules** — the What's New screen comes from
+[WhatsNewKit-Android](https://github.com/zoratek/WhatsNewKit-Android) and the
+review policy/invitation from
+[ReviewFlow-Android](https://github.com/zoratek/ReviewFlow-Android), the Android
+twins of the iOS app's WhatsNewKit and ReviewFlow packages. Both repositories
+are private, so the JitPack coordinates in their READMEs cannot resolve; instead
+`settings.gradle.kts` includes each submodule's library module directly as
+`:whatsnewkit` and `:reviewflow` (never their `:demo` apps), built against this
+build's version catalog. A fresh clone needs `git submodule update --init`
+before Gradle can configure, and upgrading a library means checking out a new
+tag inside its submodule and committing the new gitlink. Their own unit tests
+run with `./gradlew :whatsnewkit:testDebugUnitTest :reviewflow:testDebugUnitTest`.
 
 **`local.properties` is machine-local and gitignored** — it holds `sdk.dir`, an
 absolute path to one developer's SDK install. Never commit it; a fresh checkout
@@ -90,10 +93,10 @@ graph in the same change.
 | `services/whatsnew`, `feature/whatsnew` | Version-aware release-notes gate (`WhatsNewManager`, spec 15.1) and the screen content/theme (`WhatsNewContent.kt`) drawn by WhatsNewKit-Android — Phase 8 complete; first installs stay silent and upgrades present once. `MainActivity` is the single presentation site: the automatic showing marks the version seen on dismiss, the Settings row's reopen (routed up through `NavGraph`'s `onWhatsNew`) does not. The library's own `WhatsNewVersionTracker` is deliberately unused, as iOS keeps its own gate too |
 | `services/haptics` | `HapticIntent`, `HapticsService` — Phase 8 complete; single gated `fire(intent)` entry point wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue moments, a handful of `NavGraph.kt` view-only taps, and now (see `ANDROID_PLAN.md` §7's 2026-09-15 "Haptics expansion" note) every other screen: Menu, Levels (including `LevelsViewModel`'s select/warning/reward moments), Seasons, Multiplayer (`MultiplayerHapticsTracker` for remote room-update haptics, `MultiplayerRoom.canFlipNow` gating the optimistic card-flip tap), and Settings. Real-device vibration *feel* remains unverified — the emulator's `Vibrator` is a no-op and none was run this session; only the code paths and their unit tests are confirmed |
 | `services/analytics` | `AnalyticsEvent` (sealed class, one case per event, each owning its own `name`/`parameters` — see spec §16's catalog), `AnalyticsService` (the single gated `log(event)` entry point; the only sanctioned `FirebaseAnalytics.logEvent` call site in the app) — Phase 8 complete; wired into `GameViewModel`, `MenuViewModel`, `CreateMemoramaViewModel`, Levels/Seasons view models and screens, `MultiplayerViewModel`/`MultiplayerScreen`, onboarding, the notification primer, `WhatsNewManager`, `AchievementsScreen`, `SettingsScreen`, `ShareResultCard` and the ads layer. Event names/parameter keys are copied verbatim from iOS since both platforms log into one Firebase project. Not ported: `level_stars_credited` — Android's `LevelProgressService`/`SeasonProgressService` don't yet surface the improvement-only credit delta it needs (see `AnalyticsEvent`'s class doc) |
-| `services/review` | `AppReviews` — Play In-App Review wrapper (Phase 8 complete); fires on a genuine win via `GameViewModel.onGameWon`, deliberately thin (no local eligibility policy — see `ANDROID_PLAN.md` §7's Phase 8 note for why that diverges from iOS on purpose) |
+| `feature/review` | `ReviewInvitation.kt` — `DoMemoryReviewInvitationHost`, ReviewFlow-Android's full-screen review invitation wired to `AppContainer.reviews` (the app's one `ReviewManager`, spec 15.2) and hosted by `MainActivity`. Presents once, two seconds after the win that satisfies ReviewFlow's recommended policy (3 wins, 7 days since first use, 120-day cooldown, one ask per version); "Write a Review" opens the Play listing. Artwork is iOS's `onboarding-five-star-rating` PNG (`res/drawable-nodpi/review_invitation_five_star_rating.png`), copy is the app's own `review_invitation_*` strings in all ten locales. The library's Play In-App Review bridge (`ReviewRequestEffect`) is deliberately not used — the two are mutually exclusive. Wins are recorded from every `GameViewModel.onGameWon` site in `NavGraph.kt`; the Settings "Rate DoMemory" row calls the library's `openPlayStoreReviewPage()` |
 | `services/stats` | `ProfileStats`, `Achievement`, `ProfileStatsService` (lifetime aggregates + the pure `achievements()` derivation), `ProfileStatsRecorder`/`UserPreferencesProfileStatsRecorder` (the write side, mirroring `GameStatsRecorder`'s seam shape) — Phase 8 complete; recording is wired into `GameViewModel.commit()`/`.commitLossIfNeeded()` (every mode) and `MultiplayerViewModel` (guarded by `services/multiplayer/MultiplayerWinGuard`), reading into `feature/settings/AchievementsScreen.kt` |
 | `feature/share` | `ShareResultCard.kt` — the pure `resultGridString`/`resultShareCaption`, the `ShareResultCardView` composable, and `shareResultCard()` (renders it to a `Bitmap` via `GraphicsLayer.toImageBitmap()` and launches an `ACTION_SEND` chooser through a new `FileProvider`) — Phase 8 complete; reached from `GameScreen.kt`'s win overlay only (Levels/Seasons out-of-lives and lose-screen surfaces have no share affordance, matching iOS's own Win-Modal-only placement) |
-| `services/share` | `PlayStoreLinks` — the one place the Play Store listing URL is built, shared by the Settings "Rate DoMemory" row and the share-card caption |
+| `services/share` | `PlayStoreLinks` — the one place the app builds the Play Store listing URL, used by the share-card caption (the Settings "Rate DoMemory" row opens the listing through ReviewFlow-Android's `openPlayStoreReviewPage()` instead) |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app; `DoMemoryType` — the display (Righteous) and handwritten (Patrick Hand) roles, backed by `res/font` copies of the TTFs iOS bundles (both OFL 1.1; note iOS itself renders SF Rounded, not these files) |
 | `ui/lottie` | `BundledLottie` — plays a bundled Lottie JSON clip, mirroring iOS's `LottieView`; reads from a shared `assets/lottie/` at the repository root (an extra `assets.srcDir` in `app/build.gradle.kts`), the same JSON files iOS reaches through a `SupportingFiles/Lottie` symlink, so an animation cannot drift between platforms |
 | `ui/anim` | `ReduceMotion.kt` (`rememberReduceMotion`, the animator-duration-scale-off counterpart of iOS's `accessibilityReduceMotion`), `PressScale.kt`, `NumericTransition.kt` |
@@ -177,10 +180,11 @@ Phase 8 has What's New (version-gated dialog), haptics (`HapticsService`/`Haptic
 wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue
 moments and, as of the 2026-09-15 haptics-expansion session, Menu, Levels, Seasons,
 Multiplayer and Settings too — see `ANDROID_PLAN.md` §7's note for the exact mapping and
-what remains device-unverified), Play In-App Review (`AppReviews`, fired on a genuine
-win, deliberately thin with no local eligibility policy — Android's `ReviewManager` owns
-that server-side, unlike iOS's `ReviewFlow`), three Settings rows ("Achievements", "Rate
-DoMemory", "What's New"), achievements (`services/stats/ProfileStatsService`, recording
+what remains device-unverified), review prompting (ReviewFlow-Android's `ReviewManager`
+held as `AppContainer.reviews` with the recommended local policy — the same policy iOS's
+`ReviewFlow` runs — recording every genuine win and presenting `feature/review`'s
+invitation; see the package table row and `ANDROID_PLAN.md` §7's 2026-09-29 note), three
+Settings rows ("Achievements", "Rate DoMemory", "What's New"), achievements (`services/stats/ProfileStatsService`, recording
 wired into every `GameViewModel` finish and into multiplayer via `MultiplayerWinGuard`,
 reading into `feature/settings/AchievementsScreen.kt`), the spoiler-free share card
 (`feature/share/ShareResultCard.kt`, reached from the win overlay only), the four animations

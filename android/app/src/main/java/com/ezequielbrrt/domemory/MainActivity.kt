@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.ezequielbrrt.domemory.feature.launch.LaunchScreen
+import com.ezequielbrrt.domemory.feature.review.DoMemoryReviewInvitationHost
 import com.ezequielbrrt.domemory.navigation.NavGraph
 import com.ezequielbrrt.domemory.feature.whatsnew.DoMemoryWhatsNewScreen
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryTheme
@@ -111,6 +112,10 @@ class MainActivity : ComponentActivity() {
                         LaunchScreen(preference = theme)
                     }
                 }
+                // iOS attaches `.reviewRequest(using: AppReviews.manager)` at the app root;
+                // this is the same attachment. It renders nothing until a win makes the
+                // policy eligible, then presents the invitation in its own dialog window.
+                DoMemoryReviewInvitationHost(manager = container.reviews)
             }
         }
     }

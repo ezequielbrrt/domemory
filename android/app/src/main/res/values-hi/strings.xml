@@ -196,6 +196,10 @@
     <string name="settings_notifications_open_settings">सेटिंग्स खोलें</string>
     <string name="settings_review_title">DoMemory को रेट करें</string>
     <string name="settings_review_description">समीक्षाएँ दूसरे खिलाड़ियों को गेम खोजने में मदद करती हैं</string>
+    <string name="review_invitation_title">DoMemory पसंद आ रहा है?</string>
+    <string name="review_invitation_message">Google Play पर एक छोटी समीक्षा दूसरे खिलाड़ियों को गेम खोजने में मदद करती है और नए लेवल आते रहते हैं।</string>
+    <string name="review_invitation_button">समीक्षा लिखें</string>
+    <string name="review_invitation_dismiss">अभी नहीं</string>
     <string name="settings_whats_new_title">नया क्या है</string>
     <string name="settings_whats_new_description">देखें कि नए अपडेट में क्या बदला</string>
 
