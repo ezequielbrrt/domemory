@@ -87,6 +87,10 @@ dependencies {
     implementation(libs.zxing.core)
     implementation(libs.google.play.review.ktx)
     implementation(libs.lottie.compose)
+    // What's New screen, model and theme — the Android counterpart of the iOS app's
+    // WhatsNewKit package. Built from the submodule at android/WhatsNewKit-Android (see
+    // settings.gradle.kts); the version gate stays in services/whatsnew/WhatsNewManager.
+    implementation(project(":whatsnewkit"))
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

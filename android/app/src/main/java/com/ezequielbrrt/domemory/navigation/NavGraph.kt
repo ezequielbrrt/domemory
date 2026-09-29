@@ -43,7 +43,6 @@ import com.ezequielbrrt.domemory.feature.settings.AchievementsScreen
 import com.ezequielbrrt.domemory.feature.settings.AchievementsViewModel
 import com.ezequielbrrt.domemory.feature.settings.SettingsScreen
 import com.ezequielbrrt.domemory.feature.settings.SettingsViewModel
-import com.ezequielbrrt.domemory.feature.whatsnew.WhatsNewDialog
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.ads.findActivity
@@ -90,6 +89,7 @@ private object Routes {
 fun NavGraph(
     container: AppContainer,
     hasOnboarded: Boolean,
+    onWhatsNew: () -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
     // Resolved once and captured by every route below — a full-screen ad needs the
@@ -678,12 +678,10 @@ fun NavGraph(
             val state by viewModel.state.collectAsState()
             val menuEntry = remember { navController.getBackStackEntry(Routes.MENU) }
             val menuViewModel: MenuViewModel = viewModel(viewModelStoreOwner = menuEntry, factory = viewModelFactory { initializer { MenuViewModel(container.boardCatalog, container.prefs) } })
-            // A second, screen-local presentation of the same dialog MainActivity shows
-            // automatically after a version upgrade (WhatsNewDialog's own doc: "intentionally
-            // reused for automatic and Settings presentation"). No prefs write on dismiss here
-            // — reopening it manually never needs to change whatsNewLastSeenVersion, which is
-            // already at the running version by the time this screen is reachable at all.
-            var showWhatsNew by remember { mutableStateOf(false) }
+            // The Settings row reopens the same full-screen What's New MainActivity presents
+            // automatically after an upgrade; MainActivity owns the one presentation site so the
+            // screen can sit above the whole nav graph, edge to edge. Reopening it manually
+            // never writes whatsNewLastSeenVersion — see MainActivity.
             SettingsScreen(
                 state,
                 onBack = { if (state.difficultyChanged) menuViewModel.onSettingsDifficultyChanged(); navController.popBackStack() },
@@ -692,12 +690,9 @@ fun NavGraph(
                 onHaptics = viewModel::setHaptics,
                 onEnableReminders = viewModel::enableReminders,
                 onDisableReminders = viewModel::disableReminders,
-                onWhatsNew = { showWhatsNew = true },
+                onWhatsNew = onWhatsNew,
                 onAchievements = { navController.navigate(Routes.ACHIEVEMENTS) },
             )
-            if (showWhatsNew) {
-                WhatsNewDialog(onDismiss = { showWhatsNew = false })
-            }
         }
 
         composable(Routes.ACHIEVEMENTS) {
