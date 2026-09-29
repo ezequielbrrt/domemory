@@ -4,3 +4,6 @@
 [submodule "android/ReviewFlow-Android"]
 	path = android/ReviewFlow-Android
 	url = https://github.com/zoratek/ReviewFlow-Android.git
+[submodule "android/NotificationPermissionKit-Android"]
+	path = android/NotificationPermissionKit-Android
+	url = https://github.com/zoratek/NotificationPermissionKit-Android.git

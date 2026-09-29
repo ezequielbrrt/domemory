@@ -42,3 +42,8 @@ project(":whatsnewkit").projectDir = file("WhatsNewKit-Android/whatsnewkit")
 // compose-material-icons-core for it.
 include(":reviewflow")
 project(":reviewflow").projectDir = file("ReviewFlow-Android/reviewflow")
+
+// And for NotificationPermissionKit-Android (android/NotificationPermissionKit-Android): the
+// notification permission primer. Everything it references already exists in the catalog.
+include(":notificationpermissionkit")
+project(":notificationpermissionkit").projectDir = file("NotificationPermissionKit-Android/notificationpermissionkit")
