@@ -16,6 +16,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,7 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Difficulty
-import com.ezequielbrrt.domemory.feature.notifications.rememberNotificationPermissionRequester
+import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
+import com.ezequielbrrt.domemory.feature.notifications.isNotificationAuthorized
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
@@ -51,11 +56,22 @@ fun SettingsScreen(
     BackHandler(onBack = onBack)
     val p = LocalPalette.current
     val context = LocalContext.current
-    // Same "one path" discipline as the primer (feature/notifications/NotificationPrimerDialog.kt):
-    // turning the toggle on requests the OS permission first (a no-op below API 33) and only
-    // calls onEnableReminders — which flips notificationsEnabled — once that resolves.
-    // Denial leaves the flag untouched, matching spec 11.2's permission-sync rule.
-    val requestPermission = rememberNotificationPermissionRequester(onGranted = onEnableReminders, onDenied = {})
+    // Spec 11.3's "reused by the Settings toggle", the way iOS's `handleEnableNotifications`
+    // does it: already authorized → enable straight away; otherwise the same primer the menu
+    // shows (feature/notifications/NotificationPrimer.kt), which asks the OS with context
+    // behind it, or offers the system settings once the dialog can no longer appear.
+    // onEnableReminders — which flips notificationsEnabled — only ever runs after a confirmed
+    // grant; denial leaves the flag untouched, matching spec 11.2's permission-sync rule.
+    var showNotificationPrimer by remember { mutableStateOf(false) }
+    val requestPermission = {
+        if (isNotificationAuthorized(context)) onEnableReminders() else showNotificationPrimer = true
+    }
+    NotificationPrimerHost(
+        visible = showNotificationPrimer,
+        source = "settings",
+        onAuthorized = onEnableReminders,
+        onFinished = { showNotificationPrimer = false },
+    )
     Column(
         Modifier.fillMaxSize().background(p.appBackground).verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),

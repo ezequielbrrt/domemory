@@ -24,19 +24,24 @@ provisions its own JDK 21 toolchain on first run even though nothing on the
 machine is pinned to it (Android Studio ships a JBR, but that is not the same
 JDK the toolchain targets).
 
-**`android/WhatsNewKit-Android` and `android/ReviewFlow-Android` are git
-submodules** — the What's New screen comes from
-[WhatsNewKit-Android](https://github.com/zoratek/WhatsNewKit-Android) and the
+**`android/WhatsNewKit-Android`, `android/ReviewFlow-Android` and
+`android/NotificationPermissionKit-Android` are git submodules** — the What's
+New screen comes from
+[WhatsNewKit-Android](https://github.com/zoratek/WhatsNewKit-Android), the
 review policy/invitation from
-[ReviewFlow-Android](https://github.com/zoratek/ReviewFlow-Android), the Android
-twins of the iOS app's WhatsNewKit and ReviewFlow packages. Both repositories
-are private, so the JitPack coordinates in their READMEs cannot resolve; instead
+[ReviewFlow-Android](https://github.com/zoratek/ReviewFlow-Android) and the
+notification permission primer from
+[NotificationPermissionKit-Android](https://github.com/zoratek/NotificationPermissionKit-Android),
+the Android twins of the iOS app's WhatsNewKit, ReviewFlow and
+NotificationPermissionKit packages. All three repositories are private, so the
+JitPack coordinates in their READMEs cannot resolve; instead
 `settings.gradle.kts` includes each submodule's library module directly as
-`:whatsnewkit` and `:reviewflow` (never their `:demo` apps), built against this
-build's version catalog. A fresh clone needs `git submodule update --init`
-before Gradle can configure, and upgrading a library means checking out a new
-tag inside its submodule and committing the new gitlink. Their own unit tests
-run with `./gradlew :whatsnewkit:testDebugUnitTest :reviewflow:testDebugUnitTest`.
+`:whatsnewkit`, `:reviewflow` and `:notificationpermissionkit` (never their
+`:demo` apps), built against this build's version catalog. A fresh clone needs
+`git submodule update --init` before Gradle can configure, and upgrading a
+library means checking out a new tag inside its submodule and committing the
+new gitlink. Their own unit tests run with
+`./gradlew :whatsnewkit:testDebugUnitTest :reviewflow:testDebugUnitTest :notificationpermissionkit:testDebugUnitTest`.
 
 **`local.properties` is machine-local and gitignored** — it holds `sdk.dir`, an
 absolute path to one developer's SDK install. Never commit it; a fresh checkout
@@ -86,7 +91,7 @@ graph in the same change.
 | `services/daily` | `DailyChallengeService` — deterministic board, streak/milestone tracking (Phase 5) |
 | `core/deeplink` | `DeepLink`, `DeepLinkRouter` — `domemory://daily` and `domemory://join/CODE` parsing and routing |
 | `feature/seasons`, `feature/daily` | `SeasonCard`/`SeasonLevelsScreen`/`SeasonLevelsViewModel` (wires the endless-Levels lives gate into a season tile tap) and `DailyChallengeCard` — the menu entry points for Phases 4 and 5 |
-| `services/notifications`, `feature/notifications` | `NotificationService`, reminder workers and the once-per-install permission primer — the three local reminders and their OS-permission sync (Phase 5) |
+| `services/notifications`, `feature/notifications` | `NotificationService`, reminder workers (the three local reminders and their OS-permission sync, Phase 5) and `NotificationPrimer.kt` — the permission primer (spec 11.3) drawn by NotificationPermissionKit-Android, porting iOS's `NotificationPrimerContent.swift`: the fixed violet theme, the app's own copy/benefits/preview, and a `NotificationPrimerHost(visible, source, onAuthorized, onFinished)` that presents it in a full-screen dialog and logs `notification_primer_shown`/`_completed`. Two call sites, as on iOS: the menu once per install (`NavGraph.kt`) and the Settings reminders toggle whenever `isNotificationAuthorized(context)` is false. Below API 33 `ConsentGatedNotificationAuthorizationClient` reports `NotDetermined` instead of `Authorized` until the player taps, so "Turn On Reminders" stays the consent rather than the screen completing on its own |
 | `widget` | `DailyChallengeGlanceWidget`, receiver and calendar-aligned WorkManager refresh — the Daily Challenge home-screen widget (Phase 5) |
 | `services/multiplayer` | Room wire models, code normalization, Firebase adapter and pure turn reducer — Phase 6 in progress; create/join, invite sharing, QR rendering/scanning, gameplay, reconnect grace and rematch exist, while association deployment and live cross-platform verification remain follow-up work |
 | `services/ads` | AdMob initialization, debug/release placement configuration, the frequency-cap policy plus its presentation-trigger gate, and banner/interstitial/rewarded/native presentation — Phase 7 in progress; banners, the completion interstitial, both Levels rewarded rescues and the multiplayer-finished native ad are wired and presenting; `game_rewarded_extra_time`/`game_rewarded_hint` and app-open remain unwired (see `ANDROID_PLAN.md` §7) |

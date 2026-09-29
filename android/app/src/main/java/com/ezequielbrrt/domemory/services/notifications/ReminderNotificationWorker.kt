@@ -85,9 +85,9 @@ class ReminderNotificationWorker(
                 Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
         // Belt-and-suspenders: notificationsEnabled (the app flag) should already imply this
-        // on API 33+ since activateReminders() only ever gets called after a granted runtime
-        // request (feature/notifications/NotificationPermission.kt), but a revoke between
-        // scheduling and firing is a real window WorkManager doesn't close for us.
+        // on API 33+ since activateReminders() only ever gets called once the OS authorizes
+        // notifications or the primer reports a grant (feature/notifications/NotificationPrimer.kt),
+        // but a revoke between scheduling and firing is a real window WorkManager doesn't close for us.
         if (!hasPermission) return
 
         val contentIntent = PendingIntent.getActivity(

@@ -36,6 +36,7 @@ import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaViewModel
 import com.ezequielbrrt.domemory.feature.menu.MenuScreen
 import com.ezequielbrrt.domemory.feature.menu.MenuViewModel
 import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
+import com.ezequielbrrt.domemory.feature.notifications.isNotificationAuthorized
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingScreen
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingViewModel
 import com.ezequielbrrt.domemory.feature.seasons.SeasonLevelsScreen
@@ -210,12 +211,15 @@ fun NavGraph(
                 }
 
                 // Spec 11.3: "Shown once per install on the menu, and reused by the Settings
-                // toggle" (that reuse is SettingsScreen's own
-                // rememberNotificationPermissionRequester call, not this composable).
+                // toggle" (SettingsScreen hosts the same primer for its own toggle). Skipped,
+                // as iOS's `guard authorizationStatus == .notDetermined` skips it, when the OS
+                // already delivers this app's notifications — nothing to ask for.
+                val context = LocalContext.current
                 NotificationPrimerHost(
-                    visible = !notificationPrimerShown,
-                    onEnable = { container.applicationScope.launch { container.notifications.activateReminders() } },
-                    onDismiss = { container.applicationScope.launch { container.prefs.setNotificationPrimerShown(true) } },
+                    visible = !notificationPrimerShown && !isNotificationAuthorized(context),
+                    source = "menu",
+                    onAuthorized = { container.applicationScope.launch { container.notifications.activateReminders() } },
+                    onFinished = { container.applicationScope.launch { container.prefs.setNotificationPrimerShown(true) } },
                 )
             }
         }

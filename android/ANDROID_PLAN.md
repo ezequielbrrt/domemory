@@ -1559,6 +1559,45 @@ brought the Play Store app (`com.android.vending`) to the foreground — the pol
 (three wins, seven days) was not exercised end to end and rests on the library's
 `ReviewManagerTest`/`ReviewEligibilityEvaluatorTest`.
 
+**NotificationPermissionKit-Android adoption (2026-09-29).** The hand-rolled primer card in
+`feature/notifications/NotificationPrimerDialog.kt` and the bare `rememberNotificationPermissionRequester`
+in `NotificationPermission.kt` are gone; the permission primer (spec 11.3) is now drawn by
+[NotificationPermissionKit-Android](https://github.com/zoratek/NotificationPermissionKit-Android) 1.0.0,
+the Compose twin of the `NotificationPermissionKit` package iOS wraps in `NotificationPrimerContent.swift`,
+vendored exactly like the other two — private repository, git submodule at
+`android/NotificationPermissionKit-Android` pinned to tag `1.0.0`, only its `notificationpermissionkit`
+module included as `:notificationpermissionkit`, built against this catalog (no new aliases needed).
+`feature/notifications/NotificationPrimer.kt` ports the Swift file: the fixed violet
+`DoMemoryNotificationPermissionTheme` (literal colours on purpose — one identity in both appearances,
+as iOS's comment says), a configuration built from the existing `notification_primer_*` and
+`settings_notifications_denied_*`/`_open_settings` strings (the English denied message said "iOS
+Settings"; fixed to "Android Settings", the other nine locales already said Android), Material icons
+(fire, psychology, raised hand) for the SF Symbols, and `NotificationPrimerHost(visible, source,
+onAuthorized, onFinished)` presenting the library's `NotificationPermissionScreen` in a full-screen
+dialog — the Android reading of iOS's sheet — with the back gesture reported as `Deferred`. Analytics
+are unchanged in name and value: `notification_primer_shown` on appearance and
+`notification_primer_completed` with `authorized`/`denied`/`deferred`/`failed`, the mapping pinned by
+the new `NotificationPrimerOutcomeTest`. Two behaviour changes, both towards iOS: (1) the Settings
+reminders toggle now shows the primer (source `settings`) when the OS does not already authorize
+notifications, instead of firing the bare system dialog — and when the dialog can no longer appear the
+library's denied state offers "Open Settings", the counterpart of iOS's denied alert; when already
+authorized it enables directly, as iOS's `handleEnableNotifications` does. (2) The menu skips the
+once-per-install primer when notifications are already authorized, as iOS's `guard .notDetermined`
+does. One deliberate deviation from the library's own status mapping: below API 33 there is no runtime
+permission and the system client reports `Authorized` whenever notifications are enabled, which would
+make the screen complete on its own and turn reminders on for every Android 8–12 player without a tap.
+A thin wrapper client (`ConsentGatedNotificationAuthorizationClient`) reports `NotDetermined` there instead
+until the player taps, so "Turn On Reminders" remains the consent (the request then answers with the system
+toggle's state, and the mask lifts so the library's post-request re-read sees `Authorized`); API 33+ passes
+through untouched. `ConsentGatedNotificationAuthorizationClientTest` pins both sides of the line. Not
+ported: iOS's full-screen-ad suppression while the primer is up — Android's app-open ad is still
+unwired (§7's Phase 7 notes). Verification: `:app:assembleDebug` clean; `:app:testDebugUnitTest`
+423/423 (one new) and `:notificationpermissionkit:testDebugUnitTest` 10/10 green; on the Pixel_10
+emulator (API 37) with `POST_NOTIFICATIONS` revoked, the Settings toggle opened the primer, "Turn On
+Reminders" raised the system permission dialog, and allowing it flipped the toggle on. The menu's
+once-per-install path was not re-exercised (this install's `notificationPrimerShown` is already set);
+its gate is unchanged apart from the new authorized-skip.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links

@@ -26,9 +26,9 @@ class SettingsViewModel(private val prefs: UserPreferences, private val notifica
 
     /**
      * The toggle's "on" path never sets `notificationsEnabled` directly — it is called only
-     * after [com.ezequielbrrt.domemory.feature.notifications
-     * .rememberNotificationPermissionRequester] confirms a grant (or determines none is
-     * needed), same as the primer (spec 11.3: "reused by the Settings toggle"). This is the
+     * once the OS already authorizes notifications, or after the primer
+     * ([com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost]) reports a
+     * confirmed grant (spec 11.3: "reused by the Settings toggle"). This is the
      * one place a Settings-driven grant is allowed to flip the flag — going through
      * [NotificationService.activateReminders] is what keeps it from repeating spec 11.2's
      * permission-sync bug.
