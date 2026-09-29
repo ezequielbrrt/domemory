@@ -99,7 +99,6 @@ com.ezequielbrrt.domemory
 │   ├── stats/        GameStatsService, ProfileStatsService
 │   ├── images/       RemoteImageService
 │   ├── whatsnew/     WhatsNewManager, WhatsNewContent
-│   ├── review/       AppReviews
 │   └── analytics/    AnalyticsEvent (sealed), Analytics (+ LoggingAnalytics)
 ├── feature/
 │   ├── launch/       SplashScreen, LaunchSequence
@@ -110,6 +109,7 @@ com.ezequielbrrt.domemory
 │   ├── seasons/      SeasonLevelsScreen, SeasonLevelsViewModel
 │   ├── multiplayer/  MultiplayerService, room + join screens, QR
 │   ├── settings/     SettingsScreen, AchievementsScreen
+│   ├── review/       ReviewInvitation (ReviewFlow-Android host)
 │   └── share/        ShareResultCard
 ├── navigation/       NavGraph, DeepLinkRouter
 └── ui/theme/         Palette (light/dark pairs), Typography, Shapes, Icons map

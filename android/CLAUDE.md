@@ -96,7 +96,7 @@ graph in the same change.
 | `feature/review` | `ReviewInvitation.kt` — `DoMemoryReviewInvitationHost`, ReviewFlow-Android's full-screen review invitation wired to `AppContainer.reviews` (the app's one `ReviewManager`, spec 15.2) and hosted by `MainActivity`. Presents once, two seconds after the win that satisfies ReviewFlow's recommended policy (3 wins, 7 days since first use, 120-day cooldown, one ask per version); "Write a Review" opens the Play listing. Artwork is iOS's `onboarding-five-star-rating` PNG (`res/drawable-nodpi/review_invitation_five_star_rating.png`), copy is the app's own `review_invitation_*` strings in all ten locales. The library's Play In-App Review bridge (`ReviewRequestEffect`) is deliberately not used — the two are mutually exclusive. Wins are recorded from every `GameViewModel.onGameWon` site in `NavGraph.kt`; the Settings "Rate DoMemory" row calls the library's `openPlayStoreReviewPage()` |
 | `services/stats` | `ProfileStats`, `Achievement`, `ProfileStatsService` (lifetime aggregates + the pure `achievements()` derivation), `ProfileStatsRecorder`/`UserPreferencesProfileStatsRecorder` (the write side, mirroring `GameStatsRecorder`'s seam shape) — Phase 8 complete; recording is wired into `GameViewModel.commit()`/`.commitLossIfNeeded()` (every mode) and `MultiplayerViewModel` (guarded by `services/multiplayer/MultiplayerWinGuard`), reading into `feature/settings/AchievementsScreen.kt` |
 | `feature/share` | `ShareResultCard.kt` — the pure `resultGridString`/`resultShareCaption`, the `ShareResultCardView` composable, and `shareResultCard()` (renders it to a `Bitmap` via `GraphicsLayer.toImageBitmap()` and launches an `ACTION_SEND` chooser through a new `FileProvider`) — Phase 8 complete; reached from `GameScreen.kt`'s win overlay only (Levels/Seasons out-of-lives and lose-screen surfaces have no share affordance, matching iOS's own Win-Modal-only placement) |
-| `services/share` | `PlayStoreLinks` — the one place the Play Store listing URL is built, shared by the Settings "Rate DoMemory" row and the share-card caption |
+| `services/share` | `PlayStoreLinks` — the one place the app builds the Play Store listing URL, used by the share-card caption (the Settings "Rate DoMemory" row opens the listing through ReviewFlow-Android's `openPlayStoreReviewPage()` instead) |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app; `DoMemoryType` — the display (Righteous) and handwritten (Patrick Hand) roles, backed by `res/font` copies of the TTFs iOS bundles (both OFL 1.1; note iOS itself renders SF Rounded, not these files) |
 | `ui/lottie` | `BundledLottie` — plays a bundled Lottie JSON clip, mirroring iOS's `LottieView`; reads from a shared `assets/lottie/` at the repository root (an extra `assets.srcDir` in `app/build.gradle.kts`), the same JSON files iOS reaches through a `SupportingFiles/Lottie` symlink, so an animation cannot drift between platforms |
 | `ui/anim` | `ReduceMotion.kt` (`rememberReduceMotion`, the animator-duration-scale-off counterpart of iOS's `accessibilityReduceMotion`), `PressScale.kt`, `NumericTransition.kt` |
@@ -180,10 +180,11 @@ Phase 8 has What's New (version-gated dialog), haptics (`HapticsService`/`Haptic
 wired into `feature/game/GameViewModel.kt`'s flip/match/mismatch/win/loss/power-up/rescue
 moments and, as of the 2026-09-15 haptics-expansion session, Menu, Levels, Seasons,
 Multiplayer and Settings too — see `ANDROID_PLAN.md` §7's note for the exact mapping and
-what remains device-unverified), Play In-App Review (`AppReviews`, fired on a genuine
-win, deliberately thin with no local eligibility policy — Android's `ReviewManager` owns
-that server-side, unlike iOS's `ReviewFlow`), three Settings rows ("Achievements", "Rate
-DoMemory", "What's New"), achievements (`services/stats/ProfileStatsService`, recording
+what remains device-unverified), review prompting (ReviewFlow-Android's `ReviewManager`
+held as `AppContainer.reviews` with the recommended local policy — the same policy iOS's
+`ReviewFlow` runs — recording every genuine win and presenting `feature/review`'s
+invitation; see the package table row and `ANDROID_PLAN.md` §7's 2026-09-29 note), three
+Settings rows ("Achievements", "Rate DoMemory", "What's New"), achievements (`services/stats/ProfileStatsService`, recording
 wired into every `GameViewModel` finish and into multiplayer via `MultiplayerWinGuard`,
 reading into `feature/settings/AchievementsScreen.kt`), the spoiler-free share card
 (`feature/share/ShareResultCard.kt`, reached from the win overlay only), the four animations
