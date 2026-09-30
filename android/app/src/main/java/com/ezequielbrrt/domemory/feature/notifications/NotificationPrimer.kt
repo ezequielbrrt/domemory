@@ -4,6 +4,13 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FrontHand
 import androidx.compose.material.icons.filled.LocalFireDepartment
@@ -11,8 +18,12 @@ import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.NotificationManagerCompat
@@ -24,6 +35,7 @@ import com.ezequielbrrt.notificationpermissionkit.authorization.NotificationAuth
 import com.ezequielbrrt.notificationpermissionkit.authorization.NotificationPermissionResult
 import com.ezequielbrrt.notificationpermissionkit.authorization.NotificationPermissionStatus
 import com.ezequielbrrt.notificationpermissionkit.authorization.rememberSystemNotificationAuthorizationClient
+import com.ezequielbrrt.notificationpermissionkit.components.NotificationPreviewCard
 import com.ezequielbrrt.notificationpermissionkit.presentation.NotificationPermissionBenefit
 import com.ezequielbrrt.notificationpermissionkit.presentation.NotificationPermissionConfiguration
 import com.ezequielbrrt.notificationpermissionkit.presentation.NotificationPermissionScreen
@@ -69,11 +81,40 @@ fun NotificationPrimerHost(
         onDismissRequest = { complete(NotificationPermissionResult.Deferred) },
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
+        val configuration = doMemoryNotificationPermissionConfiguration()
         NotificationPermissionScreen(
-            configuration = doMemoryNotificationPermissionConfiguration(),
+            configuration = configuration,
             onCompletion = complete,
             theme = DoMemoryNotificationPermissionTheme,
             client = rememberDoMemoryNotificationAuthorizationClient(),
+            artwork = { DoMemoryNotificationPrimerArtwork(configuration.preview) },
+        )
+    }
+}
+
+/**
+ * Port of iOS's `NotificationPrimerArtwork`: Flippo ringing a reminder bell above the
+ * library's own notification preview card. It is `DefaultNotificationArtwork`'s layout with
+ * the bell glyph swapped for the mascot, except that the card sits below Flippo instead of
+ * across the lower half of the art, where it would cover his face.
+ */
+@Composable
+private fun DoMemoryNotificationPrimerArtwork(preview: NotificationPreviewContent) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Image(
+            painter = painterResource(R.drawable.flippo_reminder),
+            contentDescription = null,
+            modifier = Modifier.height(190.dp).aspectRatio(834f / 880f),
+        )
+        NotificationPreviewCard(
+            content = preview,
+            tint = DoMemoryNotificationPermissionTheme.previewTint,
+            surface = DoMemoryNotificationPermissionTheme.previewSurface,
+            modifier = Modifier.padding(horizontal = 4.dp),
         )
     }
 }
