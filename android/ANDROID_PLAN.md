@@ -1598,6 +1598,28 @@ Reminders" raised the system permission dialog, and allowing it flipped the togg
 once-per-install path was not re-exercised (this install's `notificationPrimerShown` is already set);
 its gate is unchanged apart from the new authorized-skip.
 
+**Debug menu (2026-09-29).** Android now has iOS's hidden QA panel. `feature/debug/DebugMenuScreen.kt`
+ports `DebugMenuView`, and `DebugMenuTapTrigger.kt` ports `DebugMenuTapTrigger`: five taps on the
+Settings title, each within 1.5s of the previous one, open a `debug_menu` nav route. Both the trigger
+(`SettingsScreen`'s new nullable `onDebugMenu`) and the route are gated on `BuildConfig.DEBUG`, the
+counterpart of iOS's `#if DEBUG`. Rows: What's New (WhatsNewKit-Android, not marked seen), the review
+invitation (ReviewFlow-Android, bypassing the policy, nothing recorded — `feature/review/
+ReviewInvitation.kt` gained `DoMemoryReviewInvitationPreview`, sharing its artwork, copy and style with
+the policy host), Play's native In-App Review request (status shown inline; Play shows nothing for
+sideloaded builds), the notification primer (NotificationPermissionKit-Android, live — it can grant the
+permission and arm reminders, as on iOS), the first-launch onboarding carousel, and the Levels intro.
+Deviation from iOS on purpose: iOS's "Start onboarding" wipes the user record first; Android's is a
+preview that keeps onboarding state, because `OnboardingViewModel`'s completion writes
+`completeOnboarding(Difficulty.MEDIUM)` and would reset the player's chosen difficulty. iOS's
+remove-ads toggle, ad-free-day reset and "Restart lives" rows are not ported — Android has no purchase
+layer, and the request covered the libraries and the two intros. Copy is plain English literals, as on
+iOS, outside `strings.xml` and `LocalizationParityTest`. Verification: `:app:assembleDebug` clean;
+`:app:testDebugUnitTest` 429/429 (three new in `DebugMenuTapCounterTest`); on the Pixel_10 emulator
+four taps left Settings alone, the fifth opened the menu, and every row presented its screen and
+returned to the menu (the native review request reported completion). `:app:assembleRelease`
+succeeded, and none of the menu's literals are present in the release dex while control literals from
+live code are, so R8 strips the menu from release.
+
 **Analytics parity with iOS PR #99 (2026-09-30).** Ports the events iOS added for the project
 tracker's usage questions, with the same names and parameter keys (spec §16.1):
 `achievements_opened` (Settings row), `theme_changed` (only when the pick differs, via

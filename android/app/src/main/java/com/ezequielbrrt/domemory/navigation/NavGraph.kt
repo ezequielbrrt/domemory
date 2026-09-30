@@ -29,6 +29,7 @@ import com.ezequielbrrt.domemory.core.model.LevelContext
 import com.ezequielbrrt.domemory.feature.game.GameScreen
 import com.ezequielbrrt.domemory.feature.game.GameViewModel
 import com.ezequielbrrt.domemory.feature.game.UserPreferencesGameStatsRecorder
+import com.ezequielbrrt.domemory.feature.debug.DebugMenuScreen
 import com.ezequielbrrt.domemory.feature.levels.LevelsIntroOverlay
 import com.ezequielbrrt.domemory.feature.levels.LevelsViewModel
 import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaScreen
@@ -70,6 +71,7 @@ private object Routes {
     const val ONBOARDING = "onboarding"
     const val SETTINGS = "settings"
     const val ACHIEVEMENTS = "achievements"
+    const val DEBUG_MENU = "debug_menu"
     const val CREATE_MEMORAMA = "create_memorama"
     const val LEVEL_GAME = "level/{level}"
     const val SEASON_LEVELS = "season/{seasonId}"
@@ -702,7 +704,19 @@ fun NavGraph(
                 onDisableReminders = viewModel::disableReminders,
                 onWhatsNew = onWhatsNew,
                 onAchievements = { navController.navigate(Routes.ACHIEVEMENTS) },
+                onDebugMenu = if (BuildConfig.DEBUG) { { navController.navigate(Routes.DEBUG_MENU) } } else null,
             )
+        }
+
+        // Debug builds only, like iOS's `#if DEBUG` DebugMenuView: the route does not exist
+        // in release, and nothing there can navigate to it.
+        if (BuildConfig.DEBUG) {
+            composable(Routes.DEBUG_MENU) {
+                DebugMenuScreen(
+                    onBack = { navController.popBackStack() },
+                    onNotificationsAuthorized = { container.applicationScope.launch { container.notifications.activateReminders() } },
+                )
+            }
         }
 
         composable(Routes.ACHIEVEMENTS) {
