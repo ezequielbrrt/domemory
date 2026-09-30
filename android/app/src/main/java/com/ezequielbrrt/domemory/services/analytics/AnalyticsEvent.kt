@@ -120,6 +120,13 @@ sealed class AnalyticsEvent(val name: String, val parameters: Map<String, Any>) 
         mapOf("game_id" to gameId, "is_favorite" to isFavorite.toAnalyticsInt()),
     )
 
+    /** The create-memorama screen was opened: `menu_header` or `mine_empty_state`. Compare with
+     * [CustomMemoramaCreated] for the share of players who finish building one. */
+    data class CustomMemoramaCreateOpened(val source: String) : AnalyticsEvent(
+        "custom_memorama_create_opened",
+        mapOf("source" to source),
+    )
+
     data class CustomMemoramaCreated(val gameId: String, val difficulty: String, val cardsCount: Int) : AnalyticsEvent(
         "custom_memorama_created",
         mapOf("game_id" to gameId, "difficulty" to difficulty, "cards_count" to cardsCount),
@@ -128,6 +135,13 @@ sealed class AnalyticsEvent(val name: String, val parameters: Map<String, Any>) 
     data class CustomMemoramaDeleted(val gameId: String) : AnalyticsEvent(
         "custom_memorama_deleted",
         mapOf("game_id" to gameId),
+    )
+
+    /** The player chose to `host` or `join` a room, before the backend accepts — so the gap
+     * to [MultiplayerRoomCreated] / [MultiplayerRoomJoined] is abandonment or failure. */
+    data class MultiplayerEntryTapped(val action: String) : AnalyticsEvent(
+        "multiplayer_entry_tapped",
+        mapOf("action" to action),
     )
 
     data class MultiplayerRoomCreated(val gameId: String, val isCustom: Boolean) : AnalyticsEvent(
@@ -183,6 +197,13 @@ sealed class AnalyticsEvent(val name: String, val parameters: Map<String, Any>) 
 
     data class ReviewLinkOpened(val source: String) : AnalyticsEvent("review_link_opened", mapOf("source" to source))
 
+    /** The player entered today's challenge: `card` or `widget` (the `domemory://daily` deep
+     * link). Once per entry, unlike [DailyChallengeStarted], which repeats on every retry. */
+    data class DailyChallengeOpened(val source: String, val streak: Int) : AnalyticsEvent(
+        "daily_challenge_opened",
+        mapOf("source" to source, "streak" to streak),
+    )
+
     data class DailyChallengeStarted(val streak: Int) : AnalyticsEvent(
         "daily_challenge_started",
         mapOf("streak" to streak),
@@ -201,6 +222,17 @@ sealed class AnalyticsEvent(val name: String, val parameters: Map<String, Any>) 
 
     data object OnboardingIntroSkipped : AnalyticsEvent("onboarding_intro_skipped", emptyMap())
 
+    data class AchievementsOpened(val source: String) : AnalyticsEvent(
+        "achievements_opened",
+        mapOf("source" to source),
+    )
+
+    /** Only logged when the pick differs from the current theme: `system`, `light`, `dark`. */
+    data class ThemeChanged(val theme: String, val previousTheme: String) : AnalyticsEvent(
+        "theme_changed",
+        mapOf("theme" to theme, "previous_theme" to previousTheme),
+    )
+
     // Season play reuses the numbered-level events rather than a parallel set, so the season
     // and endless-Levels funnels stay directly comparable — mirrors iOS's own doc comment on
     // this exact point. `seasonId` is omitted entirely (not sent empty) for endless Levels, so
@@ -211,14 +243,19 @@ sealed class AnalyticsEvent(val name: String, val parameters: Map<String, Any>) 
         tagged(mapOf("level" to level), seasonId),
     )
 
+    /** [powerUpsUsed] counts star power-ups bought during this attempt. */
     data class LevelFinished(
         val level: Int,
         val result: String,
         val stars: Int,
+        val powerUpsUsed: Int,
         val seasonId: String? = null,
     ) : AnalyticsEvent(
         "level_finished",
-        tagged(mapOf("level" to level, "result" to result, "stars" to stars), seasonId),
+        tagged(
+            mapOf("level" to level, "result" to result, "stars" to stars, "power_ups_used" to powerUpsUsed),
+            seasonId,
+        ),
     )
 
     data class LevelUnlocked(val level: Int, val seasonId: String? = null) : AnalyticsEvent(
@@ -229,6 +266,13 @@ sealed class AnalyticsEvent(val name: String, val parameters: Map<String, Any>) 
     data class LevelLifeConsumed(val livesRemaining: Int) : AnalyticsEvent(
         "level_life_consumed",
         mapOf("lives_remaining" to livesRemaining),
+    )
+
+    /** A loss just spent the day's last life. [LevelOutOfLivesShown] only fires later, when the
+     * player taps a level with none left. */
+    data class LevelLivesDepleted(val level: Int, val seasonId: String? = null) : AnalyticsEvent(
+        "level_lives_depleted",
+        tagged(mapOf("level" to level), seasonId),
     )
 
     data class LevelLifeGrantedFromAd(val livesRemaining: Int) : AnalyticsEvent(
@@ -246,9 +290,13 @@ sealed class AnalyticsEvent(val name: String, val parameters: Map<String, Any>) 
         val level: Int,
         val cost: Int,
         val balanceAfter: Int,
+        val seasonId: String? = null,
     ) : AnalyticsEvent(
         "level_power_up_used",
-        mapOf("power_up" to powerUp, "level" to level, "cost" to cost, "balance_after" to balanceAfter),
+        tagged(
+            mapOf("power_up" to powerUp, "level" to level, "cost" to cost, "balance_after" to balanceAfter),
+            seasonId,
+        ),
     )
 
     data class LevelLifePurchasedWithStars(val cost: Int, val balanceAfter: Int) : AnalyticsEvent(
@@ -275,7 +323,18 @@ sealed class AnalyticsEvent(val name: String, val parameters: Map<String, Any>) 
 
     data object LevelsIntroCompleted : AnalyticsEvent("levels_intro_completed", emptyMap())
 
-    data object LevelsIntroSkipped : AnalyticsEvent("levels_intro_skipped", emptyMap())
+    /** [slidesSeen] is how far the player got before skipping (1-based). */
+    data class LevelsIntroSkipped(val slidesSeen: Int) : AnalyticsEvent(
+        "levels_intro_skipped",
+        mapOf("slides_seen" to slidesSeen),
+    )
+
+    /** The active season's card on the menu was tapped. Once per tap, unlike
+     * [SeasonLevelsEntered], which also fires on returning from a level. */
+    data class SeasonCardTapped(val seasonId: String) : AnalyticsEvent(
+        "season_card_tapped",
+        mapOf("season_id" to seasonId),
+    )
 
     /** Fired every time a season's level map appears, including returning to it from a level —
      * distinct from the generic [ScreenView], which carries no season identity. */

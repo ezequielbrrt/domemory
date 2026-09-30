@@ -1598,6 +1598,23 @@ Reminders" raised the system permission dialog, and allowing it flipped the togg
 once-per-install path was not re-exercised (this install's `notificationPrimerShown` is already set);
 its gate is unchanged apart from the new authorized-skip.
 
+**Analytics parity with iOS PR #99 (2026-09-30).** Ports the events iOS added for the project
+tracker's usage questions, with the same names and parameter keys (spec §16.1):
+`achievements_opened` (Settings row), `theme_changed` (only when the pick differs, via
+`SettingsViewModel.setTheme`), `custom_memorama_create_opened` (menu header and empty Mine
+state), `daily_challenge_opened` (`card` from the menu, `widget` from the `domemory://daily`
+deep link), `season_card_tapped`, `multiplayer_entry_tapped` and `level_lives_depleted`.
+`level_finished` gains `power_ups_used` (star power-ups bought this attempt, reset by
+`trackGameStarted`), `level_power_up_used` gains `season_id`, and `levels_intro_skipped`
+becomes a data class carrying `slides_seen`, which `IntroCarousel.onSkip` now passes.
+Android-specific readings: the host/join choice is logged on the lobby's Create, Join and
+Scan QR buttons, since Android has no menu between the header button and the lobby; and
+depletion is gated on `LevelLivesService.spendOnLoss()` returning true, so a loss with no
+life to spend is not a depletion. `menu_tab_selected` landed earlier with iOS PR #99.
+Validation: the full unit suite (433 tests) passes, including three new `GameViewModelTest`
+cases (depletion fires once on the real last life, never at zero, and `power_ups_used`
+counts then resets on retry). No event was observed in DebugView on a device.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links

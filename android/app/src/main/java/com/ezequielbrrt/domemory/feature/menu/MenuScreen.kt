@@ -58,6 +58,8 @@ import com.ezequielbrrt.domemory.services.seasons.Season
 import com.ezequielbrrt.domemory.services.seasons.SeasonLevelProgressStore
 import com.ezequielbrrt.domemory.services.ads.AdMobBanner
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 
@@ -111,7 +113,11 @@ fun MenuScreen(
                 SeasonCard(
                     season = activeSeason,
                     store = activeSeasonStore,
-                    onClick = { HapticsService.fire(HapticIntent.TAP); onSeasonSelected(activeSeason) },
+                    onClick = {
+                        HapticsService.fire(HapticIntent.TAP)
+                        AnalyticsService.log(AnalyticsEvent.SeasonCardTapped(seasonId = activeSeason.id))
+                        onSeasonSelected(activeSeason)
+                    },
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -159,7 +165,11 @@ private fun MenuHeader(onCreateMemorama: () -> Unit, onMultiplayer: () -> Unit, 
                 tint = palette.primary,
                 modifier = Modifier
                     .size(44.dp)
-                    .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onCreateMemorama() })
+                    .clickable(onClick = {
+                        HapticsService.fire(HapticIntent.TAP)
+                        AnalyticsService.log(AnalyticsEvent.CustomMemoramaCreateOpened(source = "menu_header"))
+                        onCreateMemorama()
+                    })
                     .padding(10.dp),
             )
             Text(text = "⚙", color = palette.primary, fontSize = 22.sp, modifier = Modifier.size(44.dp).clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onSettings() }).padding(10.dp))
@@ -264,7 +274,11 @@ private fun EmptyMineState(onCreateMemorama: () -> Unit) {
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .background(palette.primary, RoundedCornerShape(999.dp))
-                    .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onCreateMemorama() })
+                    .clickable(onClick = {
+                        HapticsService.fire(HapticIntent.TAP)
+                        AnalyticsService.log(AnalyticsEvent.CustomMemoramaCreateOpened(source = "mine_empty_state"))
+                        onCreateMemorama()
+                    })
                     .padding(horizontal = 18.dp, vertical = 10.dp),
             )
         }

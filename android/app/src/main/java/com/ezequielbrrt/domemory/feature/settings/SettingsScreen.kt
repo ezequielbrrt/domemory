@@ -85,7 +85,11 @@ fun SettingsScreen(
             SettingRow(
                 title = stringResource(R.string.achievements_title),
                 description = stringResource(R.string.achievements_subtitle),
-                onClick = { HapticsService.fire(HapticIntent.TAP); onAchievements() },
+                onClick = {
+                    HapticsService.fire(HapticIntent.TAP)
+                    AnalyticsService.log(AnalyticsEvent.AchievementsOpened(source = "settings"))
+                    onAchievements()
+                },
             )
             HorizontalDivider(color = p.surfaceBorder)
             Difficulty.entries.forEach { d ->
