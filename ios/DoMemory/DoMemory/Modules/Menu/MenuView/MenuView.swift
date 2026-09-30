@@ -77,6 +77,7 @@ struct MenuView: View {
                                 Menu {
                                     Button {
                                         HapticsService.shared.fire(.tap)
+                                        AnalyticsService.log(.multiplayerEntryTapped(action: "host"))
                                         isHostingMultiplayerRoom = true
                                     } label: {
                                         Label(Strings.multiplayerCreateRoom, systemImage: "person.2.badge.plus")
@@ -84,6 +85,7 @@ struct MenuView: View {
 
                                     Button {
                                         HapticsService.shared.fire(.tap)
+                                        AnalyticsService.log(.multiplayerEntryTapped(action: "join"))
                                         showJoinMultiplayerSheet = true
                                     } label: {
                                         Label(Strings.multiplayerJoinRoom, systemImage: "arrow.right.circle")
@@ -105,7 +107,7 @@ struct MenuView: View {
                                 }
                                 .accessibilityLabel(Strings.multiplayerTitle)
 
-                                Button(action: { HapticsService.shared.fire(.tap); self.showCreateSheet = true }) {
+                                Button(action: { HapticsService.shared.fire(.tap); openCreateSheet(source: "menu_header") }) {
                                     Image(systemName: "plus")
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundStyle(Color.primaryColor)
@@ -153,13 +155,14 @@ struct MenuView: View {
                                     CompactDailyChallengeCard(
                                         streak: DailyChallengeService.shared.currentStreak,
                                         isCompleted: DailyChallengeService.shared.isCompletedToday(),
-                                        onPlay: { dailyChallengeBoard = DailyChallengeService.shared.boardForToday() }
+                                        onPlay: { openDailyChallenge(source: "card") }
                                     )
 
                                     SeasonCard(
                                         season: season,
                                         onOpen: {
                                             HapticsService.shared.fire(.tap)
+                                            AnalyticsService.log(.seasonCardTapped(seasonID: season.id))
                                             seasonDestination = season
                                         }
                                     )
@@ -171,7 +174,7 @@ struct MenuView: View {
                                 DailyChallengeCard(
                                     streak: DailyChallengeService.shared.currentStreak,
                                     isCompleted: DailyChallengeService.shared.isCompletedToday(),
-                                    onPlay: { dailyChallengeBoard = DailyChallengeService.shared.boardForToday() }
+                                    onPlay: { openDailyChallenge(source: "card") }
                                 )
                                 .id(statsRefreshID)
                                 .padding(.horizontal, 16)
@@ -353,10 +356,24 @@ struct MenuView: View {
         }
         .onReceive(deepLinkRouter.$shouldOpenDailyChallenge.filter { $0 }) { _ in
             if !DailyChallengeService.shared.isCompletedToday() {
-                dailyChallengeBoard = DailyChallengeService.shared.boardForToday()
+                openDailyChallenge(source: "notification")
             }
             deepLinkRouter.shouldOpenDailyChallenge = false
         }
+    }
+
+    private func openCreateSheet(source: String) {
+        AnalyticsService.log(.customMemoramaCreateOpened(source: source))
+        showCreateSheet = true
+    }
+
+    /// `source` is `card` or `notification`; the completed card is disabled,
+    /// so every call is a real entry into today's challenge.
+    private func openDailyChallenge(source: String) {
+        AnalyticsService.log(
+            .dailyChallengeOpened(source: source, streak: DailyChallengeService.shared.currentStreak)
+        )
+        dailyChallengeBoard = DailyChallengeService.shared.boardForToday()
     }
 
     private struct JoinDeepLink: Identifiable, Hashable {
@@ -413,7 +430,7 @@ struct MenuView: View {
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.textMuted)
                     .multilineTextAlignment(.center)
-                Button(action: { HapticsService.shared.fire(.tap); showCreateSheet = true }) {
+                Button(action: { HapticsService.shared.fire(.tap); openCreateSheet(source: "mine_empty_state") }) {
                     Text(Strings.emptyMyGamesAction)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)

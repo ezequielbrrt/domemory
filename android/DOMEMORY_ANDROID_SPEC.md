@@ -1345,8 +1345,10 @@ the event set is consistent.
 | `quit_confirmed` | `difficulty`, `time_remaining`, `failed_tries` |
 | `retry_tapped` | `difficulty`, `cards_count`, `source` |
 | `favorite_toggled` | `game_id`, `is_favorite` |
+| `custom_memorama_create_opened` | `source` (`menu_header` \| `mine_empty_state`) |
 | `custom_memorama_created` | `game_id`, `difficulty`, `cards_count` |
 | `custom_memorama_deleted` | `game_id` |
+| `multiplayer_entry_tapped` | `action` (`host` \| `join`) — the menu choice, before the backend accepts |
 | `multiplayer_room_created` | `game_id`, `is_custom` |
 | `multiplayer_room_joined` | — |
 | `multiplayer_game_started` | `game_id` |
@@ -1358,24 +1360,30 @@ the event set is consistent.
 | `notification_primer_shown` | `source` |
 | `notification_primer_completed` | `source`, `outcome` |
 | `review_link_opened` | `source` |
+| `daily_challenge_opened` | `source` (`card` \| `notification`), `streak` — once per entry; `daily_challenge_started` repeats on every retry |
 | `daily_challenge_started` | `streak` |
 | `daily_challenge_finished` | `result`, `streak` |
 | `streak_milestone` | `days` |
 | `result_shared` | `source` |
 | `onboarding_intro_completed` / `_skipped` | — |
+| `achievements_opened` | `source` (`settings`) |
+| `theme_changed` | `theme`, `previous_theme` (`system` \| `light` \| `dark`) — only when the pick differs |
 | `level_started` | `level` (+ `season_id`) |
-| `level_finished` | `level`, `result`, `stars` (+ `season_id`) |
+| `level_finished` | `level`, `result`, `stars`, `power_ups_used` (star power-ups bought this attempt) (+ `season_id`) |
 | `level_unlocked` | `level` (+ `season_id`) |
 | `level_life_consumed` / `level_life_granted_from_ad` | `lives_remaining` |
+| `level_lives_depleted` | `level` (+ `season_id`) — a loss just spent the last life |
 | `level_out_of_lives_shown` | `source` |
 | `level_stars_credited` | `level`, `amount`, `balance_after` (+ `season_id`) |
-| `level_power_up_used` | `power_up`, `level`, `cost`, `balance_after` |
+| `level_power_up_used` | `power_up`, `level`, `cost`, `balance_after` (+ `season_id`) |
 | `level_life_purchased_with_stars` | `cost`, `balance_after` |
 | `level_skipped` | `level`, `cost`, `balance_after` |
 | `level_failed_by_mistakes` | `level`, `max_failures`, `time_remaining` |
 | `level_mistakes_forgiven` | `level`, `amount`, `source` (`ad` \| `stars`) |
 | `levels_intro_shown` | `source` |
-| `levels_intro_completed` / `_skipped` | — |
+| `levels_intro_completed` | — |
+| `levels_intro_skipped` | `slides_seen` (1-based) |
+| `season_card_tapped` | `season_id` — the menu card; `season_levels_entered` also fires on returning from a level |
 | `season_levels_entered` | `season_id` |
 
 ### 16.2 The season dimension

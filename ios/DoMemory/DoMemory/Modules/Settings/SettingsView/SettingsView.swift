@@ -62,6 +62,7 @@ struct SettingsView: View {
                                 systemImage: "trophy.fill"
                             ) {
                                 HapticsService.shared.fire(.tap)
+                                AnalyticsService.log(.achievementsOpened(source: "settings"))
                                 showAchievements = true
                             }
 
@@ -308,6 +309,9 @@ struct SettingsView: View {
                 selectedTheme: AppTheme(rawValue: themePreference) ?? .system,
                 onSelect: { theme in
                     HapticsService.shared.fire(.tap)
+                    if theme.rawValue != themePreference {
+                        AnalyticsService.log(.themeChanged(theme: theme.rawValue, previousTheme: themePreference))
+                    }
                     themePreference = theme.rawValue
                     showThemePicker = false
                 }
