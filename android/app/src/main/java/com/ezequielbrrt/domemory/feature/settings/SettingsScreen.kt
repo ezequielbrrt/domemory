@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Difficulty
+import com.ezequielbrrt.domemory.feature.debug.debugMenuTapTrigger
 import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
 import com.ezequielbrrt.domemory.feature.notifications.isNotificationAuthorized
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
@@ -52,6 +53,8 @@ fun SettingsScreen(
     onDisableReminders: () -> Unit,
     onWhatsNew: () -> Unit,
     onAchievements: () -> Unit,
+    /** Debug builds only (null in release): five taps on the title open the debug menu. */
+    onDebugMenu: (() -> Unit)? = null,
 ) {
     BackHandler(onBack = onBack)
     val p = LocalPalette.current
@@ -78,7 +81,12 @@ fun SettingsScreen(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             BackButton(onClick = onBack)
-            Text(stringResource(R.string.settings_title), style = DoMemoryType.display(26), color = p.primary)
+            Text(
+                stringResource(R.string.settings_title),
+                style = DoMemoryType.display(26),
+                color = p.primary,
+                modifier = onDebugMenu?.let { Modifier.debugMenuTapTrigger(it) } ?: Modifier,
+            )
         }
         SettingGroup(stringResource(R.string.settings_section_game)) {
             // First row of the first section, as on iOS (`SettingsView`'s Game section).

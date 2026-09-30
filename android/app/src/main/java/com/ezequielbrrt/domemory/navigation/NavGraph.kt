@@ -29,6 +29,7 @@ import com.ezequielbrrt.domemory.core.model.LevelContext
 import com.ezequielbrrt.domemory.feature.game.GameScreen
 import com.ezequielbrrt.domemory.feature.game.GameViewModel
 import com.ezequielbrrt.domemory.feature.game.UserPreferencesGameStatsRecorder
+import com.ezequielbrrt.domemory.feature.debug.DebugMenuScreen
 import com.ezequielbrrt.domemory.feature.levels.LevelsIntroOverlay
 import com.ezequielbrrt.domemory.feature.levels.LevelsViewModel
 import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaScreen
@@ -52,6 +53,7 @@ import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
+import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.stats.UserPreferencesProfileStatsRecorder
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -70,6 +72,7 @@ private object Routes {
     const val ONBOARDING = "onboarding"
     const val SETTINGS = "settings"
     const val ACHIEVEMENTS = "achievements"
+    const val DEBUG_MENU = "debug_menu"
     const val CREATE_MEMORAMA = "create_memorama"
     const val LEVEL_GAME = "level/{level}"
     const val SEASON_LEVELS = "season/{seasonId}"
@@ -160,6 +163,10 @@ fun NavGraph(
                 },
             )
             val levelsUiState by levelsViewModel.uiState.collectAsState()
+            // Only the top destination stays composed, so this runs every time the menu comes
+            // back into view — the counterpart of iOS's `LevelsView.onAppear { refresh() }`. It
+            // picks up lives and stars changed elsewhere, e.g. the debug menu's "Restart lives".
+            LaunchedEffect(Unit) { levelsViewModel.refresh() }
             val activeSeason by container.seasonCatalog.activeSeason.collectAsState()
             val dailyStreak by container.prefs.dailyStreakCurrent.collectAsState(initial = 0)
             val dailyLastAttemptDay by container.prefs.dailyLastAttemptDay.collectAsState(initial = null)
@@ -702,7 +709,20 @@ fun NavGraph(
                 onDisableReminders = viewModel::disableReminders,
                 onWhatsNew = onWhatsNew,
                 onAchievements = { navController.navigate(Routes.ACHIEVEMENTS) },
+                onDebugMenu = if (BuildConfig.DEBUG) { { navController.navigate(Routes.DEBUG_MENU) } } else null,
             )
+        }
+
+        // Debug builds only, like iOS's `#if DEBUG` DebugMenuView: the route does not exist
+        // in release, and nothing there can navigate to it.
+        if (BuildConfig.DEBUG) {
+            composable(Routes.DEBUG_MENU) {
+                DebugMenuScreen(
+                    onBack = { navController.popBackStack() },
+                    onNotificationsAuthorized = { container.applicationScope.launch { container.notifications.activateReminders() } },
+                    onRestoreLives = { container.levelLives.refill(LevelLivesService.MAX_LIVES) },
+                )
+            }
         }
 
         composable(Routes.ACHIEVEMENTS) {
