@@ -22,6 +22,9 @@ struct MenuView: View {
     @State private var showJoinMultiplayerSheet = false
     @State private var isHostingMultiplayerRoom = false
     @State private var selectedTab: GameTab = .levels
+    /// Set when the app, not the player, moves the tab, so that switch is not
+    /// logged as `menu_tab_selected`.
+    @State private var isProgrammaticTabChange = false
     @State private var randomMemorama: Memorama?
     @State private var dailyChallengeBoard: Memorama?
     @State private var statsRefreshID = UUID()
@@ -297,7 +300,10 @@ struct MenuView: View {
                     .sheet(isPresented: $showCreateSheet) {
                         CreateMemoramaView(
                             currentDifficulty: viewModel.currentDifficulty,
-                            onSave: { viewModel.addCustomMemorama($0) }
+                            onSave: { memorama in
+                                viewModel.addCustomMemorama(memorama)
+                                showMyMemoramas()
+                            }
                         )
                     }
                     .sheet(isPresented: $showJoinMultiplayerSheet) {
@@ -326,9 +332,13 @@ struct MenuView: View {
         .onChange(of: showNotificationPrimer) { _, isShowing in
             AdsService.shared.setFullScreenAdsSuppressed(isShowing)
         }
-        // Only a tap on the tab bar changes the tab, so this is exactly the
-        // player's switches; the Levels default on launch is not logged.
+        // The player's tab switches. The Levels default on launch is not logged,
+        // nor is the jump to "My memoramas" after creating one.
         .onChange(of: selectedTab) { previous, tab in
+            if isProgrammaticTabChange {
+                isProgrammaticTabChange = false
+                return
+            }
             AnalyticsService.log(.menuTabSelected(tab: tab.rawValue, previousTab: previous.rawValue))
         }
         .onAppear {
@@ -360,6 +370,14 @@ struct MenuView: View {
             }
             deepLinkRouter.shouldOpenDailyChallenge = false
         }
+    }
+
+    /// Shows "My memoramas" after the player creates one, so the new board is on
+    /// screen when the sheet closes (tracker #161; Android does the same).
+    private func showMyMemoramas() {
+        guard selectedTab != .mine else { return }
+        isProgrammaticTabChange = true
+        selectedTab = .mine
     }
 
     private func openCreateSheet(source: String) {

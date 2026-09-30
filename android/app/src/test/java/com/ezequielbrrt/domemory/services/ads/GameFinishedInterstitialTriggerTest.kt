@@ -42,6 +42,22 @@ class GameFinishedInterstitialTriggerTest {
         assertTrue(decision.shouldRequestPresentation)
     }
 
+    @Test fun `an active ad-free day never requests and does not advance the cadence`() {
+        val state = AdFrequencyState(qualifyingCompletions = 2)
+        val decision = GameFinishedInterstitialTrigger.evaluate(
+            state = state,
+            difficulty = Difficulty.EASY,
+            gameDurationMillis = 20_000,
+            nowMillis = 100_000,
+            allowInterstitial = true,
+            involuntaryAdsSuppressed = true,
+        )
+        assertFalse(decision.shouldRequestPresentation)
+        // Games played during the grant don't count, so the first finish after it ends is
+        // not an instant interstitial.
+        assertEquals(state, decision.nextState)
+    }
+
     @Test fun `a too-short game never requests even when otherwise due`() {
         val state = AdFrequencyState(qualifyingCompletions = 2)
         val decision = GameFinishedInterstitialTrigger.evaluate(

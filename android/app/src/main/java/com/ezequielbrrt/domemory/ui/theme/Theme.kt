@@ -11,6 +11,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
@@ -21,32 +22,62 @@ enum class ThemePreference { SYSTEM, LIGHT, DARK }
 val LocalPalette = staticCompositionLocalOf { LightPalette }
 
 /**
- * The two named type roles from the spec (14.2), backed by the same two fonts iOS bundles:
- * Righteous for display text and Patrick Hand for handwritten text. The TTFs in `res/font`
- * are byte-for-byte copies of `ios/DoMemory/DoMemory/SupportingFiles/Fonts`, both under the
- * SIL Open Font License 1.1 (the copyright and license text travel inside each file).
+ * The app's typography: Nunito everywhere, standing in for the SF Pro Rounded iOS renders.
  *
- * Note that iOS's `Font.righteous`/`Font.patrickHand` currently return `.system(design:
- * .rounded)` rather than these files, so iOS renders SF Rounded; Android renders the fonts
- * themselves. Both fonts ship a single Regular weight, so the styles ask for
- * [FontWeight.Normal] — anything heavier makes Compose synthesize a fake bold. Glyphs the
- * fonts lack (Devanagari, CJK) fall back to the system font per character.
+ * iOS bundles Righteous and Patrick Hand, but its `Font.righteous`/`Font.patrickHand` return
+ * `.system(design: .rounded)`, and nearly every other label is `.system(design: .rounded)` too,
+ * so the iOS app is set in SF Pro Rounded throughout. Apple licenses that face for Apple
+ * platforms only, so Android uses Nunito, the closest open rounded sans (SIL Open Font License
+ * 1.1; the license text ships in `assets/licenses/Nunito-OFL.txt`). `res/font/nunito.ttf` is
+ * Google Fonts' variable font, and each weight below is one instance of its `wght` axis, so
+ * bold text is a real bold, never a synthesized one. Glyphs Nunito lacks (Devanagari, CJK)
+ * fall back to the system font per character.
  */
 object DoMemoryType {
-    private val Righteous = FontFamily(Font(R.font.righteous_regular, FontWeight.Normal))
-    private val PatrickHand = FontFamily(Font(R.font.patrick_hand_regular, FontWeight.Normal))
+    val Nunito: FontFamily = FontFamily(
+        listOf(300, 400, 500, 600, 700, 800, 900).map { weight ->
+            Font(
+                resId = R.font.nunito,
+                weight = FontWeight(weight),
+                variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
+            )
+        },
+    )
 
+    /** The display/brand role (titles), iOS's `righteous(size:)`: heavy rounded. */
     fun display(size: Int) = TextStyle(
-        fontFamily = Righteous,
-        fontWeight = FontWeight.Normal,
+        fontFamily = Nunito,
+        fontWeight = FontWeight.ExtraBold,
         fontSize = size.sp,
     )
 
+    /** The secondary role, iOS's `patrickHand(size:)`: semibold rounded. */
     fun handwritten(size: Int) = TextStyle(
-        fontFamily = PatrickHand,
-        fontWeight = FontWeight.Normal,
+        fontFamily = Nunito,
+        fontWeight = FontWeight.SemiBold,
         fontSize = size.sp,
     )
+
+    /** Material's type scale in Nunito, so every `Text`, button and tab label inherits it. */
+    val typography: Typography = Typography().run {
+        copy(
+            displayLarge = displayLarge.copy(fontFamily = Nunito),
+            displayMedium = displayMedium.copy(fontFamily = Nunito),
+            displaySmall = displaySmall.copy(fontFamily = Nunito),
+            headlineLarge = headlineLarge.copy(fontFamily = Nunito),
+            headlineMedium = headlineMedium.copy(fontFamily = Nunito),
+            headlineSmall = headlineSmall.copy(fontFamily = Nunito),
+            titleLarge = titleLarge.copy(fontFamily = Nunito),
+            titleMedium = titleMedium.copy(fontFamily = Nunito),
+            titleSmall = titleSmall.copy(fontFamily = Nunito),
+            bodyLarge = bodyLarge.copy(fontFamily = Nunito),
+            bodyMedium = bodyMedium.copy(fontFamily = Nunito),
+            bodySmall = bodySmall.copy(fontFamily = Nunito),
+            labelLarge = labelLarge.copy(fontFamily = Nunito),
+            labelMedium = labelMedium.copy(fontFamily = Nunito),
+            labelSmall = labelSmall.copy(fontFamily = Nunito),
+        )
+    }
 }
 
 @Composable
@@ -84,6 +115,6 @@ fun DoMemoryTheme(
     }
 
     CompositionLocalProvider(LocalPalette provides palette) {
-        MaterialTheme(colorScheme = scheme, typography = Typography(), content = content)
+        MaterialTheme(colorScheme = scheme, typography = DoMemoryType.typography, content = content)
     }
 }
