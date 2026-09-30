@@ -50,7 +50,7 @@ enum AnalyticsEvent {
     case notificationPrimerCompleted(source: String, outcome: String)
     case reviewLinkOpened(source: String)
     /// The player entered today's challenge: `card` (the menu card) or
-    /// `notification` (the reminder's deep link). Once per entry, unlike
+    /// `widget` (the widget's `daily` deep link). Once per entry, unlike
     /// `dailyChallengeStarted`, which fires again on every retry.
     case dailyChallengeOpened(source: String, streak: Int)
     case dailyChallengeStarted(streak: Int)

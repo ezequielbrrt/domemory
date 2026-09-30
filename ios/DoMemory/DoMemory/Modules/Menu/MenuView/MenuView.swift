@@ -356,7 +356,7 @@ struct MenuView: View {
         }
         .onReceive(deepLinkRouter.$shouldOpenDailyChallenge.filter { $0 }) { _ in
             if !DailyChallengeService.shared.isCompletedToday() {
-                openDailyChallenge(source: "notification")
+                openDailyChallenge(source: "widget")
             }
             deepLinkRouter.shouldOpenDailyChallenge = false
         }
@@ -367,8 +367,9 @@ struct MenuView: View {
         showCreateSheet = true
     }
 
-    /// `source` is `card` or `notification`; the completed card is disabled,
-    /// so every call is a real entry into today's challenge.
+    /// `source` is `card` or `widget` (the `domemory://daily` deep link, or its
+    /// https form). The completed card is disabled and the link is ignored once
+    /// today is done, so every call is a real entry into today's challenge.
     private func openDailyChallenge(source: String) {
         AnalyticsService.log(
             .dailyChallengeOpened(source: source, streak: DailyChallengeService.shared.currentStreak)

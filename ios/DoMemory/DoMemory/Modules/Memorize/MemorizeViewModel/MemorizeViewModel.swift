@@ -511,10 +511,13 @@ class MemorizeViewModel {
                 AnalyticsService.log(.levelUnlocked(level: unlockedLevel, seasonID: context.seasonID))
             }
             if !didWin {
+                // `consumeLife` also returns 0 when there was nothing to spend;
+                // only a real 1 → 0 transition is a depletion.
+                let hadLives = LevelLivesService.shared.hasLivesRemaining()
                 let remaining = LevelLivesService.shared.consumeLife()
                 levelLivesRemaining = remaining
                 AnalyticsService.log(.levelLifeConsumed(livesRemaining: remaining))
-                if remaining == 0 {
+                if hadLives, remaining == 0 {
                     AnalyticsService.log(.levelLivesDepleted(level: levelNumber, seasonID: context.seasonID))
                 }
             }

@@ -1360,7 +1360,7 @@ the event set is consistent.
 | `notification_primer_shown` | `source` |
 | `notification_primer_completed` | `source`, `outcome` |
 | `review_link_opened` | `source` |
-| `daily_challenge_opened` | `source` (`card` \| `notification`), `streak` — once per entry; `daily_challenge_started` repeats on every retry |
+| `daily_challenge_opened` | `source` (`card` \| `widget` — the `daily` deep link), `streak` — once per entry; `daily_challenge_started` repeats on every retry |
 | `daily_challenge_started` | `streak` |
 | `daily_challenge_finished` | `result`, `streak` |
 | `streak_milestone` | `days` |
