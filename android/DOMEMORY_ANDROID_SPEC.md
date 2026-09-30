@@ -1058,14 +1058,18 @@ The rules that stop the app feeling like an ad delivery mechanism:
   full-screen ad is presenting, only if no first-run surface is up, and only if
   the cached ad is **fresher than 4 hours**.
 
-### 12.3 Remove Ads and the ad-free day — deferred on Android
+### 12.3 Remove Ads (deferred on Android) and the ad-free day (ported)
 
-The non-consumable `com.ezequielbrrt.domemory.removeads` product, restore flow, and
-the rewarded ad-free day below are intentionally absent from the current Android
-scope. This deferral does not affect normal opt-in rewarded ads for extra time,
-hints, lives, or mistake forgiveness.
+The non-consumable `com.ezequielbrrt.domemory.removeads` product and its restore
+flow are still intentionally absent from Android. The rewarded ad-free day below is
+ported (2026-09-30), with two differences that follow from the missing purchase: the
+sheet has no "Remove ads forever" link, and the Settings "Purchases" section holds
+only the ad-free day row. Android's ad-free window lives in its own preference,
+since there is no `hasRemovedAds` purchase to combine it with; `AdFreeGate` is the
+read side the ads layer consults. `ad_free_day_rewarded` shares Android's single
+rewarded unit.
 
-**Ad-free day (iOS 4.4.0, to port).** Watching **two** rewarded ads
+**Ad-free day (iOS 4.4.0).** Watching **two** rewarded ads
 (`ad_free_day_rewarded`), each on its own tap, sets a 24-hour expiry during which
 `hasRemovedAds` is true and every *involuntary* placement (banners, natives,
 interstitials, app-open) is suppressed. Rewarded placements stay available.

@@ -19,6 +19,7 @@ import com.ezequielbrrt.domemory.services.whatsnew.WhatsNewManager
 import com.ezequielbrrt.domemory.widget.DailyChallengeGlanceWidget
 import com.ezequielbrrt.reviewflow.ReviewManager
 import com.ezequielbrrt.domemory.services.levels.LevelProgressService
+import com.ezequielbrrt.domemory.services.ads.AdFreeDayService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelsIntroGate
 import com.ezequielbrrt.domemory.services.levels.StarWalletService
@@ -70,6 +71,9 @@ class AppContainer(
 
     val levelProgress = LevelProgressService(prefs, applicationScope)
     val levelLives = LevelLivesService(prefs, dayProvider)
+
+    /** The ad-free day (spec 12.3): the two-ad chain and the grant that turns ads off. */
+    val adFreeDay = AdFreeDayService(prefs, dayProvider, applicationScope)
     val starWallet = StarWalletService(prefs, applicationScope)
     val levelsIntroGate = LevelsIntroGate(prefs)
     val dailyChallenge = DailyChallengeService(prefs, dayProvider)

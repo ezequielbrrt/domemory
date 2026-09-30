@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.feature.adfree.AdFreeDayEntryPoint
 import com.ezequielbrrt.domemory.core.model.Board
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.feature.game.CardView
@@ -393,6 +394,10 @@ class MultiplayerViewModel(
         }
         if (state.loading) CircularProgressIndicator(color = p.primary)
         state.error?.let { Text(it, color = p.secondary, textAlign = TextAlign.Center) }
+        // The ad-free day pill (spec 12.3). Lobby only, as on iOS: the board path above
+        // returns early, so this never reaches a game in progress.
+        Spacer(Modifier.weight(1f))
+        AdFreeDayEntryPoint(source = "multiplayer_lobby", modifier = Modifier.align(Alignment.End))
     }
 
     if (showGamePicker) {

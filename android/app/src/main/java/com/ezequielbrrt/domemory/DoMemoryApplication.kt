@@ -7,6 +7,7 @@ import coil3.SingletonImageLoader
 import coil3.disk.DiskCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.ezequielbrrt.domemory.widget.DailyChallengeWidgetScheduler
+import com.ezequielbrrt.domemory.services.ads.AdFreeGate
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
@@ -20,6 +21,8 @@ class DoMemoryApplication : Application(), SingletonImageLoader.Factory {
         super.onCreate()
         container = AppContainer(context = this)
         AdsService.initialize(this)
+        // Before any screen composes, so no banner loads for a player who has ads turned off.
+        AdFreeGate.install(container.adFreeDay.expiryMillis)
         AnalyticsService.initialize(this)
         HapticsService.initialize(this, container.prefs, container.applicationScope)
         // Spec 8.1's midnight refresh. Idempotent across process restarts: KEEP (see the

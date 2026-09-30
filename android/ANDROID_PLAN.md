@@ -1657,6 +1657,31 @@ Validation: `:app:assembleDebug :app:testDebugUnitTest --rerun` passed (436 test
 Pixel_10 emulator the pause, quit (Back cancelled and the timer resumed), timeout loss,
 mistake loss and level-1 win overlays were all reached.
 
+**Ad-free day (2026-09-30).** Ports iOS's "No Ads" offer (spec 12.3): two rewarded ads, each on
+its own tap, turn off banners, natives and the completion interstitial for 24 hours.
+`services/ads/AdFreeDayService` holds the two-ad chain, keyed to the local day like lives so a
+half-finished chain resets at midnight, and the grant, which extends a window that is still
+running. `UserPreferences` stores both, each update in a single DataStore transaction.
+`AdFreeGate` is the ads layer's read side: `AdMobBanner` and `AdMobNativeAdView` render nothing
+while it is active, and `notifyGameFinished` passes it as `involuntaryAdsSuppressed`, the hook
+Phase 7 left for exactly this. Rewarded placements are never gated. The new
+`AD_FREE_DAY_REWARDED` shares the single rewarded unit, so release needs no new AdMob unit, and
+`loadRewarded` gained an optional readiness callback plus in-flight de-duplication (iOS's
+`loadRewardedAd(for:completion:)`), which the sheet needs to leave "Loading ad".
+`feature/adfree` holds the pill (menu tabs, season map, multiplayer lobby), the bottom sheet
+(Flippo, apology copy on the first open only, stepper, loading / ready / presenting / no fill
+/ active) and its testable `AdFreeDayOffer` state machine. Settings gets a "Free ad-free day"
+row under Purchases, the debug menu gets iOS's "Disable ads" and "Reset ad-free day offer"
+rows, and the five `ad_free_day_*` events match iOS. There is no "Remove ads forever" link:
+Android still has no purchase layer. Strings: 21 keys ported from iOS into all ten locales.
+Tests: `AdFreeDayServiceTest` (12, including the 8 iOS cases), `AdFreeDayOfferTest` (7) and the
+event shapes, for 459 in the suite. On the Pixel_10 emulator the full chain ran end to end
+with Google's test rewarded ad: the apology on the first open and neutral copy after it,
+"No Ads 1/2" progress surviving a dismissed sheet, the grant from the Settings row, the menu
+banner gone at once, and the pill reading "23h left". Not exercised: the interstitial and the
+multiplayer native while ads are off, and the season-map and lobby pill placements, which
+were only built.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links

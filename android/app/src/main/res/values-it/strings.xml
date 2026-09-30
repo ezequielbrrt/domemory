@@ -301,4 +301,27 @@
     <string name="lose_offer_watch_ad">Guarda un annuncio</string>
     <string name="lose_pay_stars_format">Paga %d stelle</string>
     <string name="lose_life_at_stake">Continua questa partita e non perderai una vita.</string>
+
+    <!-- Ad-free day (spec 12.3), ported from iOS -->
+    <string name="settings_section_purchases">Acquisti</string>
+    <string name="settings_rewarded_remove_ads_title">Giorno gratis senza annunci</string>
+    <string name="settings_rewarded_remove_ads_description">Guarda %1$d brevi annunci per disattivare la pubblicità per 24 ore</string>
+    <string name="settings_rewarded_remove_ads_active_format">Annunci disattivati fino alle %1$s</string>
+    <string name="ad_free_day_pill_title">Niente pubblicità</string>
+    <string name="ad_free_day_pill_progress_format">Niente pubblicità %1$d/%2$d</string>
+    <string name="ad_free_day_pill_active_format">%1$s rimanenti</string>
+    <string name="ad_free_day_intro_title">Scusa per le pubblicità</string>
+    <string name="ad_free_day_intro_message">Tengono DoMemory gratuito, ma ecco una via d\'uscita: guarda %1$d brevi annunci e li spegniamo per le prossime 24 ore.</string>
+    <string name="ad_free_day_intro_watch_format">Mi sembra giusto, guarda l\'annuncio %1$d di %2$d</string>
+    <string name="ad_free_day_title">Gioca un giorno senza pubblicità</string>
+    <string name="ad_free_day_message">Guarda %1$d brevi annunci e spegniamo banner e interstitial per 24 ore.</string>
+    <string name="ad_free_day_watch_format">Guarda l\'annuncio %1$d di %2$d</string>
+    <string name="ad_free_day_step_ad_format">Annuncio %1$d</string>
+    <string name="ad_free_day_step_reward">Giorno senza pubblicità</string>
+    <string name="ad_free_day_halfway_hint">Ancora uno e hai finito</string>
+    <string name="ad_free_day_no_fill">Nessun annuncio disponibile al momento. I tuoi progressi sono salvati.</string>
+    <string name="ad_free_day_try_again">Riprova</string>
+    <string name="ad_free_day_active_format">Pubblicità spente fino alle %1$s</string>
+    <string name="ad_free_day_back">Torna al gioco</string>
+    <string name="ad_free_day_not_now">Non ora</string>
 </resources>

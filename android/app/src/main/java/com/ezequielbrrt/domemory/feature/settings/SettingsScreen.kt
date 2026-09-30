@@ -1,5 +1,6 @@
 package com.ezequielbrrt.domemory.feature.settings
 
+import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,8 +17,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -28,6 +32,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.feature.adfree.AdFreeDayOfferSheet
+import com.ezequielbrrt.domemory.feature.adfree.LocalAdFreeDay
+import com.ezequielbrrt.domemory.feature.adfree.logAdFreeDayEntryTapped
+import com.ezequielbrrt.domemory.services.ads.AdFreeDayService
+import com.ezequielbrrt.domemory.services.ads.AdPlacement
+import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.feature.debug.debugMenuTapTrigger
 import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
@@ -41,6 +51,8 @@ import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
 import com.ezequielbrrt.reviewflow.openPlayStoreReviewPage
+import java.util.Date
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
@@ -128,6 +140,7 @@ fun SettingsScreen(
             HapticsService.fire(HapticIntent.TAP)
             if (turningOn) requestPermission() else onDisableReminders()
         }
+        AdFreeDaySettingsGroup()
         SettingGroup(stringResource(R.string.settings_section_about)) {
             // Opens the Play Store listing directly — the standard manual "rate the app"
             // entry, and ReviewFlow's "persistent review link": `market://details` pinned to
@@ -177,6 +190,40 @@ private fun ThemePreference.labelRes(): Int = when (this) {
 
 /** A tappable info row — the "Rate DoMemory" / "What's New" shape: a title plus a
  * secondary description line, no switch. */
+/**
+ * "Free ad-free day" (spec 12.3): opens the same sheet as the floating pill. iOS keeps it in its
+ * Purchases section beside Remove Ads; Android has no purchase yet, so the section holds only
+ * this row. Hidden when no rewarded unit is configured, unless a grant is already running.
+ */
+@Composable private fun AdFreeDaySettingsGroup() {
+    val service = LocalAdFreeDay.current ?: return
+    val expiry by service.expiryMillis.collectAsState()
+    val isActive = service.isGrantActive()
+    if (!isActive && !AdsService.isRewardedConfigured(AdPlacement.AD_FREE_DAY_REWARDED)) return
+    var showOffer by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    SettingGroup(stringResource(R.string.settings_section_purchases)) {
+        SettingRow(
+            title = stringResource(R.string.settings_rewarded_remove_ads_title),
+            description = if (isActive) {
+                val until = DateFormat.getTimeFormat(context).format(Date(expiry ?: 0L))
+                stringResource(R.string.settings_rewarded_remove_ads_active_format, until)
+            } else {
+                stringResource(R.string.settings_rewarded_remove_ads_description, AdFreeDayService.REQUIRED_ADS)
+            },
+            onClick = {
+                HapticsService.fire(HapticIntent.TAP)
+                scope.launch {
+                    logAdFreeDayEntryTapped("settings", isActive = service.isGrantActive(), adsWatched = service.adsWatched())
+                }
+                showOffer = true
+            },
+        )
+    }
+    if (showOffer) AdFreeDayOfferSheet(source = "settings", service = service, onDismiss = { showOffer = false })
+}
+
 @Composable private fun SettingRow(title: String, description: String, onClick: () -> Unit) {
     val p = LocalPalette.current
     Column(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp)) {
