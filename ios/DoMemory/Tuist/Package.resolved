@@ -1,5 +1,5 @@
 {
-  "originHash" : "202566f468a8ba861a74ec6aae5f12976ecf284da6c0043ec0b006e3524ed9e0",
+  "originHash" : "96bad810b25cff567cc1da72488bd1c1da4fdea5c7bb385e166fddf404d67776",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -141,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ezequielbrrt/ReviewFlow",
       "state" : {
-        "revision" : "02e43fcfb138fc9bc2379a5e3aa420c309fc4e32",
-        "version" : "2.0.0"
+        "revision" : "467f27b0b582d95e0a9a527d3762193caae39f48",
+        "version" : "2.2.0"
       }
     },
     {

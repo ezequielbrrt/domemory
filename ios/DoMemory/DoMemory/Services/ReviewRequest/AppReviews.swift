@@ -3,8 +3,8 @@
 //  DoMemory
 //
 
-import Foundation
 import ReviewFlow
+import SwiftUI
 
 /// App-wide holder for the single `ReviewManager`.
 ///
@@ -28,6 +28,20 @@ enum AppReviews {
     static func recordSuccessfulGameWin() {
         manager.recordSuccessfulAction(appVersion: appVersion)
     }
+}
+
+extension ReviewInvitationStyle {
+    /// The review invitation in the app's typography, matching the intro
+    /// carousel (`IntroCarouselView`), the closest full-screen surface: a
+    /// heavy rounded title, a medium rounded subtitle and a bold rounded
+    /// primary button. Applied once at the root in `DoMemoryApp`, so it also
+    /// reaches presented covers.
+    static let doMemory = ReviewInvitationStyle(
+        titleFont: .righteous(size: 26),
+        messageFont: .system(size: 16, weight: .medium, design: .rounded),
+        reviewButtonFont: .system(size: 17, weight: .bold, design: .rounded),
+        dismissButtonFont: .system(size: 15, weight: .semibold, design: .rounded)
+    )
 }
 
 /// Carries the retired `ReviewRequestService` state into ReviewFlow's store.
