@@ -500,7 +500,28 @@ From the lose screen:
 | Forgive 3 mistakes | 8★ or rewarded ad | resumes the same board, +15 s floor |
 | Watch ad for +1 life | rewarded ad | +1 life, restarts the level |
 | Watch ad for +30 s | rewarded ad | `timeRemaining += 30`, clears the loss, resumes |
-| Skip this level | 15★ | **confirmation dialog required** |
+| Skip this level | 15★ | **confirmation dialog required**; only offered when a life is left after it |
+
+**Layout:** the lives row carries the spendable star balance on its right. The
+screen offers **one rescue**, chosen by why the game ended — a life when out of
+lives, forgiven mistakes when the budget ran out, 30 s when the clock did — as a
+title ("Forgive 3 mistakes") over its payments side by side: a filled ad button and
+an outlined star price. A payment that isn't available (no ad filled, not enough
+stars) is left out; a rescue with neither isn't shown. Try again follows, then Skip
+and Menu as text buttons. Menu is an outlined button only when nothing else is on
+the card.
+
+**The life at stake:** a Level loss is only booked when the player leaves it (Try
+again, Menu, Skip). While the lose screen is up, the heart it would cost is still
+full, so it **pulses** rather than breaking, and the rescue carries "Continue now and
+you won't lose a life." The heart-break effect plays only when a life is actually
+spent in place (Try again on the last life, which leaves the screen in its
+out-of-lives state).
+
+**Skip availability:** skipping books the loss, so it is offered only when the
+player would still have a life afterwards — never when out of lives, nor when the
+skip would spend the last one. Otherwise the map's lives gate refuses the level the
+player just paid to unlock.
 
 **Skip semantics:** unlocks the next level, stores **no stars** (renders as
 cleared-with-0-stars, replayable for credit later), records the attempt as a

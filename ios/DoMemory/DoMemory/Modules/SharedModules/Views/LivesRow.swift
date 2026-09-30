@@ -34,6 +34,10 @@ struct LivesRow: View {
     /// player, who never sees the clip, sees exactly the same hearts.
     var effect: LivesRowEffect? = nil
     var onEffectFinished: (() -> Void)? = nil
+    /// A still-filled heart that a pending loss will take unless the player
+    /// rescues the game. It pulses rather than breaking, because it hasn't
+    /// gone yet.
+    var atRiskSlot: Int? = nil
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// The heart briefly scaled up by a refill, so the burst has a heart
@@ -43,9 +47,7 @@ struct LivesRow: View {
     var body: some View {
         HStack(spacing: 4) {
             ForEach(0..<total, id: \.self) { index in
-                Image(systemName: index < remaining ? "heart.fill" : "heart")
-                    .font(.system(size: iconSize, weight: .semibold))
-                    .foregroundStyle(index < remaining ? Color.secundaryColor : Color.textMuted.opacity(0.3))
+                heart(at: index)
                     .scaleEffect(bumpedSlot == index ? 1.35 : 1)
                     .animation(.spring(response: 0.3, dampingFraction: 0.5), value: bumpedSlot)
                     .overlay { overlay(for: index) }
@@ -53,6 +55,29 @@ struct LivesRow: View {
         }
         .accessibilityElement()
         .accessibilityLabel(Strings.livesRemainingFormat(remaining, total))
+    }
+
+    @ViewBuilder
+    private func heart(at index: Int) -> some View {
+        let glyph = Image(systemName: index < remaining ? "heart.fill" : "heart")
+            .font(.system(size: iconSize, weight: .semibold))
+            .foregroundStyle(index < remaining ? Color.secundaryColor : Color.textMuted.opacity(0.3))
+
+        if index == atRiskSlot, index < remaining {
+            if reduceMotion {
+                glyph.opacity(0.45)
+            } else {
+                glyph.phaseAnimator([false, true]) { content, dimmed in
+                    content
+                        .opacity(dimmed ? 0.3 : 1)
+                        .scaleEffect(dimmed ? 0.85 : 1)
+                } animation: { _ in
+                    .easeInOut(duration: 0.7)
+                }
+            }
+        } else {
+            glyph
+        }
     }
 
     @ViewBuilder
@@ -88,6 +113,7 @@ struct LivesRow: View {
         LivesRow(remaining: 0)
         LivesRow(remaining: 2, effect: .lost(slot: 2))
         LivesRow(remaining: 3, effect: .gained(slot: 2))
+        LivesRow(remaining: 3, atRiskSlot: 2)
     }
     .padding()
 }
