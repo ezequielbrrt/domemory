@@ -17,8 +17,12 @@ struct PauseModal: View {
                 .background(.ultraThinMaterial)
 
             VStack(spacing: 0) {
-                Text("🧐")
-                    .font(.system(size: 64))
+                // Flippo holds up a mitten while the board waits.
+                Image("FlippoPause")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 160, height: 168)
+                    .accessibilityHidden(true)
                     .padding(.bottom, 12)
 
                 Text(Strings.pause)
