@@ -1611,8 +1611,16 @@ permission and arm reminders, as on iOS), the first-launch onboarding carousel, 
 Deviation from iOS on purpose: iOS's "Start onboarding" wipes the user record first; Android's is a
 preview that keeps onboarding state, because `OnboardingViewModel`'s completion writes
 `completeOnboarding(Difficulty.MEDIUM)` and would reset the player's chosen difficulty. iOS's
-remove-ads toggle, ad-free-day reset and "Restart lives" rows are not ported — Android has no purchase
-layer, and the request covered the libraries and the two intros. Copy is plain English literals, as on
+remove-ads toggle and ad-free-day reset are not ported — Android has no purchase layer and no ad-free
+day offer. A follow-up (2026-09-30) aligned the rows with iOS's order and titles ("Start onboarding",
+"Start Levels onboarding", "Show notifications view", "Show ask-for-review view (native)", "Show
+ReviewFlow invitation view"; What's New stays as an Android-only extra) and ported "Restart lives",
+which refills today's lives through `LevelLivesService.refill(MAX_LIVES)`. The menu now also
+refreshes `LevelsViewModel` each time it comes back into view (`LaunchedEffect(Unit)` in the MENU
+route — only the top destination stays composed), iOS's `LevelsView.onAppear` refresh; before, the
+hearts header stayed stale after lives changed anywhere but a level. Verified on the Pixel_10
+emulator: a timed-out level took lives to 3/4, "Restart lives" reported 4/4, the header showed 4/4
+on return, and 4/4 survived a force-stop and relaunch. Copy is plain English literals, as on
 iOS, outside `strings.xml` and `LocalizationParityTest`. Verification: `:app:assembleDebug` clean;
 `:app:testDebugUnitTest` 429/429 (three new in `DebugMenuTapCounterTest`); on the Pixel_10 emulator
 four taps left Settings alone, the fifth opened the menu, and every row presented its screen and

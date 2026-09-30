@@ -53,6 +53,7 @@ import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
+import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.stats.UserPreferencesProfileStatsRecorder
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -162,6 +163,10 @@ fun NavGraph(
                 },
             )
             val levelsUiState by levelsViewModel.uiState.collectAsState()
+            // Only the top destination stays composed, so this runs every time the menu comes
+            // back into view — the counterpart of iOS's `LevelsView.onAppear { refresh() }`. It
+            // picks up lives and stars changed elsewhere, e.g. the debug menu's "Restart lives".
+            LaunchedEffect(Unit) { levelsViewModel.refresh() }
             val activeSeason by container.seasonCatalog.activeSeason.collectAsState()
             val dailyStreak by container.prefs.dailyStreakCurrent.collectAsState(initial = 0)
             val dailyLastAttemptDay by container.prefs.dailyLastAttemptDay.collectAsState(initial = null)
@@ -715,6 +720,7 @@ fun NavGraph(
                 DebugMenuScreen(
                     onBack = { navController.popBackStack() },
                     onNotificationsAuthorized = { container.applicationScope.launch { container.notifications.activateReminders() } },
+                    onRestoreLives = { container.levelLives.refill(LevelLivesService.MAX_LIVES) },
                 )
             }
         }

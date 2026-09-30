@@ -46,6 +46,7 @@ import com.ezequielbrrt.domemory.feature.onboarding.OnboardingScreen
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingUiState
 import com.ezequielbrrt.domemory.feature.review.DoMemoryReviewInvitationPreview
 import com.ezequielbrrt.domemory.feature.whatsnew.DoMemoryWhatsNewScreen
+import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.ui.components.BackButton
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
@@ -56,19 +57,24 @@ import kotlinx.coroutines.launch
 
 /**
  * Debug-build QA panel, the Android port of iOS's `DebugMenuView`, reached by tapping the
- * Settings title five times (`debugMenuTapTrigger`). Every row presents a screen the app
- * normally shows only when some gate opens — the three vendored libraries' screens, Play's
- * native review request, and the two intro carousels — without touching that gate's state:
+ * Settings title five times (`debugMenuTapTrigger`). The screen rows present what the app
+ * normally shows only when some gate opens — the two intro carousels, the three vendored
+ * libraries' screens and Play's native review request — without touching that gate's state:
  * What's New is not marked seen, the review policy records nothing, and the onboarding
  * preview does not re-run `completeOnboarding` (which would reset the player's difficulty).
  * The primer is the one live flow: it can really grant the permission and turn reminders on,
- * exactly as iOS's debug row does.
+ * exactly as iOS's debug row does. "Restart lives" refills today's Levels lives, as on iOS.
  *
  * Copy is plain English literals on purpose, as on iOS: no player, reviewer or translator
  * can reach this screen, so it stays out of `strings.xml` and `LocalizationParityTest`.
  */
 @Composable
-fun DebugMenuScreen(onBack: () -> Unit, onNotificationsAuthorized: () -> Unit) {
+fun DebugMenuScreen(
+    onBack: () -> Unit,
+    onNotificationsAuthorized: () -> Unit,
+    /** Refills today's Levels lives and returns the new count — iOS's `restoreFullLives()`. */
+    onRestoreLives: suspend () -> Int,
+) {
     BackHandler(onBack = onBack)
     val palette = LocalPalette.current
     val context = LocalContext.current
@@ -76,6 +82,7 @@ fun DebugMenuScreen(onBack: () -> Unit, onNotificationsAuthorized: () -> Unit) {
     val scope = rememberCoroutineScope()
     var preview by rememberSaveable { mutableStateOf<DebugPreview?>(null) }
     var nativeReviewStatus by remember { mutableStateOf<String?>(null) }
+    var livesStatus by remember { mutableStateOf<String?>(null) }
     val dismissPreview = { preview = null }
 
     Column(
@@ -87,17 +94,25 @@ fun DebugMenuScreen(onBack: () -> Unit, onNotificationsAuthorized: () -> Unit) {
             Text("Debug Menu", style = DoMemoryType.display(26), color = palette.primary)
         }
 
-        DebugSection("Libraries") {
+        // Same rows, order and titles as iOS's DebugMenuView, so QA steps carry across. iOS's
+        // first section (the remove-ads toggle and the ad-free day reset) has no Android
+        // counterpart yet: there is no purchase layer and no ad-free day offer to act on.
+        DebugSection("Screens") {
             DebugRow(
-                title = "Show What's New",
-                subtitle = "WhatsNewKit-Android. The current release notes; does not mark the version seen",
-            ) { preview = DebugPreview.WHATS_NEW }
+                title = "Start onboarding",
+                subtitle = "The first-launch carousel. Preview only: keeps onboarding state and difficulty",
+            ) { preview = DebugPreview.ONBOARDING }
             DebugRow(
-                title = "Show review invitation",
-                subtitle = "ReviewFlow-Android. The full-screen invitation, bypassing the 3-win / 7-day policy; records nothing",
-            ) { preview = DebugPreview.REVIEW_INVITATION }
+                title = "Start Levels onboarding",
+                subtitle = "The Levels intro carousel, same as the \"?\" button on the level map",
+            ) { preview = DebugPreview.LEVELS_INTRO }
             DebugRow(
-                title = "Request native Play review",
+                title = "Show notifications view",
+                subtitle = "NotificationPermissionKit-Android. Live: can grant the permission and turn reminders on. " +
+                    "Closes at once when notifications are already allowed; revoke them to see it",
+            ) { preview = DebugPreview.NOTIFICATION_PRIMER }
+            DebugRow(
+                title = "Show ask-for-review view (native)",
                 subtitle = nativeReviewStatus
                     ?: "Play In-App Review, bypassing the policy. Play shows nothing for sideloaded builds; this confirms the call completes",
             ) {
@@ -114,21 +129,25 @@ fun DebugMenuScreen(onBack: () -> Unit, onNotificationsAuthorized: () -> Unit) {
                 }
             }
             DebugRow(
-                title = "Show notification primer",
-                subtitle = "NotificationPermissionKit-Android. Live: can grant the permission and turn reminders on. " +
-                    "Closes at once when notifications are already allowed; revoke them to see it",
-            ) { preview = DebugPreview.NOTIFICATION_PRIMER }
+                title = "Show ReviewFlow invitation view",
+                subtitle = "ReviewFlow-Android. The full-screen invitation, bypassing the 3-win / 7-day policy; records nothing",
+            ) { preview = DebugPreview.REVIEW_INVITATION }
+            // Android-only: iOS has no What's New row.
+            DebugRow(
+                title = "Show What's New",
+                subtitle = "WhatsNewKit-Android. The current release notes; does not mark the version seen",
+            ) { preview = DebugPreview.WHATS_NEW }
         }
 
-        DebugSection("Onboarding") {
+        DebugSection("Levels") {
             DebugRow(
-                title = "Show onboarding",
-                subtitle = "The first-launch carousel. Preview only: keeps onboarding state and difficulty",
-            ) { preview = DebugPreview.ONBOARDING }
-            DebugRow(
-                title = "Show Levels onboarding",
-                subtitle = "The Levels intro carousel, same as the \"?\" button on the level map",
-            ) { preview = DebugPreview.LEVELS_INTRO }
+                title = "Restart lives",
+                subtitle = livesStatus ?: "Refills today's Levels lives budget",
+            ) {
+                scope.launch {
+                    livesStatus = "Restored: ${onRestoreLives()}/${LevelLivesService.MAX_LIVES} lives"
+                }
+            }
         }
     }
 
