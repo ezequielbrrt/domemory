@@ -1218,8 +1218,12 @@ Two named styles are used throughout:
 **Important:** although `Righteous-Regular.ttf` and `PatrickHand-Regular.ttf` are
 bundled and declared, the actual implementations return **system fonts** — heavy
 rounded and semibold rounded respectively. The custom faces are effectively not in
-use. On Android, either use the same TTFs deliberately or map to a rounded system
-face and keep the two-role structure.
+use: iOS renders SF Pro Rounded, which Apple licenses for Apple platforms only.
+Android keeps the two-role structure and renders both roles, and every Material
+text style, in **Nunito** (a rounded sans, SIL OFL 1.1, bundled as one variable
+`res/font/nunito.ttf` with its licence in `assets/licenses/`): `display` at
+`ExtraBold`, `handwritten` at `SemiBold`. It is the closest freely licensed match
+for SF Rounded, not the same face.
 
 Body UI uses rounded system fonts at weights `semibold`/`bold`/`heavy`.
 
@@ -1361,7 +1365,7 @@ the event set is consistent.
 | `screen_view` | `screen_name`, `screen_class` |
 | `difficulty_selected` | `difficulty` |
 | `menu_loaded` | `difficulty` |
-| `menu_tab_selected` | `tab`, `previous_tab` (`levels` \| `mine` \| `all`) — only on a switch; the Levels default at launch and re-tapping the current tab log nothing |
+| `menu_tab_selected` | `tab`, `previous_tab` (`levels` \| `mine` \| `all`) — only on a switch; the Levels default at launch, re-tapping the current tab and the automatic jump to `mine` after creating a memorama log nothing |
 | `game_list_loaded` | `difficulty`, `game_count`, `custom_count` |
 | `game_started` | `source`, `difficulty`, `cards_count`, `is_custom` |
 | `game_finished` | `result`, `difficulty`, `cards_count`, `failed_tries`, `time_remaining`, `is_custom` |

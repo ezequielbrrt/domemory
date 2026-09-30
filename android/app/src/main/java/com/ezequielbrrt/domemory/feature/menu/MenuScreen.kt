@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AlertDialog
@@ -170,7 +171,16 @@ private fun MenuHeader(onCreateMemorama: () -> Unit, onMultiplayer: () -> Unit, 
             color = palette.primary,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("♟", color = palette.primary, fontSize = 22.sp, modifier = Modifier.size(44.dp).clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onMultiplayer() }).padding(10.dp))
+            // Two people, as on iOS (`person.2.fill`), labelled for TalkBack like iOS's button.
+            Icon(
+                imageVector = Icons.Filled.People,
+                contentDescription = stringResource(R.string.multiplayer_title),
+                tint = palette.primary,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clickable(onClick = { HapticsService.fire(HapticIntent.TAP); onMultiplayer() })
+                    .padding(10.dp),
+            )
             Icon(
                 imageVector = Icons.Filled.Add,
                 contentDescription = stringResource(R.string.menu_create_title),

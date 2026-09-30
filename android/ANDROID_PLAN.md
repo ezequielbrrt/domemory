@@ -29,7 +29,6 @@ Target: feature parity with iOS 4.2.0.
 | O7 | Register a second Firebase Android client for `com.ezequielbrrt.domemory.debug`? Without one, debug and release cannot be installed side by side (see §2). | any time |
 | O1 | Register `domemory.app`, deploy `assetlinks.json` plus iOS's `apple-app-site-association`, then verify the shared-link join flow. | deferred Phase 6 follow-up |
 | O5 | Consent/UMP dialog on Android in place of ATT? (Affects the launch sequence, §11.4.) | Phase 7 |
-| O6 | Ship the bundled `Righteous`/`PatrickHand` TTFs, or use rounded system faces as iOS effectively does? | Phase 8 |
 
 ---
 
@@ -1682,6 +1681,25 @@ banner gone at once, and the pill reading "23h left". Not exercised: the interst
 multiplayer native while ads are off, and the season-map and lobby pill placements, which
 were only built.
 
+**Tracker issues #148, #149, #161, #158, 2026-09-30.** Fonts (#148, closes O6): iOS's
+`righteous()`/`patrickHand()` return `.system(design: .rounded)`, so iOS renders SF Pro Rounded,
+which Apple licenses for Apple platforms only. Android now uses Nunito for both roles and for every
+Material style (`DoMemoryType.typography`, passed to `MaterialTheme`): one variable
+`res/font/nunito.ttf` from Google Fonts, instanced per weight with `FontVariation.weight`, OFL text
+in `assets/licenses/Nunito-OFL.txt`. `display` is ExtraBold and `handwritten` SemiBold. Righteous and
+Patrick Hand are deleted from `res/font`. The menu's multiplayer button (#149) is Material `People`,
+iOS's `person.2.fill`, with a "Multiplayer" content description, in place of "♟". Saving a new
+memorama (#161) now selects `MenuTab.MINE` via `MenuViewModel.showMyMemoramas()`, without logging
+`menu_tab_selected`; iOS does the same in `MenuView`. Verification: `assembleDebug
+testDebugUnitTest` 461/0, iOS `xcodebuild test` 223/0. On the Pixel_10 emulator: Nunito on the menu,
+Settings, season map and lobby; the People icon opening the lobby; creating a board from the Levels
+tab landing on My memoramas with `custom_memorama_created` and no `menu_tab_selected`. Ad-free day
+(#158): the pill shows "23h left" on the season map and the multiplayer lobby, closing the
+placements gap above. The interstitial under a grant was not observed on device: the emulator was
+taken over by another app mid-run. `GameFinishedInterstitialTriggerTest` now covers it instead: an
+active grant never requests and leaves the cadence counter untouched. Still not exercised: the
+multiplayer-finished native while ads are off, and any physical device.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links
@@ -1694,7 +1712,7 @@ were only built.
 5. Run real-device follow-ups: haptic feel, TalkBack announcements, animation feel for the new
    Lottie effects, the out-of-lives modal's on-screen appearance, and RTL/dark-mode rendering
    of the new Levels/Daily/Seasons components.
-6. Resolve optional cleanup decisions: bundled display fonts (O6), a second Firebase debug
+6. Resolve optional cleanup decisions: ~~bundled display fonts (O6)~~ Nunito, 2026-09-30 — a second Firebase debug
    client (O7) — ~~compact Daily-card layout~~ done, 2026-09-15 — and season system-bar
    transparency.
 

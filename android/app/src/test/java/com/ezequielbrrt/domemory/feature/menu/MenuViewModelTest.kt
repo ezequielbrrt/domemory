@@ -89,6 +89,20 @@ class MenuViewModelTest {
     }
 
     @Test
+    fun `creating a memorama shows My memoramas from any tab`() = runTest {
+        val vm = newViewModel()
+        advanceUntilIdle()
+
+        vm.selectTab(MenuTab.ALL)
+        vm.showMyMemoramas()
+        assertEquals(MenuTab.MINE, vm.state.value.selectedTab)
+
+        vm.showMyMemoramas() // already there: stays put
+        assertEquals(MenuTab.MINE, vm.state.value.selectedTab)
+        vm.stop()
+    }
+
+    @Test
     fun `changing difficulty re-filters the All tab and persists`() = runTest {
         val prefs = newPrefs()
         val vm = newViewModel(prefs)

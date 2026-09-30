@@ -78,6 +78,15 @@ class MenuViewModel(
         )
     }
 
+    /**
+     * Shows "My memoramas" after the player creates one, so the new board is on screen when
+     * they return (tracker #161; iOS does the same). The app moving the tab is not the
+     * player switching it, so `menu_tab_selected` is not logged.
+     */
+    fun showMyMemoramas() {
+        _state.value = _state.value.copy(selectedTab = MenuTab.MINE)
+    }
+
     /** Spec 4: filters the All tab and seeds the next game's clock and pie. */
     fun setDifficulty(difficulty: Difficulty) {
         if (difficulty == _state.value.difficulty) return

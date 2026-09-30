@@ -761,6 +761,7 @@ fun NavGraph(
                     coroutineScope.launch {
                         if (viewModel.save()) {
                             menuViewModel.onCustomMemoramaChanged()
+                            menuViewModel.showMyMemoramas()
                             navController.popBackStack()
                         }
                     }
