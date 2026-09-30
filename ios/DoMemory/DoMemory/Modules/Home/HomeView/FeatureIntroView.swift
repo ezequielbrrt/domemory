@@ -36,7 +36,7 @@ struct FeatureIntroView: View {
         IntroCarouselView(
             slides: slides,
             finishTitle: Strings.introGetStarted,
-            onSkip: {
+            onSkip: { _ in
                 AnalyticsService.log(.onboardingIntroSkipped)
                 finish()
             },

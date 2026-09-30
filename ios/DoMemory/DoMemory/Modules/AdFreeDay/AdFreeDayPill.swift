@@ -38,6 +38,7 @@ private struct AdFreeDayEntryPoint: ViewModifier {
                     // Re-read on every render so a chain advanced inside the
                     // sheet shows on the pill as soon as the sheet closes.
                     AdFreeDayPill(adsWatched: AdFreeDayService.shared.adsWatched()) {
+                        AdFreeDayOfferViewModel.logEntryTapped(source: source)
                         showOffer = true
                     }
                     .padding(.trailing, 16)

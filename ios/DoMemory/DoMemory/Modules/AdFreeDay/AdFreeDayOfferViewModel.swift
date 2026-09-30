@@ -100,14 +100,33 @@ final class AdFreeDayOfferViewModel {
         }
     }
 
+    /// Logs a tap on an entry point to the sheet — the floating pill or the
+    /// Settings row — with the state it showed at the time.
+    static func logEntryTapped(source: String) {
+        let adsWatched = AdFreeDayService.shared.adsWatched()
+        let state: String
+        if PurchaseService.shared.hasActiveRewardedRemoveAds {
+            state = "active"
+        } else if adsWatched > 0 {
+            state = "in_progress"
+        } else {
+            state = "idle"
+        }
+        AnalyticsService.log(.adFreeDayEntryTapped(source: source, state: state, adsWatched: adsWatched))
+    }
+
     private func watchAd() {
         phase = .presenting
+        AnalyticsService.log(.adFreeDayWatchTapped(source: source, adNumber: nextAdNumber))
         AnalyticsService.log(.adLifecycle(placement: placement.rawValue, action: "requested"))
         AdsService.shared.presentRewardedAd(
             for: placement,
             rewardHandler: { [weak self] in
                 guard let self else { return }
                 AnalyticsService.log(.adLifecycle(placement: self.placement.rawValue, action: "reward_earned"))
+                // Read before recording: completing the chain clears progress.
+                let adNumber = self.service.adsWatched() + 1
+                AnalyticsService.log(.adFreeDayAdWatched(source: self.source, adNumber: adNumber))
                 let completed = self.service.recordAdWatched()
                 self.adsWatched = self.service.adsWatched()
                 guard completed else { return }

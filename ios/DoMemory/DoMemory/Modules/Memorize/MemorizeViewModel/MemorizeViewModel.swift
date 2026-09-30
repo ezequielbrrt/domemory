@@ -125,6 +125,9 @@ class MemorizeViewModel {
     /// re-render when the freeze starts or expires.
     private(set) var isFrozen = false
     private var hasLoggedGameFinished = false
+    /// Star power-ups bought during the current attempt, reported on
+    /// `levelFinished`. Reset with every start, retry and next level.
+    private var powerUpsUsedThisAttempt = 0
     private var gameStartedAt: Date?
     private var lastRewardedAdDate: Date?
 
@@ -398,6 +401,7 @@ class MemorizeViewModel {
 
     func trackGameStarted(source: String) {
         hasLoggedGameFinished = false
+        powerUpsUsedThisAttempt = 0
         gameStartedAt = Date()
         Task { @MainActor in
             AdsService.shared.loadInterstitial(for: .gameFinishedInterstitial)
@@ -488,6 +492,7 @@ class MemorizeViewModel {
                     level: levelNumber,
                     result: result,
                     stars: earnedStars,
+                    powerUpsUsed: powerUpsUsedThisAttempt,
                     seasonID: context.seasonID
                 )
             )
@@ -506,9 +511,15 @@ class MemorizeViewModel {
                 AnalyticsService.log(.levelUnlocked(level: unlockedLevel, seasonID: context.seasonID))
             }
             if !didWin {
+                // `consumeLife` also returns 0 when there was nothing to spend;
+                // only a real 1 → 0 transition is a depletion.
+                let hadLives = LevelLivesService.shared.hasLivesRemaining()
                 let remaining = LevelLivesService.shared.consumeLife()
                 levelLivesRemaining = remaining
                 AnalyticsService.log(.levelLifeConsumed(livesRemaining: remaining))
+                if hadLives, remaining == 0 {
+                    AnalyticsService.log(.levelLivesDepleted(level: levelNumber, seasonID: context.seasonID))
+                }
             }
         }
         NotificationService.shared.scheduleInactivityReminder()
@@ -667,12 +678,14 @@ extension MemorizeViewModel {
             revealHintPair()
         }
 
+        powerUpsUsedThisAttempt += 1
         AnalyticsService.log(
             .levelPowerUpUsed(
                 powerUp: powerUp.rawValue,
                 level: levelNumber,
                 cost: powerUp.cost,
-                balanceAfter: starBalance
+                balanceAfter: starBalance,
+                seasonID: levelContext?.seasonID
             )
         )
     }

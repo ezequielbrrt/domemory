@@ -28,7 +28,9 @@ struct IntroCarouselView: View {
     /// Title for the button on the last page — "Get Started" on first launch,
     /// "Got It" when the carousel is a reference the player opened deliberately.
     let finishTitle: String
-    let onSkip: () -> Void
+    /// Receives how many slides the player had reached (1-based) when they
+    /// skipped, for analytics.
+    let onSkip: (_ slidesSeen: Int) -> Void
     let onFinish: () -> Void
 
     @State private var page = 0
@@ -42,7 +44,7 @@ struct IntroCarouselView: View {
             VStack(spacing: 0) {
                 HStack {
                     Spacer()
-                    Button(Strings.introSkip) { HapticsService.shared.fire(.tap); onSkip() }
+                    Button(Strings.introSkip) { HapticsService.shared.fire(.tap); onSkip(page + 1) }
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                         .foregroundStyle(Color.textMuted)
                 }
@@ -235,7 +237,7 @@ private struct IntroSlideText: View {
             )
         ],
         finishTitle: "Got It",
-        onSkip: {},
+        onSkip: { _ in },
         onFinish: {}
     )
 }

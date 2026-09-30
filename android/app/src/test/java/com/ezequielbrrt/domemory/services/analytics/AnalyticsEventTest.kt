@@ -34,6 +34,12 @@ class AnalyticsEventTest {
         assertEquals(mapOf("difficulty" to "medium"), event.parameters)
     }
 
+    @Test fun `menu tab selected`() {
+        val event = AnalyticsEvent.MenuTabSelected(tab = "all", previousTab = "levels")
+        assertEquals("menu_tab_selected", event.name)
+        assertEquals(mapOf("tab" to "all", "previous_tab" to "levels"), event.parameters)
+    }
+
     @Test fun `game list loaded`() {
         val event = AnalyticsEvent.GameListLoaded(difficulty = "easy", gameCount = 42, customCount = 3)
         assertEquals("game_list_loaded", event.name)

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+[Unreleased]
+
+### Added
+- Added analytics for each step of the ad-free day offer, so its funnel can be read from tap to grant. `ad_free_day_entry_tapped{source, state, ads_watched}` fires when the floating "No Ads" pill or the Settings row is tapped, with `state` `idle`, `in_progress` (one ad already watched today) or `active` (a grant is running). `ad_free_day_watch_tapped{source, ad_number}` fires when "Watch ad N of 2" is tapped with an ad ready, and `ad_free_day_ad_watched{source, ad_number}` when ad N pays out, so the drop-off between the first and second ad is visible; `ad_lifecycle` already reported rewards under `ad_free_day_rewarded` but could not tell the two apart. The existing `ad_free_day_offer_shown` and `ad_free_day_granted` are unchanged.
+- Added `menu_tab_selected{tab, previous_tab}`, logged when the player switches between the Levels, Mine and All tabs, so tab visits can be counted and not only the games started from them. Until now a player who opened the All tab and left without playing was invisible; games started there are still identified by `game_started{source: menu_card | random_menu_button, is_custom: 0}`. The Levels tab the menu opens on is not logged as a selection. Android's unreleased menu logs the same event, and skips a re-tap of the tab already showing.
+- Added analytics for the entry points that only logged their outcome, or nothing. `achievements_opened{source: settings}` for the Settings row. `theme_changed{theme, previous_theme}` when a different theme is picked. `custom_memorama_create_opened{source: menu_header | mine_empty_state}` for the create sheet, ahead of the existing `custom_memorama_created`. `daily_challenge_opened{source: card | widget, streak}` once per entry into today's challenge, separating card taps from the widget's `domemory://daily` deep link; `daily_challenge_started` also fires on every retry, so it could not count entries. `season_card_tapped{season_id}` for the menu's season card; `season_levels_entered` also fires on returning from a level. `multiplayer_entry_tapped{action: host | join}` for the multiplayer menu, before the backend accepts a room.
+- Added `level_lives_depleted{level, season_id}` when a loss spends the day's last life. Until now running out was only visible as `level_life_consumed{lives_remaining: 0}`, or later as `level_out_of_lives_shown` once the player tapped a level with none left.
+
+### Changed
+- `level_power_up_used` now carries `season_id` for season levels, like the other level events, and `level_finished` carries `power_ups_used`: the number of star power-ups bought during that attempt, reset on every start, retry and next level. The share of level plays that used a booster is now a filter on one event instead of a join.
+- `levels_intro_skipped` now carries `slides_seen`, how far the player got through the four-slide Levels intro before skipping (1-based). `IntroCarouselView.onSkip` passes it; the first-launch onboarding ignores it and `onboarding_intro_skipped` is unchanged. The intro only opens from the map's info button, so `levels_intro_shown{source: info_button}` already counted those taps.
+
 [4.4.1] 28-09-2026
 
 ### Added

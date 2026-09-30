@@ -17,6 +17,8 @@ enum AnalyticsEvent {
     case screenView(name: String, screenClass: String)
     case difficultySelected(difficulty: String)
     case menuLoaded(difficulty: String)
+    /// The player switched menu tab: `levels`, `mine` or `all`.
+    case menuTabSelected(tab: String, previousTab: String)
     case gameListLoaded(difficulty: String, gameCount: Int, customCount: Int)
     case gameStarted(source: String, difficulty: String, cardsCount: Int, isCustom: Bool)
     case gameFinished(result: String, difficulty: String, cardsCount: Int, failedTries: Int, timeRemaining: Int, isCustom: Bool)
@@ -26,8 +28,16 @@ enum AnalyticsEvent {
     case quitConfirmed(difficulty: String, timeRemaining: Int, failedTries: Int)
     case retryTapped(difficulty: String, cardsCount: Int, source: String)
     case favoriteToggled(gameID: String, isFavorite: Bool)
+    /// The create-memorama sheet was opened: `menu_header` (the + button) or
+    /// `mine_empty_state`. Compare with `customMemoramaCreated` for the share
+    /// of players who finish building one.
+    case customMemoramaCreateOpened(source: String)
     case customMemoramaCreated(gameID: String, difficulty: String, cardsCount: Int)
     case customMemoramaDeleted(gameID: String)
+    /// A choice in the menu's multiplayer menu: `host` or `join`. Precedes
+    /// `multiplayerRoomCreated` / `multiplayerRoomJoined`, which only fire once
+    /// the backend accepts, so the gap between the two is abandonment.
+    case multiplayerEntryTapped(action: String)
     case multiplayerRoomCreated(gameID: String, isCustom: Bool)
     case multiplayerRoomJoined
     case multiplayerGameStarted(gameID: String)
@@ -39,6 +49,10 @@ enum AnalyticsEvent {
     case notificationPrimerShown(source: String)
     case notificationPrimerCompleted(source: String, outcome: String)
     case reviewLinkOpened(source: String)
+    /// The player entered today's challenge: `card` (the menu card) or
+    /// `widget` (the widget's `daily` deep link). Once per entry, unlike
+    /// `dailyChallengeStarted`, which fires again on every retry.
+    case dailyChallengeOpened(source: String, streak: Int)
     case dailyChallengeStarted(streak: Int)
     case dailyChallengeFinished(result: String, streak: Int)
     case streakMilestone(days: Int)
@@ -47,34 +61,57 @@ enum AnalyticsEvent {
     case resultShared(source: String)
     case onboardingIntroCompleted
     case onboardingIntroSkipped
+    case achievementsOpened(source: String)
+    /// Only logged when the pick differs from the current theme. Values are
+    /// `AppTheme` raw values: `system`, `light`, `dark`.
+    case themeChanged(theme: String, previousTheme: String)
     // Season play reuses the numbered-level events rather than getting a
     // parallel set, so the season and endless-Levels funnels stay directly
     // comparable. `seasonID` is nil for endless Levels and the key is then
     // omitted entirely, leaving those events exactly the shape they were.
     case levelStarted(level: Int, seasonID: String? = nil)
-    case levelFinished(level: Int, result: String, stars: Int, seasonID: String? = nil)
+    /// `powerUpsUsed` counts star power-ups bought during this attempt, so the
+    /// share of level plays that used any is one filter away.
+    case levelFinished(level: Int, result: String, stars: Int, powerUpsUsed: Int, seasonID: String? = nil)
     case levelUnlocked(level: Int, seasonID: String? = nil)
     case levelLifeConsumed(livesRemaining: Int)
+    /// A loss just spent the day's last life. `levelOutOfLivesShown` only
+    /// fires later, when the player taps a level with none left.
+    case levelLivesDepleted(level: Int, seasonID: String? = nil)
     case levelLifeGrantedFromAd(livesRemaining: Int)
     case levelOutOfLivesShown(source: String)
     case levelStarsCredited(level: Int, amount: Int, balanceAfter: Int, seasonID: String? = nil)
-    case levelPowerUpUsed(powerUp: String, level: Int, cost: Int, balanceAfter: Int)
+    case levelPowerUpUsed(powerUp: String, level: Int, cost: Int, balanceAfter: Int, seasonID: String? = nil)
     case levelLifePurchasedWithStars(cost: Int, balanceAfter: Int)
     case levelSkipped(level: Int, cost: Int, balanceAfter: Int)
     case levelFailedByMistakes(level: Int, maxFailures: Int, timeRemaining: Int)
     case levelMistakesForgiven(level: Int, amount: Int, source: String)
     case levelsIntroShown(source: String)
     case levelsIntroCompleted
-    case levelsIntroSkipped
+    /// `slidesSeen` is how far the player got before skipping (1-based).
+    case levelsIntroSkipped(slidesSeen: Int)
+    /// The active season's card on the menu was tapped. Once per tap, unlike
+    /// `seasonLevelsEntered`, which also fires on returning from a level.
+    case seasonCardTapped(seasonID: String)
     /// Fired every time a season's level map appears, including returning to
     /// it from a level — distinct from the generic `screenView`, which
     /// carries no season identity. Lets a season's entry funnel be filtered
     /// on its own in Firebase.
     case seasonLevelsEntered(seasonID: String)
-    // The ad-free day offer. The rewarded ad itself is tracked through
-    // `adLifecycle` under the `ad_free_day_rewarded` placement; these two add
-    // the funnel ends around it.
+    // The ad-free day offer, in funnel order: entry tapped → offer shown →
+    // watch tapped → ad watched (once per ad) → granted. The rewarded ad's
+    // load and dismissal are still tracked through `adLifecycle` under the
+    // `ad_free_day_rewarded` placement; these carry the ad's place in the
+    // chain, which `adLifecycle` cannot.
+    /// The "No Ads" pill or the Settings row was tapped. `state` is what the
+    /// entry point showed: `idle`, `in_progress` (one ad done) or `active`.
+    case adFreeDayEntryTapped(source: String, state: String, adsWatched: Int)
     case adFreeDayOfferShown(source: String, isIntro: Bool, adsWatched: Int)
+    /// The sheet's "Watch ad N of 2" button was tapped with an ad ready.
+    case adFreeDayWatchTapped(source: String, adNumber: Int)
+    /// Rewarded ad N of the chain paid out. The last one is always followed
+    /// by `adFreeDayGranted`.
+    case adFreeDayAdWatched(source: String, adNumber: Int)
     case adFreeDayGranted(source: String)
 
     var name: String {
@@ -82,6 +119,7 @@ enum AnalyticsEvent {
         case .screenView: return AnalyticsEventScreenView
         case .difficultySelected: return "difficulty_selected"
         case .menuLoaded: return "menu_loaded"
+        case .menuTabSelected: return "menu_tab_selected"
         case .gameListLoaded: return "game_list_loaded"
         case .gameStarted: return "game_started"
         case .gameFinished: return "game_finished"
@@ -91,8 +129,10 @@ enum AnalyticsEvent {
         case .quitConfirmed: return "quit_confirmed"
         case .retryTapped: return "retry_tapped"
         case .favoriteToggled: return "favorite_toggled"
+        case .customMemoramaCreateOpened: return "custom_memorama_create_opened"
         case .customMemoramaCreated: return "custom_memorama_created"
         case .customMemoramaDeleted: return "custom_memorama_deleted"
+        case .multiplayerEntryTapped: return "multiplayer_entry_tapped"
         case .multiplayerRoomCreated: return "multiplayer_room_created"
         case .multiplayerRoomJoined: return "multiplayer_room_joined"
         case .multiplayerGameStarted: return "multiplayer_game_started"
@@ -104,6 +144,7 @@ enum AnalyticsEvent {
         case .notificationPrimerShown: return "notification_primer_shown"
         case .notificationPrimerCompleted: return "notification_primer_completed"
         case .reviewLinkOpened: return "review_link_opened"
+        case .dailyChallengeOpened: return "daily_challenge_opened"
         case .dailyChallengeStarted: return "daily_challenge_started"
         case .dailyChallengeFinished: return "daily_challenge_finished"
         case .streakMilestone: return "streak_milestone"
@@ -112,10 +153,13 @@ enum AnalyticsEvent {
         case .resultShared: return "result_shared"
         case .onboardingIntroCompleted: return "onboarding_intro_completed"
         case .onboardingIntroSkipped: return "onboarding_intro_skipped"
+        case .achievementsOpened: return "achievements_opened"
+        case .themeChanged: return "theme_changed"
         case .levelStarted: return "level_started"
         case .levelFinished: return "level_finished"
         case .levelUnlocked: return "level_unlocked"
         case .levelLifeConsumed: return "level_life_consumed"
+        case .levelLivesDepleted: return "level_lives_depleted"
         case .levelLifeGrantedFromAd: return "level_life_granted_from_ad"
         case .levelOutOfLivesShown: return "level_out_of_lives_shown"
         case .levelStarsCredited: return "level_stars_credited"
@@ -127,8 +171,12 @@ enum AnalyticsEvent {
         case .levelsIntroShown: return "levels_intro_shown"
         case .levelsIntroCompleted: return "levels_intro_completed"
         case .levelsIntroSkipped: return "levels_intro_skipped"
+        case .seasonCardTapped: return "season_card_tapped"
         case .seasonLevelsEntered: return "season_levels_entered"
+        case .adFreeDayEntryTapped: return "ad_free_day_entry_tapped"
         case .adFreeDayOfferShown: return "ad_free_day_offer_shown"
+        case .adFreeDayWatchTapped: return "ad_free_day_watch_tapped"
+        case .adFreeDayAdWatched: return "ad_free_day_ad_watched"
         case .adFreeDayGranted: return "ad_free_day_granted"
         }
     }
@@ -144,6 +192,11 @@ enum AnalyticsEvent {
             return ["difficulty": difficulty]
         case .menuLoaded(let difficulty):
             return ["difficulty": difficulty]
+        case .menuTabSelected(let tab, let previousTab):
+            return [
+                "tab": tab,
+                "previous_tab": previousTab
+            ]
         case .gameListLoaded(let difficulty, let gameCount, let customCount):
             return [
                 "difficulty": difficulty,
@@ -199,6 +252,8 @@ enum AnalyticsEvent {
                 "game_id": gameID,
                 "is_favorite": isFavorite ? 1 : 0
             ]
+        case .customMemoramaCreateOpened(let source):
+            return ["source": source]
         case .customMemoramaCreated(let gameID, let difficulty, let cardsCount):
             return [
                 "game_id": gameID,
@@ -207,6 +262,8 @@ enum AnalyticsEvent {
             ]
         case .customMemoramaDeleted(let gameID):
             return ["game_id": gameID]
+        case .multiplayerEntryTapped(let action):
+            return ["action": action]
         case .multiplayerRoomCreated(let gameID, let isCustom):
             return [
                 "game_id": gameID,
@@ -238,6 +295,11 @@ enum AnalyticsEvent {
             ]
         case .reviewLinkOpened(let source):
             return ["source": source]
+        case .dailyChallengeOpened(let source, let streak):
+            return [
+                "source": source,
+                "streak": streak
+            ]
         case .dailyChallengeStarted(let streak):
             return ["streak": streak]
         case .dailyChallengeFinished(let result, let streak):
@@ -255,14 +317,22 @@ enum AnalyticsEvent {
             return ["source": source]
         case .onboardingIntroCompleted, .onboardingIntroSkipped:
             return [:]
+        case .achievementsOpened(let source):
+            return ["source": source]
+        case .themeChanged(let theme, let previousTheme):
+            return [
+                "theme": theme,
+                "previous_theme": previousTheme
+            ]
         case .levelStarted(let level, let seasonID):
             return AnalyticsEvent.tagged(["level": level], seasonID: seasonID)
-        case .levelFinished(let level, let result, let stars, let seasonID):
+        case .levelFinished(let level, let result, let stars, let powerUpsUsed, let seasonID):
             return AnalyticsEvent.tagged(
                 [
                     "level": level,
                     "result": result,
-                    "stars": stars
+                    "stars": stars,
+                    "power_ups_used": powerUpsUsed
                 ],
                 seasonID: seasonID
             )
@@ -270,6 +340,8 @@ enum AnalyticsEvent {
             return AnalyticsEvent.tagged(["level": level], seasonID: seasonID)
         case .levelLifeConsumed(let livesRemaining):
             return ["lives_remaining": livesRemaining]
+        case .levelLivesDepleted(let level, let seasonID):
+            return AnalyticsEvent.tagged(["level": level], seasonID: seasonID)
         case .levelLifeGrantedFromAd(let livesRemaining):
             return ["lives_remaining": livesRemaining]
         case .levelOutOfLivesShown(let source):
@@ -283,13 +355,16 @@ enum AnalyticsEvent {
                 ],
                 seasonID: seasonID
             )
-        case .levelPowerUpUsed(let powerUp, let level, let cost, let balanceAfter):
-            return [
-                "power_up": powerUp,
-                "level": level,
-                "cost": cost,
-                "balance_after": balanceAfter
-            ]
+        case .levelPowerUpUsed(let powerUp, let level, let cost, let balanceAfter, let seasonID):
+            return AnalyticsEvent.tagged(
+                [
+                    "power_up": powerUp,
+                    "level": level,
+                    "cost": cost,
+                    "balance_after": balanceAfter
+                ],
+                seasonID: seasonID
+            )
         case .levelLifePurchasedWithStars(let cost, let balanceAfter):
             return [
                 "cost": cost,
@@ -315,10 +390,26 @@ enum AnalyticsEvent {
             ]
         case .levelsIntroShown(let source):
             return ["source": source]
-        case .levelsIntroCompleted, .levelsIntroSkipped:
+        case .levelsIntroCompleted:
             return [:]
+        case .levelsIntroSkipped(let slidesSeen):
+            return ["slides_seen": slidesSeen]
+        case .seasonCardTapped(let seasonID):
+            return ["season_id": seasonID]
         case .seasonLevelsEntered(let seasonID):
             return ["season_id": seasonID]
+        case .adFreeDayEntryTapped(let source, let state, let adsWatched):
+            return [
+                "source": source,
+                "state": state,
+                "ads_watched": adsWatched
+            ]
+        case .adFreeDayWatchTapped(let source, let adNumber),
+             .adFreeDayAdWatched(let source, let adNumber):
+            return [
+                "source": source,
+                "ad_number": adNumber
+            ]
         case .adFreeDayOfferShown(let source, let isIntro, let adsWatched):
             return [
                 "source": source,
