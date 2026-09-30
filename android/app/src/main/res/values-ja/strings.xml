@@ -301,4 +301,27 @@
     <string name="lose_offer_watch_ad">広告を見る</string>
     <string name="lose_pay_stars_format">スター%d個で支払う</string>
     <string name="lose_life_at_stake">このゲームを続ければライフは減りません。</string>
+
+    <!-- Ad-free day (spec 12.3), ported from iOS -->
+    <string name="settings_section_purchases">購入</string>
+    <string name="settings_rewarded_remove_ads_title">無料の広告なしデー</string>
+    <string name="settings_rewarded_remove_ads_description">短い広告を%1$d本見ると24時間広告を止められます</string>
+    <string name="settings_rewarded_remove_ads_active_format">%1$sまで広告なし</string>
+    <string name="ad_free_day_pill_title">広告なし</string>
+    <string name="ad_free_day_pill_progress_format">広告なし %1$d/%2$d</string>
+    <string name="ad_free_day_pill_active_format">残り %1$s</string>
+    <string name="ad_free_day_intro_title">広告についてごめんなさい</string>
+    <string name="ad_free_day_intro_message">広告のおかげでDoMemoryは無料で遊べますが、抜け道があります。短い広告を%1$d本見ると、これから24時間は広告を止めます。</string>
+    <string name="ad_free_day_intro_watch_format">いいね、広告 %1$d/%2$d を見る</string>
+    <string name="ad_free_day_title">1日広告なしで遊ぼう</string>
+    <string name="ad_free_day_message">短い広告を%1$d本見ると、バナーとインタースティシャルを24時間止めます。</string>
+    <string name="ad_free_day_watch_format">広告 %1$d/%2$d を見る</string>
+    <string name="ad_free_day_step_ad_format">広告 %1$d</string>
+    <string name="ad_free_day_step_reward">広告なしの1日</string>
+    <string name="ad_free_day_halfway_hint">あと1本で完了</string>
+    <string name="ad_free_day_no_fill">今は広告がありません。進み具合は保存されています。</string>
+    <string name="ad_free_day_try_again">もう一度</string>
+    <string name="ad_free_day_active_format">%1$s まで広告オフ</string>
+    <string name="ad_free_day_back">ゲームに戻る</string>
+    <string name="ad_free_day_not_now">今はしない</string>
 </resources>

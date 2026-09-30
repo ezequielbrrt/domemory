@@ -399,4 +399,26 @@ class AnalyticsEventTest {
             event.parameters.values.forEach { value -> assertEquals(false, value is Boolean) }
         }
     }
+
+    @Test fun `ad-free day funnel events`() {
+        val entry = AnalyticsEvent.AdFreeDayEntryTapped(source = "settings", state = "in_progress", adsWatched = 1)
+        assertEquals("ad_free_day_entry_tapped", entry.name)
+        assertEquals(mapOf("source" to "settings", "state" to "in_progress", "ads_watched" to 1), entry.parameters)
+
+        val shown = AnalyticsEvent.AdFreeDayOfferShown(source = "menu_all", isIntro = true, adsWatched = 0)
+        assertEquals("ad_free_day_offer_shown", shown.name)
+        assertEquals(mapOf("source" to "menu_all", "is_intro" to 1, "ads_watched" to 0), shown.parameters)
+
+        val tapped = AnalyticsEvent.AdFreeDayWatchTapped(source = "season_levels", adNumber = 2)
+        assertEquals("ad_free_day_watch_tapped", tapped.name)
+        assertEquals(mapOf("source" to "season_levels", "ad_number" to 2), tapped.parameters)
+
+        val watched = AnalyticsEvent.AdFreeDayAdWatched(source = "multiplayer_lobby", adNumber = 1)
+        assertEquals("ad_free_day_ad_watched", watched.name)
+        assertEquals(mapOf("source" to "multiplayer_lobby", "ad_number" to 1), watched.parameters)
+
+        val granted = AnalyticsEvent.AdFreeDayGranted(source = "menu_mine")
+        assertEquals("ad_free_day_granted", granted.name)
+        assertEquals(mapOf("source" to "menu_mine"), granted.parameters)
+    }
 }

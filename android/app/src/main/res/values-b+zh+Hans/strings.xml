@@ -301,4 +301,27 @@
     <string name="lose_offer_watch_ad">观看广告</string>
     <string name="lose_pay_stars_format">支付 %d 颗星星</string>
     <string name="lose_life_at_stake">继续这局游戏，就不会失去生命。</string>
+
+    <!-- Ad-free day (spec 12.3), ported from iOS -->
+    <string name="settings_section_purchases">购买</string>
+    <string name="settings_rewarded_remove_ads_title">免费无广告一天</string>
+    <string name="settings_rewarded_remove_ads_description">观看 %1$d 条短广告即可关闭广告 24 小时</string>
+    <string name="settings_rewarded_remove_ads_active_format">广告已停用至 %1$s</string>
+    <string name="ad_free_day_pill_title">免广告</string>
+    <string name="ad_free_day_pill_progress_format">免广告 %1$d/%2$d</string>
+    <string name="ad_free_day_pill_active_format">剩余 %1$s</string>
+    <string name="ad_free_day_intro_title">抱歉打扰你的广告</string>
+    <string name="ad_free_day_intro_message">广告让 DoMemory 保持免费，但这里有个办法：观看 %1$d 条短广告，接下来 24 小时我们会关闭广告。</string>
+    <string name="ad_free_day_intro_watch_format">好的，观看第 %1$d/%2$d 条广告</string>
+    <string name="ad_free_day_title">畅玩一天无广告</string>
+    <string name="ad_free_day_message">观看 %1$d 条短广告，我们会关闭横幅和插页广告 24 小时。</string>
+    <string name="ad_free_day_watch_format">观看第 %1$d/%2$d 条广告</string>
+    <string name="ad_free_day_step_ad_format">广告 %1$d</string>
+    <string name="ad_free_day_step_reward">无广告的一天</string>
+    <string name="ad_free_day_halfway_hint">再看一条就完成了</string>
+    <string name="ad_free_day_no_fill">当前没有可用的广告。你的进度已保存。</string>
+    <string name="ad_free_day_try_again">重试</string>
+    <string name="ad_free_day_active_format">广告已关闭，直到 %1$s</string>
+    <string name="ad_free_day_back">返回游戏</string>
+    <string name="ad_free_day_not_now">暂不</string>
 </resources>

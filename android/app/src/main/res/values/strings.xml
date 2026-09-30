@@ -301,4 +301,27 @@
     <string name="lose_offer_watch_ad">Watch ad</string>
     <string name="lose_pay_stars_format">Pay %d stars</string>
     <string name="lose_life_at_stake">Continue now and you won\'t lose a life.</string>
+
+    <!-- Ad-free day (spec 12.3), ported from iOS -->
+    <string name="settings_section_purchases">Purchases</string>
+    <string name="settings_rewarded_remove_ads_title">Free ad-free day</string>
+    <string name="settings_rewarded_remove_ads_description">Watch %1$d short ads to disable ads for 24 hours</string>
+    <string name="settings_rewarded_remove_ads_active_format">Ads are disabled until %1$s</string>
+    <string name="ad_free_day_pill_title">No Ads</string>
+    <string name="ad_free_day_pill_progress_format">No Ads %1$d/%2$d</string>
+    <string name="ad_free_day_pill_active_format">%1$s left</string>
+    <string name="ad_free_day_intro_title">Sorry about the ads</string>
+    <string name="ad_free_day_intro_message">They keep DoMemory free, but here\'s a way out: watch %1$d short ads and we turn them off for the next 24 hours.</string>
+    <string name="ad_free_day_intro_watch_format">Sounds fair, watch ad %1$d of %2$d</string>
+    <string name="ad_free_day_title">Play a day without ads</string>
+    <string name="ad_free_day_message">Watch %1$d short ads and we turn off banners and interstitials for 24 hours.</string>
+    <string name="ad_free_day_watch_format">Watch ad %1$d of %2$d</string>
+    <string name="ad_free_day_step_ad_format">Ad %1$d</string>
+    <string name="ad_free_day_step_reward">Ad-free day</string>
+    <string name="ad_free_day_halfway_hint">One more and you\'re done</string>
+    <string name="ad_free_day_no_fill">No ad available right now. Your progress is saved.</string>
+    <string name="ad_free_day_try_again">Try again</string>
+    <string name="ad_free_day_active_format">Ads are off until %1$s</string>
+    <string name="ad_free_day_back">Back to the game</string>
+    <string name="ad_free_day_not_now">Not now</string>
 </resources>

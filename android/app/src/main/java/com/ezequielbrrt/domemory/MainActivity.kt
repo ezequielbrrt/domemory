@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import com.ezequielbrrt.domemory.feature.adfree.LocalAdFreeDay
 import com.ezequielbrrt.domemory.feature.launch.LaunchScreen
 import com.ezequielbrrt.domemory.feature.review.DoMemoryReviewInvitationHost
 import com.ezequielbrrt.domemory.navigation.NavGraph
@@ -89,11 +91,14 @@ class MainActivity : ComponentActivity() {
                     Scaffold { insets ->
                         Box(Modifier.fillMaxSize().padding(insets)) {
                             hasOnboarded?.let {
-                                NavGraph(
-                                    container,
-                                    hasOnboarded = it,
-                                    onWhatsNew = { whatsNewPresentation = WhatsNewPresentation.MANUAL },
-                                )
+                                // The ad-free day pill and the Settings row reach the service here.
+                                CompositionLocalProvider(LocalAdFreeDay provides container.adFreeDay) {
+                                    NavGraph(
+                                        container,
+                                        hasOnboarded = it,
+                                        onWhatsNew = { whatsNewPresentation = WhatsNewPresentation.MANUAL },
+                                    )
+                                }
                             }
                         }
                     }

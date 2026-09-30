@@ -28,6 +28,7 @@ enum class AdPlacement(val type: Type) {
     GAME_REWARDED_HINT(Type.REWARDED),
     LEVELS_REWARDED_LIFE(Type.REWARDED),
     LEVELS_REWARDED_FORGIVE(Type.REWARDED),
+    AD_FREE_DAY_REWARDED(Type.REWARDED),
     APP_OPEN(Type.APP_OPEN),
     MULTIPLAYER_FINISHED_NATIVE(Type.NATIVE);
 
@@ -50,7 +51,8 @@ object AdUnitConfiguration {
         AdPlacement.GAME_REWARDED_EXTRA_TIME,
         AdPlacement.GAME_REWARDED_HINT,
         AdPlacement.LEVELS_REWARDED_LIFE,
-        AdPlacement.LEVELS_REWARDED_FORGIVE -> select(debug, TEST_REWARDED, REWARDED)
+        AdPlacement.LEVELS_REWARDED_FORGIVE,
+        AdPlacement.AD_FREE_DAY_REWARDED -> select(debug, TEST_REWARDED, REWARDED)
         AdPlacement.APP_OPEN -> select(debug, TEST_APP_OPEN, APP_OPEN)
         AdPlacement.MULTIPLAYER_FINISHED_NATIVE -> select(debug, TEST_NATIVE, MULTIPLAYER_NATIVE)
     }
@@ -93,11 +95,12 @@ object AdUnitConfiguration {
  * fresh process simply starts a fresh interstitial count, one session-visible divergence from
  * iOS, documented here rather than silently carried.
  *
- * **Remove Ads has no Android entitlement layer.** iOS gates banners, natives, interstitials
- * and app-open on `PurchaseService.shared.hasRemovedAds`; nothing here does, because there is
- * no purchase service to gate on (Phase 7 is explicitly ads-only, IAP deferred). Every
- * `involuntaryAdsSuppressed` parameter below defaults to `false` for the same reason — it
- * exists so the day a purchase layer lands, wiring it is a one-line change here, not a new gate.
+ * **The ad-free day is the only entitlement.** iOS gates banners, natives, interstitials and
+ * app-open on `PurchaseService.shared.hasRemovedAds`, which a Remove Ads purchase or a rewarded
+ * ad-free day turns on. Android has no purchase layer yet (spec 12.3), so [AdFreeGate] carries
+ * the ad-free day alone: [notifyGameFinished] passes it as `involuntaryAdsSuppressed`, and
+ * [AdMobBanner] and [AdMobNativeAdView] render nothing while it is active. Rewarded placements
+ * are opt-in and are never gated.
  */
 object AdsService {
     private val initialized = AtomicBoolean(false)
@@ -105,6 +108,9 @@ object AdsService {
     private var interstitialAd: InterstitialAd? = null
     private var interstitialPlacement: AdPlacement? = null
     private val rewardedAds = mutableMapOf<AdPlacement, RewardedAd>()
+
+    /** Readiness callbacks waiting on a rewarded load already in flight, per placement. */
+    private val rewardedLoadWaiters = mutableMapOf<AdPlacement, MutableList<(Boolean) -> Unit>>()
 
     /** The single cadence counter every full-screen ad decision reads and writes. */
     private var frequencyState = AdFrequencyState()
@@ -183,6 +189,7 @@ object AdsService {
             gameDurationMillis = gameDurationMillis,
             nowMillis = nowMillis,
             allowInterstitial = allowInterstitial,
+            involuntaryAdsSuppressed = AdFreeGate.isActive(nowMillis),
         )
         frequencyState = decision.nextState
         if (!decision.shouldRequestPresentation) return
@@ -206,11 +213,29 @@ object AdsService {
     // configured but still has no Android call site; see android/ANDROID_PLAN.md Phase 7
     // for why) --------------------------------------------------------------------------
 
-    /** Loads the next rewarded ad for [placement]. A no-op while one is already cached. */
-    fun loadRewarded(context: Context, placement: AdPlacement) {
+    /**
+     * Loads the next rewarded ad for [placement]. A no-op while one is already cached or a
+     * load is already in flight, so two callers never race two requests for one slot.
+     * [onReady], when given, reports whether an ad is ready to show: at once for a cached ad
+     * or an unconfigured placement, otherwise when the in-flight load settles. iOS's
+     * `loadRewardedAd(for:completion:)`; the ad-free day sheet needs it to leave "Loading ad".
+     */
+    fun loadRewarded(context: Context, placement: AdPlacement, onReady: ((Boolean) -> Unit)? = null) {
         require(placement.type == AdPlacement.Type.REWARDED) { "$placement is not a rewarded placement" }
-        if (!AdUnitConfiguration.isConfigured(placement)) return
-        if (rewardedAds[placement] != null) return
+        if (!AdUnitConfiguration.isConfigured(placement)) {
+            onReady?.invoke(false)
+            return
+        }
+        if (rewardedAds[placement] != null) {
+            onReady?.invoke(true)
+            return
+        }
+        val waiters = rewardedLoadWaiters[placement]
+        if (waiters != null) {
+            onReady?.let(waiters::add)
+            return
+        }
+        rewardedLoadWaiters[placement] = mutableListOf<(Boolean) -> Unit>().apply { onReady?.let(::add) }
 
         RewardedAd.load(
             context.applicationContext,
@@ -219,10 +244,12 @@ object AdsService {
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(ad: RewardedAd) {
                     rewardedAds[placement] = ad
+                    rewardedLoadWaiters.remove(placement)?.forEach { it(true) }
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     rewardedAds.remove(placement)
+                    rewardedLoadWaiters.remove(placement)?.forEach { it(false) }
                 }
             },
         )

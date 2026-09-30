@@ -54,6 +54,7 @@ import com.ezequielbrrt.domemory.feature.daily.DailyChallengeCard
 import com.ezequielbrrt.domemory.feature.levels.LevelsScreen
 import com.ezequielbrrt.domemory.feature.levels.LevelsViewModel
 import com.ezequielbrrt.domemory.feature.seasons.SeasonCard
+import com.ezequielbrrt.domemory.feature.adfree.AdFreeDayEntryPoint
 import com.ezequielbrrt.domemory.services.seasons.Season
 import com.ezequielbrrt.domemory.services.seasons.SeasonLevelProgressStore
 import com.ezequielbrrt.domemory.services.ads.AdMobBanner
@@ -124,21 +125,32 @@ fun MenuScreen(
         }
         AdMobBanner(AdPlacement.HOME_BANNER, Modifier.fillMaxWidth())
         MenuTabRow(selected = state.selectedTab, onSelectTab = onSelectTab)
-        when (state.selectedTab) {
-            MenuTab.LEVELS -> LevelsScreen(levelsViewModel, onLevelSelected)
-            MenuTab.MINE -> MineTab(
-                state = state,
-                onToggleFavorite = onToggleFavorite,
-                onDeleteCustomMemorama = onDeleteCustomMemorama,
-                onBoardSelected = onBoardSelected,
-                onCreateMemorama = onCreateMemorama,
-            )
-            MenuTab.ALL -> AllTab(
-                state = state,
-                onDifficultyChange = onDifficultyChange,
-                onToggleFavorite = onToggleFavorite,
-                onBoardSelected = onBoardSelected,
-                onRandomGame = onRandomGame,
+        // The ad-free day pill floats bottom-end over whichever tab is showing, as on iOS.
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            when (state.selectedTab) {
+                MenuTab.LEVELS -> LevelsScreen(levelsViewModel, onLevelSelected)
+                MenuTab.MINE -> MineTab(
+                    state = state,
+                    onToggleFavorite = onToggleFavorite,
+                    onDeleteCustomMemorama = onDeleteCustomMemorama,
+                    onBoardSelected = onBoardSelected,
+                    onCreateMemorama = onCreateMemorama,
+                )
+                MenuTab.ALL -> AllTab(
+                    state = state,
+                    onDifficultyChange = onDifficultyChange,
+                    onToggleFavorite = onToggleFavorite,
+                    onBoardSelected = onBoardSelected,
+                    onRandomGame = onRandomGame,
+                )
+            }
+            AdFreeDayEntryPoint(
+                source = when (state.selectedTab) {
+                    MenuTab.LEVELS -> "menu_levels"
+                    MenuTab.MINE -> "menu_mine"
+                    MenuTab.ALL -> "menu_all"
+                },
+                modifier = Modifier.align(Alignment.BottomEnd),
             )
         }
     }

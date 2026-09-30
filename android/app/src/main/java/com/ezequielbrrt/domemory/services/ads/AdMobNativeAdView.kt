@@ -39,6 +39,8 @@ import com.google.android.gms.ads.nativead.NativeAdView
 @Composable
 fun AdMobNativeAdView(placement: AdPlacement, modifier: Modifier = Modifier) {
     require(placement.type == AdPlacement.Type.NATIVE) { "$placement is not a native placement" }
+    // An ad-free day hides natives outright, like banners.
+    if (rememberInvoluntaryAdsSuppressed()) return
     val context = LocalContext.current
     var nativeAd by remember(placement) { mutableStateOf<NativeAd?>(null) }
 

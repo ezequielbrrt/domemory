@@ -301,4 +301,27 @@
     <string name="lose_offer_watch_ad">Voir une pub</string>
     <string name="lose_pay_stars_format">Payer %d étoiles</string>
     <string name="lose_life_at_stake">Continuez cette partie et vous ne perdrez pas de vie.</string>
+
+    <!-- Ad-free day (spec 12.3), ported from iOS -->
+    <string name="settings_section_purchases">Achats</string>
+    <string name="settings_rewarded_remove_ads_title">Journée gratuite sans pubs</string>
+    <string name="settings_rewarded_remove_ads_description">Regarde %1$d pubs courtes pour désactiver les pubs pendant 24 heures</string>
+    <string name="settings_rewarded_remove_ads_active_format">Les pubs sont désactivées jusqu\'à %1$s</string>
+    <string name="ad_free_day_pill_title">Sans pubs</string>
+    <string name="ad_free_day_pill_progress_format">Sans pubs %1$d/%2$d</string>
+    <string name="ad_free_day_pill_active_format">%1$s restantes</string>
+    <string name="ad_free_day_intro_title">Désolé pour les pubs</string>
+    <string name="ad_free_day_intro_message">Elles gardent DoMemory gratuit, mais voici une échappatoire : regarde %1$d pubs courtes et on les coupe pour les 24 prochaines heures.</string>
+    <string name="ad_free_day_intro_watch_format">Ça me va, voir la pub %1$d sur %2$d</string>
+    <string name="ad_free_day_title">Joue une journée sans pubs</string>
+    <string name="ad_free_day_message">Regarde %1$d pubs courtes et on coupe les bannières et les interstitiels pendant 24 heures.</string>
+    <string name="ad_free_day_watch_format">Voir la pub %1$d sur %2$d</string>
+    <string name="ad_free_day_step_ad_format">Pub %1$d</string>
+    <string name="ad_free_day_step_reward">Journée sans pubs</string>
+    <string name="ad_free_day_halfway_hint">Encore une et c\'est bon</string>
+    <string name="ad_free_day_no_fill">Aucune pub disponible pour le moment. Ta progression est sauvegardée.</string>
+    <string name="ad_free_day_try_again">Réessayer</string>
+    <string name="ad_free_day_active_format">Pubs coupées jusqu\'à %1$s</string>
+    <string name="ad_free_day_back">Retour au jeu</string>
+    <string name="ad_free_day_not_now">Pas maintenant</string>
 </resources>

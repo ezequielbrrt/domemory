@@ -497,6 +497,87 @@ class UserPreferences(private val dataStore: DataStore<Preferences>) {
     val gameFinishedInterstitialCompletionCount: Flow<Int> =
         intFlow(Keys.ADS_INTERSTITIAL_COMPLETION_COUNT, default = 0)
 
+    // -- Ad-free day (12.3) -------------------------------------------------------------
+
+    /**
+     * Ads watched toward today's ad-free day. Scoped to the local day like lives: the first
+     * read of a new day resets it, so a half-finished chain never carries over midnight.
+     */
+    suspend fun adFreeDayAdsWatchedFor(dayKey: String): Int {
+        var result = 0
+        dataStore.edit { prefs ->
+            if (prefs[Keys.AD_FREE_DAY_PROGRESS_DAY] != dayKey) {
+                prefs[Keys.AD_FREE_DAY_ADS_WATCHED] = 0
+                prefs[Keys.AD_FREE_DAY_PROGRESS_DAY] = dayKey
+            }
+            result = prefs[Keys.AD_FREE_DAY_ADS_WATCHED] ?: 0
+        }
+        return result
+    }
+
+    /**
+     * Records one rewarded ad in one transaction. Returns true when this ad completed the
+     * chain of [requiredAds]; completing also clears the progress so the next chain starts
+     * from zero.
+     */
+    suspend fun recordAdFreeDayAdWatched(dayKey: String, requiredAds: Int): Boolean {
+        var completed = false
+        dataStore.edit { prefs ->
+            val current = if (prefs[Keys.AD_FREE_DAY_PROGRESS_DAY] != dayKey) 0 else (prefs[Keys.AD_FREE_DAY_ADS_WATCHED] ?: 0)
+            val watched = current + 1
+            if (watched >= requiredAds) {
+                prefs.remove(Keys.AD_FREE_DAY_ADS_WATCHED)
+                prefs.remove(Keys.AD_FREE_DAY_PROGRESS_DAY)
+                completed = true
+            } else {
+                prefs[Keys.AD_FREE_DAY_ADS_WATCHED] = watched
+                prefs[Keys.AD_FREE_DAY_PROGRESS_DAY] = dayKey
+            }
+        }
+        return completed
+    }
+
+    /** Whether the apologetic first-open copy has been shown. */
+    val adFreeDayIntroShown: Flow<Boolean> = booleanFlow(Keys.AD_FREE_DAY_INTRO_SHOWN, default = false)
+
+    suspend fun setAdFreeDayIntroShown(shown: Boolean) = setBoolean(Keys.AD_FREE_DAY_INTRO_SHOWN, shown)
+
+    /** Debug/QA only: forgets today's progress and the intro flag. */
+    suspend fun resetAdFreeDay() {
+        dataStore.edit { prefs ->
+            prefs.remove(Keys.AD_FREE_DAY_ADS_WATCHED)
+            prefs.remove(Keys.AD_FREE_DAY_PROGRESS_DAY)
+            prefs.remove(Keys.AD_FREE_DAY_INTRO_SHOWN)
+        }
+    }
+
+    /**
+     * When the rewarded ad-free window ends, in epoch millis; null when none was ever granted.
+     * iOS's `rewardedRemoveAdsExpirationDate`. A past value means the window has ended.
+     */
+    val rewardedRemoveAdsExpiry: Flow<Long?> =
+        dataStore.data.map { it[Keys.REWARDED_REMOVE_ADS_EXPIRY] }.distinctUntilChanged()
+
+    /**
+     * Extends the ad-free window by [durationMillis] from [nowMillis], or from the current
+     * expiry when one is still running, so a grant never shortens an existing one. Returns
+     * the new expiry.
+     */
+    suspend fun extendRewardedRemoveAds(nowMillis: Long, durationMillis: Long): Long {
+        var result = 0L
+        dataStore.edit { prefs ->
+            val base = maxOf(nowMillis, prefs[Keys.REWARDED_REMOVE_ADS_EXPIRY] ?: 0L)
+            result = base + durationMillis
+            prefs[Keys.REWARDED_REMOVE_ADS_EXPIRY] = result
+        }
+        return result
+    }
+
+    /** Debug/QA only: ends any ad-free window immediately. */
+    suspend fun clearRewardedRemoveAds() {
+        dataStore.edit { prefs -> prefs.remove(Keys.REWARDED_REMOVE_ADS_EXPIRY) }
+    }
+
     suspend fun incrementInterstitialCompletionCount() = incrementInt(Keys.ADS_INTERSTITIAL_COMPLETION_COUNT)
 
     suspend fun resetInterstitialCompletionCount() {
@@ -599,6 +680,10 @@ private object Keys {
     val LEVELS_LIFETIME_STARS = intPreferencesKey("levels.lifetimeStars")
     val LEVELS_WALLET_BALANCE = intPreferencesKey("levels.wallet.balance")
     val LEVELS_LIVES_REMAINING = intPreferencesKey("levels.lives.remaining")
+    val AD_FREE_DAY_ADS_WATCHED = intPreferencesKey("adFreeDay.adsWatched")
+    val AD_FREE_DAY_PROGRESS_DAY = stringPreferencesKey("adFreeDay.progressDay")
+    val AD_FREE_DAY_INTRO_SHOWN = booleanPreferencesKey("adFreeDay.introShown")
+    val REWARDED_REMOVE_ADS_EXPIRY = longPreferencesKey("ads.rewardedRemoveAdsExpiry")
     val LEVELS_LIVES_LAST_RESET_DAY = stringPreferencesKey("levels.lives.lastResetDay")
 
     val DAILY_STREAK_CURRENT = intPreferencesKey("dailyStreakCurrent")

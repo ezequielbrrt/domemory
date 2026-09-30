@@ -343,6 +343,38 @@ sealed class AnalyticsEvent(val name: String, val parameters: Map<String, Any>) 
         mapOf("season_id" to seasonId),
     )
 
+    // The ad-free day offer (spec 12.3), in funnel order: entry tapped -> offer shown ->
+    // watch tapped -> ad watched (once per ad) -> granted. The ad itself is still reported
+    // through [AdLifecycle] under `ad_free_day_rewarded`; these carry its place in the chain.
+
+    /** The "No Ads" pill or the Settings row was tapped. [state]: `idle`, `in_progress`, `active`. */
+    data class AdFreeDayEntryTapped(val source: String, val state: String, val adsWatched: Int) : AnalyticsEvent(
+        "ad_free_day_entry_tapped",
+        mapOf("source" to source, "state" to state, "ads_watched" to adsWatched),
+    )
+
+    data class AdFreeDayOfferShown(val source: String, val isIntro: Boolean, val adsWatched: Int) : AnalyticsEvent(
+        "ad_free_day_offer_shown",
+        mapOf("source" to source, "is_intro" to isIntro.toAnalyticsInt(), "ads_watched" to adsWatched),
+    )
+
+    /** "Watch ad N of 2" was tapped with an ad ready. */
+    data class AdFreeDayWatchTapped(val source: String, val adNumber: Int) : AnalyticsEvent(
+        "ad_free_day_watch_tapped",
+        mapOf("source" to source, "ad_number" to adNumber),
+    )
+
+    /** Rewarded ad N of the chain paid out. The last one is always followed by [AdFreeDayGranted]. */
+    data class AdFreeDayAdWatched(val source: String, val adNumber: Int) : AnalyticsEvent(
+        "ad_free_day_ad_watched",
+        mapOf("source" to source, "ad_number" to adNumber),
+    )
+
+    data class AdFreeDayGranted(val source: String) : AnalyticsEvent(
+        "ad_free_day_granted",
+        mapOf("source" to source),
+    )
+
     companion object {
         /** Adds the season dimension to a numbered-level event, or returns [parameters]
          * untouched when there is no season — mirrors iOS's private `tagged(_:seasonID:)`. */

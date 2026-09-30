@@ -23,6 +23,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,12 +41,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
+import com.ezequielbrrt.domemory.feature.adfree.LocalAdFreeDay
 import com.ezequielbrrt.domemory.feature.levels.LevelsIntroOverlay
 import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingScreen
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingUiState
 import com.ezequielbrrt.domemory.feature.review.DoMemoryReviewInvitationPreview
 import com.ezequielbrrt.domemory.feature.whatsnew.DoMemoryWhatsNewScreen
+import com.ezequielbrrt.domemory.services.ads.AdFreeDayService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.ui.components.BackButton
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
@@ -83,6 +86,12 @@ fun DebugMenuScreen(
     var preview by rememberSaveable { mutableStateOf<DebugPreview?>(null) }
     var nativeReviewStatus by remember { mutableStateOf<String?>(null) }
     var livesStatus by remember { mutableStateOf<String?>(null) }
+    val adFreeDay = LocalAdFreeDay.current
+    val adsDisabled = adFreeDay?.let { service ->
+        val expiry by service.expiryMillis.collectAsState()
+        (expiry ?: 0L) > System.currentTimeMillis()
+    } ?: false
+    var adFreeResetStatus by remember { mutableStateOf<String?>(null) }
     val dismissPreview = { preview = null }
 
     Column(
@@ -94,9 +103,29 @@ fun DebugMenuScreen(
             Text("Debug Menu", style = DoMemoryType.display(26), color = palette.primary)
         }
 
-        // Same rows, order and titles as iOS's DebugMenuView, so QA steps carry across. iOS's
-        // first section (the remove-ads toggle and the ad-free day reset) has no Android
-        // counterpart yet: there is no purchase layer and no ad-free day offer to act on.
+        // Same rows, order and titles as iOS's DebugMenuView, so QA steps carry across.
+        adFreeDay?.let { service ->
+            DebugSection("Ads") {
+                DebugRow(
+                    title = "Disable ads",
+                    subtitle = "Grants/clears a year-long rewarded remove-ads window. Now: " +
+                        if (adsDisabled) "ads off" else "ads on",
+                ) {
+                    scope.launch { if (adsDisabled) service.clearGrant() else service.grantForDebug() }
+                }
+                DebugRow(
+                    title = "Reset ad-free day offer",
+                    subtitle = adFreeResetStatus
+                        ?: "Forgets today's watched ads and replays the apology copy on the next open",
+                ) {
+                    scope.launch {
+                        service.reset()
+                        adFreeResetStatus = "Reset: 0/${AdFreeDayService.REQUIRED_ADS} ads, apology copy next open"
+                    }
+                }
+            }
+        }
+
         DebugSection("Screens") {
             DebugRow(
                 title = "Start onboarding",

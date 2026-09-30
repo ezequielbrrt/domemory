@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.ezequielbrrt.domemory.R
+import com.ezequielbrrt.domemory.feature.adfree.AdFreeDayEntryPoint
 import com.ezequielbrrt.domemory.feature.levels.LevelTile
 import com.ezequielbrrt.domemory.feature.levels.LivesPill
 import com.ezequielbrrt.domemory.feature.levels.OutOfLivesModal
@@ -259,6 +260,9 @@ fun SeasonLevelsScreen(
                 }
             }
         }
+
+        // The ad-free day pill (spec 12.3); the out-of-lives prompt below still covers it.
+        AdFreeDayEntryPoint(source = "season_levels", modifier = Modifier.align(Alignment.BottomEnd))
 
         if (uiState.showOutOfLivesPrompt) {
             LaunchedEffect(Unit) {
