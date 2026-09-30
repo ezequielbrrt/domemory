@@ -94,12 +94,14 @@ data class IntroIllustration(
  *
  * @param finishTitle label for the button on the last page — "Get Started" on first
  *   launch, "Got It" when the carousel is a reference the player opened deliberately.
+ * @param onSkip receives how many slides the player had reached (1-based) when they
+ *   skipped, for analytics.
  */
 @Composable
 fun IntroCarousel(
     slides: List<IntroSlide>,
     finishTitle: String,
-    onSkip: () -> Unit,
+    onSkip: (slidesSeen: Int) -> Unit,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -117,7 +119,7 @@ fun IntroCarousel(
                 TextButton(
                     onClick = {
                         HapticsService.fire(HapticIntent.TAP)
-                        onSkip()
+                        onSkip(pagerState.currentPage + 1)
                     },
                 ) {
                     Text(

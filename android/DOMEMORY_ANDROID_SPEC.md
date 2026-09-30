@@ -1348,7 +1348,7 @@ the event set is consistent.
 | `custom_memorama_create_opened` | `source` (`menu_header` \| `mine_empty_state`) |
 | `custom_memorama_created` | `game_id`, `difficulty`, `cards_count` |
 | `custom_memorama_deleted` | `game_id` |
-| `multiplayer_entry_tapped` | `action` (`host` \| `join`) — the menu choice, before the backend accepts |
+| `multiplayer_entry_tapped` | `action` (`host` \| `join`) — the host/join choice, before the backend accepts (iOS: the menu's multiplayer menu; Android: the lobby's Create, Join and Scan QR buttons) |
 | `multiplayer_room_created` | `game_id`, `is_custom` |
 | `multiplayer_room_joined` | — |
 | `multiplayer_game_started` | `game_id` |

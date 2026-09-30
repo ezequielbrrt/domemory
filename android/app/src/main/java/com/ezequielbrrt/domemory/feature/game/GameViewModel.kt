@@ -174,6 +174,11 @@ class GameViewModel(
     private var frozenUntilMillis: Long = 0L
     private var winReported = false
 
+    /** Star power-ups bought during the current attempt, reported on `level_finished`. Reset by
+     * [trackGameStarted], so every start and [restart] counts from zero — iOS's
+     * `powerUpsUsedThisAttempt`. */
+    private var powerUpsUsedThisAttempt = 0
+
     /** Guards [commitLossIfNeeded] — a rescue that undoes the loss never sets this. */
     private var lossCommitted = false
 
@@ -194,6 +199,7 @@ class GameViewModel(
      * the "what kind of start is this" logic at every caller.
      */
     private fun trackGameStarted(source: String) {
+        powerUpsUsedThisAttempt = 0
         onAnalytics?.invoke(
             AnalyticsEvent.GameStarted(
                 source = source,
@@ -426,6 +432,7 @@ class GameViewModel(
                     level = context.number,
                     result = if (outcome is GameOutcome.Won) "win" else "lose",
                     stars = starsEarned,
+                    powerUpsUsed = powerUpsUsedThisAttempt,
                     seasonId = context.seasonId,
                 ),
             )
@@ -511,11 +518,14 @@ class GameViewModel(
                     level = context.number,
                     result = "lose",
                     stars = starsAfter,
+                    powerUpsUsed = powerUpsUsedThisAttempt,
                     seasonId = context.seasonId,
                 ),
             )
         }
-        levelLives?.spendOnLoss()
+        // `spendOnLoss` is false when there was nothing to spend, so only a real 1 → 0
+        // transition below counts as a depletion.
+        val spentLife = levelLives?.spendOnLoss() == true
         // Re-read post-spend so the lose overlay, still on screen, re-renders into its
         // out-of-lives state in place — the Android counterpart of iOS's LoseModal
         // "re-rendering" once `logGameFinishedIfNeeded` updates `levelLivesRemaining`
@@ -524,6 +534,10 @@ class GameViewModel(
         levelLives?.remaining()?.let { remaining ->
             _state.value = _state.value.copy(livesRemaining = remaining)
             onAnalytics?.invoke(AnalyticsEvent.LevelLifeConsumed(livesRemaining = remaining))
+            val context = (mode as? GameMode.Level)?.context
+            if (spentLife && remaining == 0 && context != null) {
+                onAnalytics?.invoke(AnalyticsEvent.LevelLivesDepleted(level = context.number, seasonId = context.seasonId))
+            }
         }
         logGameFinished(outcome)
         recordStats(outcome)
@@ -769,12 +783,14 @@ class GameViewModel(
             return false
         }
         onHaptic?.invoke(HapticIntent.REWARD)
+        powerUpsUsedThisAttempt += 1
         onAnalytics?.invoke(
             AnalyticsEvent.LevelPowerUpUsed(
                 powerUp = powerUp.analyticsKey,
                 level = context.number,
                 cost = powerUp.cost,
                 balanceAfter = wallet.balance.value,
+                seasonId = context.seasonId,
             ),
         )
         return true

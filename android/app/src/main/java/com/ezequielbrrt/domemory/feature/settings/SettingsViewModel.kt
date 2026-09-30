@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.data.prefs.UserPreferences
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.notifications.NotificationService
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,12 +18,26 @@ import kotlinx.coroutines.launch
 
 data class SettingsUiState(val difficulty: Difficulty = Difficulty.MEDIUM, val theme: ThemePreference = ThemePreference.SYSTEM, val hapticsEnabled: Boolean = true, val remindersEnabled: Boolean = false, val difficultyChanged: Boolean = false)
 
+/** The `theme` value of `theme_changed`, spelled like iOS's `AppTheme` raw values. */
+private val ThemePreference.analyticsKey: String
+    get() = when (this) {
+        ThemePreference.SYSTEM -> "system"
+        ThemePreference.LIGHT -> "light"
+        ThemePreference.DARK -> "dark"
+    }
+
 class SettingsViewModel(private val prefs: UserPreferences, private val notifications: NotificationService) : ViewModel() {
     private val _state = MutableStateFlow(SettingsUiState())
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
     init { combine(prefs.playerDifficulty, prefs.themePreference, prefs.hapticsEnabled, prefs.notificationsEnabled) { d, t, h, n -> _state.value.copy(difficulty = d, theme = t, hapticsEnabled = h, remindersEnabled = n) }.onEach { _state.value = it }.launchIn(viewModelScope) }
     fun setDifficulty(value: Difficulty) { if (value != _state.value.difficulty) viewModelScope.launch { prefs.setPlayerDifficulty(value); _state.value = _state.value.copy(difficultyChanged = true) } }
-    fun setTheme(value: ThemePreference) = viewModelScope.launch { prefs.setThemePreference(value) }
+    fun setTheme(value: ThemePreference) = viewModelScope.launch {
+        val previous = _state.value.theme
+        if (value != previous) {
+            AnalyticsService.log(AnalyticsEvent.ThemeChanged(theme = value.analyticsKey, previousTheme = previous.analyticsKey))
+        }
+        prefs.setThemePreference(value)
+    }
     fun setHaptics(value: Boolean) = viewModelScope.launch { prefs.setHapticsEnabled(value) }
 
     /**

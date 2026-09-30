@@ -108,7 +108,12 @@ fun NavGraph(
             is DeepLink.Daily -> {
                 val alreadyDone = container.dailyChallenge.isCompletedToday()
                 container.deepLinkRouter.consume()
-                if (!alreadyDone) navController.navigate(Routes.DAILY_GAME)
+                if (!alreadyDone) {
+                    AnalyticsService.log(
+                        AnalyticsEvent.DailyChallengeOpened(source = "widget", streak = container.dailyChallenge.currentStreak()),
+                    )
+                    navController.navigate(Routes.DAILY_GAME)
+                }
             }
             is DeepLink.Join -> {
                 val code = (container.deepLinkRouter.pending.value as DeepLink.Join).code
@@ -196,6 +201,7 @@ fun NavGraph(
                         // which only fire .tap inside the same !isCompleted guard.
                         if (!isDailyCompletedToday) {
                             HapticsService.fire(HapticIntent.TAP)
+                            AnalyticsService.log(AnalyticsEvent.DailyChallengeOpened(source = "card", streak = dailyStreak))
                             navController.navigate(Routes.DAILY_GAME)
                         }
                     },
