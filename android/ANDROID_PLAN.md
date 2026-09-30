@@ -1645,6 +1645,18 @@ Validation: the full unit suite (433 tests) passes, including three new `GameVie
 cases (depletion fires once on the real last life, never at zero, and `power_ups_used`
 counts then resets on retry). No event was observed in DebugView on a device.
 
+**Flippo in the game modals (2026-09-30).** The win, lose, pause and quit overlays in
+`feature/game/GameScreen.kt` show the same Flippo poses as iOS (`flippo_win`, `flippo_lose_time`,
+`flippo_lose_mistakes`, `flippo_pause`, `flippo_quit` in `res/drawable-nodpi/`) at 160 × 168 dp,
+replacing the emoji heroes and the lose overlay's `clock-crack` / `x-shake` Lottie heroes (the clips
+stay bundled). The quit confirmation is no longer a Material `AlertDialog`: the new `QuitOverlay` is
+a custom card mirroring iOS's `QuitModal` (Flippo, the question, Cancel / Accept capsules, in
+`PauseOverlay`'s card chrome), with a `BackHandler` keeping the dialog's Back-as-Cancel behaviour.
+Accept still leaves `showQuitConfirm` true so the pause sheet does not flash during the exit.
+Validation: `:app:assembleDebug :app:testDebugUnitTest --rerun` passed (436 tests); on the
+Pixel_10 emulator the pause, quit (Back cancelled and the timer resumed), timeout loss,
+mistake loss and level-1 win overlays were all reached.
+
 ## 8. Immediate next steps
 
 1. Decide **O1**: register `domemory.app`, deploy Android App Links and iOS Universal Links
