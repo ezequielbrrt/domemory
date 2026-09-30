@@ -108,8 +108,11 @@ struct WinModal: View {
                 .background(.ultraThinMaterial)
 
             VStack(spacing: 6) {
-                Text("😎")
-                    .font(.system(size: 68))
+                Image("FlippoWin")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 160, height: 168)
+                    .accessibilityHidden(true)
                     .padding(.bottom, 8)
 
                 Text(levelNumber != nil ? Strings.levelCleared : Strings.youWin)

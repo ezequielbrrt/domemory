@@ -194,6 +194,10 @@
     <string name="settings_notifications_open_settings">설정 열기</string>
     <string name="settings_review_title">DoMemory 평가하기</string>
     <string name="settings_review_description">리뷰는 다른 플레이어가 게임을 찾는 데 도움이 됩니다</string>
+    <string name="review_invitation_title">DoMemory가 마음에 드시나요?</string>
+    <string name="review_invitation_message">Google Play에 남기는 짧은 리뷰는 다른 플레이어가 게임을 찾는 데 도움이 되고 새 레벨을 계속 만들 수 있게 해줍니다.</string>
+    <string name="review_invitation_button">리뷰 쓰기</string>
+    <string name="review_invitation_dismiss">나중에</string>
     <string name="settings_whats_new_title">새로운 기능</string>
     <string name="settings_whats_new_description">최신 업데이트에서 바뀐 점 보기</string>
 

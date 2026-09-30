@@ -50,6 +50,7 @@ struct SeasonLevelsView: View {
                 background: { background },
                 header: { header }
             )
+            .adFreeDayEntryPoint(source: "season_levels")
             .navigationDestination(item: $selectedLevel) { level in
                 MemorizeView(
                     viewModel: MemorizeViewModel(context: viewModel.context(for: level)),

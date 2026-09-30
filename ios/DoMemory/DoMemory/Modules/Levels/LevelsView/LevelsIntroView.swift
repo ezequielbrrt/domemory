@@ -48,8 +48,8 @@ struct LevelsIntroView: View {
         IntroCarouselView(
             slides: slides,
             finishTitle: Strings.levelsIntroDone,
-            onSkip: {
-                AnalyticsService.log(.levelsIntroSkipped)
+            onSkip: { slidesSeen in
+                AnalyticsService.log(.levelsIntroSkipped(slidesSeen: slidesSeen))
                 onDismiss()
             },
             onFinish: {

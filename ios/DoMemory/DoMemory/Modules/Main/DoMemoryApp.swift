@@ -20,6 +20,8 @@ struct DoMemoryApp: App {
                 // Connects the shared manager to StoreKit's prompt. Recording a
                 // win anywhere in the app flows back through this modifier.
                 .reviewRequest(using: AppReviews.manager)
+                // ReviewFlow's invitation reads its fonts from the environment.
+                .reviewInvitationStyle(.doMemory)
                 .task {
                     await NotificationService.shared.syncAuthorizationStatus()
                     guard UserDefaults.standard.bool(forKey: UserDefaultsKeys.notificationsEnabled) else { return }

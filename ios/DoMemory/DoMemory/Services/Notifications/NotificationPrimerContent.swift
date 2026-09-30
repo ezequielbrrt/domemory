@@ -56,6 +56,37 @@ extension NotificationPermissionConfiguration {
     }
 }
 
+// MARK: - Artwork
+
+/// Flippo ringing a reminder bell above the kit's own notification preview.
+///
+/// This is `DefaultNotificationArtwork`'s layout with its bell glyph swapped for
+/// the mascot, except that the preview sits below Flippo instead of across the
+/// lower half of the art, where it would cover his face. The source art lives in
+/// `assets/images/flippo/flippo-reminder.png`.
+struct NotificationPrimerArtwork: View {
+    let preview: NotificationPreviewContent
+    let theme: NotificationPermissionTheme
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Image("FlippoReminder")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 190)
+                .accessibilityHidden(true)
+
+            NotificationPreviewCard(
+                content: preview,
+                tint: theme.previewTint,
+                surface: theme.previewSurface
+            )
+            .padding(.horizontal, 4)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
 // MARK: - Presentation
 
 /// The primer screen, wired to the app's reminder scheduling.
@@ -69,7 +100,13 @@ struct NotificationPrimerView: View {
     var body: some View {
         NotificationPermissionView(
             configuration: .doMemory,
-            theme: .doMemory
+            theme: .doMemory,
+            artwork: {
+                NotificationPrimerArtwork(
+                    preview: NotificationPermissionConfiguration.doMemory.preview,
+                    theme: .doMemory
+                )
+            }
         ) { result in
             if case .authorized = result {
                 NotificationService.shared.activateReminders()

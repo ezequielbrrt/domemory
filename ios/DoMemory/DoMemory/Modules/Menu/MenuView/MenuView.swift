@@ -11,7 +11,8 @@ import AppTrackingTransparency
 import GoogleMobileAds
 import UserNotifications
 
-private enum GameTab { case all, mine, levels }
+/// The raw value is the `tab` parameter of `menu_tab_selected`.
+private enum GameTab: String { case all, mine, levels }
 
 struct MenuView: View {
     @State private var viewModel = MenuViewModel()
@@ -76,6 +77,7 @@ struct MenuView: View {
                                 Menu {
                                     Button {
                                         HapticsService.shared.fire(.tap)
+                                        AnalyticsService.log(.multiplayerEntryTapped(action: "host"))
                                         isHostingMultiplayerRoom = true
                                     } label: {
                                         Label(Strings.multiplayerCreateRoom, systemImage: "person.2.badge.plus")
@@ -83,6 +85,7 @@ struct MenuView: View {
 
                                     Button {
                                         HapticsService.shared.fire(.tap)
+                                        AnalyticsService.log(.multiplayerEntryTapped(action: "join"))
                                         showJoinMultiplayerSheet = true
                                     } label: {
                                         Label(Strings.multiplayerJoinRoom, systemImage: "arrow.right.circle")
@@ -104,7 +107,7 @@ struct MenuView: View {
                                 }
                                 .accessibilityLabel(Strings.multiplayerTitle)
 
-                                Button(action: { HapticsService.shared.fire(.tap); self.showCreateSheet = true }) {
+                                Button(action: { HapticsService.shared.fire(.tap); openCreateSheet(source: "menu_header") }) {
                                     Image(systemName: "plus")
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundStyle(Color.primaryColor)
@@ -152,13 +155,14 @@ struct MenuView: View {
                                     CompactDailyChallengeCard(
                                         streak: DailyChallengeService.shared.currentStreak,
                                         isCompleted: DailyChallengeService.shared.isCompletedToday(),
-                                        onPlay: { dailyChallengeBoard = DailyChallengeService.shared.boardForToday() }
+                                        onPlay: { openDailyChallenge(source: "card") }
                                     )
 
                                     SeasonCard(
                                         season: season,
                                         onOpen: {
                                             HapticsService.shared.fire(.tap)
+                                            AnalyticsService.log(.seasonCardTapped(seasonID: season.id))
                                             seasonDestination = season
                                         }
                                     )
@@ -170,7 +174,7 @@ struct MenuView: View {
                                 DailyChallengeCard(
                                     streak: DailyChallengeService.shared.currentStreak,
                                     isCompleted: DailyChallengeService.shared.isCompletedToday(),
-                                    onPlay: { dailyChallengeBoard = DailyChallengeService.shared.boardForToday() }
+                                    onPlay: { openDailyChallenge(source: "card") }
                                 )
                                 .id(statsRefreshID)
                                 .padding(.horizontal, 16)
@@ -230,18 +234,21 @@ struct MenuView: View {
                             // Tab bar with per-tab content
                             TabView(selection: $selectedTab) {
                                 LevelsView()
+                                    .adFreeDayEntryPoint(source: "menu_levels")
                                     .tabItem {
                                         Label(Strings.tabLevels, systemImage: "trophy.fill")
                                     }
                                     .tag(GameTab.levels)
 
                                 gamesTabContent(for: .mine, games: myGames)
+                                    .adFreeDayEntryPoint(source: "menu_mine")
                                     .tabItem {
                                         Label(Strings.tabMine, systemImage: "square.and.pencil")
                                     }
                                     .tag(GameTab.mine)
 
                                 gamesTabContent(for: .all, games: allGames)
+                                    .adFreeDayEntryPoint(source: "menu_all")
                                     .tabItem {
                                         Label(Strings.tabAll, systemImage: "square.grid.2x2.fill")
                                     }
@@ -319,6 +326,11 @@ struct MenuView: View {
         .onChange(of: showNotificationPrimer) { _, isShowing in
             AdsService.shared.setFullScreenAdsSuppressed(isShowing)
         }
+        // Only a tap on the tab bar changes the tab, so this is exactly the
+        // player's switches; the Levels default on launch is not logged.
+        .onChange(of: selectedTab) { previous, tab in
+            AnalyticsService.log(.menuTabSelected(tab: tab.rawValue, previousTab: previous.rawValue))
+        }
         .onAppear {
             statsRefreshID = UUID()
             AdsService.shared.registerMenuReadyForAppOpenAds()
@@ -344,10 +356,25 @@ struct MenuView: View {
         }
         .onReceive(deepLinkRouter.$shouldOpenDailyChallenge.filter { $0 }) { _ in
             if !DailyChallengeService.shared.isCompletedToday() {
-                dailyChallengeBoard = DailyChallengeService.shared.boardForToday()
+                openDailyChallenge(source: "widget")
             }
             deepLinkRouter.shouldOpenDailyChallenge = false
         }
+    }
+
+    private func openCreateSheet(source: String) {
+        AnalyticsService.log(.customMemoramaCreateOpened(source: source))
+        showCreateSheet = true
+    }
+
+    /// `source` is `card` or `widget` (the `domemory://daily` deep link, or its
+    /// https form). The completed card is disabled and the link is ignored once
+    /// today is done, so every call is a real entry into today's challenge.
+    private func openDailyChallenge(source: String) {
+        AnalyticsService.log(
+            .dailyChallengeOpened(source: source, streak: DailyChallengeService.shared.currentStreak)
+        )
+        dailyChallengeBoard = DailyChallengeService.shared.boardForToday()
     }
 
     private struct JoinDeepLink: Identifiable, Hashable {
@@ -404,7 +431,7 @@ struct MenuView: View {
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.textMuted)
                     .multilineTextAlignment(.center)
-                Button(action: { HapticsService.shared.fire(.tap); showCreateSheet = true }) {
+                Button(action: { HapticsService.shared.fire(.tap); openCreateSheet(source: "mine_empty_state") }) {
                     Text(Strings.emptyMyGamesAction)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)

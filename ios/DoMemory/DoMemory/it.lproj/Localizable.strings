@@ -70,7 +70,7 @@
 "settings_rewarded_remove_ads_action" = "Guarda";
 "settings_rewarded_remove_ads_active" = "Attivo";
 "settings_rewarded_remove_ads_active_format" = "Annunci disattivati fino alle %@";
-"settings_rewarded_remove_ads_description" = "Guarda un annuncio per disattivare gli annunci per 24 ore";
+"settings_rewarded_remove_ads_description" = "Guarda %d brevi annunci per disattivare la pubblicità per 24 ore";
 "settings_rewarded_remove_ads_success_message" = "Annunci disattivati per le prossime 24 ore.";
 "settings_rewarded_remove_ads_success_title" = "Annunci disattivati";
 "settings_rewarded_remove_ads_title" = "Giorno gratis senza annunci";
@@ -289,6 +289,26 @@
 "season_complete_badge" = "Completata";
 "season_complete_title" = "Stagione completata!";
 "season_complete_message" = "Hai superato tutti i livelli. Rigioca quello che vuoi per migliorarne le stelle.";
+
+// Ad-free day offer (pill + sheet)
+"ad_free_day_pill_title" = "Niente pubblicità";
+"ad_free_day_pill_progress_format" = "Niente pubblicità %d/%d";
+"ad_free_day_pill_active_format" = "%@ rimanenti";
+"ad_free_day_intro_title" = "Scusa per le pubblicità";
+"ad_free_day_intro_message" = "Tengono DoMemory gratuito, ma ecco una via d'uscita: guarda %d brevi annunci e li spegniamo per le prossime 24 ore.";
+"ad_free_day_intro_watch_format" = "Mi sembra giusto, guarda l'annuncio %d di %d";
+"ad_free_day_title" = "Gioca un giorno senza pubblicità";
+"ad_free_day_message" = "Guarda %d brevi annunci e spegniamo banner e interstitial per 24 ore.";
+"ad_free_day_watch_format" = "Guarda l'annuncio %d di %d";
+"ad_free_day_step_ad_format" = "Annuncio %d";
+"ad_free_day_step_reward" = "Giorno senza pubblicità";
+"ad_free_day_halfway_hint" = "Ancora uno e hai finito";
+"ad_free_day_no_fill" = "Nessun annuncio disponibile al momento. I tuoi progressi sono salvati.";
+"ad_free_day_try_again" = "Riprova";
+"ad_free_day_active_format" = "Pubblicità spente fino alle %@";
+"ad_free_day_back" = "Torna al gioco";
+"ad_free_day_remove_forever_format" = "Rimuovi le pubblicità per sempre · %@";
+"ad_free_day_not_now" = "Non ora";
 
 /* Lose modal rescue offers */
 "lose_offer_forgive_format" = "Cancella %d errori";

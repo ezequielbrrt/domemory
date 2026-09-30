@@ -10,8 +10,6 @@ import SwiftUI
 struct LoseModal: View {
     var listener: LoseModalViewModelListener?
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
     /// Plays when a life is actually booked while the modal is up — the
     /// out-of-lives path, where Try again spends the last heart in place.
     @State private var livesEffect: LivesRowEffect?
@@ -96,20 +94,16 @@ struct LoseModal: View {
                 .background(.ultraThinMaterial)
 
             VStack(spacing: 0) {
-                // The hero says *why*: a clock rings and cracks on a timeout,
-                // a red badge stamps in and shakes its head on a mistake
-                // bust. Both end on a still picture. Reduce-motion players
-                // keep the face the modal has always shown.
-                if reduceMotion {
-                    Text("😳")
-                        .font(.system(size: 64))
-                        .padding(.bottom, 12)
-                } else {
-                    LottieView(name: lostToMistakes ? "x-shake" : "clock-crack", tint: Color.secundaryColor)
-                        .frame(width: 72, height: 72)
-                        .padding(.bottom, 12)
-                        .accessibilityHidden(true)
-                }
+                // Flippo says *why*: dizzy from the clock running out, or
+                // sheepish over one too many mistakes. The art is already a
+                // static pose, so it renders identically regardless of the
+                // reduce-motion setting.
+                Image(lostToMistakes ? "FlippoLoseMistakes" : "FlippoLoseTime")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 160, height: 168)
+                    .accessibilityHidden(true)
+                    .padding(.bottom, 12)
 
                 // Reason pill chip
                 HStack(spacing: 6) {

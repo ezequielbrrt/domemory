@@ -1,5 +1,7 @@
 package com.ezequielbrrt.domemory.feature.game
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
@@ -247,28 +250,106 @@ fun GameScreen(
         // exactly where it left off, confirm abandons it with no stats/lives/win-loss
         // side effect — see `onQuitDuringPlay`'s doc above.
         if (showQuitConfirm) {
-            AlertDialog(
-                onDismissRequest = { showQuitConfirm = false; onPauseToggle() },
-                title = { Text(stringResource(R.string.game_quit_confirmation)) },
-                confirmButton = {
-                    // Deliberately leaves `showQuitConfirm` true: `onQuitDuringPlay` pops
-                    // the back stack, which unmounts this screen a frame later rather than
-                    // immediately. Clearing the flag here left `isPaused` (still true from
-                    // this dialog's own pause) as the only condition guarding the pause
-                    // sheet, so it flashed on screen for that one frame during the exit
-                    // transition. Leaving the dialog's own condition true keeps it — not
-                    // the pause sheet — showing until the screen is actually gone.
-                    TextButton(onClick = { onQuitDuringPlay() }) {
-                        Text(stringResource(R.string.common_accept))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showQuitConfirm = false; onPauseToggle() }) {
-                        Text(stringResource(R.string.common_cancel))
-                    }
-                },
+            val cancelQuit = { showQuitConfirm = false; onPauseToggle() }
+            // The system dialog this replaced treated Back as Cancel; keep that.
+            BackHandler(onBack = cancelQuit)
+            QuitOverlay(
+                onCancel = cancelQuit,
+                // Deliberately leaves `showQuitConfirm` true: `onQuitDuringPlay` pops the
+                // back stack, which unmounts this screen a frame later rather than
+                // immediately. Clearing the flag here left `isPaused` (still true from this
+                // card's own pause) as the only condition guarding the pause sheet, so it
+                // flashed on screen for that one frame during the exit transition. Leaving
+                // the card's own condition true keeps it — not the pause sheet — showing
+                // until the screen is actually gone.
+                onAccept = { onQuitDuringPlay() },
             )
         }
+    }
+}
+
+/**
+ * Port of iOS's `QuitModal`: Flippo pleading with the player to stay, the question, and a
+ * Cancel / Accept pair — the same card chrome as [PauseOverlay], so the two read as one family.
+ */
+@Composable
+private fun QuitOverlay(onCancel: () -> Unit, onAccept: () -> Unit) {
+    val palette = LocalPalette.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(palette.overlayBackdrop)
+            // Swallow taps, as [PauseOverlay] does, so nothing behind the card reacts.
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {},
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Surface(
+            modifier = Modifier.padding(horizontal = 32.dp),
+            shape = RoundedCornerShape(28.dp),
+            color = palette.surfacePrimary,
+            border = androidx.compose.foundation.BorderStroke(1.dp, palette.surfaceBorder),
+            shadowElevation = 16.dp,
+        ) {
+            Column(
+                modifier = Modifier.padding(28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.flippo_quit),
+                    contentDescription = null,
+                    modifier = Modifier.size(width = 160.dp, height = 168.dp),
+                )
+                Spacer(Modifier.size(12.dp))
+                Text(
+                    text = stringResource(R.string.game_quit_confirmation),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = palette.textPrimary,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.size(28.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    QuitCapsuleButton(
+                        text = stringResource(R.string.common_cancel),
+                        container = palette.secondary.copy(alpha = 0.1f),
+                        content = palette.secondary,
+                        onClick = onCancel,
+                        modifier = Modifier.weight(1f),
+                    )
+                    QuitCapsuleButton(
+                        text = stringResource(R.string.common_accept),
+                        container = palette.primary,
+                        content = androidx.compose.ui.graphics.Color.White,
+                        onClick = onAccept,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuitCapsuleButton(
+    text: String,
+    container: androidx.compose.ui.graphics.Color,
+    content: androidx.compose.ui.graphics.Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(50),
+        colors = ButtonDefaults.buttonColors(containerColor = container, contentColor = content),
+        contentPadding = PaddingValues(vertical = 14.dp),
+    ) {
+        Text(text, fontSize = 16.sp, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -313,7 +394,12 @@ private fun PauseOverlay(
                 modifier = Modifier.padding(28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("🧐", fontSize = 64.sp)
+                // Flippo holds up a mitten while the board waits, as on iOS's PauseModal.
+                Image(
+                    painter = painterResource(R.drawable.flippo_pause),
+                    contentDescription = null,
+                    modifier = Modifier.size(width = 160.dp, height = 168.dp),
+                )
                 Spacer(Modifier.size(12.dp))
                 Text(
                     text = stringResource(R.string.game_pause_title),
@@ -734,19 +820,16 @@ private fun OutcomeOverlay(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    // The hero says *why*, as on iOS's LoseModal: a clock rings and cracks
-                    // on a timeout, a red badge stamps in and shakes its head on a mistake
-                    // bust. Both end on a still picture. Reduce-motion players get the
-                    // static face iOS has always shown there.
-                    if (reduceMotion) {
-                        Text("😳", fontSize = 56.sp)
-                    } else {
-                        BundledLottie(
-                            name = if (lostToMistakes) "x-shake" else "clock-crack",
-                            tint = palette.secondary,
-                            modifier = Modifier.size(72.dp),
-                        )
-                    }
+                    // Flippo says *why*, as on iOS's LoseModal: dizzy from the clock running
+                    // out, or sheepish over one too many mistakes. A static pose needs no
+                    // reduce-motion fallback of its own.
+                    Image(
+                        painter = painterResource(
+                            if (lostToMistakes) R.drawable.flippo_lose_mistakes else R.drawable.flippo_lose_time,
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier.size(width = 160.dp, height = 168.dp),
+                    )
 
                     // Reason pill chip — port of iOS's capsule (icon + "You lose" /
                     // "Too many mistakes"), tinted `secondary` at ~10% background opacity.
@@ -1134,7 +1217,11 @@ private fun WinOutcomeContent(
         modifier = Modifier.padding(top = 32.dp, start = 28.dp, end = 28.dp, bottom = 28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("😎", fontSize = 68.sp)
+        Image(
+            painter = painterResource(R.drawable.flippo_win),
+            contentDescription = null,
+            modifier = Modifier.size(width = 160.dp, height = 168.dp),
+        )
         Spacer(Modifier.size(8.dp))
         Text(
             text = stringResource(if (levelNumber != null) R.string.level_cleared else R.string.game_win_title),

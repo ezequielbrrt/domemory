@@ -17,19 +17,17 @@ struct QuitModal: View {
                 .background(.ultraThinMaterial)
 
             VStack(spacing: 0) {
-                Text("🥺")
-                    .font(.system(size: 56))
+                // Flippo pleads with the player to stay.
+                Image("FlippoQuit")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 160, height: 168)
+                    .accessibilityHidden(true)
                     .padding(.bottom, 12)
 
                 Text(Strings.quit)
                     .font(.system(size: 18, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color.textPrimary)
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom, 6)
-
-                Text(Strings.youWinDescription)
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundStyle(Color.textMuted)
                     .multilineTextAlignment(.center)
                     .padding(.bottom, 28)
 

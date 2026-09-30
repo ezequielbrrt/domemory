@@ -359,13 +359,18 @@ class MultiplayerViewModel(
         } ?: run {
             OutlinedTextField(code, { code = it }, label = { Text(stringResource(R.string.multiplayer_code_placeholder)) }, modifier = Modifier.fillMaxWidth())
             Button(
-                onClick = { HapticsService.fire(HapticIntent.TAP); vm.join(code) },
+                onClick = {
+                    HapticsService.fire(HapticIntent.TAP)
+                    AnalyticsService.log(AnalyticsEvent.MultiplayerEntryTapped(action = "join"))
+                    vm.join(code)
+                },
                 enabled = code.isNotBlank() && !state.loading,
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.multiplayer_join_room)) }
             OutlinedButton(
                 onClick = {
                     HapticsService.fire(HapticIntent.TAP)
+                    AnalyticsService.log(AnalyticsEvent.MultiplayerEntryTapped(action = "join"))
                     launchMultiplayerQrScanner(
                         context = context,
                         onScanned = vm::joinScannedInvite,
@@ -377,7 +382,11 @@ class MultiplayerViewModel(
             ) { Text(stringResource(R.string.multiplayer_scan_qr_code)) }
             // Spec 10.4 step 1: host-first — a room is created empty, no board required.
             Button(
-                onClick = { HapticsService.fire(HapticIntent.TAP); vm.create() },
+                onClick = {
+                    HapticsService.fire(HapticIntent.TAP)
+                    AnalyticsService.log(AnalyticsEvent.MultiplayerEntryTapped(action = "host"))
+                    vm.create()
+                },
                 enabled = !state.loading,
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.multiplayer_create_room)) }

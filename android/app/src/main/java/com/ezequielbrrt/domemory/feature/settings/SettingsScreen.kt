@@ -1,9 +1,5 @@
 package com.ezequielbrrt.domemory.feature.settings
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +16,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,16 +29,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Difficulty
-import com.ezequielbrrt.domemory.feature.notifications.rememberNotificationPermissionRequester
+import com.ezequielbrrt.domemory.feature.debug.debugMenuTapTrigger
+import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
+import com.ezequielbrrt.domemory.feature.notifications.isNotificationAuthorized
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
-import com.ezequielbrrt.domemory.services.share.PlayStoreLinks
 import com.ezequielbrrt.domemory.ui.components.BackButton
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryType
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
+import com.ezequielbrrt.reviewflow.openPlayStoreReviewPage
 
 @Composable
 fun SettingsScreen(
@@ -51,29 +53,51 @@ fun SettingsScreen(
     onDisableReminders: () -> Unit,
     onWhatsNew: () -> Unit,
     onAchievements: () -> Unit,
+    /** Debug builds only (null in release): five taps on the title open the debug menu. */
+    onDebugMenu: (() -> Unit)? = null,
 ) {
     BackHandler(onBack = onBack)
     val p = LocalPalette.current
     val context = LocalContext.current
-    // Same "one path" discipline as the primer (feature/notifications/NotificationPrimerDialog.kt):
-    // turning the toggle on requests the OS permission first (a no-op below API 33) and only
-    // calls onEnableReminders — which flips notificationsEnabled — once that resolves.
-    // Denial leaves the flag untouched, matching spec 11.2's permission-sync rule.
-    val requestPermission = rememberNotificationPermissionRequester(onGranted = onEnableReminders, onDenied = {})
+    // Spec 11.3's "reused by the Settings toggle", the way iOS's `handleEnableNotifications`
+    // does it: already authorized → enable straight away; otherwise the same primer the menu
+    // shows (feature/notifications/NotificationPrimer.kt), which asks the OS with context
+    // behind it, or offers the system settings once the dialog can no longer appear.
+    // onEnableReminders — which flips notificationsEnabled — only ever runs after a confirmed
+    // grant; denial leaves the flag untouched, matching spec 11.2's permission-sync rule.
+    var showNotificationPrimer by remember { mutableStateOf(false) }
+    val requestPermission = {
+        if (isNotificationAuthorized(context)) onEnableReminders() else showNotificationPrimer = true
+    }
+    NotificationPrimerHost(
+        visible = showNotificationPrimer,
+        source = "settings",
+        onAuthorized = onEnableReminders,
+        onFinished = { showNotificationPrimer = false },
+    )
     Column(
         Modifier.fillMaxSize().background(p.appBackground).verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             BackButton(onClick = onBack)
-            Text(stringResource(R.string.settings_title), style = DoMemoryType.display(26), color = p.primary)
+            Text(
+                stringResource(R.string.settings_title),
+                style = DoMemoryType.display(26),
+                color = p.primary,
+                modifier = onDebugMenu?.let { Modifier.debugMenuTapTrigger(it) } ?: Modifier,
+            )
         }
         SettingGroup(stringResource(R.string.settings_section_game)) {
             // First row of the first section, as on iOS (`SettingsView`'s Game section).
             SettingRow(
                 title = stringResource(R.string.achievements_title),
                 description = stringResource(R.string.achievements_subtitle),
-                onClick = { HapticsService.fire(HapticIntent.TAP); onAchievements() },
+                onClick = {
+                    HapticsService.fire(HapticIntent.TAP)
+                    AnalyticsService.log(AnalyticsEvent.AchievementsOpened(source = "settings"))
+                    onAchievements()
+                },
             )
             HorizontalDivider(color = p.surfaceBorder)
             Difficulty.entries.forEach { d ->
@@ -106,19 +130,18 @@ fun SettingsScreen(
         }
         SettingGroup(stringResource(R.string.settings_section_about)) {
             // Opens the Play Store listing directly — the standard manual "rate the app"
-            // entry. This is deliberately separate from the win-triggered Play In-App Review
-            // prompt (AppReviews.recordSuccessfulGameWin, fired from GameViewModel on a real
-            // win): that flow cannot be launched on demand by design — Google's ReviewManager
-            // API has no "show the dialog now" call, only "request a flow, which Play Core
-            // may or may not actually present" — so a manual button can only ever be this
-            // storefront link, never a way to force the in-app prompt open.
+            // entry, and ReviewFlow's "persistent review link": `market://details` pinned to
+            // the Play Store app, falling back to the web listing. Deliberately separate from
+            // the win-triggered review invitation (`AppContainer.reviews`, presented by
+            // `MainActivity`), which ReviewFlow's cooldown and per-version policy gate; this
+            // row is always available, matching iOS's `AppStoreReviewLink` Settings row.
             SettingRow(
                 title = stringResource(R.string.settings_review_title),
                 description = stringResource(R.string.settings_review_description),
                 onClick = {
                     HapticsService.fire(HapticIntent.TAP)
                     AnalyticsService.log(AnalyticsEvent.ReviewLinkOpened(source = "settings"))
-                    openPlayStoreListing(context)
+                    context.openPlayStoreReviewPage()
                 },
             )
             SettingRow(
@@ -133,24 +156,6 @@ fun SettingsScreen(
                 },
             )
         }
-    }
-}
-
-/** `market://details` routes straight into the Play Store app when it's installed (the
- * common case); `setPackage` pins the intent to Play Store specifically so no other app
- * that happens to claim the `market` scheme can intercept it. Falls back to the plain
- * `https://play.google.com` listing URL — resolvable by any browser — when the Play Store
- * app can't handle it at all (an emulator with no Play Store image, mirrors this repo's own
- * `Pixel_10` note about `google_apis_playstore` vs plain `google_apis` images). */
-private fun openPlayStoreListing(context: Context) {
-    val appId = context.packageName
-    val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appId")).apply {
-        setPackage("com.android.vending")
-    }
-    try {
-        context.startActivity(marketIntent)
-    } catch (_: ActivityNotFoundException) {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PlayStoreLinks.listingUrl(context))))
     }
 }
 

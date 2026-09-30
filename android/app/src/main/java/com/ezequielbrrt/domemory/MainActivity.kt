@@ -19,8 +19,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.ezequielbrrt.domemory.feature.launch.LaunchScreen
+import com.ezequielbrrt.domemory.feature.review.DoMemoryReviewInvitationHost
 import com.ezequielbrrt.domemory.navigation.NavGraph
-import com.ezequielbrrt.domemory.feature.whatsnew.WhatsNewDialog
+import com.ezequielbrrt.domemory.feature.whatsnew.DoMemoryWhatsNewScreen
 import com.ezequielbrrt.domemory.ui.theme.DoMemoryTheme
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
@@ -64,34 +65,61 @@ class MainActivity : ComponentActivity() {
         setContent {
             val theme by container.prefs.themePreference.collectAsState(initial = com.ezequielbrrt.domemory.ui.theme.ThemePreference.SYSTEM)
             val hasOnboarded by container.prefs.hasOnboarded.collectAsState(initial = null)
-            var showWhatsNew by remember { mutableStateOf(false) }
+            // The single presentation site for the What's New screen. The automatic showing
+            // is version-gated by WhatsNewManager and marks the version seen on dismiss; the
+            // Settings row's manual reopen (routed here through NavGraph) does not, so a
+            // look-up can never suppress an announcement the player has not actually seen —
+            // the same split iOS keeps between ContentView and SettingsView.
+            var whatsNewPresentation by remember { mutableStateOf<WhatsNewPresentation?>(null) }
             var showLaunchScreen by remember { mutableStateOf(true) }
             LaunchedEffect(Unit) {
                 delay(1_200)
                 showLaunchScreen = false
             }
             LaunchedEffect(hasOnboarded) {
-                hasOnboarded?.let { showWhatsNew = container.whatsNew.shouldShowAfterLaunch(it) }
+                hasOnboarded?.let {
+                    if (container.whatsNew.shouldShowAfterLaunch(it)) whatsNewPresentation = WhatsNewPresentation.AUTOMATIC
+                }
             }
             DoMemoryTheme(preference = theme) {
-                Scaffold { insets ->
-                    Box(Modifier.fillMaxSize().padding(insets)) {
-                        hasOnboarded?.let { NavGraph(container, hasOnboarded = it) }
-                        if (showWhatsNew) {
-                            WhatsNewDialog {
-                                showWhatsNew = false
+                // Everything full-screen sits outside the Scaffold: WhatsNewScreen pads for the
+                // system bars itself and would double them inside the inset content box, and
+                // the launch overlay has to stay on top of it during the 1.2s splash.
+                Box(Modifier.fillMaxSize()) {
+                    Scaffold { insets ->
+                        Box(Modifier.fillMaxSize().padding(insets)) {
+                            hasOnboarded?.let {
+                                NavGraph(
+                                    container,
+                                    hasOnboarded = it,
+                                    onWhatsNew = { whatsNewPresentation = WhatsNewPresentation.MANUAL },
+                                )
+                            }
+                        }
+                    }
+                    whatsNewPresentation?.let { presentation ->
+                        DoMemoryWhatsNewScreen {
+                            whatsNewPresentation = null
+                            if (presentation == WhatsNewPresentation.AUTOMATIC) {
                                 container.applicationScope.launch { container.whatsNew.markSeen() }
                             }
                         }
-                        AnimatedVisibility(
-                            visible = showLaunchScreen,
-                            exit = fadeOut(),
-                        ) {
-                            LaunchScreen(preference = theme)
-                        }
+                    }
+                    AnimatedVisibility(
+                        visible = showLaunchScreen,
+                        exit = fadeOut(),
+                    ) {
+                        LaunchScreen(preference = theme)
                     }
                 }
+                // iOS attaches `.reviewRequest(using: AppReviews.manager)` at the app root;
+                // this is the same attachment. It renders nothing until a win makes the
+                // policy eligible, then presents the invitation in its own dialog window.
+                DoMemoryReviewInvitationHost(manager = container.reviews)
             }
         }
     }
 }
+
+/** Why the What's New screen is up — decides whether dismissing it records the version. */
+private enum class WhatsNewPresentation { AUTOMATIC, MANUAL }

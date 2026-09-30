@@ -17,6 +17,7 @@ import com.ezequielbrrt.domemory.services.notifications.NotificationService
 import com.ezequielbrrt.domemory.services.multiplayer.MultiplayerService
 import com.ezequielbrrt.domemory.services.whatsnew.WhatsNewManager
 import com.ezequielbrrt.domemory.widget.DailyChallengeGlanceWidget
+import com.ezequielbrrt.reviewflow.ReviewManager
 import com.ezequielbrrt.domemory.services.levels.LevelProgressService
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelsIntroGate
@@ -83,6 +84,16 @@ class AppContainer(
     val deepLinkRouter = DeepLinkRouter()
     val multiplayer = MultiplayerService()
     val whatsNew = WhatsNewManager(prefs, BuildConfig.VERSION_NAME)
+
+    /**
+     * Spec 15.2's review policy, the counterpart of iOS's `AppReviews.manager`. One instance
+     * for the process: `recordSuccessfulAction` (every `GameViewModel.onGameWon` site in
+     * `NavGraph.kt`) and the presenter (`feature/review/ReviewInvitation.kt`, hosted by
+     * `MainActivity`) must share it, and a pending ask survives activity recreation only if
+     * the manager outlives the activity. History lives in the library's own
+     * `SharedPreferences` file — a fresh install starts clean, there is nothing to migrate.
+     */
+    val reviews = ReviewManager(appContext)
 
     /** Local reminders (spec 11.2) — inactivity tiers, the streak-at-risk nudge, permission sync. */
     val notifications = NotificationService(appContext, prefs, dailyChallenge)

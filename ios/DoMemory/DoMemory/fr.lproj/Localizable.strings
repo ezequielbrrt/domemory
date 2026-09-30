@@ -70,7 +70,7 @@
 "settings_rewarded_remove_ads_action" = "Voir";
 "settings_rewarded_remove_ads_active" = "Actif";
 "settings_rewarded_remove_ads_active_format" = "Les pubs sont désactivées jusqu'à %@";
-"settings_rewarded_remove_ads_description" = "Regardez une pub pour désactiver les pubs pendant 24 heures";
+"settings_rewarded_remove_ads_description" = "Regarde %d pubs courtes pour désactiver les pubs pendant 24 heures";
 "settings_rewarded_remove_ads_success_message" = "Les pubs sont désactivées pendant les prochaines 24 heures.";
 "settings_rewarded_remove_ads_success_title" = "Pubs désactivées";
 "settings_rewarded_remove_ads_title" = "Journée gratuite sans pubs";
@@ -289,6 +289,26 @@
 "season_complete_badge" = "Terminée";
 "season_complete_title" = "Saison terminée !";
 "season_complete_message" = "Vous avez réussi tous les niveaux. Rejouez celui que vous voulez pour améliorer ses étoiles.";
+
+// Ad-free day offer (pill + sheet)
+"ad_free_day_pill_title" = "Sans pubs";
+"ad_free_day_pill_progress_format" = "Sans pubs %d/%d";
+"ad_free_day_pill_active_format" = "%@ restantes";
+"ad_free_day_intro_title" = "Désolé pour les pubs";
+"ad_free_day_intro_message" = "Elles gardent DoMemory gratuit, mais voici une échappatoire : regarde %d pubs courtes et on les coupe pour les 24 prochaines heures.";
+"ad_free_day_intro_watch_format" = "Ça me va, voir la pub %d sur %d";
+"ad_free_day_title" = "Joue une journée sans pubs";
+"ad_free_day_message" = "Regarde %d pubs courtes et on coupe les bannières et les interstitiels pendant 24 heures.";
+"ad_free_day_watch_format" = "Voir la pub %d sur %d";
+"ad_free_day_step_ad_format" = "Pub %d";
+"ad_free_day_step_reward" = "Journée sans pubs";
+"ad_free_day_halfway_hint" = "Encore une et c'est bon";
+"ad_free_day_no_fill" = "Aucune pub disponible pour le moment. Ta progression est sauvegardée.";
+"ad_free_day_try_again" = "Réessayer";
+"ad_free_day_active_format" = "Pubs coupées jusqu'à %@";
+"ad_free_day_back" = "Retour au jeu";
+"ad_free_day_remove_forever_format" = "Supprimer les pubs pour toujours · %@";
+"ad_free_day_not_now" = "Pas maintenant";
 
 /* Lose modal rescue offers */
 "lose_offer_forgive_format" = "Effacer %d erreurs";

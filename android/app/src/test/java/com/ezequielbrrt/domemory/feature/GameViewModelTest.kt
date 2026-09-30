@@ -11,6 +11,7 @@ import com.ezequielbrrt.domemory.feature.game.GameOutcome
 import com.ezequielbrrt.domemory.feature.game.GameStatsRecorder
 import com.ezequielbrrt.domemory.feature.game.GameViewModel
 import com.ezequielbrrt.domemory.feature.game.LoseReason
+import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.levels.LevelCurve
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.levels.LevelPowerUp
@@ -53,6 +54,7 @@ class GameViewModelTest {
         starWallet: StarWalletService? = null,
         onCompletionInterstitial: ((Difficulty, Long) -> Unit)? = null,
         onHaptic: ((com.ezequielbrrt.domemory.services.haptics.HapticIntent) -> Unit)? = null,
+        onAnalytics: ((AnalyticsEvent) -> Unit)? = null,
     ) = GameViewModel(
         board = board,
         mode = mode,
@@ -64,6 +66,7 @@ class GameViewModelTest {
         starWallet = starWallet,
         onCompletionInterstitial = onCompletionInterstitial,
         onHaptic = onHaptic,
+        onAnalytics = onAnalytics,
     )
 
     private fun TestScope.levelLives(day: LocalDate = LocalDate.of(2026, 9, 11)): LevelLivesService {
@@ -545,6 +548,75 @@ class GameViewModelTest {
         // of navigating away, matching iOS's LoseModal re-rendering in place.
         assertEquals(0, vm.state.value.livesRemaining)
         assertTrue(vm.state.value.isOutOfLives)
+        vm.stop()
+    }
+
+    @Test
+    fun `committing the loss that spends the last life logs level_lives_depleted`() = runTest {
+        val lives = levelLives()
+        repeat(3) { lives.spendOnLoss() } // one life left
+        val events = mutableListOf<AnalyticsEvent>()
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 7, store = RecordingStore(), seasonId = "spooky")),
+            levelLives = lives,
+            onAnalytics = { events += it },
+        )
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+
+        assertFalse(vm.retry())
+        runCurrent()
+
+        assertEquals(
+            listOf(AnalyticsEvent.LevelLivesDepleted(level = 7, seasonId = "spooky")),
+            events.filterIsInstance<AnalyticsEvent.LevelLivesDepleted>(),
+        )
+        vm.stop()
+    }
+
+    @Test
+    fun `a loss with no life left to spend does not log level_lives_depleted`() = runTest {
+        val lives = levelLives()
+        repeat(4) { lives.spendOnLoss() } // already at 0
+        val events = mutableListOf<AnalyticsEvent>()
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = RecordingStore())),
+            levelLives = lives,
+            onAnalytics = { events += it },
+        )
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+
+        vm.retry()
+        runCurrent()
+
+        assertTrue(events.filterIsInstance<AnalyticsEvent.LevelLivesDepleted>().isEmpty())
+        vm.stop()
+    }
+
+    @Test
+    fun `level_finished counts the power-ups bought in that attempt and resets on retry`() = runTest {
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.EXTRA_TIME.cost)
+        runCurrent()
+        val events = mutableListOf<AnalyticsEvent>()
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = RecordingStore())),
+            levelLives = levelLives(),
+            starWallet = wallet,
+            onAnalytics = { events += it },
+        )
+        assertTrue(vm.buyExtraTime())
+        runCurrent()
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+        assertTrue(vm.retry()) // commits the first loss, restarts with lives left
+        runCurrent()
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+        vm.retry()
+        runCurrent()
+
+        assertEquals(
+            listOf(1, 0),
+            events.filterIsInstance<AnalyticsEvent.LevelFinished>().map { it.powerUpsUsed },
+        )
         vm.stop()
     }
 

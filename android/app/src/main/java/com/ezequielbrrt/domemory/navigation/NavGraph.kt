@@ -21,6 +21,7 @@ import androidx.navigation.navArgument
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ezequielbrrt.domemory.AppContainer
+import com.ezequielbrrt.domemory.BuildConfig
 import com.ezequielbrrt.domemory.core.deeplink.DeepLink
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.core.model.GameMode
@@ -28,6 +29,7 @@ import com.ezequielbrrt.domemory.core.model.LevelContext
 import com.ezequielbrrt.domemory.feature.game.GameScreen
 import com.ezequielbrrt.domemory.feature.game.GameViewModel
 import com.ezequielbrrt.domemory.feature.game.UserPreferencesGameStatsRecorder
+import com.ezequielbrrt.domemory.feature.debug.DebugMenuScreen
 import com.ezequielbrrt.domemory.feature.levels.LevelsIntroOverlay
 import com.ezequielbrrt.domemory.feature.levels.LevelsViewModel
 import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaScreen
@@ -35,6 +37,7 @@ import com.ezequielbrrt.domemory.feature.menu.CreateMemoramaViewModel
 import com.ezequielbrrt.domemory.feature.menu.MenuScreen
 import com.ezequielbrrt.domemory.feature.menu.MenuViewModel
 import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
+import com.ezequielbrrt.domemory.feature.notifications.isNotificationAuthorized
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingScreen
 import com.ezequielbrrt.domemory.feature.onboarding.OnboardingViewModel
 import com.ezequielbrrt.domemory.feature.seasons.SeasonLevelsScreen
@@ -43,7 +46,6 @@ import com.ezequielbrrt.domemory.feature.settings.AchievementsScreen
 import com.ezequielbrrt.domemory.feature.settings.AchievementsViewModel
 import com.ezequielbrrt.domemory.feature.settings.SettingsScreen
 import com.ezequielbrrt.domemory.feature.settings.SettingsViewModel
-import com.ezequielbrrt.domemory.feature.whatsnew.WhatsNewDialog
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
 import com.ezequielbrrt.domemory.services.ads.findActivity
@@ -51,7 +53,7 @@ import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
-import com.ezequielbrrt.domemory.services.review.AppReviews
+import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.stats.UserPreferencesProfileStatsRecorder
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -70,6 +72,7 @@ private object Routes {
     const val ONBOARDING = "onboarding"
     const val SETTINGS = "settings"
     const val ACHIEVEMENTS = "achievements"
+    const val DEBUG_MENU = "debug_menu"
     const val CREATE_MEMORAMA = "create_memorama"
     const val LEVEL_GAME = "level/{level}"
     const val SEASON_LEVELS = "season/{seasonId}"
@@ -90,6 +93,7 @@ private object Routes {
 fun NavGraph(
     container: AppContainer,
     hasOnboarded: Boolean,
+    onWhatsNew: () -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
     // Resolved once and captured by every route below — a full-screen ad needs the
@@ -107,7 +111,12 @@ fun NavGraph(
             is DeepLink.Daily -> {
                 val alreadyDone = container.dailyChallenge.isCompletedToday()
                 container.deepLinkRouter.consume()
-                if (!alreadyDone) navController.navigate(Routes.DAILY_GAME)
+                if (!alreadyDone) {
+                    AnalyticsService.log(
+                        AnalyticsEvent.DailyChallengeOpened(source = "widget", streak = container.dailyChallenge.currentStreak()),
+                    )
+                    navController.navigate(Routes.DAILY_GAME)
+                }
             }
             is DeepLink.Join -> {
                 val code = (container.deepLinkRouter.pending.value as DeepLink.Join).code
@@ -154,6 +163,10 @@ fun NavGraph(
                 },
             )
             val levelsUiState by levelsViewModel.uiState.collectAsState()
+            // Only the top destination stays composed, so this runs every time the menu comes
+            // back into view — the counterpart of iOS's `LevelsView.onAppear { refresh() }`. It
+            // picks up lives and stars changed elsewhere, e.g. the debug menu's "Restart lives".
+            LaunchedEffect(Unit) { levelsViewModel.refresh() }
             val activeSeason by container.seasonCatalog.activeSeason.collectAsState()
             val dailyStreak by container.prefs.dailyStreakCurrent.collectAsState(initial = 0)
             val dailyLastAttemptDay by container.prefs.dailyLastAttemptDay.collectAsState(initial = null)
@@ -195,6 +208,7 @@ fun NavGraph(
                         // which only fire .tap inside the same !isCompleted guard.
                         if (!isDailyCompletedToday) {
                             HapticsService.fire(HapticIntent.TAP)
+                            AnalyticsService.log(AnalyticsEvent.DailyChallengeOpened(source = "card", streak = dailyStreak))
                             navController.navigate(Routes.DAILY_GAME)
                         }
                     },
@@ -210,12 +224,15 @@ fun NavGraph(
                 }
 
                 // Spec 11.3: "Shown once per install on the menu, and reused by the Settings
-                // toggle" (that reuse is SettingsScreen's own
-                // rememberNotificationPermissionRequester call, not this composable).
+                // toggle" (SettingsScreen hosts the same primer for its own toggle). Skipped,
+                // as iOS's `guard authorizationStatus == .notDetermined` skips it, when the OS
+                // already delivers this app's notifications — nothing to ask for.
+                val context = LocalContext.current
                 NotificationPrimerHost(
-                    visible = !notificationPrimerShown,
-                    onEnable = { container.applicationScope.launch { container.notifications.activateReminders() } },
-                    onDismiss = { container.applicationScope.launch { container.prefs.setNotificationPrimerShown(true) } },
+                    visible = !notificationPrimerShown && !isNotificationAuthorized(context),
+                    source = "menu",
+                    onAuthorized = { container.applicationScope.launch { container.notifications.activateReminders() } },
+                    onFinished = { container.applicationScope.launch { container.prefs.setNotificationPrimerShown(true) } },
                 )
             }
         }
@@ -273,7 +290,7 @@ fun NavGraph(
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
                             onHaptic = HapticsService::fire,
-                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onGameWon = { container.reviews.recordSuccessfulAction(BuildConfig.VERSION_NAME) },
                             onAnalytics = AnalyticsService::log,
                             initialSource = "daily_challenge",
                         )
@@ -400,7 +417,7 @@ fun NavGraph(
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
                             onHaptic = HapticsService::fire,
-                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onGameWon = { container.reviews.recordSuccessfulAction(BuildConfig.VERSION_NAME) },
                             onAnalytics = AnalyticsService::log,
                             // This route's own `onNextLevel` below re-navigates here for the
                             // following level rather than advancing in place, so a "next
@@ -549,7 +566,7 @@ fun NavGraph(
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
                             onHaptic = HapticsService::fire,
-                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onGameWon = { container.reviews.recordSuccessfulAction(BuildConfig.VERSION_NAME) },
                             onAnalytics = AnalyticsService::log,
                             // Same simplification as the Season route above: this route's
                             // own `onNextLevel` below re-navigates here for the following
@@ -678,12 +695,10 @@ fun NavGraph(
             val state by viewModel.state.collectAsState()
             val menuEntry = remember { navController.getBackStackEntry(Routes.MENU) }
             val menuViewModel: MenuViewModel = viewModel(viewModelStoreOwner = menuEntry, factory = viewModelFactory { initializer { MenuViewModel(container.boardCatalog, container.prefs) } })
-            // A second, screen-local presentation of the same dialog MainActivity shows
-            // automatically after a version upgrade (WhatsNewDialog's own doc: "intentionally
-            // reused for automatic and Settings presentation"). No prefs write on dismiss here
-            // — reopening it manually never needs to change whatsNewLastSeenVersion, which is
-            // already at the running version by the time this screen is reachable at all.
-            var showWhatsNew by remember { mutableStateOf(false) }
+            // The Settings row reopens the same full-screen What's New MainActivity presents
+            // automatically after an upgrade; MainActivity owns the one presentation site so the
+            // screen can sit above the whole nav graph, edge to edge. Reopening it manually
+            // never writes whatsNewLastSeenVersion — see MainActivity.
             SettingsScreen(
                 state,
                 onBack = { if (state.difficultyChanged) menuViewModel.onSettingsDifficultyChanged(); navController.popBackStack() },
@@ -692,11 +707,21 @@ fun NavGraph(
                 onHaptics = viewModel::setHaptics,
                 onEnableReminders = viewModel::enableReminders,
                 onDisableReminders = viewModel::disableReminders,
-                onWhatsNew = { showWhatsNew = true },
+                onWhatsNew = onWhatsNew,
                 onAchievements = { navController.navigate(Routes.ACHIEVEMENTS) },
+                onDebugMenu = if (BuildConfig.DEBUG) { { navController.navigate(Routes.DEBUG_MENU) } } else null,
             )
-            if (showWhatsNew) {
-                WhatsNewDialog(onDismiss = { showWhatsNew = false })
+        }
+
+        // Debug builds only, like iOS's `#if DEBUG` DebugMenuView: the route does not exist
+        // in release, and nothing there can navigate to it.
+        if (BuildConfig.DEBUG) {
+            composable(Routes.DEBUG_MENU) {
+                DebugMenuScreen(
+                    onBack = { navController.popBackStack() },
+                    onNotificationsAuthorized = { container.applicationScope.launch { container.notifications.activateReminders() } },
+                    onRestoreLives = { container.levelLives.refill(LevelLivesService.MAX_LIVES) },
+                )
             }
         }
 
@@ -782,7 +807,7 @@ fun NavGraph(
                                 AdsService.notifyGameFinished(activity, difficulty, durationMs)
                             },
                             onHaptic = HapticsService::fire,
-                            onGameWon = { AppReviews.recordSuccessfulGameWin(activity) },
+                            onGameWon = { container.reviews.recordSuccessfulAction(BuildConfig.VERSION_NAME) },
                             onAnalytics = AnalyticsService::log,
                             // Free play's two entry points (a board card, or the "random
                             // game" button) both navigate into this same route with no

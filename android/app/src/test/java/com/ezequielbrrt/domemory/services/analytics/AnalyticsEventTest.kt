@@ -34,6 +34,12 @@ class AnalyticsEventTest {
         assertEquals(mapOf("difficulty" to "medium"), event.parameters)
     }
 
+    @Test fun `menu tab selected`() {
+        val event = AnalyticsEvent.MenuTabSelected(tab = "all", previousTab = "levels")
+        assertEquals("menu_tab_selected", event.name)
+        assertEquals(mapOf("tab" to "all", "previous_tab" to "levels"), event.parameters)
+    }
+
     @Test fun `game list loaded`() {
         val event = AnalyticsEvent.GameListLoaded(difficulty = "easy", gameCount = 42, customCount = 3)
         assertEquals("game_list_loaded", event.name)
@@ -243,15 +249,27 @@ class AnalyticsEventTest {
     }
 
     @Test fun `level finished, endless and season`() {
-        val endless = AnalyticsEvent.LevelFinished(level = 12, result = "win", stars = 3)
+        val endless = AnalyticsEvent.LevelFinished(level = 12, result = "win", stars = 3, powerUpsUsed = 2)
         assertEquals("level_finished", endless.name)
-        assertEquals(mapOf("level" to 12, "result" to "win", "stars" to 3), endless.parameters)
-
-        val season = AnalyticsEvent.LevelFinished(level = 5, result = "lose", stars = 0, seasonId = "spooky")
         assertEquals(
-            mapOf("level" to 5, "result" to "lose", "stars" to 0, "season_id" to "spooky"),
+            mapOf("level" to 12, "result" to "win", "stars" to 3, "power_ups_used" to 2),
+            endless.parameters,
+        )
+
+        val season = AnalyticsEvent.LevelFinished(level = 5, result = "lose", stars = 0, powerUpsUsed = 0, seasonId = "spooky")
+        assertEquals(
+            mapOf("level" to 5, "result" to "lose", "stars" to 0, "power_ups_used" to 0, "season_id" to "spooky"),
             season.parameters,
         )
+    }
+
+    @Test fun `level lives depleted, endless and season`() {
+        val endless = AnalyticsEvent.LevelLivesDepleted(level = 12)
+        assertEquals("level_lives_depleted", endless.name)
+        assertEquals(mapOf("level" to 12), endless.parameters)
+
+        val season = AnalyticsEvent.LevelLivesDepleted(level = 5, seasonId = "spooky")
+        assertEquals(mapOf("level" to 5, "season_id" to "spooky"), season.parameters)
     }
 
     @Test fun `level unlocked, endless and season`() {
@@ -289,6 +307,9 @@ class AnalyticsEventTest {
             mapOf("power_up" to "revealPair", "level" to 8, "cost" to 6, "balance_after" to 4),
             event.parameters,
         )
+
+        val season = AnalyticsEvent.LevelPowerUpUsed(powerUp = "peek", level = 3, cost = 4, balanceAfter = 1, seasonId = "spooky")
+        assertEquals("spooky", season.parameters["season_id"])
     }
 
     @Test fun `level life purchased with stars`() {
@@ -326,8 +347,37 @@ class AnalyticsEventTest {
         assertEquals("levels_intro_completed", AnalyticsEvent.LevelsIntroCompleted.name)
         assertEquals(emptyMap<String, Any>(), AnalyticsEvent.LevelsIntroCompleted.parameters)
 
-        assertEquals("levels_intro_skipped", AnalyticsEvent.LevelsIntroSkipped.name)
-        assertEquals(emptyMap<String, Any>(), AnalyticsEvent.LevelsIntroSkipped.parameters)
+        val skipped = AnalyticsEvent.LevelsIntroSkipped(slidesSeen = 2)
+        assertEquals("levels_intro_skipped", skipped.name)
+        assertEquals(mapOf("slides_seen" to 2), skipped.parameters)
+    }
+
+    @Test fun `season card tapped`() {
+        val event = AnalyticsEvent.SeasonCardTapped(seasonId = "spooky")
+        assertEquals("season_card_tapped", event.name)
+        assertEquals(mapOf("season_id" to "spooky"), event.parameters)
+    }
+
+    @Test fun `entry point events`() {
+        val create = AnalyticsEvent.CustomMemoramaCreateOpened(source = "mine_empty_state")
+        assertEquals("custom_memorama_create_opened", create.name)
+        assertEquals(mapOf("source" to "mine_empty_state"), create.parameters)
+
+        val multiplayer = AnalyticsEvent.MultiplayerEntryTapped(action = "host")
+        assertEquals("multiplayer_entry_tapped", multiplayer.name)
+        assertEquals(mapOf("action" to "host"), multiplayer.parameters)
+
+        val daily = AnalyticsEvent.DailyChallengeOpened(source = "widget", streak = 4)
+        assertEquals("daily_challenge_opened", daily.name)
+        assertEquals(mapOf("source" to "widget", "streak" to 4), daily.parameters)
+
+        val achievements = AnalyticsEvent.AchievementsOpened(source = "settings")
+        assertEquals("achievements_opened", achievements.name)
+        assertEquals(mapOf("source" to "settings"), achievements.parameters)
+
+        val theme = AnalyticsEvent.ThemeChanged(theme = "dark", previousTheme = "system")
+        assertEquals("theme_changed", theme.name)
+        assertEquals(mapOf("theme" to "dark", "previous_theme" to "system"), theme.parameters)
     }
 
     @Test fun `season levels entered`() {

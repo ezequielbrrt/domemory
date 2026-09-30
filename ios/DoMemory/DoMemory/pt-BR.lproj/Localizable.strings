@@ -70,7 +70,7 @@
 "settings_rewarded_remove_ads_action" = "Ver";
 "settings_rewarded_remove_ads_active" = "Ativo";
 "settings_rewarded_remove_ads_active_format" = "Anúncios desativados até %@";
-"settings_rewarded_remove_ads_description" = "Veja um anúncio para desativar anúncios por 24 horas";
+"settings_rewarded_remove_ads_description" = "Assista %d anúncios curtos para desativar anúncios por 24 horas";
 "settings_rewarded_remove_ads_success_message" = "Anúncios desativados pelas próximas 24 horas.";
 "settings_rewarded_remove_ads_success_title" = "Anúncios desativados";
 "settings_rewarded_remove_ads_title" = "Dia grátis sem anúncios";
@@ -289,6 +289,26 @@
 "season_complete_badge" = "Concluída";
 "season_complete_title" = "Temporada concluída!";
 "season_complete_message" = "Você concluiu todos os níveis. Jogue qualquer um de novo para melhorar as estrelas dele.";
+
+// Ad-free day offer (pill + sheet)
+"ad_free_day_pill_title" = "Sem anúncios";
+"ad_free_day_pill_progress_format" = "Sem anúncios %d/%d";
+"ad_free_day_pill_active_format" = "%@ restantes";
+"ad_free_day_intro_title" = "Desculpa pelos anúncios";
+"ad_free_day_intro_message" = "Eles mantêm o DoMemory grátis, mas aqui vai uma saída: assista %d anúncios curtos e nós os desligamos pelas próximas 24 horas.";
+"ad_free_day_intro_watch_format" = "Parece justo, assistir anúncio %d de %d";
+"ad_free_day_title" = "Jogue um dia sem anúncios";
+"ad_free_day_message" = "Assista %d anúncios curtos e desligamos banners e intersticiais por 24 horas.";
+"ad_free_day_watch_format" = "Assistir anúncio %d de %d";
+"ad_free_day_step_ad_format" = "Anúncio %d";
+"ad_free_day_step_reward" = "Dia sem anúncios";
+"ad_free_day_halfway_hint" = "Mais um e pronto";
+"ad_free_day_no_fill" = "Nenhum anúncio disponível agora. Seu progresso está salvo.";
+"ad_free_day_try_again" = "Tentar de novo";
+"ad_free_day_active_format" = "Anúncios desligados até %@";
+"ad_free_day_back" = "Voltar ao jogo";
+"ad_free_day_remove_forever_format" = "Remover anúncios para sempre · %@";
+"ad_free_day_not_now" = "Agora não";
 
 /* Lose modal rescue offers */
 "lose_offer_forgive_format" = "Perdoar %d erros";

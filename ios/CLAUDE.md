@@ -58,6 +58,7 @@ There are six product surfaces: the **curated board catalog** (Firebase `/data`)
 | `Seasons` | Limited-time themed level runs driven by Firebase `/seasons`; renders `LevelMapView` under its own header and artwork |
 | `Multiplayer` | Two-player turn-based matches over Firebase RTDB: room create/join, 6-char codes, QR, presence, reconnect, invite links |
 | `Settings` | Difficulty, theme, haptics, reminders, purchases, Achievements, What's New, review link |
+| `AdFreeDay` | The ad-free day offer: the floating "No Ads" pill (`adFreeDayEntryPoint(source:)`) on the three menu tabs, the season map and the multiplayer lobby, and the two-ad sheet it opens (also reached from the Settings row). Never on gameplay or its modals |
 | `SharedModules` | `Difficulty`, `UserManageObject` (CoreData), `RemoteImage`, `LottieView`, `LivesRow`, `LoaderView`, intro carousel |
 
 A menu card that fills itself with artwork (`Season`, `Daily Challenge`) must mark that artwork
@@ -103,13 +104,14 @@ Also: `DoMemory/DoMemoryWidget/` — a home-screen widget showing the Daily Chal
 
 **Other**
 - **`DailyChallengeService`** – One deterministic board per calendar day, 6 pairs, identical content for every user; layout is still shuffled per play so a screenshot can't be used to memorize positions. **One attempt per day** — any finish, win or loss, consumes it. Reloads the widget timeline on completion.
-- **`PurchaseService`** – StoreKit 2, one non-consumable IAP (`com.ezequielbrrt.domemory.removeads`), plus a rewarded **24-hour ad-free day**. `hasRemovedAds` is `purchased || rewardedExpiry > now`.
+- **`PurchaseService`** – StoreKit 2, one non-consumable IAP (`com.ezequielbrrt.domemory.removeads`), plus a rewarded **24-hour ad-free day**. `hasRemovedAds` is `purchased || rewardedExpiry > now`. `purchaseAlert` is presented **only by Settings**, so a grant or purchase made from any other surface must not leave one queued — `grantRewardedRemoveAds(showsAlert: false)`.
+- **`AdFreeDayService`** – Counts the two rewarded ads (`requiredAds`) behind the ad-free day; one ad grants nothing. Progress is keyed to the local day through `dailyChallengeSeed(for:)`, like lives, so a half-finished chain resets at midnight, and a completed chain clears itself. The grant is `PurchaseService.grantRewardedRemoveAds`; the placement is `ad_free_day_rewarded`, the only rewarded unit that is hidden for Remove Ads purchasers.
 - **`AdsService`** – Banner, interstitial, rewarded, app-open and native placements. **Remove Ads gates only `suppressesInvoluntaryAds`** — banners, natives, interstitials, app-open. Rewarded ads are opt-in and hand something back, so purchasers keep them; do not gate a rewarded placement on the entitlement. Also owns the frequency caps (per-difficulty interstitial cadence, 20s minimum game length, 60s post-rewarded suppression, 90s between any two full-screen ads, 4h app-open freshness).
 - **`NotificationService`** – Inactivity reminders (day 2 and day 7, 19:00) and a streak-at-risk nudge (20:00). Every scheduling method early-returns on `notificationsEnabled`, so **a permission grant that skips setting that flag leaves the user authorized and silently un-reminded** — route every grant through `activateReminders()`. There is deliberately no bare `requestPermission()`.
 - **`HapticsService`** – Single entry point; call sites name the *moment* (`.match`, `.reward`) rather than a generator style, so the whole feel is retunable from one table. Defaults **on** — read through `object(forKey:)`, since `bool(forKey:)` on an unwritten key would ship the feature silently disabled.
 - **`GameStatsService`** – Per-memorama played/won counters. **`ProfileStatsService`** – Lifetime aggregates and derived Achievements.
 - **`RemoteImageService`** – Memory (`NSCache`) + disk (SHA-256 filename, ~64 MB, LRU) + `URLCache`-backed fetch, with in-flight de-duplication. Used for season artwork through the `RemoteImage` view. Season art is deliberately **never bundled**: seasons ship from Firebase without an app release, so art in the binary would only cover seasons that existed at build time.
-- **`WhatsNewManager`** – Version-gated release sheet. A brand-new install records the running version immediately and never sees it. **`AppReviews`** – Holds the single ReviewFlow `ReviewManager`; wins are recorded, StoreKit decides.
+- **`WhatsNewManager`** – Version-gated release sheet. A brand-new install records the running version immediately and never sees it. **`AppReviews`** – Holds the single ReviewFlow `ReviewManager`; wins are recorded, StoreKit decides. Also defines `ReviewInvitationStyle.doMemory`, the invitation's typography, applied once at the root in `DoMemoryApp` — restyle the invitation there, not per call site.
 - **`AnalyticsService`** (`AppConfiguration.swift`) – Thin wrapper over Firebase Analytics; every event is typed via the `AnalyticsEvent` enum, which owns its own name and parameters. No event name or parameter key is ever a bare string at a call site — keep it that way.
 
 `AppConfiguration.swift` also holds the light/dark colour palette, `AppTheme`, and the `righteous` / `patrickHand` font helpers (which currently return **system** rounded fonts despite the bundled TTFs).
@@ -166,7 +168,7 @@ Season titles are a separate problem: they come from the Firebase payload, not t
 
 ### Tests
 
-`DoMemory/DoMemoryTests/` — 19 files. The pure logic (curve, stars, lives, wallet, season validation and locale resolution, day boundaries, haptic mapping, review migration) is all testable without a UI and is where the real bugs live. Add to them when changing any of the above.
+`DoMemory/DoMemoryTests/` — 20 files. The pure logic (curve, stars, lives, wallet, season validation and locale resolution, day boundaries, haptic mapping, review migration) is all testable without a UI and is where the real bugs live. Add to them when changing any of the above.
 
 ### App Store artwork
 

@@ -35,7 +35,7 @@ six things that make it a live product rather than a toy:
 6. **Custom memoramas** — player-authored emoji card sets stored locally.
 
 Android monetization is currently AdMob (banner / interstitial / rewarded / app-open /
-native). Remove Ads purchases and the temporary rewarded ad-free day are deferred.
+native). Remove Ads purchases and the two-ad rewarded ad-free day (§12.3) are deferred.
 
 ### Platform targets (iOS, for reference)
 
@@ -1031,6 +1031,7 @@ landing the ad directly on top of the release announcement.
 | `levels_rewarded_forgive` | rewarded | mistake bust → forgive 3 |
 | `app_open` | app-open | on foreground |
 | `multiplayer_finished_native` | native | multiplayer end screen |
+| `ad_free_day_rewarded` | rewarded | ad-free day sheet (pill on menu tabs, season map, multiplayer lobby; Settings row) → two ads = 24 h without involuntary ads |
 
 Ad unit ids are per-platform — **Android needs its own AdMob app id and its own
 unit ids.** Do not reuse the iOS ones. The iOS app id is
@@ -1057,12 +1058,50 @@ The rules that stop the app feeling like an ad delivery mechanism:
   full-screen ad is presenting, only if no first-run surface is up, and only if
   the cached ad is **fresher than 4 hours**.
 
-### 12.3 Remove Ads — deferred on Android
+### 12.3 Remove Ads and the ad-free day — deferred on Android
 
 The non-consumable `com.ezequielbrrt.domemory.removeads` product, restore flow, and
-the Settings-only rewarded 24-hour ad-free day are intentionally absent from the
-current Android scope. This deferral does not affect normal opt-in rewarded ads for
-extra time, hints, lives, or mistake forgiveness.
+the rewarded ad-free day below are intentionally absent from the current Android
+scope. This deferral does not affect normal opt-in rewarded ads for extra time,
+hints, lives, or mistake forgiveness.
+
+**Ad-free day (iOS 4.4.0, to port).** Watching **two** rewarded ads
+(`ad_free_day_rewarded`), each on its own tap, sets a 24-hour expiry during which
+`hasRemovedAds` is true and every *involuntary* placement (banners, natives,
+interstitials, app-open) is suppressed. Rewarded placements stay available.
+
+- **Entry points:** a floating capsule pill, bottom-trailing, on the three menu
+  tabs, the season map and the multiplayer lobby (never on gameplay, modals or the
+  multiplayer board). Hidden for Remove Ads purchasers, and when the rewarded unit
+  is unconfigured unless a grant is running. Pill text: "No Ads" idle, "No Ads 1/2"
+  mid-chain, "18h left" while active (one unit, hours or minutes). The Settings row
+  "Free ad-free day" opens the same sheet.
+- **Sheet:** Flippo illustration, title, message, a three-node stepper
+  (Ad 1 → Ad 2 → Ad-free day), one primary button, a "Remove ads forever · price"
+  link to the purchase, and "Not now". The **first** presentation ever uses the
+  apology copy (`ad_free_day_intro_*`); a persisted flag switches every later one
+  to the neutral copy. States: loading (button disabled, "Loading ad..."), ready
+  ("Watch ad N of 2"), presenting, no fill ("Try again", progress kept), active
+  ("Ads are off until <time>", "Back to the game").
+- **Progress:** ads watched today (0 or 1) persists in preferences keyed to the
+  local day seed (same as lives); it resets on the first read of a new day and
+  after a completed chain. One ad grants nothing. The second ad is never
+  auto-launched after the first closes.
+- **Grant:** extends the existing `rewardedRemoveAdsExpirationDate` by 24 h from
+  now, or from the current expiry when one is still running.
+- **Analytics**, in funnel order:
+  `ad_free_day_entry_tapped{source, state (idle/in_progress/active), ads_watched}`
+  on a tap of the pill or the Settings row;
+  `ad_free_day_offer_shown{source, is_intro (1/0), ads_watched}` when the sheet
+  appears; `ad_free_day_watch_tapped{source, ad_number}` when "Watch ad N of 2"
+  is tapped with an ad ready; `ad_free_day_ad_watched{source, ad_number}` when
+  ad N pays out (read `ad_number` before recording it — completing the chain
+  clears progress); `ad_free_day_granted{source}` after the last ad. Plus
+  `ad_lifecycle` for the ad itself under placement `ad_free_day_rewarded`.
+  Sources: `menu_levels`, `menu_mine`, `menu_all`, `season_levels`,
+  `multiplayer_lobby`, `settings`.
+- **Constants:** required ads 2, grant 24 h, both plain constants (candidates for
+  Remote Config later).
 
 ---
 
@@ -1266,9 +1305,11 @@ cooldown and a per-version cap. Settings also carries a plain **"Rate DoMemory"*
 link to the store page, so leaving a review doesn't depend on catching the
 throttled system prompt.
 
-**Android:** Play In-App Review API (`ReviewManager`), which has its own quota.
-Keep the same "record wins, let the platform decide, plus an always-available
-link" structure.
+**Android:** ReviewFlow-Android (the same package's Android twin, vendored as a
+submodule) with its recommended policy, presenting its full-screen review
+invitation rather than Play's In-App Review sheet — Google Play has no direct
+"write a review" link, so the invitation opens the listing. Same "record wins,
+let the policy decide, plus an always-available link" structure.
 
 ### 15.3 Onboarding carousel
 
@@ -1316,6 +1357,7 @@ the event set is consistent.
 | `screen_view` | `screen_name`, `screen_class` |
 | `difficulty_selected` | `difficulty` |
 | `menu_loaded` | `difficulty` |
+| `menu_tab_selected` | `tab`, `previous_tab` (`levels` \| `mine` \| `all`) — only on a switch; the Levels default at launch and re-tapping the current tab log nothing |
 | `game_list_loaded` | `difficulty`, `game_count`, `custom_count` |
 | `game_started` | `source`, `difficulty`, `cards_count`, `is_custom` |
 | `game_finished` | `result`, `difficulty`, `cards_count`, `failed_tries`, `time_remaining`, `is_custom` |
@@ -1324,8 +1366,10 @@ the event set is consistent.
 | `quit_confirmed` | `difficulty`, `time_remaining`, `failed_tries` |
 | `retry_tapped` | `difficulty`, `cards_count`, `source` |
 | `favorite_toggled` | `game_id`, `is_favorite` |
+| `custom_memorama_create_opened` | `source` (`menu_header` \| `mine_empty_state`) |
 | `custom_memorama_created` | `game_id`, `difficulty`, `cards_count` |
 | `custom_memorama_deleted` | `game_id` |
+| `multiplayer_entry_tapped` | `action` (`host` \| `join`) — the host/join choice, before the backend accepts (iOS: the menu's multiplayer menu; Android: the lobby's Create, Join and Scan QR buttons) |
 | `multiplayer_room_created` | `game_id`, `is_custom` |
 | `multiplayer_room_joined` | — |
 | `multiplayer_game_started` | `game_id` |
@@ -1337,24 +1381,30 @@ the event set is consistent.
 | `notification_primer_shown` | `source` |
 | `notification_primer_completed` | `source`, `outcome` |
 | `review_link_opened` | `source` |
+| `daily_challenge_opened` | `source` (`card` \| `widget` — the `daily` deep link), `streak` — once per entry; `daily_challenge_started` repeats on every retry |
 | `daily_challenge_started` | `streak` |
 | `daily_challenge_finished` | `result`, `streak` |
 | `streak_milestone` | `days` |
 | `result_shared` | `source` |
 | `onboarding_intro_completed` / `_skipped` | — |
+| `achievements_opened` | `source` (`settings`) |
+| `theme_changed` | `theme`, `previous_theme` (`system` \| `light` \| `dark`) — only when the pick differs |
 | `level_started` | `level` (+ `season_id`) |
-| `level_finished` | `level`, `result`, `stars` (+ `season_id`) |
+| `level_finished` | `level`, `result`, `stars`, `power_ups_used` (star power-ups bought this attempt) (+ `season_id`) |
 | `level_unlocked` | `level` (+ `season_id`) |
 | `level_life_consumed` / `level_life_granted_from_ad` | `lives_remaining` |
+| `level_lives_depleted` | `level` (+ `season_id`) — a loss just spent the last life |
 | `level_out_of_lives_shown` | `source` |
 | `level_stars_credited` | `level`, `amount`, `balance_after` (+ `season_id`) |
-| `level_power_up_used` | `power_up`, `level`, `cost`, `balance_after` |
+| `level_power_up_used` | `power_up`, `level`, `cost`, `balance_after` (+ `season_id`) |
 | `level_life_purchased_with_stars` | `cost`, `balance_after` |
 | `level_skipped` | `level`, `cost`, `balance_after` |
 | `level_failed_by_mistakes` | `level`, `max_failures`, `time_remaining` |
 | `level_mistakes_forgiven` | `level`, `amount`, `source` (`ad` \| `stars`) |
 | `levels_intro_shown` | `source` |
-| `levels_intro_completed` / `_skipped` | — |
+| `levels_intro_completed` | — |
+| `levels_intro_skipped` | `slides_seen` (1-based) |
+| `season_card_tapped` | `season_id` — the menu card; `season_levels_entered` also fires on returning from a level |
 | `season_levels_entered` | `season_id` |
 
 ### 16.2 The season dimension
@@ -1675,7 +1725,7 @@ settings_remove_ads_unavailable = Remove Ads is unavailable right now
 settings_remove_ads_pending = Purchase pending approval
 settings_remove_ads_no_restore = No Remove Ads purchase was found
 settings_rewarded_remove_ads_title = Free ad-free day
-settings_rewarded_remove_ads_description = Watch an ad to disable ads for 24 hours
+settings_rewarded_remove_ads_description = Watch %d short ads to disable ads for 24 hours
 settings_rewarded_remove_ads_action = Watch
 settings_rewarded_remove_ads_active = Active
 settings_rewarded_remove_ads_active_format = Ads are disabled until %@
@@ -1687,6 +1737,24 @@ settings_restore_purchases_action = Restore
 settings_purchase_success_title = Purchase Successful
 settings_purchase_success_message = Ads have been removed. Enjoy the game!
 settings_restore_success_title = Purchases Restored
+ad_free_day_pill_title = No Ads
+ad_free_day_pill_progress_format = No Ads %d/%d
+ad_free_day_pill_active_format = %@ left
+ad_free_day_intro_title = Sorry about the ads
+ad_free_day_intro_message = They keep DoMemory free, but here's a way out: watch %d short ads and we turn them off for the next 24 hours.
+ad_free_day_intro_watch_format = Sounds fair, watch ad %d of %d
+ad_free_day_title = Play a day without ads
+ad_free_day_message = Watch %d short ads and we turn off banners and interstitials for 24 hours.
+ad_free_day_watch_format = Watch ad %d of %d
+ad_free_day_step_ad_format = Ad %d
+ad_free_day_step_reward = Ad-free day
+ad_free_day_halfway_hint = One more and you're done
+ad_free_day_no_fill = No ad available right now. Your progress is saved.
+ad_free_day_try_again = Try again
+ad_free_day_active_format = Ads are off until %@
+ad_free_day_back = Back to the game
+ad_free_day_remove_forever_format = Remove ads forever · %@
+ad_free_day_not_now = Not now
 settings_restore_success_message = Your previous purchase has been restored.
 
 # Achievements
@@ -1843,7 +1911,7 @@ Every tunable number in one place, for cross-checking an implementation.
 | Interstitial suppressed after a rewarded ad | 60 s |
 | Minimum gap between full-screen ads | 90 s |
 | App-open ad freshness | 4 h |
-| Rewarded ad-free day | 24 h |
+| Rewarded ad-free day | 24 h, after 2 rewarded ads |
 
 ### Other
 

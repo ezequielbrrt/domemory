@@ -190,10 +190,14 @@
     <string name="settings_notifications_description_on">You\'ll be reminded if you haven\'t played in 2 days</string>
     <string name="settings_notifications_description_off">Get notified when you haven\'t played in a while</string>
     <string name="settings_notifications_denied_title">Notifications Disabled</string>
-    <string name="settings_notifications_denied_message">Enable notifications for DoMemory in iOS Settings to receive reminders.</string>
+    <string name="settings_notifications_denied_message">Enable notifications for DoMemory in Android Settings to receive reminders.</string>
     <string name="settings_notifications_open_settings">Open Settings</string>
     <string name="settings_review_title">Rate DoMemory</string>
     <string name="settings_review_description">Reviews help other players find the game</string>
+    <string name="review_invitation_title">Enjoying DoMemory?</string>
+    <string name="review_invitation_message">A quick review on Google Play helps other players find the game and keeps new levels coming.</string>
+    <string name="review_invitation_button">Write a Review</string>
+    <string name="review_invitation_dismiss">Not Now</string>
     <string name="settings_whats_new_title">What\'s New</string>
     <string name="settings_whats_new_description">See what changed in the latest update</string>
 

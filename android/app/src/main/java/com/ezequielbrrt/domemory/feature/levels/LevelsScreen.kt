@@ -593,8 +593,8 @@ fun LevelsIntroOverlay(onDismiss: () -> Unit, source: String = "info_button") {
     IntroCarousel(
         slides = slides,
         finishTitle = stringResource(R.string.levels_intro_done),
-        onSkip = {
-            AnalyticsService.log(AnalyticsEvent.LevelsIntroSkipped)
+        onSkip = { slidesSeen ->
+            AnalyticsService.log(AnalyticsEvent.LevelsIntroSkipped(slidesSeen = slidesSeen))
             onDismiss()
         },
         onFinish = {

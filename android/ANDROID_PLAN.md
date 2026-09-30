@@ -99,7 +99,6 @@ com.ezequielbrrt.domemory
 │   ├── stats/        GameStatsService, ProfileStatsService
 │   ├── images/       RemoteImageService
 │   ├── whatsnew/     WhatsNewManager, WhatsNewContent
-│   ├── review/       AppReviews
 │   └── analytics/    AnalyticsEvent (sealed), Analytics (+ LoggingAnalytics)
 ├── feature/
 │   ├── launch/       SplashScreen, LaunchSequence
@@ -110,6 +109,7 @@ com.ezequielbrrt.domemory
 │   ├── seasons/      SeasonLevelsScreen, SeasonLevelsViewModel
 │   ├── multiplayer/  MultiplayerService, room + join screens, QR
 │   ├── settings/     SettingsScreen, AchievementsScreen
+│   ├── review/       ReviewInvitation (ReviewFlow-Android host)
 │   └── share/        ShareResultCard
 ├── navigation/       NavGraph, DeepLinkRouter
 └── ui/theme/         Palette (light/dark pairs), Typography, Shapes, Icons map
@@ -1491,6 +1491,171 @@ existing visual language, with the previously-unused `multiplayer_final_score` s
 Verification: `compileDebugKotlin` clean; `cleanTestDebugUnitTest testDebugUnitTest` 422/422 passing (no
 new tests — the change is purely presentational, no new branching logic beyond the existing win/lose/draw
 resolution `MultiplayerViewModel` already had). Not viewed on an emulator/device — no live session run.
+
+**WhatsNewKit-Android adoption (2026-09-29).** The hand-rolled `AlertDialog` in
+`feature/whatsnew/WhatsNewDialog.kt` is gone; the What's New screen is now drawn by
+[WhatsNewKit-Android](https://github.com/zoratek/WhatsNewKit-Android) 1.0.0, the Compose twin of
+the `whats-new-ios` package iOS already uses. The library's README documents JitPack coordinates,
+but both the `zoratek` and `ezequielbrrt` repositories are private and JitPack answers 401 for
+them, so the repository is vendored as a git submodule at `android/WhatsNewKit-Android` (pinned to
+tag `1.0.0`) and `settings.gradle.kts` includes only its `whatsnewkit` module as `:whatsnewkit` —
+`:demo` is never configured. The module reads this build's version catalog, hence the new
+`android-library` plugin alias (declared `apply false` at the root, since it shares the AGP
+artifact with `android-application` and applying it with a version from a subproject fails with
+"already on the classpath with an unknown version") and the `androidx-compose-foundation`
+library alias. `feature/whatsnew/WhatsNewContent.kt` ports `WhatsNewContent.swift`: a
+`Palette.whatsNewTheme()` mirroring `WhatsNewTheme.doMemory` token for token (card tinted
+`surfacePrimary` over the library's material layer, borders/separators `surfaceBorder`, badge and
+icon chips `primary` at 14%, headline in `DoMemoryType.display(30)`), and the same four
+`whats_new_*` string pairs the dialog showed, now with Material icons (gift, palette, touch,
+timeline) standing in for iOS's SF Symbols. The version gate is unchanged —
+`services/whatsnew/WhatsNewManager` and spec 15.1's `whatsNewLastSeenVersion` stay, and the
+library's `WhatsNewVersionTracker` is deliberately not used, matching iOS, which keeps its own
+`WhatsNewManager` beside WhatsNewKit. Presentation moved to a single site: `MainActivity` now
+wraps the `Scaffold` in a `Box` and draws `DoMemoryWhatsNewScreen` edge to edge above the nav
+graph (the library pads for system bars itself and would have doubled the Scaffold's insets),
+with the launch overlay moved to the same `Box` so it still covers the screen during the 1.2s
+splash; a private `WhatsNewPresentation` enum (AUTOMATIC/MANUAL) decides whether dismissal calls
+`markSeen()`. `NavGraph` gained an `onWhatsNew` parameter so the Settings row reaches that site
+instead of hosting its own dialog. Verification: `:app:assembleDebug` clean;
+`:app:testDebugUnitTest` 422/422 and `:whatsnewkit:testDebugUnitTest` 21/21 green; on the
+Pixel_10 emulator the Settings row opens the screen in light and dark (status-bar icons flip with
+the appearance), "Let's Play" returns to Settings, and the system back key is consumed while it
+is up. The automatic post-upgrade path was not exercised on the emulator (it needs a stored
+`whatsNewLastSeenVersion` older than the running one) — its gate is untouched and remains covered
+by `WhatsNewManagerTest`.
+
+**ReviewFlow-Android adoption (2026-09-29).** The thin Play Core wrapper in
+`services/review/AppReviews.kt` is gone, and with it the Phase 8 decision above to diverge from
+iOS's local review policy: Android now uses
+[ReviewFlow-Android](https://github.com/zoratek/ReviewFlow-Android) 1.0.0, the Compose twin of the
+`ReviewFlow` package iOS wraps in `AppReviews.swift`, vendored exactly like WhatsNewKit-Android —
+private repository, git submodule at `android/ReviewFlow-Android` pinned to tag `1.0.0`, only its
+`reviewflow` module included as `:reviewflow`, built against this catalog (which gained
+`play-review-ktx` — renamed from `google-play-review-ktx`, since :app no longer depends on Play
+Core directly and the library re-exports it as `api` — plus `kotlinx-coroutines-core` and
+`compose-material-icons-core`). `AppContainer.reviews` holds the one `ReviewManager` (recommended
+policy: 3 wins, 7 days since first use, 120-day cooldown, one ask per version; history in the
+library's own `SharedPreferences` file, nothing to migrate on Android). `NavGraph.kt`'s four
+`onGameWon` sites now call `recordSuccessfulAction(BuildConfig.VERSION_NAME)` on it. Presentation
+is the library's **explicit invitation**, not its Play In-App Review bridge — the user asked for
+the iOS image to be used, and the image only exists in the invitation: `feature/review/
+ReviewInvitation.kt`'s `DoMemoryReviewInvitationHost` wraps `ReviewInvitationHost` with
+`palette.primary` as accent, the display face for the headline via `LocalReviewInvitationStyle`,
+the iOS `onboarding-five-star-rating` PNG copied byte-for-byte to
+`res/drawable-nodpi/review_invitation_five_star_rating.png`, and four new `review_invitation_*`
+strings translated into all ten locales (`LocalizationParityTest` green). `MainActivity` hosts it
+beside the What's New screen, mirroring iOS's `.reviewRequest(using:)` at the app root. iOS itself
+still uses the native StoreKit prompt in production and only shows `ReviewInvitationFullScreen`
+from its debug menu; switching Android to the same native path is a one-line swap to
+`ReviewRequestEffect(manager = container.reviews)`. The Settings "Rate DoMemory" row now calls the
+library's `Context.openPlayStoreReviewPage()` (same `market://` + web fallback the local helper
+had), so that helper was deleted; `services/share/PlayStoreLinks` stays for the share caption.
+Spec §15.2's Android paragraph was updated to match. Verification: `:app:assembleDebug` clean;
+`:app:testDebugUnitTest` 422/422 and `:reviewflow:testDebugUnitTest` 11/11 green; on the Pixel_10
+emulator the invitation was rendered in light and dark through a throwaway local patch that
+presented `ReviewInvitationDialog` unconditionally (not committed), and its "Write a Review" tap
+brought the Play Store app (`com.android.vending`) to the foreground — the policy-gated path itself
+(three wins, seven days) was not exercised end to end and rests on the library's
+`ReviewManagerTest`/`ReviewEligibilityEvaluatorTest`.
+
+**NotificationPermissionKit-Android adoption (2026-09-29).** The hand-rolled primer card in
+`feature/notifications/NotificationPrimerDialog.kt` and the bare `rememberNotificationPermissionRequester`
+in `NotificationPermission.kt` are gone; the permission primer (spec 11.3) is now drawn by
+[NotificationPermissionKit-Android](https://github.com/zoratek/NotificationPermissionKit-Android) 1.0.0,
+the Compose twin of the `NotificationPermissionKit` package iOS wraps in `NotificationPrimerContent.swift`,
+vendored exactly like the other two — private repository, git submodule at
+`android/NotificationPermissionKit-Android` pinned to tag `1.0.0`, only its `notificationpermissionkit`
+module included as `:notificationpermissionkit`, built against this catalog (no new aliases needed).
+`feature/notifications/NotificationPrimer.kt` ports the Swift file: the fixed violet
+`DoMemoryNotificationPermissionTheme` (literal colours on purpose — one identity in both appearances,
+as iOS's comment says), a configuration built from the existing `notification_primer_*` and
+`settings_notifications_denied_*`/`_open_settings` strings (the English denied message said "iOS
+Settings"; fixed to "Android Settings", the other nine locales already said Android), Material icons
+(fire, psychology, raised hand) for the SF Symbols, and `NotificationPrimerHost(visible, source,
+onAuthorized, onFinished)` presenting the library's `NotificationPermissionScreen` in a full-screen
+dialog — the Android reading of iOS's sheet — with the back gesture reported as `Deferred`. Analytics
+are unchanged in name and value: `notification_primer_shown` on appearance and
+`notification_primer_completed` with `authorized`/`denied`/`deferred`/`failed`, the mapping pinned by
+the new `NotificationPrimerOutcomeTest`. Two behaviour changes, both towards iOS: (1) the Settings
+reminders toggle now shows the primer (source `settings`) when the OS does not already authorize
+notifications, instead of firing the bare system dialog — and when the dialog can no longer appear the
+library's denied state offers "Open Settings", the counterpart of iOS's denied alert; when already
+authorized it enables directly, as iOS's `handleEnableNotifications` does. (2) The menu skips the
+once-per-install primer when notifications are already authorized, as iOS's `guard .notDetermined`
+does. One deliberate deviation from the library's own status mapping: below API 33 there is no runtime
+permission and the system client reports `Authorized` whenever notifications are enabled, which would
+make the screen complete on its own and turn reminders on for every Android 8–12 player without a tap.
+A thin wrapper client (`ConsentGatedNotificationAuthorizationClient`) reports `NotDetermined` there instead
+until the player taps, so "Turn On Reminders" remains the consent (the request then answers with the system
+toggle's state, and the mask lifts so the library's post-request re-read sees `Authorized`); API 33+ passes
+through untouched. `ConsentGatedNotificationAuthorizationClientTest` pins both sides of the line. Not
+ported: iOS's full-screen-ad suppression while the primer is up — Android's app-open ad is still
+unwired (§7's Phase 7 notes). Verification: `:app:assembleDebug` clean; `:app:testDebugUnitTest`
+423/423 (one new) and `:notificationpermissionkit:testDebugUnitTest` 10/10 green; on the Pixel_10
+emulator (API 37) with `POST_NOTIFICATIONS` revoked, the Settings toggle opened the primer, "Turn On
+Reminders" raised the system permission dialog, and allowing it flipped the toggle on. The menu's
+once-per-install path was not re-exercised (this install's `notificationPrimerShown` is already set);
+its gate is unchanged apart from the new authorized-skip.
+
+**Debug menu (2026-09-29).** Android now has iOS's hidden QA panel. `feature/debug/DebugMenuScreen.kt`
+ports `DebugMenuView`, and `DebugMenuTapTrigger.kt` ports `DebugMenuTapTrigger`: five taps on the
+Settings title, each within 1.5s of the previous one, open a `debug_menu` nav route. Both the trigger
+(`SettingsScreen`'s new nullable `onDebugMenu`) and the route are gated on `BuildConfig.DEBUG`, the
+counterpart of iOS's `#if DEBUG`. Rows: What's New (WhatsNewKit-Android, not marked seen), the review
+invitation (ReviewFlow-Android, bypassing the policy, nothing recorded — `feature/review/
+ReviewInvitation.kt` gained `DoMemoryReviewInvitationPreview`, sharing its artwork, copy and style with
+the policy host), Play's native In-App Review request (status shown inline; Play shows nothing for
+sideloaded builds), the notification primer (NotificationPermissionKit-Android, live — it can grant the
+permission and arm reminders, as on iOS), the first-launch onboarding carousel, and the Levels intro.
+Deviation from iOS on purpose: iOS's "Start onboarding" wipes the user record first; Android's is a
+preview that keeps onboarding state, because `OnboardingViewModel`'s completion writes
+`completeOnboarding(Difficulty.MEDIUM)` and would reset the player's chosen difficulty. iOS's
+remove-ads toggle and ad-free-day reset are not ported — Android has no purchase layer and no ad-free
+day offer. A follow-up (2026-09-30) aligned the rows with iOS's order and titles ("Start onboarding",
+"Start Levels onboarding", "Show notifications view", "Show ask-for-review view (native)", "Show
+ReviewFlow invitation view"; What's New stays as an Android-only extra) and ported "Restart lives",
+which refills today's lives through `LevelLivesService.refill(MAX_LIVES)`. The menu now also
+refreshes `LevelsViewModel` each time it comes back into view (`LaunchedEffect(Unit)` in the MENU
+route — only the top destination stays composed), iOS's `LevelsView.onAppear` refresh; before, the
+hearts header stayed stale after lives changed anywhere but a level. Verified on the Pixel_10
+emulator: a timed-out level took lives to 3/4, "Restart lives" reported 4/4, the header showed 4/4
+on return, and 4/4 survived a force-stop and relaunch. Copy is plain English literals, as on
+iOS, outside `strings.xml` and `LocalizationParityTest`. Verification: `:app:assembleDebug` clean;
+`:app:testDebugUnitTest` 429/429 (three new in `DebugMenuTapCounterTest`); on the Pixel_10 emulator
+four taps left Settings alone, the fifth opened the menu, and every row presented its screen and
+returned to the menu (the native review request reported completion). `:app:assembleRelease`
+succeeded, and none of the menu's literals are present in the release dex while control literals from
+live code are, so R8 strips the menu from release.
+
+**Analytics parity with iOS PR #99 (2026-09-30).** Ports the events iOS added for the project
+tracker's usage questions, with the same names and parameter keys (spec §16.1):
+`achievements_opened` (Settings row), `theme_changed` (only when the pick differs, via
+`SettingsViewModel.setTheme`), `custom_memorama_create_opened` (menu header and empty Mine
+state), `daily_challenge_opened` (`card` from the menu, `widget` from the `domemory://daily`
+deep link), `season_card_tapped`, `multiplayer_entry_tapped` and `level_lives_depleted`.
+`level_finished` gains `power_ups_used` (star power-ups bought this attempt, reset by
+`trackGameStarted`), `level_power_up_used` gains `season_id`, and `levels_intro_skipped`
+becomes a data class carrying `slides_seen`, which `IntroCarousel.onSkip` now passes.
+Android-specific readings: the host/join choice is logged on the lobby's Create, Join and
+Scan QR buttons, since Android has no menu between the header button and the lobby; and
+depletion is gated on `LevelLivesService.spendOnLoss()` returning true, so a loss with no
+life to spend is not a depletion. `menu_tab_selected` landed earlier with iOS PR #99.
+Validation: the full unit suite (433 tests) passes, including three new `GameViewModelTest`
+cases (depletion fires once on the real last life, never at zero, and `power_ups_used`
+counts then resets on retry). No event was observed in DebugView on a device.
+
+**Flippo in the game modals (2026-09-30).** The win, lose, pause and quit overlays in
+`feature/game/GameScreen.kt` show the same Flippo poses as iOS (`flippo_win`, `flippo_lose_time`,
+`flippo_lose_mistakes`, `flippo_pause`, `flippo_quit` in `res/drawable-nodpi/`) at 160 × 168 dp,
+replacing the emoji heroes and the lose overlay's `clock-crack` / `x-shake` Lottie heroes (the clips
+stay bundled). The quit confirmation is no longer a Material `AlertDialog`: the new `QuitOverlay` is
+a custom card mirroring iOS's `QuitModal` (Flippo, the question, Cancel / Accept capsules, in
+`PauseOverlay`'s card chrome), with a `BackHandler` keeping the dialog's Back-as-Cancel behaviour.
+Accept still leaves `showQuitConfirm` true so the pause sheet does not flash during the exit.
+Validation: `:app:assembleDebug :app:testDebugUnitTest --rerun` passed (436 tests); on the
+Pixel_10 emulator the pause, quit (Back cancelled and the timer resumed), timeout loss,
+mistake loss and level-1 win overlays were all reached.
 
 ## 8. Immediate next steps
 

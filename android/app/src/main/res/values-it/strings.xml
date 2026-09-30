@@ -194,6 +194,10 @@
     <string name="settings_notifications_open_settings">Apri Impostazioni</string>
     <string name="settings_review_title">Valuta DoMemory</string>
     <string name="settings_review_description">Le recensioni aiutano altri giocatori a trovare il gioco</string>
+    <string name="review_invitation_title">Ti piace DoMemory?</string>
+    <string name="review_invitation_message">Una breve recensione su Google Play aiuta altri giocatori a trovare il gioco e fa arrivare nuovi livelli.</string>
+    <string name="review_invitation_button">Scrivi una recensione</string>
+    <string name="review_invitation_dismiss">Non ora</string>
     <string name="settings_whats_new_title">Novità</string>
     <string name="settings_whats_new_description">Scopri cosa è cambiato nell\'ultimo aggiornamento</string>
 

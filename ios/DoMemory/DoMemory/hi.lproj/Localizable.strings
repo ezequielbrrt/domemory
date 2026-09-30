@@ -70,7 +70,7 @@
 "settings_rewarded_remove_ads_action" = "देखें";
 "settings_rewarded_remove_ads_active" = "सक्रिय";
 "settings_rewarded_remove_ads_active_format" = "%@ तक विज्ञापन बंद हैं";
-"settings_rewarded_remove_ads_description" = "24 घंटे के लिए विज्ञापन बंद करने हेतु विज्ञापन देखें";
+"settings_rewarded_remove_ads_description" = "%d छोटे विज्ञापन देखकर 24 घंटों के लिए विज्ञापन बंद करें";
 "settings_rewarded_remove_ads_success_message" = "अगले 24 घंटों के लिए विज्ञापन बंद हैं।";
 "settings_rewarded_remove_ads_success_title" = "विज्ञापन बंद";
 "settings_rewarded_remove_ads_title" = "मुफ्त विज्ञापन-मुक्त दिन";
@@ -289,6 +289,26 @@
 "season_complete_badge" = "पूर्ण";
 "season_complete_title" = "सीज़न पूरा हुआ!";
 "season_complete_message" = "आपने सभी स्तर पूरे कर लिए। इनमें से किसी को दोबारा खेलकर उसके सितारे बेहतर करें।";
+
+// Ad-free day offer (pill + sheet)
+"ad_free_day_pill_title" = "विज्ञापन नहीं";
+"ad_free_day_pill_progress_format" = "विज्ञापन नहीं %d/%d";
+"ad_free_day_pill_active_format" = "%@ बाकी";
+"ad_free_day_intro_title" = "विज्ञापनों के लिए माफ़ करें";
+"ad_free_day_intro_message" = "इन्हीं से DoMemory मुफ़्त रहता है, लेकिन एक रास्ता है: %d छोटे विज्ञापन देखें और हम अगले 24 घंटों के लिए उन्हें बंद कर देंगे।";
+"ad_free_day_intro_watch_format" = "ठीक है, विज्ञापन %d/%d देखें";
+"ad_free_day_title" = "एक दिन बिना विज्ञापन खेलें";
+"ad_free_day_message" = "%d छोटे विज्ञापन देखें और हम 24 घंटों के लिए बैनर और इंटरस्टीशियल बंद कर देंगे।";
+"ad_free_day_watch_format" = "विज्ञापन %d/%d देखें";
+"ad_free_day_step_ad_format" = "विज्ञापन %d";
+"ad_free_day_step_reward" = "विज्ञापन-मुक्त दिन";
+"ad_free_day_halfway_hint" = "बस एक और, फिर हो गया";
+"ad_free_day_no_fill" = "अभी कोई विज्ञापन उपलब्ध नहीं है। आपकी प्रगति सहेज ली गई है।";
+"ad_free_day_try_again" = "फिर से कोशिश करें";
+"ad_free_day_active_format" = "%@ तक विज्ञापन बंद";
+"ad_free_day_back" = "गेम पर वापस जाएँ";
+"ad_free_day_remove_forever_format" = "विज्ञापन हमेशा के लिए हटाएँ · %@";
+"ad_free_day_not_now" = "अभी नहीं";
 
 /* Lose modal rescue offers */
 "lose_offer_forgive_format" = "%d गलतियाँ माफ़ करें";
