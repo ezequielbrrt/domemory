@@ -8,8 +8,11 @@ import com.ezequielbrrt.domemory.data.repository.CatalogStatus
  * The three tabs on the real menu (spec 2): `[Levels] [My memoramas] [All]`, in that
  * order — the bar itself "opens on Levels". [LEVELS] is a placeholder tile only in this
  * phase; Phase 3 owns `LevelProgressStore` and the level map.
+ *
+ * [analyticsKey] is the `tab` value of `menu_tab_selected`, spelled like iOS's `GameTab`
+ * raw values — explicit so renaming a constant cannot change the reported value.
  */
-enum class MenuTab { LEVELS, MINE, ALL }
+enum class MenuTab(val analyticsKey: String) { LEVELS("levels"), MINE("mine"), ALL("all") }
 
 /** Per-board counters displayed on the catalog cards, matching iOS's stat badges. */
 data class BoardStats(

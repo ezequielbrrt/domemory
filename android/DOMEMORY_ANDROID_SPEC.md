@@ -1068,10 +1068,17 @@ interstitials, app-open) is suppressed. Rewarded placements stay available.
   auto-launched after the first closes.
 - **Grant:** extends the existing `rewardedRemoveAdsExpirationDate` by 24 h from
   now, or from the current expiry when one is still running.
-- **Analytics:** `ad_free_day_offer_shown{source, is_intro (1/0), ads_watched}`,
-  `ad_free_day_granted{source}`, plus `ad_lifecycle` for the ad itself under
-  placement `ad_free_day_rewarded`. Sources: `menu_levels`, `menu_mine`,
-  `menu_all`, `season_levels`, `multiplayer_lobby`, `settings`.
+- **Analytics**, in funnel order:
+  `ad_free_day_entry_tapped{source, state (idle/in_progress/active), ads_watched}`
+  on a tap of the pill or the Settings row;
+  `ad_free_day_offer_shown{source, is_intro (1/0), ads_watched}` when the sheet
+  appears; `ad_free_day_watch_tapped{source, ad_number}` when "Watch ad N of 2"
+  is tapped with an ad ready; `ad_free_day_ad_watched{source, ad_number}` when
+  ad N pays out (read `ad_number` before recording it — completing the chain
+  clears progress); `ad_free_day_granted{source}` after the last ad. Plus
+  `ad_lifecycle` for the ad itself under placement `ad_free_day_rewarded`.
+  Sources: `menu_levels`, `menu_mine`, `menu_all`, `season_levels`,
+  `multiplayer_lobby`, `settings`.
 - **Constants:** required ads 2, grant 24 h, both plain constants (candidates for
   Remote Config later).
 
@@ -1329,6 +1336,7 @@ the event set is consistent.
 | `screen_view` | `screen_name`, `screen_class` |
 | `difficulty_selected` | `difficulty` |
 | `menu_loaded` | `difficulty` |
+| `menu_tab_selected` | `tab`, `previous_tab` (`levels` \| `mine` \| `all`) — only on a switch; the Levels default at launch and re-tapping the current tab log nothing |
 | `game_list_loaded` | `difficulty`, `game_count`, `custom_count` |
 | `game_started` | `source`, `difficulty`, `cards_count`, `is_custom` |
 | `game_finished` | `result`, `difficulty`, `cards_count`, `failed_tries`, `time_remaining`, `is_custom` |

@@ -42,6 +42,12 @@ sealed class AnalyticsEvent(val name: String, val parameters: Map<String, Any>) 
         mapOf("difficulty" to difficulty),
     )
 
+    /** The player switched menu tab: `levels`, `mine` or `all`. */
+    data class MenuTabSelected(val tab: String, val previousTab: String) : AnalyticsEvent(
+        "menu_tab_selected",
+        mapOf("tab" to tab, "previous_tab" to previousTab),
+    )
+
     data class GameListLoaded(val difficulty: String, val gameCount: Int, val customCount: Int) : AnalyticsEvent(
         "game_list_loaded",
         mapOf("difficulty" to difficulty, "game_count" to gameCount, "custom_count" to customCount),

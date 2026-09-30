@@ -69,7 +69,13 @@ class MenuViewModel(
     }
 
     fun selectTab(tab: MenuTab) {
+        val previous = _state.value.selectedTab
+        // Re-tapping the current tab is not a switch; iOS's `onChange` never sees it either.
+        if (tab == previous) return
         _state.value = _state.value.copy(selectedTab = tab)
+        AnalyticsService.log(
+            AnalyticsEvent.MenuTabSelected(tab = tab.analyticsKey, previousTab = previous.analyticsKey),
+        )
     }
 
     /** Spec 4: filters the All tab and seeds the next game's clock and pie. */

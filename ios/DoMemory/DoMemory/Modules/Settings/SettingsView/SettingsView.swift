@@ -164,6 +164,7 @@ struct SettingsView: View {
                                     isDisabled: purchaseService.hasRemovedAds
                                 ) {
                                     HapticsService.shared.fire(.tap)
+                                    AdFreeDayOfferViewModel.logEntryTapped(source: "settings")
                                     showAdFreeDay = true
                                 }
                             }

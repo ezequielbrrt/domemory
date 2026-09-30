@@ -17,6 +17,8 @@ enum AnalyticsEvent {
     case screenView(name: String, screenClass: String)
     case difficultySelected(difficulty: String)
     case menuLoaded(difficulty: String)
+    /// The player switched menu tab: `levels`, `mine` or `all`.
+    case menuTabSelected(tab: String, previousTab: String)
     case gameListLoaded(difficulty: String, gameCount: Int, customCount: Int)
     case gameStarted(source: String, difficulty: String, cardsCount: Int, isCustom: Bool)
     case gameFinished(result: String, difficulty: String, cardsCount: Int, failedTries: Int, timeRemaining: Int, isCustom: Bool)
@@ -71,10 +73,20 @@ enum AnalyticsEvent {
     /// carries no season identity. Lets a season's entry funnel be filtered
     /// on its own in Firebase.
     case seasonLevelsEntered(seasonID: String)
-    // The ad-free day offer. The rewarded ad itself is tracked through
-    // `adLifecycle` under the `ad_free_day_rewarded` placement; these two add
-    // the funnel ends around it.
+    // The ad-free day offer, in funnel order: entry tapped → offer shown →
+    // watch tapped → ad watched (once per ad) → granted. The rewarded ad's
+    // load and dismissal are still tracked through `adLifecycle` under the
+    // `ad_free_day_rewarded` placement; these carry the ad's place in the
+    // chain, which `adLifecycle` cannot.
+    /// The "No Ads" pill or the Settings row was tapped. `state` is what the
+    /// entry point showed: `idle`, `in_progress` (one ad done) or `active`.
+    case adFreeDayEntryTapped(source: String, state: String, adsWatched: Int)
     case adFreeDayOfferShown(source: String, isIntro: Bool, adsWatched: Int)
+    /// The sheet's "Watch ad N of 2" button was tapped with an ad ready.
+    case adFreeDayWatchTapped(source: String, adNumber: Int)
+    /// Rewarded ad N of the chain paid out. The last one is always followed
+    /// by `adFreeDayGranted`.
+    case adFreeDayAdWatched(source: String, adNumber: Int)
     case adFreeDayGranted(source: String)
 
     var name: String {
@@ -82,6 +94,7 @@ enum AnalyticsEvent {
         case .screenView: return AnalyticsEventScreenView
         case .difficultySelected: return "difficulty_selected"
         case .menuLoaded: return "menu_loaded"
+        case .menuTabSelected: return "menu_tab_selected"
         case .gameListLoaded: return "game_list_loaded"
         case .gameStarted: return "game_started"
         case .gameFinished: return "game_finished"
@@ -128,7 +141,10 @@ enum AnalyticsEvent {
         case .levelsIntroCompleted: return "levels_intro_completed"
         case .levelsIntroSkipped: return "levels_intro_skipped"
         case .seasonLevelsEntered: return "season_levels_entered"
+        case .adFreeDayEntryTapped: return "ad_free_day_entry_tapped"
         case .adFreeDayOfferShown: return "ad_free_day_offer_shown"
+        case .adFreeDayWatchTapped: return "ad_free_day_watch_tapped"
+        case .adFreeDayAdWatched: return "ad_free_day_ad_watched"
         case .adFreeDayGranted: return "ad_free_day_granted"
         }
     }
@@ -144,6 +160,11 @@ enum AnalyticsEvent {
             return ["difficulty": difficulty]
         case .menuLoaded(let difficulty):
             return ["difficulty": difficulty]
+        case .menuTabSelected(let tab, let previousTab):
+            return [
+                "tab": tab,
+                "previous_tab": previousTab
+            ]
         case .gameListLoaded(let difficulty, let gameCount, let customCount):
             return [
                 "difficulty": difficulty,
@@ -319,6 +340,18 @@ enum AnalyticsEvent {
             return [:]
         case .seasonLevelsEntered(let seasonID):
             return ["season_id": seasonID]
+        case .adFreeDayEntryTapped(let source, let state, let adsWatched):
+            return [
+                "source": source,
+                "state": state,
+                "ads_watched": adsWatched
+            ]
+        case .adFreeDayWatchTapped(let source, let adNumber),
+             .adFreeDayAdWatched(let source, let adNumber):
+            return [
+                "source": source,
+                "ad_number": adNumber
+            ]
         case .adFreeDayOfferShown(let source, let isIntro, let adsWatched):
             return [
                 "source": source,

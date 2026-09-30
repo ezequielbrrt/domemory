@@ -11,7 +11,8 @@ import AppTrackingTransparency
 import GoogleMobileAds
 import UserNotifications
 
-private enum GameTab { case all, mine, levels }
+/// The raw value is the `tab` parameter of `menu_tab_selected`.
+private enum GameTab: String { case all, mine, levels }
 
 struct MenuView: View {
     @State private var viewModel = MenuViewModel()
@@ -321,6 +322,11 @@ struct MenuView: View {
         // what triggers the app-open ad — same collision the What's New sheet has.
         .onChange(of: showNotificationPrimer) { _, isShowing in
             AdsService.shared.setFullScreenAdsSuppressed(isShowing)
+        }
+        // Only a tap on the tab bar changes the tab, so this is exactly the
+        // player's switches; the Levels default on launch is not logged.
+        .onChange(of: selectedTab) { previous, tab in
+            AnalyticsService.log(.menuTabSelected(tab: tab.rawValue, previousTab: previous.rawValue))
         }
         .onAppear {
             statsRefreshID = UUID()
