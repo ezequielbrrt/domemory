@@ -30,6 +30,10 @@
     <string name="game_points_label">अंक</string>
     <string name="game_quit_accessibility">गेम से बाहर निकलें</string>
     <string name="game_quit_confirmation">क्या आप वाकई बाहर निकलना चाहते हैं?</string>
+    <string name="game_card_face_down">उल्टा पत्ता</string>
+    <string name="game_card_state_face_up">सीधा</string>
+    <string name="game_card_state_matched">जोड़ी बनी</string>
+    <string name="game_card_flip_action">पलटें</string>
     <string name="game_remaining_label">बाकी</string>
     <string name="game_errors_label">गलतियां</string>
     <string name="game_time_label">समय</string>

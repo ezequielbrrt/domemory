@@ -327,6 +327,7 @@ fun NavGraph(
                     HapticsService.fire(HapticIntent.TAP)
                     viewModel.restart()
                 },
+                onBackgrounded = viewModel::pauseForBackground,
                 onWatchAdForHint = { onFinished ->
                     HapticsService.fire(HapticIntent.TAP)
                     AdsService.showRewarded(
@@ -460,6 +461,7 @@ fun NavGraph(
                 state = state,
                 onChoose = viewModel::choose,
                 onPauseToggle = { if (state.isPaused) viewModel.resume() else viewModel.pause() },
+                onBackgrounded = viewModel::pauseForBackground,
                 onQuit = {
                     // A season loss is deferred exactly like an endless one (see
                     // GameViewModel's class doc) — quitting without this would leave the
@@ -610,6 +612,7 @@ fun NavGraph(
                 state = state,
                 onChoose = viewModel::choose,
                 onPauseToggle = { if (state.isPaused) viewModel.resume() else viewModel.pause() },
+                onBackgrounded = viewModel::pauseForBackground,
                 onQuit = {
                     viewModel.acknowledgeLossAndQuit()
                     navController.popBackStack()
@@ -830,6 +833,7 @@ fun NavGraph(
                 onPauseToggle = {
                     if (state.isPaused) viewModel.resume() else viewModel.pause()
                 },
+                onBackgrounded = viewModel::pauseForBackground,
                 onQuit = {
                     // Free play has no lose-screen rescue to protect, so this doubles as
                     // the mid-game abandon (mirrors iOS's `tapOnExit()`).

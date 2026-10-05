@@ -194,6 +194,19 @@ confirm once an analytics pipeline exists on Android (currently absent — see
 the "Deliberately deferred" list in `ANDROID_PLAN.md` §7); until then this is
 UI-only parity.
 
+### 3.7 Leaving the app mid-game
+
+When the app leaves the foreground during a game that is still in play (no
+outcome yet, not already paused), the game pauses exactly as the pause button
+would, and the pause sheet is waiting on return. It pauses silently: no haptic
+and no `pause_opened`, since the player tapped nothing. Only the player's own
+Continue resumes it. A finished game is left alone.
+
+This is Android-only. Android keeps the main thread, and with it the countdown,
+running while the app is in the background, so without it a player who switches
+apps returns to an out-of-time loss. iOS suspends the app instead, which stops
+its tick loop.
+
 ---
 
 ## 4. Difficulty
@@ -488,6 +501,17 @@ Implementation notes that matter:
   visually).
 - **Peek** must be ended if the game is paused, otherwise pausing mid-peek
   cancels the scheduled flip-back and leaves the board revealed for free.
+- **Pausing holds Freeze.** The deadline is wall-clock, so the time left on it is
+  saved when the clock stops and a fresh deadline is set from it on resume.
+  Otherwise a pause during Freeze burns the Freeze the player paid for.
+- **Peek and Freeze can't be bought while they run.** A second one restarts the
+  effect rather than extending it, so it would charge twice for what plays as
+  one. Their buttons are disabled until the effect ends (`isPeeking`, `isFrozen`),
+  and the view model refuses the purchase before spending. A Freeze held by a
+  pause still counts as running.
+- **One purchase at a time.** On Android the star spend is a suspending DataStore
+  write, so a purchase still in flight refuses a second tap. A double tap buys
+  once.
 - **Reveal pair** re-arms the normal 2 s flip-back.
 
 ### 7.7 Buying past a wall
@@ -1280,6 +1304,13 @@ Details that matter:
 - The star balance announces "N stars available"; power-up buttons announce
   "<name>, costs N stars".
 - The season progress bar announces "7 of 20 levels cleared" rather than "7 / 20".
+- Cards announce what the player would see, not the drawn glyphs. A face-down
+  card reads "Face-down card" (not "question mark") and offers a "Flip" action.
+  A face-up card reads its emoji with the state "Face up", or "Matched" once its
+  pair is found, and offers no action, because tapping it does nothing. A matched
+  card that has left the board is removed from the accessibility tree; it is only
+  transparent, so a screen reader would otherwise still find it. Android only for
+  now (`game_card_*` strings); iOS cards have no accessibility labels yet.
 - Disabled controls stay silent — the haptic modifier sits inside the disabled
   subtree.
 

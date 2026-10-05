@@ -10,6 +10,8 @@ import SwiftUI
 
 struct PowerUpBar: View {
     let balance: Int
+    /// Peek or Freeze already running — disabled until it ends.
+    var isActive: (LevelPowerUp) -> Bool = { _ in false }
     var onUse: (LevelPowerUp) -> Void
 
     var body: some View {
@@ -44,7 +46,7 @@ struct PowerUpBar: View {
     }
 
     private func button(for powerUp: LevelPowerUp) -> some View {
-        let affordable = balance >= powerUp.cost
+        let available = balance >= powerUp.cost && !isActive(powerUp)
 
         return Button {
             onUse(powerUp)
@@ -52,21 +54,21 @@ struct PowerUpBar: View {
             VStack(spacing: 1) {
                 Image(systemName: powerUp.systemImage)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(affordable ? Color.primaryColor : Color.textMuted)
+                    .foregroundStyle(available ? Color.primaryColor : Color.textMuted)
                 HStack(spacing: 2) {
                     Text("\(powerUp.cost)")
                         .font(.system(size: 11, weight: .bold, design: .rounded))
                     Image(systemName: "star.fill")
                         .font(.system(size: 8))
                 }
-                .foregroundStyle(affordable ? Color.hardAmber : Color.textMuted)
+                .foregroundStyle(available ? Color.hardAmber : Color.textMuted)
             }
             .frame(width: 48, height: 44)
             .background(chipBackground)
-            .opacity(affordable ? 1 : 0.45)
+            .opacity(available ? 1 : 0.45)
         }
         .buttonStyle(.plain)
-        .disabled(!affordable)
+        .disabled(!available)
         .accessibilityLabel(Strings.powerUpCostFormat(powerUp.title, powerUp.cost))
     }
 

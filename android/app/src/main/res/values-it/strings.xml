@@ -30,6 +30,10 @@
     <string name="game_points_label">Punti</string>
     <string name="game_quit_accessibility">Esci dal gioco</string>
     <string name="game_quit_confirmation">Sei sicuro di voler uscire?</string>
+    <string name="game_card_face_down">Carta coperta</string>
+    <string name="game_card_state_face_up">Scoperta</string>
+    <string name="game_card_state_matched">Abbinata</string>
+    <string name="game_card_flip_action">Gira</string>
     <string name="game_remaining_label">rimanenti</string>
     <string name="game_errors_label">errori</string>
     <string name="game_time_label">Tempo</string>

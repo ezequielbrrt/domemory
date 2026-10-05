@@ -157,6 +157,62 @@ final class MemorizeViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isFrozen, "a fresh board must not look frozen")
     }
 
+    /// A second Freeze restarts the hold rather than extending it, so buying it
+    /// again while it runs would charge twice for what plays as one.
+    func testASecondFreezeIsRefusedWhileFrozen() {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.freeze.cost * 2)
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+
+        viewModel.use(.freeze)
+        viewModel.use(.freeze)
+        XCTAssertEqual(StarWalletService.shared.balance, LevelPowerUp.freeze.cost)
+    }
+
+    /// A freeze is still running — and still not for sale — once play resumes.
+    /// That paused seconds don't count against it is pinned on Android, whose
+    /// view model takes an injected clock; this one reads `Date()` directly.
+    func testFreezeSurvivesAPause() {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.freeze.cost * 2)
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+
+        viewModel.use(.freeze)
+        viewModel.tapOnPause()
+        viewModel.reconnectTime()
+        XCTAssertTrue(viewModel.isFrozen, "resuming must not drop a paid-for freeze")
+        viewModel.use(.freeze)
+        XCTAssertEqual(StarWalletService.shared.balance, LevelPowerUp.freeze.cost)
+    }
+
+    func testASecondPeekIsRefusedWhileTheFirstIsShowing() {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.peek.cost * 2)
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+
+        viewModel.use(.peek)
+        XCTAssertTrue(viewModel.isPeeking)
+        viewModel.use(.peek)
+        XCTAssertEqual(StarWalletService.shared.balance, LevelPowerUp.peek.cost)
+    }
+
+    /// Pausing ends a Peek (it would otherwise leave the board revealed), so
+    /// the button has to come back with it.
+    func testPausingEndsAPeekAndReopensIt() {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.peek.cost)
+        let viewModel = MemorizeViewModel(level: 1)
+        defer { viewModel.stopTimer() }
+
+        viewModel.use(.peek)
+        viewModel.tapOnPause()
+        XCTAssertFalse(viewModel.isPeeking)
+        XCTAssertFalse(viewModel.isActive(.peek))
+    }
+
     // MARK: - Lose modal: the life at stake
 
     /// Runs the clock out on a real board, the way the tick loop ends a game.

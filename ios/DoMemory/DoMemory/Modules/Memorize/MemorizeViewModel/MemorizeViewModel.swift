@@ -117,8 +117,18 @@ class MemorizeViewModel {
     /// rather than cancelling `timerTask`, so freezing doesn't tear down the
     /// card flip-back scheduling the way `stopTimer()` would.
     private var frozenUntil: Date? {
-        didSet { isFrozen = frozenUntil != nil }
+        didSet {
+            isFrozen = frozenUntil != nil
+            if frozenUntil == nil { heldFreezeRemaining = nil }
+        }
     }
+    /// Freeze time left when the clock stopped, restored by `startTimer()`.
+    /// `frozenUntil` is wall-clock, so without this a pause during Freeze would
+    /// burn the Freeze the player paid for.
+    private var heldFreezeRemaining: TimeInterval?
+    /// True while a bought Peek is showing the board; the Peek button stays
+    /// disabled until it ends.
+    private(set) var isPeeking = false
     /// Mirrors `frozenUntil` for the HUD. A separate observable flag rather than
     /// a computed property because nothing else changes while the clock is held
     /// — `timeRemaining` stops ticking — so the view would have no signal to
@@ -349,6 +359,10 @@ class MemorizeViewModel {
     // MARK: - Timer
     func startTimer() {
         stopTimer()
+        if let held = heldFreezeRemaining {
+            frozenUntil = held > 0 ? Date().addingTimeInterval(held) : nil
+            heldFreezeRemaining = nil
+        }
         HapticsService.shared.prepare(for: .cardFlip)
         timerTask = Task { @MainActor [weak self] in
             while let self, !Task.isCancelled, self.timeRemaining > 0 {
@@ -374,6 +388,11 @@ class MemorizeViewModel {
     }
 
     func stopTimer() {
+        // Only the first stop holds the freeze: a second one while still
+        // stopped would read a deadline that kept running in the meantime.
+        if let frozenUntil, heldFreezeRemaining == nil {
+            heldFreezeRemaining = max(0, frozenUntil.timeIntervalSinceNow)
+        }
         timerTask?.cancel()
         timerTask = nil
         flipBackTask?.cancel()
@@ -392,6 +411,7 @@ class MemorizeViewModel {
         guard peekTask != nil else { return }
         peekTask?.cancel()
         peekTask = nil
+        isPeeking = false
         model.flipBackUnmatchedCards()
     }
 
@@ -658,11 +678,21 @@ extension MemorizeViewModel {
         starBalance >= powerUp.cost
     }
 
+    /// Peek or Freeze already running. Buying either again restarts it rather
+    /// than extending it, so it would charge twice for what plays as one.
+    func isActive(_ powerUp: LevelPowerUp) -> Bool {
+        switch powerUp {
+        case .peek: isPeeking
+        case .freeze: isFrozen
+        case .extraTime, .revealPair: false
+        }
+    }
+
     /// Buys and immediately applies a power-up. No confirmation step — costs
     /// are small and the clock is running, so a modal here would cost more than
     /// a misfire does.
     func use(_ powerUp: LevelPowerUp) {
-        guard let levelNumber, canAfford(powerUp) else { return }
+        guard let levelNumber, canAfford(powerUp), !isActive(powerUp) else { return }
         guard StarWalletService.shared.spend(powerUp.cost) else { return }
         HapticsService.shared.fire(.reward)
         starBalance = StarWalletService.shared.balance
@@ -697,10 +727,12 @@ extension MemorizeViewModel {
         withAnimation(.easeInOut(duration: 0.3)) {
             model.revealAllUnmatchedForPeek()
         }
+        isPeeking = true
         peekTask = Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(LevelPowerUp.peekDuration))
             guard !Task.isCancelled, let self else { return }
             self.peekTask = nil
+            self.isPeeking = false
             withAnimation(.easeInOut(duration: 0.4)) {
                 self.model.flipBackUnmatchedCards()
             }

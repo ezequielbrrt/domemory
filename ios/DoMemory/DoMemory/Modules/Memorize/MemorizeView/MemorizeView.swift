@@ -160,7 +160,7 @@ struct MemorizeView: View {
                 .padding(.bottom, 8)
 
                 if viewModel.canUsePowerUps {
-                    PowerUpBar(balance: viewModel.starBalance) { powerUp in
+                    PowerUpBar(balance: viewModel.starBalance, isActive: viewModel.isActive) { powerUp in
                         viewModel.use(powerUp)
                     }
                 }

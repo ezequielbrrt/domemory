@@ -30,6 +30,10 @@
     <string name="game_points_label">ポイント</string>
     <string name="game_quit_accessibility">ゲームを終了</string>
     <string name="game_quit_confirmation">本当に終了しますか？</string>
+    <string name="game_card_face_down">裏向きのカード</string>
+    <string name="game_card_state_face_up">表向き</string>
+    <string name="game_card_state_matched">ペア成立</string>
+    <string name="game_card_flip_action">めくる</string>
     <string name="game_remaining_label">残り</string>
     <string name="game_errors_label">ミス</string>
     <string name="game_time_label">時間</string>

@@ -30,6 +30,10 @@
     <string name="game_points_label">Points</string>
     <string name="game_quit_accessibility">Quit game</string>
     <string name="game_quit_confirmation">Are you sure you want to exit?</string>
+    <string name="game_card_face_down">Face-down card</string>
+    <string name="game_card_state_face_up">Face up</string>
+    <string name="game_card_state_matched">Matched</string>
+    <string name="game_card_flip_action">Flip</string>
     <string name="game_remaining_label">remaining</string>
     <string name="game_errors_label">errors</string>
     <string name="game_time_label">Time</string>

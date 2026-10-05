@@ -18,9 +18,17 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.core.model.Card
 import com.ezequielbrrt.domemory.ui.anim.pressScaleClickable
 import com.ezequielbrrt.domemory.ui.theme.LocalPalette
@@ -50,6 +58,13 @@ fun CardView(
         label = "cardHide",
     )
     val showingFront = rotation < 90f
+    val faceDownLabel = stringResource(R.string.game_card_face_down)
+    val stateLabel = when {
+        card.isMatched -> stringResource(R.string.game_card_state_matched)
+        card.isFaceUp -> stringResource(R.string.game_card_state_face_up)
+        else -> null
+    }
+    val flipLabel = stringResource(R.string.game_card_flip_action)
 
     Box(
         modifier = modifier
@@ -67,6 +82,21 @@ fun CardView(
                 color = if (showingFront) palette.surfaceBorder else Color.Transparent,
                 shape = RoundedCornerShape(14.dp),
             )
+            // TalkBack reads what the player would see, not the drawn glyphs: "Face-down card"
+            // rather than "question mark", the emoji plus "Matched" once a pair is found. Only
+            // a face-down card offers a tap — tapping any other is a dead tap. A matched card
+            // that has left the board is cleared out of the tree entirely; it is only
+            // transparent, so it would otherwise still be found. Placed before the clickable
+            // so it replaces that modifier's own semantics.
+            .clearAndSetSemantics {
+                if (isHidden) return@clearAndSetSemantics
+                contentDescription = if (card.isFaceUp) card.content else faceDownLabel
+                stateLabel?.let { stateDescription = it }
+                if (!card.isFaceUp) {
+                    role = Role.Button
+                    onClick(label = flipLabel) { onClick(); true }
+                }
+            }
             // Same press-to-0.92 spring as level tiles (spec: "any other primarily-tappable
             // game surface"). iOS never applies `TileTapStyle` to game cards themselves — this
             // is an Android-only extension of the same reusable feedback to a surface that
