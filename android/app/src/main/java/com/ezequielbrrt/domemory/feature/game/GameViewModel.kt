@@ -822,7 +822,9 @@ class GameViewModel(
     }
 
     private fun isActive(powerUp: LevelPowerUp): Boolean = when (powerUp) {
-        LevelPowerUp.PEEK -> peekJob != null
+        // Not `peekJob != null`: [stop] cancels the job without clearing it, so a retry
+        // within a peek's few seconds would otherwise refuse Peek for the whole new attempt.
+        LevelPowerUp.PEEK -> peekJob?.isActive == true
         LevelPowerUp.FREEZE -> now() < frozenUntilMillis || heldFreezeMillis != null
         LevelPowerUp.EXTRA_TIME, LevelPowerUp.REVEAL_PAIR -> false
     }

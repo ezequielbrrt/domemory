@@ -1314,6 +1314,20 @@ class GameViewModelTest {
     }
 
     @Test
+    fun `restarting mid-peek leaves peek buyable in the new attempt`() = runTest {
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.PEEK.cost * 2)
+        runCurrent()
+        val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)), starWallet = wallet)
+
+        assertTrue(vm.buyPeek())
+        vm.restart()
+        assertFalse(vm.state.value.isPeeking)
+        assertTrue(vm.buyPeek())
+        vm.stop()
+    }
+
+    @Test
     fun `a second freeze is refused while frozen, including while paused`() = runTest {
         val wallet = starWallet()
         wallet.credit(LevelPowerUp.FREEZE.cost * 2)
