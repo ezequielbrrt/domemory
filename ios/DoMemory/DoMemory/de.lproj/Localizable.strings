@@ -21,6 +21,9 @@
 "game_pairs_label" = "Paare";
 "game_points_label" = "Punkte";
 "game_quit_confirmation" = "Möchtest du wirklich beenden?";
+"game_card_face_down" = "Verdeckte Karte";
+"game_card_state_face_up" = "Aufgedeckt";
+"game_card_state_matched" = "Gefunden";
 "game_remaining_label" = "übrig";
 "game_errors_label" = "Fehler";
 "game_time_label" = "Zeit";

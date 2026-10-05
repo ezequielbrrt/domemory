@@ -21,6 +21,9 @@
 "game_pairs_label" = "配对";
 "game_points_label" = "分数";
 "game_quit_confirmation" = "确定要退出吗？";
+"game_card_face_down" = "背面朝上的牌";
+"game_card_state_face_up" = "正面朝上";
+"game_card_state_matched" = "已配对";
 "game_remaining_label" = "剩余";
 "game_errors_label" = "错误";
 "game_time_label" = "时间";

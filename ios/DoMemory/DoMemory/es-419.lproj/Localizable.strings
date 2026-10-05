@@ -21,6 +21,9 @@
 "game_pairs_label" = "pares";
 "game_points_label" = "Puntos";
 "game_quit_confirmation" = "¿Estás seguro de que quieres salir?";
+"game_card_face_down" = "Carta boca abajo";
+"game_card_state_face_up" = "Boca arriba";
+"game_card_state_matched" = "Emparejada";
 "game_remaining_label" = "restantes";
 "game_errors_label" = "errores";
 "game_time_label" = "Tiempo";

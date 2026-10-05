@@ -21,6 +21,9 @@
 "game_pairs_label" = "pairs";
 "game_points_label" = "Points";
 "game_quit_confirmation" = "Are you sure you want to exit?";
+"game_card_face_down" = "Face-down card";
+"game_card_state_face_up" = "Face up";
+"game_card_state_matched" = "Matched";
 "game_remaining_label" = "remaining";
 "game_errors_label" = "errors";
 "game_time_label" = "Time";

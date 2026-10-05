@@ -177,14 +177,16 @@ struct MemorizeView: View {
                         spacing: BoardLayout.spacing
                     ) {
                         ForEach(viewModel.cards) { card in
+                            let choose = {
+                                withAnimation(.linear(duration: 1)) {
+                                    viewModel.choose(card: card)
+                                    viewModel.getIfAllAreMatched()
+                                }
+                            }
                             CardView(card: card, shouldShowPie: viewModel.shouldShowPie)
                                 .frame(width: layout.cardSize.width, height: layout.cardSize.height)
-                                .onTapGesture {
-                                    withAnimation(.linear(duration: 1)) {
-                                        viewModel.choose(card: card)
-                                        viewModel.getIfAllAreMatched()
-                                    }
-                                }
+                                .onTapGesture(perform: choose)
+                                .cardAccessibility(card, onActivate: choose)
                         }
                     }
                     .padding(BoardLayout.padding)

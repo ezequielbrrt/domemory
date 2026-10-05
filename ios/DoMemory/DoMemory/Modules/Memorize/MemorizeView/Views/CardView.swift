@@ -69,3 +69,23 @@ struct CardView: View {
         }
     }
 }
+
+extension View {
+    /// VoiceOver for one board card: what the player would see, not the drawn
+    /// layers. A face-down card reads "Face-down card" and is a button. Its emoji
+    /// is still in the view tree at zero opacity (`Cardify`) and must never be
+    /// read out. A face-up card reads its emoji, with "Face up" or "Matched". A
+    /// matched card that has left the board draws nothing and is hidden. The
+    /// explicit action is the tap itself, so a VoiceOver double tap flips the
+    /// card without relying on the tap gesture being exposed. Matches Android's
+    /// `CardView` semantics.
+    func cardAccessibility(_ card: MemoryGame<String>.Card, onActivate: @escaping () -> Void) -> some View {
+        self
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(card.isFaceUp ? Text(verbatim: card.content) : Text(Strings.cardFaceDown))
+            .accessibilityValue(card.isMatched ? Strings.cardMatched : card.isFaceUp ? Strings.cardFaceUp : "")
+            .accessibilityAddTraits(card.isFaceUp ? [] : .isButton)
+            .accessibilityAction { onActivate() }
+            .accessibilityHidden(card.isMatched && !card.isFaceUp)
+    }
+}

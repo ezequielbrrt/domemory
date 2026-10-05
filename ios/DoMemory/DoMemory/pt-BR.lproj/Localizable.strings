@@ -21,6 +21,9 @@
 "game_pairs_label" = "pares";
 "game_points_label" = "Pontos";
 "game_quit_confirmation" = "Tem certeza de que deseja sair?";
+"game_card_face_down" = "Carta virada para baixo";
+"game_card_state_face_up" = "Virada para cima";
+"game_card_state_matched" = "Combinada";
 "game_remaining_label" = "restantes";
 "game_errors_label" = "erros";
 "game_time_label" = "Tempo";

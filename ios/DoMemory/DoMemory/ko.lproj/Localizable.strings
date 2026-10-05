@@ -21,6 +21,9 @@
 "game_pairs_label" = "쌍";
 "game_points_label" = "점수";
 "game_quit_confirmation" = "정말로 나가시겠습니까?";
+"game_card_face_down" = "뒤집힌 카드";
+"game_card_state_face_up" = "앞면";
+"game_card_state_matched" = "짝 맞춤";
 "game_remaining_label" = "남음";
 "game_errors_label" = "오류";
 "game_time_label" = "시간";
