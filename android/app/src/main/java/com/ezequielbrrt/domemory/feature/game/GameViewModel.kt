@@ -192,6 +192,9 @@ class GameViewModel(
     /** Guards [commitLossIfNeeded] — a rescue that undoes the loss never sets this. */
     private var lossCommitted = false
 
+    /** Set while a [skipLevelWithStars] runs and once it has succeeded. */
+    private var skipStarted = false
+
     /** Wall-clock start of the current attempt (spec: iOS's `gameStartedAt`) — the elapsed
      * time [onCompletionInterstitial] reports is measured from here, and it is reset on
      * every [restart] so a retried attempt is timed from its own start, not the original. */
@@ -392,6 +395,9 @@ class GameViewModel(
         if (_state.value.outcome != null) return
         tickJob?.cancel()
         flipBackJob?.cancel()
+        // A forgive rescue resumes this same board, so it gets back the Freeze that was
+        // running when the loss landed, as on iOS. Any other way out restarts or leaves.
+        holdFreeze()
         _state.value = _state.value.copy(outcome = outcome)
         // Fires as soon as the outcome is decided — independent of whether a Level loss's
         // commit is deferred below, matching iOS's own timing (the lose/win screen appears
@@ -623,9 +629,19 @@ class GameViewModel(
         // A peek left running through a pause would leave the board revealed for free
         // once resumed (spec 7.6).
         endPeekIfActive()
+        holdFreeze()
+        _state.value = _state.value.copy(isPaused = true)
+    }
+
+    /** Saves what is left of a running Freeze; [restoreHeldFreeze] starts it again. */
+    private fun holdFreeze() {
         val freezeLeft = frozenUntilMillis - now()
         if (freezeLeft > 0) heldFreezeMillis = freezeLeft
-        _state.value = _state.value.copy(isPaused = true)
+    }
+
+    private fun restoreHeldFreeze() {
+        heldFreezeMillis?.let { frozenUntilMillis = now() + it }
+        heldFreezeMillis = null
     }
 
     fun resume() {
@@ -634,8 +650,7 @@ class GameViewModel(
         onAnalytics?.invoke(
             AnalyticsEvent.ResumeTapped(_state.value.recordedDifficulty.key, _state.value.timeRemaining.toInt()),
         )
-        heldFreezeMillis?.let { frozenUntilMillis = now() + it }
-        heldFreezeMillis = null
+        restoreHeldFreeze()
         _state.value = _state.value.copy(isPaused = false)
         checkMistakeBudget()
     }
@@ -681,6 +696,7 @@ class GameViewModel(
         stop()
         winReported = false
         lossCommitted = false
+        skipStarted = false
         frozenUntilMillis = 0L
         heldFreezeMillis = null
         gameStartedAtMillis = now()
@@ -884,6 +900,7 @@ class GameViewModel(
             timeRemaining = flooredTime,
             failedTries = game.failedTries,
         )
+        restoreHeldFreeze()
         start()
         onHaptic?.invoke(HapticIntent.REWARD)
         onAnalytics?.invoke(
@@ -926,6 +943,17 @@ class GameViewModel(
     suspend fun skipLevelWithStars(): Boolean {
         val context = (mode as? GameMode.Level)?.context ?: return false
         if (_state.value.outcome !is GameOutcome.Lost) return false
+        // One skip per loss. The outcome is still Lost after a skip, and the confirm button
+        // can take a second tap before its dialog closes, so without this a double tap paid
+        // for the skip twice.
+        if (skipStarted) return false
+        skipStarted = true
+        val skipped = skipLevel(context)
+        if (!skipped) skipStarted = false
+        return skipped
+    }
+
+    private suspend fun skipLevel(context: LevelContext): Boolean {
         // Skipping books the loss and returns to the map, whose lives gate then decides
         // whether the unlocked level is playable. When the skip would leave no life — the
         // player is already out, or it would spend their last — it sells an unlock they
@@ -973,6 +1001,7 @@ class GameViewModel(
             timeRemaining = flooredTime,
             failedTries = game.failedTries,
         )
+        restoreHeldFreeze()
         start()
         onHaptic?.invoke(HapticIntent.REWARD)
         onAnalytics?.invoke(

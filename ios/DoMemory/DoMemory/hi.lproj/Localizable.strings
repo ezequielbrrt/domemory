@@ -21,6 +21,9 @@
 "game_pairs_label" = "जोड़े";
 "game_points_label" = "अंक";
 "game_quit_confirmation" = "क्या आप वाकई बाहर निकलना चाहते हैं?";
+"game_card_face_down" = "उल्टा पत्ता";
+"game_card_state_face_up" = "सीधा";
+"game_card_state_matched" = "जोड़ी बनी";
 "game_remaining_label" = "बाकी";
 "game_errors_label" = "गलतियां";
 "game_time_label" = "समय";

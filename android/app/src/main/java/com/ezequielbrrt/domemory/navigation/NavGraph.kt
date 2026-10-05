@@ -9,6 +9,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -129,9 +131,10 @@ fun NavGraph(
 
     NavHost(navController = navController, startDestination = if (hasOnboarded) Routes.MENU else Routes.ONBOARDING) {
         composable(Routes.ONBOARDING) {
+            val ifResumed = rememberResumedGuard()
             val viewModel: OnboardingViewModel = viewModel(factory = viewModelFactory { initializer { OnboardingViewModel(container.prefs) } })
             val state by viewModel.state.collectAsState()
-            val onOnboardingComplete = { navController.navigate(Routes.MENU) { popUpTo(Routes.ONBOARDING) { inclusive = true } } }
+            val onOnboardingComplete = { ifResumed { navController.navigate(Routes.MENU) { popUpTo(Routes.ONBOARDING) { inclusive = true } } } }
             OnboardingScreen(
                 state,
                 onNext = { viewModel.completeIntro(onOnboardingComplete) },
@@ -139,6 +142,7 @@ fun NavGraph(
             )
         }
         composable(Routes.MENU) {
+            val ifResumed = rememberResumedGuard()
             val viewModel: MenuViewModel = viewModel(
                 factory = viewModelFactory {
                     initializer { MenuViewModel(container.boardCatalog, container.prefs) }
@@ -184,32 +188,38 @@ fun NavGraph(
                     onToggleFavorite = viewModel::toggleFavorite,
                     onDeleteCustomMemorama = viewModel::deleteCustomMemorama,
                     onBoardSelected = { board ->
-                        navController.navigate(Routes.game(board.id, state.difficulty))
-                    },
-                    onRandomGame = {
-                        viewModel.randomGame()?.let { board ->
+                        ifResumed {
                             navController.navigate(Routes.game(board.id, state.difficulty))
                         }
                     },
-                    onCreateMemorama = { navController.navigate(Routes.CREATE_MEMORAMA) },
-                    onMultiplayer = { navController.navigate(Routes.multiplayer()) },
-                    onSettings = { navController.navigate(Routes.SETTINGS) },
+                    onRandomGame = {
+                        ifResumed {
+                            viewModel.randomGame()?.let { board ->
+                                navController.navigate(Routes.game(board.id, state.difficulty))
+                            }
+                        }
+                    },
+                    onCreateMemorama = { ifResumed { navController.navigate(Routes.CREATE_MEMORAMA) } },
+                    onMultiplayer = { ifResumed { navController.navigate(Routes.multiplayer()) } },
+                    onSettings = { ifResumed { navController.navigate(Routes.SETTINGS) } },
                     levelsViewModel = levelsViewModel,
-                    onLevelSelected = { navController.navigate(Routes.level(it)) },
+                    onLevelSelected = { ifResumed { navController.navigate(Routes.level(it)) } },
                     activeSeason = activeSeason,
                     activeSeasonStore = activeSeason?.let { container.seasonProgressStore(it) },
-                    onSeasonSelected = { season -> navController.navigate(Routes.seasonLevels(season.id)) },
+                    onSeasonSelected = { season -> ifResumed { navController.navigate(Routes.seasonLevels(season.id)) } },
                     dailyStreak = dailyStreak,
                     isDailyChallengeCompletedToday = isDailyCompletedToday,
                     onDailyChallengeSelected = {
-                        // Mirrors the domemory://daily deep link: a no-op once today is done,
-                        // since there's no result screen yet to send the player back to (spec 11.1).
-                        // Matches iOS's DailyChallengeCard/CompactDailyChallengeCard buttons,
-                        // which only fire .tap inside the same !isCompleted guard.
-                        if (!isDailyCompletedToday) {
-                            HapticsService.fire(HapticIntent.TAP)
-                            AnalyticsService.log(AnalyticsEvent.DailyChallengeOpened(source = "card", streak = dailyStreak))
-                            navController.navigate(Routes.DAILY_GAME)
+                        ifResumed {
+                            // Mirrors the domemory://daily deep link: a no-op once today is done,
+                            // since there's no result screen yet to send the player back to (spec 11.1).
+                            // Matches iOS's DailyChallengeCard/CompactDailyChallengeCard buttons,
+                            // which only fire .tap inside the same !isCompleted guard.
+                            if (!isDailyCompletedToday) {
+                                HapticsService.fire(HapticIntent.TAP)
+                                AnalyticsService.log(AnalyticsEvent.DailyChallengeOpened(source = "card", streak = dailyStreak))
+                                navController.navigate(Routes.DAILY_GAME)
+                            }
                         }
                     },
                 )
@@ -241,6 +251,7 @@ fun NavGraph(
             route = Routes.MULTIPLAYER,
             arguments = listOf(navArgument("code") { type = NavType.StringType; defaultValue = "" }),
         ) { entry ->
+            val ifResumed = rememberResumedGuard()
             val initialCode = entry.arguments?.getString("code").orEmpty()
             val viewModel: com.ezequielbrrt.domemory.feature.multiplayer.MultiplayerViewModel = viewModel(
                 factory = viewModelFactory {
@@ -264,11 +275,12 @@ fun NavGraph(
                 boards = boards,
                 vm = viewModel,
                 initialCode = initialCode,
-                onBack = { navController.popBackStack() },
+                onBack = { ifResumed { navController.popBackStack() } },
             )
         }
 
         composable(Routes.DAILY_GAME) {
+            val ifResumed = rememberResumedGuard()
             // Daily Challenge takes the *player's* stored difficulty for the clock/pie, not
             // the board's own — the board always declares medium (spec 8's "medium difficulty"
             // is the board's, distinct from the player setting that drives the timer).
@@ -304,17 +316,19 @@ fun NavGraph(
                 viewModel::choose,
                 { if (state.isPaused) viewModel.resume() else viewModel.pause() },
                 {
-                    // The Daily Challenge has no lose-screen rescue to protect, so — like
-                    // free play's own onQuit below — this doubles as the mid-game abandon.
-                    AnalyticsService.log(
-                        AnalyticsEvent.QuitConfirmed(
-                            difficulty = state.recordedDifficulty.key,
-                            timeRemaining = state.timeRemaining.toInt(),
-                            failedTries = state.failedTries,
-                        ),
-                    )
-                    HapticsService.fire(HapticIntent.TAP)
-                    navController.popBackStack()
+                    ifResumed {
+                        // The Daily Challenge has no lose-screen rescue to protect, so — like
+                        // free play's own onQuit below — this doubles as the mid-game abandon.
+                        AnalyticsService.log(
+                            AnalyticsEvent.QuitConfirmed(
+                                difficulty = state.recordedDifficulty.key,
+                                timeRemaining = state.timeRemaining.toInt(),
+                                failedTries = state.failedTries,
+                            ),
+                        )
+                        HapticsService.fire(HapticIntent.TAP)
+                        navController.popBackStack()
+                    }
                 },
                 {
                     AnalyticsService.log(
@@ -349,6 +363,7 @@ fun NavGraph(
         }
 
         composable(Routes.SEASON_LEVELS, arguments = listOf(navArgument("seasonId") { type = NavType.StringType })) { entry ->
+            val ifResumed = rememberResumedGuard()
             val seasonId = entry.arguments?.getString("seasonId").orEmpty()
             val seasons by container.seasonCatalog.seasons.collectAsState()
             val season = seasons.firstOrNull { it.id == seasonId }
@@ -376,8 +391,8 @@ fun NavGraph(
                 store = store,
                 viewModel = seasonLevelsViewModel,
                 todayKey = container.todayKey(),
-                onLevelSelected = { level -> navController.navigate(Routes.seasonGame(season.id, level)) },
-                onBack = { navController.popBackStack() },
+                onLevelSelected = { level -> ifResumed { navController.navigate(Routes.seasonGame(season.id, level)) } },
+                onBack = { ifResumed { navController.popBackStack() } },
             )
         }
 
@@ -388,6 +403,7 @@ fun NavGraph(
                 navArgument("level") { type = NavType.IntType },
             ),
         ) { entry ->
+            val ifResumed = rememberResumedGuard()
             val seasonId = entry.arguments?.getString("seasonId").orEmpty()
             val level = entry.arguments?.getInt("level") ?: 1
             val seasons by container.seasonCatalog.seasons.collectAsState()
@@ -463,26 +479,30 @@ fun NavGraph(
                 onPauseToggle = { if (state.isPaused) viewModel.resume() else viewModel.pause() },
                 onBackgrounded = viewModel::pauseForBackground,
                 onQuit = {
-                    // A season loss is deferred exactly like an endless one (see
-                    // GameViewModel's class doc) — quitting without this would leave the
-                    // life unspent and the attempt unrecorded. acknowledgeLossAndQuit()
-                    // fires its own TAP haptic.
-                    viewModel.acknowledgeLossAndQuit()
-                    navController.popBackStack()
+                    ifResumed {
+                        // A season loss is deferred exactly like an endless one (see
+                        // GameViewModel's class doc) — quitting without this would leave the
+                        // life unspent and the attempt unrecorded. acknowledgeLossAndQuit()
+                        // fires its own TAP haptic.
+                        viewModel.acknowledgeLossAndQuit()
+                        navController.popBackStack()
+                    }
                 },
                 onQuitDuringPlay = {
-                    // Mid-game abandon (spec §3.6) — no outcome exists yet, so unlike
-                    // [onQuit] above this must not spend a life or touch stats. Mirrors
-                    // iOS's `tapOnExit()`, the Quit modal's confirm handler.
-                    AnalyticsService.log(
-                        AnalyticsEvent.QuitConfirmed(
-                            difficulty = state.recordedDifficulty.key,
-                            timeRemaining = state.timeRemaining.toInt(),
-                            failedTries = state.failedTries,
-                        ),
-                    )
-                    HapticsService.fire(HapticIntent.TAP)
-                    navController.popBackStack()
+                    ifResumed {
+                        // Mid-game abandon (spec §3.6) — no outcome exists yet, so unlike
+                        // [onQuit] above this must not spend a life or touch stats. Mirrors
+                        // iOS's `tapOnExit()`, the Quit modal's confirm handler.
+                        AnalyticsService.log(
+                            AnalyticsEvent.QuitConfirmed(
+                                difficulty = state.recordedDifficulty.key,
+                                timeRemaining = state.timeRemaining.toInt(),
+                                failedTries = state.failedTries,
+                            ),
+                        )
+                        HapticsService.fire(HapticIntent.TAP)
+                        navController.popBackStack()
+                    }
                 },
                 onRetry = {
                     // Out of lives after this loss commits: stay put rather than navigate
@@ -494,8 +514,10 @@ fun NavGraph(
                     coroutineScope.launch { viewModel.retry() }
                 },
                 onNextLevel = {
-                    navController.popBackStack()
-                    navController.navigate(Routes.seasonGame(seasonId, level + 1))
+                    ifResumed {
+                        navController.popBackStack()
+                        navController.navigate(Routes.seasonGame(seasonId, level + 1))
+                    }
                 },
                 isLevel = true,
                 starBalance = starBalance,
@@ -506,8 +528,10 @@ fun NavGraph(
                 onBuyLifeWithStars = { coroutineScope.launch { viewModel.buyLifeWithStars() } },
                 onForgiveMistakesWithStars = { coroutineScope.launch { viewModel.forgiveMistakesWithStars() } },
                 onSkipLevelWithStars = {
-                    coroutineScope.launch {
-                        if (viewModel.skipLevelWithStars()) navController.popBackStack()
+                    ifResumed {
+                        coroutineScope.launch {
+                            if (viewModel.skipLevelWithStars()) navController.popBackStack()
+                        }
                     }
                 },
                 onWatchAdForLife = { onFinished ->
@@ -550,6 +574,7 @@ fun NavGraph(
         }
 
         composable(Routes.LEVEL_GAME, arguments = listOf(navArgument("level") { type = NavType.IntType })) { entry ->
+            val ifResumed = rememberResumedGuard()
             val level = entry.arguments?.getInt("level") ?: 1
             val store = container.levelProgress
             val viewModel: GameViewModel = viewModel(
@@ -614,22 +639,26 @@ fun NavGraph(
                 onPauseToggle = { if (state.isPaused) viewModel.resume() else viewModel.pause() },
                 onBackgrounded = viewModel::pauseForBackground,
                 onQuit = {
-                    viewModel.acknowledgeLossAndQuit()
-                    navController.popBackStack()
+                    ifResumed {
+                        viewModel.acknowledgeLossAndQuit()
+                        navController.popBackStack()
+                    }
                 },
                 onQuitDuringPlay = {
-                    // Mid-game abandon (spec §3.6) — no outcome exists yet, so unlike
-                    // [onQuit] above this must not spend a life or touch stats. Mirrors
-                    // iOS's `tapOnExit()`, the Quit modal's confirm handler.
-                    AnalyticsService.log(
-                        AnalyticsEvent.QuitConfirmed(
-                            difficulty = state.recordedDifficulty.key,
-                            timeRemaining = state.timeRemaining.toInt(),
-                            failedTries = state.failedTries,
-                        ),
-                    )
-                    HapticsService.fire(HapticIntent.TAP)
-                    navController.popBackStack()
+                    ifResumed {
+                        // Mid-game abandon (spec §3.6) — no outcome exists yet, so unlike
+                        // [onQuit] above this must not spend a life or touch stats. Mirrors
+                        // iOS's `tapOnExit()`, the Quit modal's confirm handler.
+                        AnalyticsService.log(
+                            AnalyticsEvent.QuitConfirmed(
+                                difficulty = state.recordedDifficulty.key,
+                                timeRemaining = state.timeRemaining.toInt(),
+                                failedTries = state.failedTries,
+                            ),
+                        )
+                        HapticsService.fire(HapticIntent.TAP)
+                        navController.popBackStack()
+                    }
                 },
                 onRetry = {
                     // Out of lives after this loss commits: stay put rather than navigate
@@ -641,8 +670,10 @@ fun NavGraph(
                     coroutineScope.launch { viewModel.retry() }
                 },
                 onNextLevel = {
-                    navController.popBackStack()
-                    navController.navigate(Routes.level(level + 1))
+                    ifResumed {
+                        navController.popBackStack()
+                        navController.navigate(Routes.level(level + 1))
+                    }
                 },
                 isLevel = true,
                 starBalance = starBalance,
@@ -653,8 +684,10 @@ fun NavGraph(
                 onBuyLifeWithStars = { coroutineScope.launch { viewModel.buyLifeWithStars() } },
                 onForgiveMistakesWithStars = { coroutineScope.launch { viewModel.forgiveMistakesWithStars() } },
                 onSkipLevelWithStars = {
-                    coroutineScope.launch {
-                        if (viewModel.skipLevelWithStars()) navController.popBackStack()
+                    ifResumed {
+                        coroutineScope.launch {
+                            if (viewModel.skipLevelWithStars()) navController.popBackStack()
+                        }
                     }
                 },
                 onWatchAdForLife = { onFinished ->
@@ -694,6 +727,7 @@ fun NavGraph(
         }
 
         composable(Routes.SETTINGS) {
+            val ifResumed = rememberResumedGuard()
             val viewModel: SettingsViewModel = viewModel(factory = viewModelFactory { initializer { SettingsViewModel(container.prefs, container.notifications) } })
             val state by viewModel.state.collectAsState()
             val menuEntry = remember { navController.getBackStackEntry(Routes.MENU) }
@@ -704,15 +738,20 @@ fun NavGraph(
             // never writes whatsNewLastSeenVersion — see MainActivity.
             SettingsScreen(
                 state,
-                onBack = { if (state.difficultyChanged) menuViewModel.onSettingsDifficultyChanged(); navController.popBackStack() },
+                onBack = {
+                    ifResumed {
+                        if (state.difficultyChanged) menuViewModel.onSettingsDifficultyChanged()
+                        navController.popBackStack()
+                    }
+                },
                 onDifficulty = viewModel::setDifficulty,
                 onTheme = viewModel::setTheme,
                 onHaptics = viewModel::setHaptics,
                 onEnableReminders = viewModel::enableReminders,
                 onDisableReminders = viewModel::disableReminders,
                 onWhatsNew = onWhatsNew,
-                onAchievements = { navController.navigate(Routes.ACHIEVEMENTS) },
-                onDebugMenu = if (BuildConfig.DEBUG) { { navController.navigate(Routes.DEBUG_MENU) } } else null,
+                onAchievements = { ifResumed { navController.navigate(Routes.ACHIEVEMENTS) } },
+                onDebugMenu = if (BuildConfig.DEBUG) { { ifResumed { navController.navigate(Routes.DEBUG_MENU) } } } else null,
             )
         }
 
@@ -720,8 +759,9 @@ fun NavGraph(
         // in release, and nothing there can navigate to it.
         if (BuildConfig.DEBUG) {
             composable(Routes.DEBUG_MENU) {
+                val ifResumed = rememberResumedGuard()
                 DebugMenuScreen(
-                    onBack = { navController.popBackStack() },
+                    onBack = { ifResumed { navController.popBackStack() } },
                     onNotificationsAuthorized = { container.applicationScope.launch { container.notifications.activateReminders() } },
                     onRestoreLives = { container.levelLives.refill(LevelLivesService.MAX_LIVES) },
                 )
@@ -729,14 +769,16 @@ fun NavGraph(
         }
 
         composable(Routes.ACHIEVEMENTS) {
+            val ifResumed = rememberResumedGuard()
             val viewModel: AchievementsViewModel = viewModel(
                 factory = viewModelFactory { initializer { AchievementsViewModel(container.profileStats) } },
             )
             val state by viewModel.state.collectAsState()
-            AchievementsScreen(state = state, onBack = { navController.popBackStack() })
+            AchievementsScreen(state = state, onBack = { ifResumed { navController.popBackStack() } })
         }
 
         composable(Routes.CREATE_MEMORAMA) {
+            val ifResumed = rememberResumedGuard()
             val viewModel: CreateMemoramaViewModel = viewModel(
                 factory = viewModelFactory {
                     initializer { CreateMemoramaViewModel(container.prefs) }
@@ -761,15 +803,17 @@ fun NavGraph(
                 onAddEmoji = viewModel::addEmoji,
                 onRemoveEmoji = viewModel::removeEmoji,
                 onSave = {
-                    coroutineScope.launch {
-                        if (viewModel.save()) {
-                            menuViewModel.onCustomMemoramaChanged()
-                            menuViewModel.showMyMemoramas()
-                            navController.popBackStack()
+                    ifResumed {
+                        coroutineScope.launch {
+                            if (viewModel.save()) {
+                                menuViewModel.onCustomMemoramaChanged()
+                                menuViewModel.showMyMemoramas()
+                                navController.popBackStack()
+                            }
                         }
                     }
                 },
-                onCancel = { navController.popBackStack() },
+                onCancel = { ifResumed { navController.popBackStack() } },
             )
         }
 
@@ -780,6 +824,7 @@ fun NavGraph(
                 navArgument("difficultyKey") { type = NavType.StringType },
             ),
         ) { backStackEntry ->
+            val ifResumed = rememberResumedGuard()
             val boardId = backStackEntry.arguments?.getString("boardId").orEmpty()
             val difficulty = Difficulty.parseOrDefault(
                 backStackEntry.arguments?.getString("difficultyKey"),
@@ -835,17 +880,19 @@ fun NavGraph(
                 },
                 onBackgrounded = viewModel::pauseForBackground,
                 onQuit = {
-                    // Free play has no lose-screen rescue to protect, so this doubles as
-                    // the mid-game abandon (mirrors iOS's `tapOnExit()`).
-                    AnalyticsService.log(
-                        AnalyticsEvent.QuitConfirmed(
-                            difficulty = state.recordedDifficulty.key,
-                            timeRemaining = state.timeRemaining.toInt(),
-                            failedTries = state.failedTries,
-                        ),
-                    )
-                    HapticsService.fire(HapticIntent.TAP)
-                    navController.popBackStack()
+                    ifResumed {
+                        // Free play has no lose-screen rescue to protect, so this doubles as
+                        // the mid-game abandon (mirrors iOS's `tapOnExit()`).
+                        AnalyticsService.log(
+                            AnalyticsEvent.QuitConfirmed(
+                                difficulty = state.recordedDifficulty.key,
+                                timeRemaining = state.timeRemaining.toInt(),
+                                failedTries = state.failedTries,
+                            ),
+                        )
+                        HapticsService.fire(HapticIntent.TAP)
+                        navController.popBackStack()
+                    }
                 },
                 onRetry = {
                     AnalyticsService.log(
@@ -875,5 +922,26 @@ fun NavGraph(
                 },
             )
         }
+    }
+}
+
+/**
+ * Runs a navigation only while the screen asking for it is still the resumed one on top.
+ *
+ * A screen that is leaving is still drawn, and still takes taps, for its whole exit
+ * transition. A second tap in that window navigated again: double-tapping a game's quit
+ * "Accept" or "Back to levels" popped the Menu as well and left an empty back stack — a
+ * blank screen the player could only escape by killing the app (QA DM-010) — and a
+ * double-tapped board or level tile pushed two games. Navigating moves this screen's back
+ * stack entry below RESUMED at once, so the guard drops every tap after the first.
+ *
+ * The same rule as lifecycle-compose's `dropUnlessResumed`, which only wraps callbacks that
+ * take no arguments; several here take a board, level or season.
+ */
+@Composable
+private fun rememberResumedGuard(): (() -> Unit) -> Unit {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    return remember(lifecycle) {
+        { action -> if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) action() }
     }
 }

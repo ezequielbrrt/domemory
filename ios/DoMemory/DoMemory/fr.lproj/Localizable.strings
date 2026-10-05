@@ -21,6 +21,9 @@
 "game_pairs_label" = "paires";
 "game_points_label" = "Points";
 "game_quit_confirmation" = "Voulez-vous vraiment quitter ?";
+"game_card_face_down" = "Carte face cachée";
+"game_card_state_face_up" = "Face visible";
+"game_card_state_matched" = "Associée";
 "game_remaining_label" = "restantes";
 "game_errors_label" = "erreurs";
 "game_time_label" = "Temps";

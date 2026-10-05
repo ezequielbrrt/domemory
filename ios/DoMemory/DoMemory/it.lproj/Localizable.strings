@@ -21,6 +21,9 @@
 "game_pairs_label" = "coppie";
 "game_points_label" = "Punti";
 "game_quit_confirmation" = "Sei sicuro di voler uscire?";
+"game_card_face_down" = "Carta coperta";
+"game_card_state_face_up" = "Scoperta";
+"game_card_state_matched" = "Abbinata";
 "game_remaining_label" = "rimanenti";
 "game_errors_label" = "errori";
 "game_time_label" = "Tempo";

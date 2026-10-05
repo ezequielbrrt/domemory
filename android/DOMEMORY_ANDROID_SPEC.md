@@ -194,6 +194,13 @@ confirm once an analytics pipeline exists on Android (currently absent — see
 the "Deliberately deferred" list in `ANDROID_PLAN.md` §7); until then this is
 UI-only parity.
 
+A navigation fires once per screen. A screen that is leaving is still drawn,
+and still takes taps, for its whole exit transition, so a second tap on Accept,
+Menu, Next level or a back button would navigate again: on Android, a
+double-tapped Accept popped the Menu too and left a blank screen. Android drops
+any navigation from a screen that is no longer resumed (`rememberResumedGuard`
+in `NavGraph.kt`), and Skip refuses a second purchase for the same loss.
+
 ### 3.7 Leaving the app mid-game
 
 When the app leaves the foreground during a game that is still in play (no
@@ -503,7 +510,9 @@ Implementation notes that matter:
   cancels the scheduled flip-back and leaves the board revealed for free.
 - **Pausing holds Freeze.** The deadline is wall-clock, so the time left on it is
   saved when the clock stops and a fresh deadline is set from it on resume.
-  Otherwise a pause during Freeze burns the Freeze the player paid for.
+  Otherwise a pause during Freeze burns the Freeze the player paid for. A loss
+  holds it the same way, so a forgive-mistakes rescue (§7.7), which resumes the
+  same board, gets back the Freeze that was running when the loss landed.
 - **Peek and Freeze can't be bought while they run.** A second one restarts the
   effect rather than extending it, so it would charge twice for what plays as
   one. Their buttons are disabled until the effect ends (`isPeeking`, `isFrozen`),
@@ -1309,8 +1318,9 @@ Details that matter:
   A face-up card reads its emoji with the state "Face up", or "Matched" once its
   pair is found, and offers no action, because tapping it does nothing. A matched
   card that has left the board is removed from the accessibility tree; it is only
-  transparent, so a screen reader would otherwise still find it. Android only for
-  now (`game_card_*` strings); iOS cards have no accessibility labels yet.
+  transparent, so a screen reader would otherwise still find it. Both platforms
+  share the `game_card_*` keys. On iOS a face-down card's emoji is still in the
+  view tree at zero opacity, so the label must replace it, never sit beside it.
 - Disabled controls stay silent — the haptic modifier sits inside the disabled
   subtree.
 

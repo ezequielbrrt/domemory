@@ -797,6 +797,36 @@ class GameViewModelTest {
     }
 
     @Test
+    fun `a freeze running when the mistakes loss lands is still running after forgiving`() = runTest {
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.FREEZE.cost + LevelPowerUp.FORGIVE_COST)
+        runCurrent()
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = RecordingStore())),
+            levelLives = levelLives(),
+            starWallet = wallet,
+        )
+        val freezeMillis = (LevelPowerUp.FREEZE_DURATION_SECONDS * 1000).toLong()
+        val max = requireNotNull(vm.state.value.maxFailures)
+        missPairs(vm, times = max - 1)
+        assertTrue(vm.buyFreeze())
+        val (a, b) = mismatchedIds(vm)
+        vm.choose(a)
+        vm.choose(b)
+        advanceTimeBy(GameViewModel.MISTAKE_LOSS_MILLIS + 100)
+        assertEquals(GameOutcome.Lost(LoseReason.TOO_MANY_MISTAKES), vm.state.value.outcome)
+        val held = vm.state.value.timeRemaining
+
+        // Longer than the whole freeze sitting on the lose screen.
+        advanceTimeBy(freezeMillis * 2)
+        assertTrue(vm.forgiveMistakesWithStars())
+        advanceTimeBy(freezeMillis / 2)
+        assertTrue(vm.state.value.isFrozen)
+        assertEquals(held, vm.state.value.timeRemaining, 0.001)
+        vm.stop()
+    }
+
+    @Test
     fun `forgiving mistakes floors the clock so the resumed board is playable`() = runTest {
         val store = RecordingStore()
         val wallet = starWallet()
@@ -934,6 +964,29 @@ class GameViewModelTest {
 
         assertFalse("committing the loss spends the heart", vm.state.value.isLifeAtStake)
         assertEquals(0, vm.state.value.livesRemaining)
+        vm.stop()
+    }
+
+    @Test
+    fun `a second skip of the same loss is refused and charges nothing`() = runTest {
+        val store = RecordingStore()
+        val lives = levelLives()
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.SKIP_LEVEL_COST * 2)
+        val vm = viewModel(
+            mode = GameMode.Level(LevelContext(number = 1, store = store)),
+            levelLives = lives,
+            starWallet = wallet,
+        )
+        advanceTimeBy((vm.state.value.timeRemaining * 1000).toLong() + 200)
+
+        val results = listOf(async { vm.skipLevelWithStars() }, async { vm.skipLevelWithStars() }).awaitAll()
+        runCurrent()
+
+        assertEquals(1, results.count { it })
+        assertEquals(listOf(1), store.skippedLevels)
+        assertEquals(LevelPowerUp.SKIP_LEVEL_COST, wallet.balance.value)
+        assertEquals(3, lives.remaining())
         vm.stop()
     }
 

@@ -21,6 +21,9 @@
 "game_pairs_label" = "ペア";
 "game_points_label" = "ポイント";
 "game_quit_confirmation" = "本当に終了しますか？";
+"game_card_face_down" = "裏向きのカード";
+"game_card_state_face_up" = "表向き";
+"game_card_state_matched" = "ペア成立";
 "game_remaining_label" = "残り";
 "game_errors_label" = "ミス";
 "game_time_label" = "時間";
