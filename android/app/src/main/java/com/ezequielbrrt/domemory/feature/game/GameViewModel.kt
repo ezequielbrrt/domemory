@@ -6,6 +6,7 @@ import com.ezequielbrrt.domemory.core.model.Board
 import com.ezequielbrrt.domemory.core.model.ChoiceOutcome
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.core.model.GameMode
+import com.ezequielbrrt.domemory.core.model.LevelContext
 import com.ezequielbrrt.domemory.core.model.MemoryGame
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
@@ -172,6 +173,15 @@ class GameViewModel(
 
     /** Wall-clock deadline the countdown is held to; written by the Freeze power-up. */
     private var frozenUntilMillis: Long = 0L
+
+    /** Freeze time left when the game was paused, restored on [resume]. The deadline above is
+     * wall-clock, so without this a pause during Freeze would burn the Freeze it paid for. */
+    private var heldFreezeMillis: Long? = null
+
+    /** True while a power-up purchase is between its tap and its effect. The star spend is a
+     * suspending DataStore write, so without this a double tap starts two purchases. */
+    private var powerUpInFlight = false
+
     private var winReported = false
 
     /** Star power-ups bought during the current attempt, reported on `level_finished`. Reset by
@@ -589,6 +599,22 @@ class GameViewModel(
         onAnalytics?.invoke(
             AnalyticsEvent.PauseOpened(_state.value.recordedDifficulty.key, _state.value.timeRemaining.toInt()),
         )
+        suspendPlay()
+    }
+
+    /**
+     * The app left the foreground mid-game. The countdown runs on the main thread, which keeps
+     * going in the background, so without this a player who switches apps comes back to an
+     * out-of-time loss. Pauses silently — no haptic, no `pause_opened`, since the player
+     * didn't tap anything — and the pause sheet is waiting when they return.
+     */
+    fun pauseForBackground() {
+        val current = _state.value
+        if (current.isPaused || current.isFinished) return
+        suspendPlay()
+    }
+
+    private fun suspendPlay() {
         // Pausing during the mistake-loss deferral must not let the player play on past
         // the budget "for free" by never letting the delay elapse — cancelling it here
         // and re-arming a fresh one from `resume()` is the actual spec 7.5 rule.
@@ -597,6 +623,8 @@ class GameViewModel(
         // A peek left running through a pause would leave the board revealed for free
         // once resumed (spec 7.6).
         endPeekIfActive()
+        val freezeLeft = frozenUntilMillis - now()
+        if (freezeLeft > 0) heldFreezeMillis = freezeLeft
         _state.value = _state.value.copy(isPaused = true)
     }
 
@@ -606,6 +634,8 @@ class GameViewModel(
         onAnalytics?.invoke(
             AnalyticsEvent.ResumeTapped(_state.value.recordedDifficulty.key, _state.value.timeRemaining.toInt()),
         )
+        heldFreezeMillis?.let { frozenUntilMillis = now() + it }
+        heldFreezeMillis = null
         _state.value = _state.value.copy(isPaused = false)
         checkMistakeBudget()
     }
@@ -616,6 +646,7 @@ class GameViewModel(
         job.cancel()
         game.flipDownUnmatched(now())
         publishCards()
+        _state.value = _state.value.copy(isPeeking = false)
     }
 
     private fun publishCards() {
@@ -651,6 +682,7 @@ class GameViewModel(
         winReported = false
         lossCommitted = false
         frozenUntilMillis = 0L
+        heldFreezeMillis = null
         gameStartedAtMillis = now()
         game = MemoryGame(board.buildCards())
         _state.value = initialState()
@@ -715,11 +747,13 @@ class GameViewModel(
         flipBackJob = null
         game.faceUpAllUnmatched(now())
         publishCards()
+        _state.value = _state.value.copy(isPeeking = true)
         peekJob = workScope.launch {
             delay((LevelPowerUp.PEEK_DURATION_SECONDS * 1000).toLong())
             peekJob = null
             game.flipDownUnmatched(now())
             publishCards()
+            _state.value = _state.value.copy(isPeeking = false)
         }
         true
     }
@@ -768,11 +802,39 @@ class GameViewModel(
      * balance decides before any effect exists to roll back. If [apply] itself then
      * reports failure (e.g. reveal pair with no unmatched pair left), the spend is
      * refunded via [StarWalletService.credit] so a failed power-up never costs stars.
+     *
+     * Two more refusals happen before any spend. A purchase already in flight blocks a second
+     * one, so a double tap buys once. And Peek or Freeze is refused while it is already
+     * running: a second one restarts the effect rather than extending it, so it would charge
+     * twice for what plays as one.
      */
     private suspend fun spendOnPowerUp(powerUp: LevelPowerUp, apply: () -> Boolean): Boolean {
         val context = (mode as? GameMode.Level)?.context ?: return false
         if (_state.value.isPaused || _state.value.isFinished) return false
+        if (powerUpInFlight || isActive(powerUp)) return false
         val wallet = starWallet ?: return false
+        powerUpInFlight = true
+        try {
+            return spendAndApply(context, wallet, powerUp, apply)
+        } finally {
+            powerUpInFlight = false
+        }
+    }
+
+    private fun isActive(powerUp: LevelPowerUp): Boolean = when (powerUp) {
+        // Not `peekJob != null`: [stop] cancels the job without clearing it, so a retry
+        // within a peek's few seconds would otherwise refuse Peek for the whole new attempt.
+        LevelPowerUp.PEEK -> peekJob?.isActive == true
+        LevelPowerUp.FREEZE -> now() < frozenUntilMillis || heldFreezeMillis != null
+        LevelPowerUp.EXTRA_TIME, LevelPowerUp.REVEAL_PAIR -> false
+    }
+
+    private suspend fun spendAndApply(
+        context: LevelContext,
+        wallet: StarWalletService,
+        powerUp: LevelPowerUp,
+        apply: () -> Boolean,
+    ): Boolean {
         if (!wallet.spend(powerUp.cost)) {
             onHaptic?.invoke(HapticIntent.WARNING)
             return false

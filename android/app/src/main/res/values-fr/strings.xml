@@ -30,6 +30,10 @@
     <string name="game_points_label">Points</string>
     <string name="game_quit_accessibility">Quitter la partie</string>
     <string name="game_quit_confirmation">Voulez-vous vraiment quitter ?</string>
+    <string name="game_card_face_down">Carte face cachée</string>
+    <string name="game_card_state_face_up">Face visible</string>
+    <string name="game_card_state_matched">Associée</string>
+    <string name="game_card_flip_action">Retourner</string>
     <string name="game_remaining_label">restantes</string>
     <string name="game_errors_label">erreurs</string>
     <string name="game_time_label">Temps</string>

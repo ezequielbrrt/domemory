@@ -186,6 +186,40 @@ class GameViewModelTest {
     }
 
     @Test
+    fun `backgrounding pauses silently and holds the clock`() = runTest {
+        val haptics = mutableListOf<com.ezequielbrrt.domemory.services.haptics.HapticIntent>()
+        val events = mutableListOf<AnalyticsEvent>()
+        val vm = viewModel(onHaptic = { haptics += it }, onAnalytics = { events += it })
+        events.clear()
+
+        vm.pauseForBackground()
+        assertTrue(vm.state.value.isPaused)
+        assertTrue(haptics.isEmpty())
+        assertTrue(events.isEmpty())
+        advanceTimeBy(30_000)
+        assertEquals(60.0, vm.state.value.timeRemaining, 0.001)
+
+        // Only the player's own Continue resumes it.
+        vm.pauseForBackground()
+        assertTrue(vm.state.value.isPaused)
+        vm.resume()
+        advanceTimeBy(5_000)
+        assertEquals(55.0, vm.state.value.timeRemaining, 0.2)
+        vm.stop()
+    }
+
+    @Test
+    fun `backgrounding a finished game changes nothing`() = runTest {
+        val vm = viewModel()
+        clearBoard(vm)
+        assertEquals(GameOutcome.Won, vm.state.value.outcome)
+
+        vm.pauseForBackground()
+        assertFalse(vm.state.value.isPaused)
+        vm.stop()
+    }
+
+    @Test
     fun `a mismatched pair flips back after two seconds`() = runTest {
         val vm = viewModel()
         val (a, b) = mismatchedIds(vm)
@@ -1233,6 +1267,99 @@ class GameViewModelTest {
         advanceTimeBy(1_000)
         assertFalse(vm.state.value.isFrozen)
         assertTrue(vm.state.value.timeRemaining < before)
+        vm.stop()
+    }
+
+    @Test
+    fun `pausing during a freeze keeps the unused freeze for after resume`() = runTest {
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.FREEZE.cost)
+        runCurrent()
+        val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)), starWallet = wallet)
+        val before = vm.state.value.timeRemaining
+        val freezeMillis = (LevelPowerUp.FREEZE_DURATION_SECONDS * 1000).toLong()
+
+        assertTrue(vm.buyFreeze())
+        advanceTimeBy(1_000)
+        vm.pause()
+        // Longer than the whole freeze: a wall-clock deadline would have run out by now.
+        advanceTimeBy(freezeMillis * 3)
+        vm.resume()
+        advanceTimeBy(freezeMillis - 1_000 - 200)
+        assertTrue(vm.state.value.isFrozen)
+        assertEquals(before, vm.state.value.timeRemaining, 0.001)
+
+        advanceTimeBy(1_000)
+        assertFalse(vm.state.value.isFrozen)
+        assertTrue(vm.state.value.timeRemaining < before)
+        vm.stop()
+    }
+
+    @Test
+    fun `a second peek is refused while the first is showing, and costs nothing`() = runTest {
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.PEEK.cost * 2)
+        runCurrent()
+        val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)), starWallet = wallet)
+
+        assertTrue(vm.buyPeek())
+        assertTrue(vm.state.value.isPeeking)
+        assertFalse(vm.buyPeek())
+        assertEquals(LevelPowerUp.PEEK.cost, wallet.balance.value)
+
+        advanceTimeBy((LevelPowerUp.PEEK_DURATION_SECONDS * 1000).toLong() + 100)
+        assertFalse(vm.state.value.isPeeking)
+        assertTrue(vm.buyPeek())
+        vm.stop()
+    }
+
+    @Test
+    fun `restarting mid-peek leaves peek buyable in the new attempt`() = runTest {
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.PEEK.cost * 2)
+        runCurrent()
+        val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)), starWallet = wallet)
+
+        assertTrue(vm.buyPeek())
+        vm.restart()
+        assertFalse(vm.state.value.isPeeking)
+        assertTrue(vm.buyPeek())
+        vm.stop()
+    }
+
+    @Test
+    fun `a second freeze is refused while frozen, including while paused`() = runTest {
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.FREEZE.cost * 2)
+        runCurrent()
+        val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)), starWallet = wallet)
+
+        assertTrue(vm.buyFreeze())
+        assertFalse(vm.buyFreeze())
+        vm.pause()
+        vm.resume()
+        assertFalse(vm.buyFreeze())
+        assertEquals(LevelPowerUp.FREEZE.cost, wallet.balance.value)
+
+        advanceTimeBy((LevelPowerUp.FREEZE_DURATION_SECONDS * 1000).toLong() + 200)
+        assertTrue(vm.buyFreeze())
+        vm.stop()
+    }
+
+    @Test
+    fun `a double tap buys a power-up once even when the wallet covers both`() = runTest {
+        val wallet = starWallet()
+        wallet.credit(LevelPowerUp.EXTRA_TIME.cost * 2)
+        runCurrent()
+        val vm = viewModel(mode = GameMode.Level(LevelContext(number = 1, store = FakeStore)), starWallet = wallet)
+        val before = vm.state.value.timeRemaining
+
+        val results = listOf(async { vm.buyExtraTime() }, async { vm.buyExtraTime() }).awaitAll()
+        runCurrent()
+
+        assertEquals(1, results.count { it })
+        assertEquals(before + LevelPowerUp.EXTRA_TIME_SECONDS, vm.state.value.timeRemaining, 0.001)
+        assertEquals(LevelPowerUp.EXTRA_TIME.cost, wallet.balance.value)
         vm.stop()
     }
 

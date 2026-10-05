@@ -30,6 +30,10 @@
     <string name="game_points_label">Punkte</string>
     <string name="game_quit_accessibility">Spiel beenden</string>
     <string name="game_quit_confirmation">Möchtest du wirklich beenden?</string>
+    <string name="game_card_face_down">Verdeckte Karte</string>
+    <string name="game_card_state_face_up">Aufgedeckt</string>
+    <string name="game_card_state_matched">Gefunden</string>
+    <string name="game_card_flip_action">Umdrehen</string>
     <string name="game_remaining_label">übrig</string>
     <string name="game_errors_label">Fehler</string>
     <string name="game_time_label">Zeit</string>

@@ -64,6 +64,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.ezequielbrrt.domemory.R
 import com.ezequielbrrt.domemory.feature.levels.LivesEffect
 import com.ezequielbrrt.domemory.feature.levels.StarBalancePill
@@ -103,6 +105,9 @@ fun GameScreen(
     onPauseToggle: () -> Unit,
     onQuit: () -> Unit,
     onRetry: () -> Unit,
+    /** Fired when the app leaves the foreground. The countdown keeps running in the
+     * background, so callers pause the game here; the pause sheet is waiting on return. */
+    onBackgrounded: () -> Unit,
     /** Fired by the in-HUD quit button once the player confirms, i.e. abandoning a game
      * that hasn't reached an outcome yet. Unlike [onQuit] (which the Levels/Seasons win
      * and lose screens use, and which commits that outcome first), this must never spend
@@ -149,6 +154,8 @@ fun GameScreen(
         AnalyticsService.log(AnalyticsEvent.ScreenView(screenName = "gameplay", screenClass = "GameScreen"))
     }
 
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { onBackgrounded() }
+
     // Drives the pie only. Repainting on frames is cheap; recomputing the model is not.
     var frameTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(state.showsPie, state.isPaused, state.isFinished) {
@@ -187,6 +194,21 @@ fun GameScreen(
                     showQuitConfirm = true
                 },
             )
+            // Power-ups sit between the HUD and the board, as on iOS (`MemorizeView.swift`),
+            // so the banner below the board never borders a control the player taps mid-game.
+            if (isLevel && starBalance != null && !state.isFinished) {
+                Spacer(Modifier.size(12.dp))
+                PowerUpBar(
+                    starBalance = starBalance,
+                    enabled = !state.isPaused,
+                    isPeeking = state.isPeeking,
+                    isFrozen = state.isFrozen,
+                    onBuyExtraTime = onBuyExtraTime,
+                    onBuyPeek = onBuyPeek,
+                    onBuyFreeze = onBuyFreeze,
+                    onBuyRevealPair = onBuyRevealPair,
+                )
+            }
             Spacer(Modifier.size(12.dp))
             BoardGrid(
                 state = state,
@@ -194,18 +216,8 @@ fun GameScreen(
                 onChoose = onChoose,
                 modifier = Modifier.weight(1f),
             )
+            Spacer(Modifier.size(12.dp))
             AdMobBanner(AdPlacement.GAME_BANNER, Modifier.fillMaxWidth())
-            if (isLevel && starBalance != null && !state.isFinished) {
-                Spacer(Modifier.size(12.dp))
-                PowerUpBar(
-                    starBalance = starBalance,
-                    enabled = !state.isPaused,
-                    onBuyExtraTime = onBuyExtraTime,
-                    onBuyPeek = onBuyPeek,
-                    onBuyFreeze = onBuyFreeze,
-                    onBuyRevealPair = onBuyRevealPair,
-                )
-            }
         }
 
         state.outcome?.let { outcome ->
@@ -573,11 +585,14 @@ fun failsChipAccessibilityValues(failedTries: Int, maxFailures: Int?): Pair<Int,
     maxFailures?.let { failedTries to it }
 
 /** The power-up bar under the HUD (spec 7.6). No confirmation step: a purchase applies
- * immediately, so every button is a single tap. */
+ * immediately, so every button is a single tap. Peek and Freeze are disabled while they
+ * run, since buying either again restarts it rather than extending it. */
 @Composable
 private fun PowerUpBar(
     starBalance: Int,
     enabled: Boolean,
+    isPeeking: Boolean,
+    isFrozen: Boolean,
     onBuyExtraTime: () -> Unit,
     onBuyPeek: () -> Unit,
     onBuyFreeze: () -> Unit,
@@ -595,14 +610,14 @@ private fun PowerUpBar(
         PowerUpButton(
             label = stringResource(R.string.levels_powerup_peek),
             cost = LevelPowerUp.PEEK.cost,
-            enabled = enabled && starBalance >= LevelPowerUp.PEEK.cost,
+            enabled = enabled && !isPeeking && starBalance >= LevelPowerUp.PEEK.cost,
             onClick = onBuyPeek,
             modifier = Modifier.weight(1f),
         )
         PowerUpButton(
             label = stringResource(R.string.levels_powerup_freeze),
             cost = LevelPowerUp.FREEZE.cost,
-            enabled = enabled && starBalance >= LevelPowerUp.FREEZE.cost,
+            enabled = enabled && !isFrozen && starBalance >= LevelPowerUp.FREEZE.cost,
             onClick = onBuyFreeze,
             modifier = Modifier.weight(1f),
         )

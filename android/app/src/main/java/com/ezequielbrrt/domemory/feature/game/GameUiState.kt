@@ -24,6 +24,8 @@ data class GameUiState(
     val totalPairs: Int = 0,
     val isPaused: Boolean = false,
     val isFrozen: Boolean = false,
+    /** A bought Peek is showing the board; the Peek button stays disabled until it ends. */
+    val isPeeking: Boolean = false,
     val showsPie: Boolean = false,
     /** The difficulty reported to analytics and shown on the win screen (spec 4). */
     val recordedDifficulty: Difficulty = Difficulty.MEDIUM,

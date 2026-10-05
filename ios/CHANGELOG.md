@@ -27,6 +27,11 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Fixed the iOS quit confirmation showing the win modal's "You finished this memorama in time" (`game_win_description`) under "Are you sure you want to exit?". `QuitModal` no longer shows that line; Android's quit confirmation never did.
+- Fixed Freeze running out during a pause, on iOS and Android. Its deadline is wall-clock, so pausing for ten seconds used up the whole 5★ Freeze. The time left is now held when the clock stops and restored when play resumes (`MemorizeViewModel.heldFreezeRemaining`, `GameViewModel.heldFreezeMillis`).
+- Peek and Freeze can no longer be bought while they are already running, on iOS and Android. Buying either again restarted the effect instead of extending it, so a double tap charged 8★ or 10★ for one Peek or one Freeze. Their buttons are disabled until the effect ends, and the purchase is refused before any stars are spent (`isActive(_:)` / `isPeeking` on iOS, `GameUiState.isPeeking` on Android). On Android a purchase still being saved also refuses a second tap, so a double tap on any power-up buys it once.
+- Fixed Android's countdown running while the app is in the background. A player who switched apps mid-game came back to an out-of-time loss. Leaving the app now pauses the game silently, with no haptic and no `pause_opened`, and the pause sheet is waiting on return (`GameViewModel.pauseForBackground()`). `DOMEMORY_ANDROID_SPEC.md` §3.7 describes it.
+- Moved Android's power-up bar above the board, as on iOS. It sat below the ad banner, 12dp from it, so a mis-tap on a power-up could hit the ad. The banner now sits alone at the bottom with 12dp of space above it.
+- Android's cards now work with TalkBack. A face-down card read as "question mark", matched cards were never announced, and matched cards that had left the board were only transparent, so TalkBack still found them. A face-down card now reads "Face-down card" with a "Flip" action, a face-up card reads its emoji with "Face up" or "Matched", and cards that have left the board are removed from the accessibility tree. Four new `game_card_*` strings in all ten locales; `DOMEMORY_ANDROID_SPEC.md` §14.5 describes it. iOS cards still have no accessibility labels.
 
 [4.4.1] 28-09-2026
 
