@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-[Unreleased]
+[4.5.0] 06-10-2026
 
 ### Added
 - Added a season deep link, `domemory://season/<id>` (or `https://domemory.app/season/<id>`), which opens that season's level map from the menu. The App Store in-app event for Spooky Season needs one: Apple refuses to review an event without a deep link, and until now any other `domemory://` link opened the app and stopped on the menu. `domemory://season` with no id opens whichever season is active, and `season` must lead the link, so an invite to a room whose code is `SEASON` (`domemory://join/season`) still joins it. The id is only matched against the *active* season, so a link for a season that has ended, or one the device has never seen, leaves the player on the menu. On a first launch the link can arrive before the season catalog does; the request then waits for the catalog, for at most 30 seconds (`SeasonDeepLink.maxWait`), so a season becoming active later can never pull the player into it unasked. Parsing and resolution live in `SeasonDeepLink` (`InviteLink.swift`), routed by `DeepLinkRouter.pendingSeasonLink` and `MenuView.openPendingSeasonLink()`, and covered by ten new `SeasonCatalogServiceTests`. Android's unreleased app handles the same link (`DeepLink.OpenSeason`, routed in `NavGraph.kt`, seven new `DeepLinkTest` cases), and `DOMEMORY_ANDROID_SPEC.md` §11.1 lists it.
