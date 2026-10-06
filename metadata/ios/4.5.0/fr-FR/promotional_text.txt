@@ -1,0 +1,1 @@
+Cette mise à jour apporte des corrections de bugs et des améliorations pour une expérience DoMemory plus fluide.
