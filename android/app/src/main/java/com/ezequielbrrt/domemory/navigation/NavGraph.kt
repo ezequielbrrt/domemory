@@ -107,9 +107,12 @@ fun NavGraph(
     // arrive before the UI exists"); only route it once there's a Menu to land on, and only
     // if today isn't already locked — mirrors the no-op DailyChallengeCard tap above.
     val pendingDeepLink by container.deepLinkRouter.pending.collectAsState()
-    LaunchedEffect(hasOnboarded, pendingDeepLink) {
+    // Keyed on the active season too: on a first launch a season link can arrive before
+    // the catalog has one, and waits for it (briefly, see DeepLink.OpenSeason.resolve).
+    val activeSeasonId = container.seasonCatalog.activeSeason.collectAsState().value?.id
+    LaunchedEffect(hasOnboarded, pendingDeepLink, activeSeasonId) {
         if (!hasOnboarded) return@LaunchedEffect
-        when (container.deepLinkRouter.pending.value) {
+        when (val link = container.deepLinkRouter.pending.value) {
             is DeepLink.Daily -> {
                 val alreadyDone = container.dailyChallenge.isCompletedToday()
                 container.deepLinkRouter.consume()
@@ -124,6 +127,16 @@ fun NavGraph(
                 val code = (container.deepLinkRouter.pending.value as DeepLink.Join).code
                 container.deepLinkRouter.consume()
                 navController.navigate(Routes.multiplayer(code))
+            }
+            is DeepLink.OpenSeason -> {
+                when (link.resolve(activeSeasonId, System.currentTimeMillis())) {
+                    DeepLink.OpenSeason.Resolution.OPEN -> {
+                        container.deepLinkRouter.consume()
+                        activeSeasonId?.let { navController.navigate(Routes.seasonLevels(it)) }
+                    }
+                    DeepLink.OpenSeason.Resolution.WAIT -> Unit
+                    DeepLink.OpenSeason.Resolution.DROP -> container.deepLinkRouter.consume()
+                }
             }
             null -> Unit
         }

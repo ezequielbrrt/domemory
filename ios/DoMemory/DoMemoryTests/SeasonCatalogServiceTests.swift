@@ -300,4 +300,74 @@ final class SeasonCatalogServiceTests: XCTestCase {
         XCTAssertEqual(service.seasons.map(\.id), ["spooky-2026"])
         XCTAssertEqual(service.activeSeason?.id, "spooky-2026")
     }
+
+    // MARK: - Season deep link (the App Store in-app event opens the app with it)
+
+    private func spooky() -> Season {
+        SeasonCatalogService.decodeSeasons(from: ["spooky-2026": body()])[0]
+    }
+
+    func testTheCustomSchemeSeasonLinkCarriesTheSeasonID() {
+        let link = SeasonDeepLink.parse(URL(string: "domemory://season/spooky-2026")!)
+        XCTAssertEqual(link?.seasonID, "spooky-2026")
+    }
+
+    func testTheUniversalSeasonLinkCarriesTheSeasonID() {
+        let link = SeasonDeepLink.parse(URL(string: "https://domemory.app/season/spooky-2026")!)
+        XCTAssertEqual(link?.seasonID, "spooky-2026")
+    }
+
+    func testASeasonLinkWithoutAnIDAsksForTheActiveSeason() {
+        let link = SeasonDeepLink.parse(URL(string: "domemory://season")!)
+        XCTAssertNotNil(link)
+        XCTAssertNil(link?.seasonID)
+    }
+
+    func testOtherLinksAreNotSeasonLinks() {
+        XCTAssertNil(SeasonDeepLink.parse(URL(string: "domemory://daily")!))
+        XCTAssertNil(SeasonDeepLink.parse(URL(string: "domemory://join/ABC123")!))
+        XCTAssertNil(SeasonDeepLink.parse(URL(string: "https://example.com/seasons/spooky-2026")!))
+    }
+
+    func testAnInviteToRoomSEASONIsStillAnInvite() {
+        let url = URL(string: "domemory://join/season")!
+        XCTAssertNil(SeasonDeepLink.parse(url), "room codes are six letters or digits, so SEASON is a valid one")
+        XCTAssertEqual(InviteLink.joinCode(from: url), "SEASON")
+    }
+
+    func testTheLinkedSeasonOpensWhenItIsTheActiveOne() {
+        let now = date(2026, 10, 15)
+        let link = SeasonDeepLink(seasonID: "spooky-2026", receivedAt: now)
+        XCTAssertEqual(link.resolve(activeSeason: spooky(), now: now), .open(spooky()))
+    }
+
+    func testALinkWithoutAnIDOpensWhicheverSeasonIsActive() {
+        let now = date(2026, 10, 15)
+        let link = SeasonDeepLink(seasonID: nil, receivedAt: now)
+        XCTAssertEqual(link.resolve(activeSeason: spooky(), now: now), .open(spooky()))
+    }
+
+    func testALinkForAnotherSeasonLeavesThePlayerOnTheMenu() {
+        let now = date(2026, 10, 15)
+        let link = SeasonDeepLink(seasonID: "winter-2026", receivedAt: now)
+        XCTAssertEqual(
+            link.resolve(activeSeason: spooky(), now: now),
+            .drop,
+            "an ended or unknown season must never open the active one in its place"
+        )
+    }
+
+    func testALinkWaitsForTheCatalogOnAFirstLaunch() {
+        let now = date(2026, 10, 15)
+        let link = SeasonDeepLink(seasonID: "spooky-2026", receivedAt: now)
+        XCTAssertEqual(link.resolve(activeSeason: nil, now: now.addingTimeInterval(5)), .wait)
+    }
+
+    func testAStaleLinkIsDroppedEvenIfTheSeasonLaterBecomesActive() {
+        let now = date(2026, 10, 15)
+        let link = SeasonDeepLink(seasonID: "spooky-2026", receivedAt: now)
+        let late = now.addingTimeInterval(SeasonDeepLink.maxWait + 1)
+        XCTAssertEqual(link.resolve(activeSeason: nil, now: late), .drop)
+        XCTAssertEqual(link.resolve(activeSeason: spooky(), now: late), .drop)
+    }
 }

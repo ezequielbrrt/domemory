@@ -68,14 +68,67 @@ enum InviteLink {
     }
 }
 
-/// Holds a join code captured from an invite link until the menu is ready to
-/// route to the multiplayer room.
+/// A request to open a season's level map: `domemory://season/<id>`, or
+/// `https://<host>/season/<id>`. The App Store in-app event for a season opens
+/// the app through this link.
+///
+/// The id is optional — `domemory://season` asks for whichever season is
+/// active — and it is only ever matched against the *active* season, so a link
+/// for a season that has ended, or one this device has never heard of, leaves
+/// the player on the menu instead of opening something else.
+struct SeasonDeepLink: Equatable {
+    /// How long a request may wait for the season catalog. On a first launch
+    /// there is no cached catalog and the active season arrives from the
+    /// network a moment after the link does; past this window the link is
+    /// dropped, so a season becoming active much later (say, at midnight) can
+    /// never pull the player into it unasked.
+    static let maxWait: TimeInterval = 30
+
+    let seasonID: String?
+    let receivedAt: Date
+
+    enum Resolution: Equatable {
+        case open(Season)
+        /// No season is known yet; keep the request and try again when the
+        /// catalog changes.
+        case wait
+        /// Expired, or it names a season that is not the active one.
+        case drop
+    }
+
+    /// Nil unless `url` is a season link. Gathers the host (custom scheme only)
+    /// plus the path, like `InviteLink.joinCode(from:)`, but `season` must be
+    /// the *first* token: `domemory://join/season` is an invite to room
+    /// `SEASON`, not a season link.
+    static func parse(_ url: URL, receivedAt: Date = Date()) -> SeasonDeepLink? {
+        var tokens: [String] = []
+        if url.scheme == InviteLink.scheme, let host = url.host {
+            tokens.append(host)
+        }
+        tokens.append(contentsOf: url.pathComponents.filter { $0 != "/" })
+
+        guard tokens.first?.lowercased() == "season" else { return nil }
+        let id = tokens.count > 1 ? tokens[1] : nil
+        return SeasonDeepLink(seasonID: id?.isEmpty == false ? id : nil, receivedAt: receivedAt)
+    }
+
+    func resolve(activeSeason: Season?, now: Date = Date()) -> Resolution {
+        guard now.timeIntervalSince(receivedAt) <= Self.maxWait else { return .drop }
+        guard let activeSeason else { return .wait }
+        guard seasonID == nil || seasonID == activeSeason.id else { return .drop }
+        return .open(activeSeason)
+    }
+}
+
+/// Holds a link's request until the menu is ready to route it: a join code for
+/// the multiplayer room, today's Daily Challenge, or a season's level map.
 @MainActor
 final class DeepLinkRouter: ObservableObject {
     static let shared = DeepLinkRouter()
 
     @Published var pendingJoinCode: String?
     @Published var shouldOpenDailyChallenge = false
+    @Published var pendingSeasonLink: SeasonDeepLink?
 
     private init() {}
 
@@ -83,6 +136,11 @@ final class DeepLinkRouter: ObservableObject {
         // Widget tap: domemory://daily (or https://<host>/daily)
         if url.host == "daily" || url.pathComponents.contains("daily") {
             shouldOpenDailyChallenge = true
+            return
+        }
+        // In-app event: domemory://season/<id> (or https://<host>/season/<id>)
+        if let seasonLink = SeasonDeepLink.parse(url) {
+            pendingSeasonLink = seasonLink
             return
         }
         guard let code = InviteLink.joinCode(from: url) else { return }

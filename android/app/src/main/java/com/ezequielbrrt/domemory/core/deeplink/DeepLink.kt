@@ -18,6 +18,34 @@ sealed interface DeepLink {
     /** `domemory://join/CODE`, `https://domemory.app/join/CODE`, or `?code=CODE` — a 6-char room code. */
     data class Join(val code: String) : DeepLink
 
+    /**
+     * `domemory://season/<id>` or `https://domemory.app/season/<id>` — open a season's level
+     * map. The App Store in-app event for a season opens the app with it (iOS's
+     * `SeasonDeepLink`). [seasonId] is null for `domemory://season`, which asks for whichever
+     * season is active, and an id is only ever matched against the *active* season, so a
+     * link for a season that has ended leaves the player on the menu.
+     */
+    data class OpenSeason(val seasonId: String?, val receivedAtMillis: Long) : DeepLink {
+        enum class Resolution { OPEN, WAIT, DROP }
+
+        /**
+         * [Resolution.WAIT] while no season is known yet — on a first launch the catalog
+         * arrives from the network a moment after the link — but only for [MAX_WAIT_MILLIS],
+         * so a season becoming active much later (say, at midnight) never pulls the player
+         * into it unasked.
+         */
+        fun resolve(activeSeasonId: String?, nowMillis: Long): Resolution = when {
+            nowMillis - receivedAtMillis > MAX_WAIT_MILLIS -> Resolution.DROP
+            activeSeasonId == null -> Resolution.WAIT
+            seasonId == null || seasonId == activeSeasonId -> Resolution.OPEN
+            else -> Resolution.DROP
+        }
+
+        companion object {
+            const val MAX_WAIT_MILLIS = 30_000L
+        }
+    }
+
     companion object {
         private const val CODE_LENGTH = 6
         private const val CUSTOM_SCHEME = "domemory"
@@ -25,7 +53,7 @@ sealed interface DeepLink {
         private const val APP_LINK_HOST = "domemory.app"
 
         /** Null for anything unparseable or not one of the accepted forms. */
-        fun parse(raw: String?): DeepLink? {
+        fun parse(raw: String?, receivedAtMillis: Long = System.currentTimeMillis()): DeepLink? {
             val trimmed = raw?.trim().orEmpty()
             if (trimmed.isEmpty()) return null
             val uri = runCatching { URI(trimmed) }.getOrNull() ?: return null
@@ -46,6 +74,11 @@ sealed interface DeepLink {
             }
 
             if (segments.any { it.equals("daily", ignoreCase = true) }) return Daily
+
+            // "season" must lead: domemory://join/season is an invite to room SEASON.
+            if (segments.firstOrNull().equals("season", ignoreCase = true)) {
+                return OpenSeason(segments.getOrNull(1), receivedAtMillis)
+            }
 
             val afterJoin = segments.indexOfFirst { it.equals("join", ignoreCase = true) }
                 .takeIf { it >= 0 }
