@@ -371,7 +371,11 @@ struct MenuView: View {
             deepLinkRouter.shouldOpenDailyChallenge = false
         }
         .onReceive(deepLinkRouter.$pendingSeasonLink.compactMap { $0 }) { _ in
-            openPendingSeasonLink()
+            // `$pendingSeasonLink` publishes in `willSet`, before the link is
+            // stored: read here, the property still holds the old value, and a
+            // nil written here is overwritten by the store. Route the link once
+            // the assignment has finished.
+            Task { @MainActor in openPendingSeasonLink() }
         }
         // On a first launch the season link can arrive before the catalog has
         // an active season; the request waits for it (briefly, see
