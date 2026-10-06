@@ -77,6 +77,41 @@ final class WhatsNewManagerTests: XCTestCase {
         XCTAssertFalse(manager.shouldShow)
     }
 
+    // MARK: - Releases with nothing to announce
+
+    /// 4.5.0 ships fixes only and keeps the 4.4.1 notes. A player who dismissed the
+    /// sheet on 4.4.1 must not be shown the same items again under a new number.
+    func testAPlayerWhoSawTheseNotesIsNotShownThemAgainOnALaterVersion() {
+        defaults.set("4.4.1", forKey: UserDefaultsKeys.whatsNewLastSeenVersion)
+
+        let manager = WhatsNewManager(defaults: defaults, isExistingUser: true, releaseNotesVersion: "4.4.1")
+
+        XCTAssertFalse(manager.shouldShow)
+    }
+
+    /// Someone jumping from before the notes' release (say 4.3.0 straight to 4.5.0) has
+    /// not seen those features yet, so the sheet still appears for them once.
+    func testAPlayerFromBeforeTheNotesReleaseStillSeesThem() {
+        defaults.set("4.3.0", forKey: UserDefaultsKeys.whatsNewLastSeenVersion)
+
+        let manager = WhatsNewManager(defaults: defaults, isExistingUser: true, releaseNotesVersion: "4.4.1")
+
+        XCTAssertTrue(manager.shouldShow)
+    }
+
+    func testVersionsCompareNumericallyNotAsText() {
+        XCTAssertTrue(WhatsNewManager.hasUnreadNotes(seen: "4.9.0", releaseNotesVersion: "4.10.0"))
+        XCTAssertFalse(WhatsNewManager.hasUnreadNotes(seen: "4.10.0", releaseNotesVersion: "4.9.0"))
+        XCTAssertTrue(WhatsNewManager.hasUnreadNotes(seen: nil, releaseNotesVersion: "4.4.1"))
+    }
+
+    func testTheShippedNotesAreNoNewerThanTheApp() {
+        XCTAssertFalse(
+            WhatsNewManager.hasUnreadNotes(seen: currentVersion, releaseNotesVersion: WhatsNewManager.releaseNotesVersion),
+            "releaseNotesVersion is ahead of the app version, so dismissing the sheet would never stick"
+        )
+    }
+
     // MARK: - Dismissal
 
     func testMarkSeenPersistsTheVersionAndHidesTheSheet() {

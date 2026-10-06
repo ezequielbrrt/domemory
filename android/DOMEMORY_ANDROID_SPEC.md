@@ -1347,6 +1347,11 @@ Shown **once per version upgrade**, comparing the running version against a stor
   from a build that predates the feature also has nothing stored, and they
   **should** see it. **Onboarding state is what separates the two.**
 - Marked seen on **dismiss**.
+- **iOS gates on the notes, not the version (since 4.5.0):** the sheet shows only while the stored
+  version is older than `WhatsNewManager.releaseNotesVersion`, the release its items describe (also
+  its badge), so a fixes-only release does not re-show old notes. Android, unreleased and on its own
+  version line, still gates on the running version; adopt the same rule with an Android notes version
+  before its first update that has nothing new to announce.
 - Reopenable from a Settings row.
 - Suppresses full-screen ads while up.
 

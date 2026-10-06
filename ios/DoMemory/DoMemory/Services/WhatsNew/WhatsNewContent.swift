@@ -33,12 +33,14 @@ extension WhatsNewTheme {
 // MARK: - Current release content
 
 extension WhatsNew {
-    /// The What's New sheet content for the running app version.
-    /// All strings are localised via `Localizable.strings`.
+    /// The What's New sheet content: the features of `WhatsNewManager.releaseNotesVersion`,
+    /// which is also the badge, so a later release that announces nothing new (4.5.0) does
+    /// not show these items under its own number. All strings are localised via
+    /// `Localizable.strings`.
     static var current: WhatsNew {
         WhatsNew(
             title: Strings.whatsNewTitle,
-            version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String,
+            version: WhatsNewManager.releaseNotesVersion,
             items: [
                 .init(
                     symbol: "person.2.fill",
