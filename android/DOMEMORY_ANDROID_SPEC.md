@@ -981,6 +981,7 @@ send both). Also offered as a **QR code** of the same link.
 | `https://domemory.app/join/CODE` | universal/app link — the install-then-route flow for new users. **Parser already accepts it; the association file was never deployed.** |
 | any of the above with `?code=CODE` | query-parameter fallback |
 | `domemory://daily` or `.../daily` | open today's Daily Challenge (the widget uses this) |
+| `domemory://season/<id>` or `.../season/<id>` | open that season's level map (the App Store in-app event uses this); `domemory://season` opens whichever season is active |
 
 Code extraction: gather the host (custom scheme only) plus path components, find
 the token after `join`, else read `?code=`. Uppercase, strip non-alphanumerics,
@@ -990,6 +991,12 @@ Routing goes through a small singleton router that holds the pending code until
 the Menu is ready to consume it — links can arrive before the UI exists.
 
 The daily deep link is a no-op if today's challenge is already completed.
+
+A season link only ever opens the **active** season: an id naming any other season (one that
+has ended, or one the device has never seen) is dropped and the player stays on the Menu. On a
+first launch the link can arrive before the season catalog; the request then waits for an active
+season for at most **30 seconds**, then is dropped, so a season becoming active later never
+pulls the player into it unasked.
 
 **Android:** implement as an `intent-filter` for scheme `domemory` plus an App
 Links filter for `domemory.app` (which needs `assetlinks.json` hosted — the

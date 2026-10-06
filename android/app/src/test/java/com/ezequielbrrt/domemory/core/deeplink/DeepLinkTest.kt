@@ -52,4 +52,39 @@ class DeepLinkTest {
         // "domemory.app" as a bare host on an unrelated path must not somehow parse as a code.
         assertNull(DeepLink.parse("https://domemory.app/"))
     }
+
+    @Test fun `a custom scheme season link carries the season id`() {
+        assertEquals(DeepLink.OpenSeason("spooky-2026", 0), DeepLink.parse("domemory://season/spooky-2026", 0))
+    }
+
+    @Test fun `the universal season link carries the same id`() {
+        assertEquals(DeepLink.OpenSeason("spooky-2026", 0), DeepLink.parse("https://domemory.app/season/spooky-2026", 0))
+    }
+
+    @Test fun `a season link without an id asks for the active season`() {
+        assertEquals(DeepLink.OpenSeason(null, 0), DeepLink.parse("domemory://season", 0))
+    }
+
+    @Test fun `an invite to room SEASON is still an invite`() {
+        // Room codes are six letters or digits, so SEASON is a valid one.
+        assertEquals(DeepLink.Join("SEASON"), DeepLink.parse("domemory://join/season", 0))
+    }
+
+    @Test fun `the linked season opens when it is the active one`() {
+        val link = DeepLink.OpenSeason("spooky-2026", 1_000)
+        assertEquals(DeepLink.OpenSeason.Resolution.OPEN, link.resolve("spooky-2026", 1_000))
+        assertEquals(DeepLink.OpenSeason.Resolution.OPEN, DeepLink.OpenSeason(null, 1_000).resolve("spooky-2026", 1_000))
+    }
+
+    @Test fun `a link for another season leaves the player on the menu`() {
+        assertEquals(DeepLink.OpenSeason.Resolution.DROP, DeepLink.OpenSeason("winter-2026", 1_000).resolve("spooky-2026", 1_000))
+    }
+
+    @Test fun `a season link waits for the catalog, but not for ever`() {
+        val link = DeepLink.OpenSeason("spooky-2026", 1_000)
+        assertEquals(DeepLink.OpenSeason.Resolution.WAIT, link.resolve(null, 6_000))
+        val late = 1_000 + DeepLink.OpenSeason.MAX_WAIT_MILLIS + 1
+        assertEquals(DeepLink.OpenSeason.Resolution.DROP, link.resolve(null, late))
+        assertEquals(DeepLink.OpenSeason.Resolution.DROP, link.resolve("spooky-2026", late))
+    }
 }

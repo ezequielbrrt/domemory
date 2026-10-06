@@ -370,6 +370,34 @@ struct MenuView: View {
             }
             deepLinkRouter.shouldOpenDailyChallenge = false
         }
+        .onReceive(deepLinkRouter.$pendingSeasonLink.compactMap { $0 }) { _ in
+            // `$pendingSeasonLink` publishes in `willSet`, before the link is
+            // stored: read here, the property still holds the old value, and a
+            // nil written here is overwritten by the store. Route the link once
+            // the assignment has finished.
+            Task { @MainActor in openPendingSeasonLink() }
+        }
+        // On a first launch the season link can arrive before the catalog has
+        // an active season; the request waits for it (briefly, see
+        // `SeasonDeepLink.maxWait`).
+        .onChange(of: seasonCatalog.activeSeason?.id) {
+            openPendingSeasonLink()
+        }
+    }
+
+    /// Opens the season a `domemory://season/<id>` link asked for, if it is the
+    /// active one. A link for any other season leaves the player on the menu.
+    private func openPendingSeasonLink() {
+        guard let link = deepLinkRouter.pendingSeasonLink else { return }
+        switch link.resolve(activeSeason: seasonCatalog.activeSeason) {
+        case .open(let season):
+            deepLinkRouter.pendingSeasonLink = nil
+            seasonDestination = season
+        case .wait:
+            break
+        case .drop:
+            deepLinkRouter.pendingSeasonLink = nil
+        }
     }
 
     /// Shows "My memoramas" after the player creates one, so the new board is on
