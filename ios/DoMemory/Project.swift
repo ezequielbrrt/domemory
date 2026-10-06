@@ -45,7 +45,7 @@ let appTarget = Target.target(
             "DEVELOPMENT_ASSET_PATHS": "\"DoMemory/Preview Content\"",
             "DEVELOPMENT_TEAM": "H5V33368QJ",
             "ENABLE_PREVIEWS": "YES",
-            "MARKETING_VERSION": "4.4.1",
+            "MARKETING_VERSION": "4.5.0",
             "OTHER_LDFLAGS": [
                 "$(inherited)",
                 "-ObjC",
