@@ -320,3 +320,24 @@
 "lose_offer_watch_ad" = "広告を見る";
 "lose_pay_stars_format" = "スター%d個で支払う";
 "lose_life_at_stake" = "このゲームを続ければライフは減りません。";
+
+// Combo meter and frozen cards (gameplay prototype)
+"levels_powerup_free" = "無料";
+"levels_powerup_charged_accessibility_format" = "%@、チャージ済み、無料で使えます";
+"game_powerup_charged_format" = "%@をチャージ！";
+"game_combo_format" = "%d連続コンボ";
+"game_combo_milestone_format" = "%d連続！";
+"game_card_frozen" = "凍ったカード。タップして氷を割ろう。";
+"game_card_bomb" = "爆弾カード。間違えると時間が減ります。";
+"game_card_locked_format" = "ロック中のカード、あと%dペア";
+"game_card_pinned" = "ピン留め済み";
+"game_pin_card" = "ピン留め";
+"game_unpin_card" = "ピン解除";
+"game_bomb_boom_seconds_format" = "ドカン！ −%d秒";
+"game_bomb_boom_move" = "ドカン！ −1手";
+"game_bomb_defused_seconds_format" = "解除！ +%d秒";
+"game_bomb_defused_move" = "解除！ +1手";
+"game_moves_label" = "残り手数";
+"game_moves_left_format" = "残り%d手";
+"levels_lose_out_of_moves" = "手数切れ";
+"lose_offer_extra_moves_format" = "あと%d手を獲得";

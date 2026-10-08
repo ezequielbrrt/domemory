@@ -29,6 +29,8 @@ final class HapticsService {
         case failure    // level lost, out of lives
         case warning    // action refused, purchase failed
         case reward     // stars earned, life granted, ad rewarded
+        case streak     // a match that extends a hot combo (3 and up)
+        case crack      // ice broken off a frozen card
     }
 
     /// The concrete UIKit feedback each intent produces. Split out from `fire`
@@ -81,6 +83,11 @@ final class HapticsService {
         case .failure:  return .notification(.error)
         case .warning:  return .notification(.warning)
         case .reward:   return .impact(.heavy)
+        // Heavier than a plain `.match` so the body feels the run building.
+        case .streak:   return .impact(.heavy)
+        // Short and brittle, like the ice it stands for; the card itself
+        // doesn't move, so this is the whole confirmation that the tap landed.
+        case .crack:    return .impact(.rigid)
         }
     }
 

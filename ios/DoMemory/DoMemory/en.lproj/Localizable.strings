@@ -320,3 +320,24 @@
 "lose_offer_watch_ad" = "Watch ad";
 "lose_pay_stars_format" = "Pay %d stars";
 "lose_life_at_stake" = "Continue now and you won't lose a life.";
+
+// Combo meter and frozen cards (gameplay prototype)
+"levels_powerup_free" = "FREE";
+"levels_powerup_charged_accessibility_format" = "%@, charged, free to use";
+"game_powerup_charged_format" = "%@ charged!";
+"game_combo_format" = "Combo of %d matches";
+"game_combo_milestone_format" = "%d in a row!";
+"game_card_frozen" = "Frozen card. Tap to crack the ice.";
+"game_card_bomb" = "Bomb card. A wrong match with it costs time.";
+"game_card_locked_format" = "Locked card, %d matches to go";
+"game_card_pinned" = "Pinned";
+"game_pin_card" = "Pin";
+"game_unpin_card" = "Unpin";
+"game_bomb_boom_seconds_format" = "Boom! −%d s";
+"game_bomb_boom_move" = "Boom! −1 move";
+"game_bomb_defused_seconds_format" = "Defused! +%d s";
+"game_bomb_defused_move" = "Defused! +1 move";
+"game_moves_label" = "Moves";
+"game_moves_left_format" = "%d moves left";
+"levels_lose_out_of_moves" = "Out of moves";
+"lose_offer_extra_moves_format" = "Get %d more moves";

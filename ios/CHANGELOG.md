@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+[Unreleased]
+
+### Added
+- Gameplay prototype (iOS only, tuning not final): a combo layer and the first board mechanics that change what a match is. Every match extends a streak and a mismatch resets it; a combo meter under the HUD (`StreakMeter`) shows the run and, in Levels and Seasons, one pip per match up to the last milestone. Streaks of 3, 5 and 7 charge a free Peek, Freeze and Reveal pair (`StreakReward`), spent before stars and shown as "FREE" on the power-up bar; charges carry into the next level and clear on a retry. From the second match in a row, the four cards around the matched pair flash face up for 0.6 s (view-level only; ice and chains stay opaque). Long-pressing a face-down card pins it with one of three colours, at most three at a time, cleared when the card is matched. Blockers arrive by level on the curve (`LevelCurve`): frozen cards from level 6 (a tap cracks the ice, the next flips the card; Peek cannot see through it), bomb cards from level 10 (marked on the back; a mismatch with one costs 10 s, or a move on a moves level, and matching its pair defuses it for 5 s or a move back, with a board shake when it goes off), and chained cards from level 15 (locked until two more pairs are matched anywhere). Every fourth level is a moves level (`LevelObjective.moves`): no clock, a budget of `pairs + maxFailures` attempts, the timer chip replaced by a moves chip, Extra time and Freeze dropped from the bar, stars rated on moves left, and an "Out of moves" loss rescued by the forgive refund. Matches are juiced on the board: both cards burst (`star-sparkle`, sized and coloured by the streak), the tapped card floats "×N", "+5 s" or "−10 s" (`FloatingNumber`, `MatchEffect`), and the pair punches out on resolve; all skipped under Reduce Motion. Blockers never stack on one card or cover both cards of a pair. 19 new strings in all ten locales (translations unreviewed), two haptic moments (`.streak`, `.crack`) and the `level_power_up_charged` event. 60 new tests. Android has none of this yet; `LevelCurve`, `MemoryGame` and `LevelPowerUp` are parity types, so it must be ported before release.
+
 [4.5.0] 06-10-2026
 
 ### Added

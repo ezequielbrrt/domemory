@@ -87,7 +87,9 @@ final class HapticsServiceTests: XCTestCase {
             .success: .notification(.success),
             .failure: .notification(.error),
             .warning: .notification(.warning),
-            .reward: .impact(.heavy)
+            .reward: .impact(.heavy),
+            .streak: .impact(.heavy),
+            .crack: .impact(.rigid)
         ]
 
         for intent in HapticsService.Intent.allCases {
