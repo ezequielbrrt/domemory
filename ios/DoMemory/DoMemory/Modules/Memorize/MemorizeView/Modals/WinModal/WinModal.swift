@@ -17,6 +17,9 @@ struct WinModal: View {
     var streak: Int = 0
     var levelNumber: Int? = nil
     var starsEarned: Int = 0
+    /// Moves left on a moves level, shown in place of the seconds; nil on a
+    /// timed board.
+    var movesRemaining: Int? = nil
     /// Whether another level follows this one. Endless Levels always has one;
     /// a finite season does not on its last board, where offering "Next Level"
     /// would promise a level that does not exist.
@@ -39,6 +42,7 @@ struct WinModal: View {
         ResultShareData(
             pairs: pairsCount,
             timeRemaining: timeRemaining,
+            movesRemaining: movesRemaining,
             failedTries: failedTries,
             difficultyTitle: difficultyTitle,
             isDailyChallenge: isDailyChallenge,
@@ -152,8 +156,8 @@ struct WinModal: View {
                     )
 
                     WinStatView(
-                        value: "\(timeRemaining)s",
-                        label: Strings.remaining,
+                        value: movesRemaining.map { "\($0)" } ?? "\(timeRemaining)s",
+                        label: movesRemaining != nil ? Strings.movesLabel : Strings.remaining,
                         valueColor: Color.easyGreen,
                         backgroundColor: Color.easyGreen.opacity(0.08)
                     )

@@ -22,6 +22,15 @@ struct LoseModal: View {
         listener?.loseReason == .tooManyMistakes
     }
 
+    private var lostToMoves: Bool {
+        listener?.loseReason == .outOfMoves
+    }
+
+    /// A budget ran out — mistakes or moves — rather than the clock.
+    private var lostToBudget: Bool {
+        listener?.loseReason?.isBudget == true
+    }
+
     private var showSkipConfirm: Bool {
         listener?.showSkipLevelConfirm == true
     }
@@ -51,11 +60,15 @@ struct LoseModal: View {
                 hasAd: listener.canWatchAdForLife,
                 starCost: listener.canBuyLifeWithStars ? LevelPowerUp.lifeCost : nil
             )
-        } else if lostToMistakes {
+        } else if lostToBudget {
             // Extra time is meaningless here — the clock wasn't the problem.
+            // On a moves level the same refund reads as moves: a forgiven
+            // mistake is an attempt handed back.
             offer = RescueOffer(
                 kind: .forgive,
-                title: Strings.loseOfferForgiveFormat(LevelPowerUp.forgiveAmount),
+                title: lostToMoves
+                    ? Strings.loseOfferExtraMovesFormat(LevelPowerUp.forgiveAmount)
+                    : Strings.loseOfferForgiveFormat(LevelPowerUp.forgiveAmount),
                 hasAd: listener.canWatchAdToForgive,
                 starCost: listener.canForgiveWithStars ? LevelPowerUp.forgiveCost : nil
             )
@@ -98,7 +111,7 @@ struct LoseModal: View {
                 // sheepish over one too many mistakes. The art is already a
                 // static pose, so it renders identically regardless of the
                 // reduce-motion setting.
-                Image(lostToMistakes ? "FlippoLoseMistakes" : "FlippoLoseTime")
+                Image(lostToBudget ? "FlippoLoseMistakes" : "FlippoLoseTime")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 160, height: 168)
@@ -107,9 +120,9 @@ struct LoseModal: View {
 
                 // Reason pill chip
                 HStack(spacing: 6) {
-                    Image(systemName: lostToMistakes ? "xmark.circle.fill" : "timer")
+                    Image(systemName: lostToMoves ? "hand.tap.fill" : lostToMistakes ? "xmark.circle.fill" : "timer")
                         .font(.system(size: 13, weight: .semibold))
-                    Text(lostToMistakes ? Strings.loseTooManyMistakes : Strings.youLose)
+                    Text(lostToMoves ? Strings.loseOutOfMoves : lostToMistakes ? Strings.loseTooManyMistakes : Strings.youLose)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                 }
                 .foregroundStyle(Color.secundaryColor)

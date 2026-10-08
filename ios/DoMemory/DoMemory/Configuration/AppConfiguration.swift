@@ -82,6 +82,7 @@ enum AnalyticsEvent {
     case levelOutOfLivesShown(source: String)
     case levelStarsCredited(level: Int, amount: Int, balanceAfter: Int, seasonID: String? = nil)
     case levelPowerUpUsed(powerUp: String, level: Int, cost: Int, balanceAfter: Int, seasonID: String? = nil)
+    case levelPowerUpCharged(powerUp: String, level: Int, streak: Int, seasonID: String? = nil)
     case levelLifePurchasedWithStars(cost: Int, balanceAfter: Int)
     case levelSkipped(level: Int, cost: Int, balanceAfter: Int)
     case levelFailedByMistakes(level: Int, maxFailures: Int, timeRemaining: Int)
@@ -164,6 +165,7 @@ enum AnalyticsEvent {
         case .levelOutOfLivesShown: return "level_out_of_lives_shown"
         case .levelStarsCredited: return "level_stars_credited"
         case .levelPowerUpUsed: return "level_power_up_used"
+        case .levelPowerUpCharged: return "level_power_up_charged"
         case .levelLifePurchasedWithStars: return "level_life_purchased_with_stars"
         case .levelSkipped: return "level_skipped"
         case .levelFailedByMistakes: return "level_failed_by_mistakes"
@@ -362,6 +364,15 @@ enum AnalyticsEvent {
                     "level": level,
                     "cost": cost,
                     "balance_after": balanceAfter
+                ],
+                seasonID: seasonID
+            )
+        case .levelPowerUpCharged(let powerUp, let level, let streak, let seasonID):
+            return AnalyticsEvent.tagged(
+                [
+                    "power_up": powerUp,
+                    "level": level,
+                    "streak": streak
                 ],
                 seasonID: seasonID
             )

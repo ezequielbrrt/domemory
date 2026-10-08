@@ -320,3 +320,24 @@
 "lose_offer_watch_ad" = "광고 보기";
 "lose_pay_stars_format" = "별 %d개 사용";
 "lose_life_at_stake" = "이 게임을 이어서 하면 생명을 잃지 않습니다.";
+
+// Combo meter and frozen cards (gameplay prototype)
+"levels_powerup_free" = "무료";
+"levels_powerup_charged_accessibility_format" = "%@, 충전됨, 무료 사용 가능";
+"game_powerup_charged_format" = "%@ 충전!";
+"game_combo_format" = "%d연속 콤보";
+"game_combo_milestone_format" = "%d연속!";
+"game_card_frozen" = "얼어붙은 카드. 탭해서 얼음을 깨세요.";
+"game_card_bomb" = "폭탄 카드. 잘못 맞추면 시간이 줄어듭니다.";
+"game_card_locked_format" = "잠긴 카드, 짝 %d개 더 필요";
+"game_card_pinned" = "표시됨";
+"game_pin_card" = "표시";
+"game_unpin_card" = "표시 해제";
+"game_bomb_boom_seconds_format" = "펑! −%d초";
+"game_bomb_boom_move" = "펑! −1수";
+"game_bomb_defused_seconds_format" = "해제! +%d초";
+"game_bomb_defused_move" = "해제! +1수";
+"game_moves_label" = "남은 수";
+"game_moves_left_format" = "%d수 남음";
+"levels_lose_out_of_moves" = "수가 없음";
+"lose_offer_extra_moves_format" = "%d수 더 받기";

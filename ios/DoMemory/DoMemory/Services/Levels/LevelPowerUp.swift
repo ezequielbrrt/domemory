@@ -45,6 +45,15 @@ enum LevelPowerUp: String, CaseIterable, Identifiable {
         }
     }
 
+    /// The power-ups that make sense for a level's objective. A moves level
+    /// has no clock, so time and Freeze have nothing to act on.
+    static func available(for objective: LevelObjective) -> [LevelPowerUp] {
+        switch objective {
+        case .timed: return allCases
+        case .moves: return [.peek, .revealPair]
+        }
+    }
+
     // MARK: - Tuning constants
 
     /// Seconds added to the clock by `.extraTime`.
@@ -67,4 +76,43 @@ enum LevelPowerUp: String, CaseIterable, Identifiable {
     static let forgiveMinimumSeconds = 15
     /// Star price of skipping a level you're stuck on.
     static let skipLevelCost = 15
+}
+
+/// What a match streak earns. Power-ups bought with stars are a menu decision;
+/// a power-up *charged* by playing well is a gameplay moment, which is the
+/// point. Each milestone hands out one free use of the power-up, as a power
+/// ladder that mirrors the price list: a short run earns the cheap assist, a
+/// long one the expensive one. The streak itself keeps counting past the last
+/// milestone, and a 12-pair board run perfectly reaches 12.
+enum StreakReward {
+    /// (streak length, power-up charged) in the order they are reached.
+    static let milestones: [(streak: Int, powerUp: LevelPowerUp)] = [
+        (3, .peek), (5, .freeze), (7, .revealPair)
+    ]
+
+    /// The power-up charged by reaching exactly this streak, if any.
+    static func powerUp(forStreak streak: Int) -> LevelPowerUp? {
+        milestones.first { $0.streak == streak }?.powerUp
+    }
+
+    /// (streak length, power-up charged) on a moves level, where Freeze would
+    /// charge nothing worth having. The two assists that still apply alternate.
+    static let movesMilestones: [(streak: Int, powerUp: LevelPowerUp)] = [
+        (3, .peek), (5, .revealPair), (7, .peek)
+    ]
+
+    static func powerUp(forStreak streak: Int, objective: LevelObjective) -> LevelPowerUp? {
+        switch objective {
+        case .timed: return powerUp(forStreak: streak)
+        case .moves: return movesMilestones.first { $0.streak == streak }?.powerUp
+        }
+    }
+
+    /// The next milestone still ahead of this streak; nil past the last one.
+    static func nextMilestone(after streak: Int) -> Int? {
+        milestones.first { $0.streak > streak }?.streak
+    }
+
+    /// The last milestone, which is also how many pips the combo meter draws.
+    static var finalMilestone: Int { milestones.last?.streak ?? 0 }
 }
