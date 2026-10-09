@@ -51,7 +51,7 @@ android {
             // place: iOS through a symlink under SupportingFiles/, Android through this
             // extra assets root. A single file per animation means the two platforms
             // cannot drift on frame count, colour or timing.
-            assets.srcDir("../../assets/lottie")
+            assets.srcDir("../../assets/animations/game")
         }
     }
 }

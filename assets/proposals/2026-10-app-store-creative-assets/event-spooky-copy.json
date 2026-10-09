@@ -1,0 +1,53 @@
+{
+ "_note": "In-app event copy for Spooky Season 2026. name and shortDescription are the app's own approved season strings (firebase/scripts/seasons.json). longDescription is new and needs native review in every locale except en-US. Limits: name 30, short 50, long 120 characters.",
+ "en-US": {
+  "name": "Spooky Season",
+  "shortDescription": "30 haunted levels",
+  "longDescription": "Flip through 30 haunted levels full of ghosts, bats and jack-o'-lanterns with Flippo. Spooky Season ends November 2!"
+ },
+ "es-MX": {
+  "name": "Temporada de Sustos",
+  "shortDescription": "30 niveles embrujados",
+  "longDescription": "Voltea 30 niveles embrujados con fantasmas, murciélagos y calabazas junto a Flippo. ¡Termina el 2 de noviembre!"
+ },
+ "de-DE": {
+  "name": "Gruselsaison",
+  "shortDescription": "30 gruselige Level",
+  "longDescription": "Deck mit Flippo 30 gruselige Level voller Geister, Fledermäuse und Kürbisse auf. Die Gruselsaison endet am 2. November!"
+ },
+ "fr-FR": {
+  "name": "Saison Frisson",
+  "shortDescription": "30 niveaux hantés",
+  "longDescription": "Retourne 30 niveaux hantés pleins de fantômes, de chauves-souris et de citrouilles avec Flippo. Fin le 2 novembre !"
+ },
+ "hi": {
+  "name": "डरावना सीज़न",
+  "shortDescription": "30 भुतहा लेवल",
+  "longDescription": "Flippo के साथ भूतों, चमगादड़ों और कद्दुओं से भरे 30 भुतहा लेवल खेलें। यह सीज़न 2 नवंबर को खत्म होगा!"
+ },
+ "it": {
+  "name": "Stagione da Brivido",
+  "shortDescription": "30 livelli infestati",
+  "longDescription": "Gira 30 livelli infestati pieni di fantasmi, pipistrelli e zucche insieme a Flippo. La stagione finisce il 2 novembre!"
+ },
+ "ja": {
+  "name": "ハロウィンシーズン",
+  "shortDescription": "30のおばけレベル",
+  "longDescription": "Flippoと一緒に、おばけやコウモリ、ジャック・オー・ランタンがいっぱいの30のおばけレベルに挑戦しよう。11月2日まで!"
+ },
+ "ko": {
+  "name": "스푸키 시즌",
+  "shortDescription": "유령 레벨 30개",
+  "longDescription": "Flippo와 함께 유령, 박쥐, 호박 등불이 가득한 유령 레벨 30개를 뒤집어 보세요. 11월 2일까지!"
+ },
+ "pt-BR": {
+  "name": "Temporada do Susto",
+  "shortDescription": "30 níveis assombrados",
+  "longDescription": "Vire 30 níveis assombrados cheios de fantasmas, morcegos e abóboras com o Flippo. A temporada acaba em 2 de novembro!"
+ },
+ "zh-Hans": {
+  "name": "万圣节赛季",
+  "shortDescription": "30 个闹鬼关卡",
+  "longDescription": "和 Flippo 一起翻开 30 个满是幽灵、蝙蝠和南瓜灯的闹鬼关卡。万圣节赛季 11 月 2 日结束!"
+ }
+}

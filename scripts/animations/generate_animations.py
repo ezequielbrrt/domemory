@@ -3,9 +3,9 @@
 
 There is no After Effects pipeline for this project, so every clip here is
 described as shapes and keyframes and written out as Lottie 5.9 JSON. Run it
-from anywhere; it (re)writes the files next to itself:
+from anywhere; it (re)writes the files in assets/animations/game/:
 
-    python3 assets/lottie/generate_animations.py
+    python3 scripts/animations/generate_animations.py
 
 Conventions the two apps rely on:
 
@@ -328,9 +328,10 @@ CLIPS = [clock_crack, x_shake, heart_break, heart_refill, freeze_thaw, star_spar
 
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
+    out = os.path.join(here, "..", "..", "assets", "animations", "game")
     for build in CLIPS:
         data = build()
-        target = os.path.join(here, f"{data['nm']}.json")
+        target = os.path.normpath(os.path.join(out, f"{data['nm']}.json"))
         with open(target, "w") as handle:
             json.dump(data, handle, separators=(", ", ": "))
         print(f"wrote {os.path.relpath(target)} ({os.path.getsize(target)} bytes)")

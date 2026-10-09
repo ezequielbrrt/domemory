@@ -5,6 +5,15 @@ repository. Each platform has its own file with the detail: read
 [`ios/CLAUDE.md`](ios/CLAUDE.md) before touching the iOS app. (`ios/AGENTS.md`
 is a symlink to it, so Claude Code and Codex read the same guidance.)
 
+## Project Tracker
+
+The tracker follows this product per platform: iOS is `domemory`, Android is
+`domemory-android`. An MCP connection to the tracker is configured in
+`.mcp.json` at this repo's root. At the start of a session, call
+`list_work_items({ appId: "domemory", status: "active" })` (or
+`"domemory-android"` when working under `android/`) to see queued work, and
+`update_work_item` to mark an item done once it ships.
+
 ## What this repository is
 
 One product — DoMemory, a memory-card (memorama) game — shipped as two native
@@ -12,11 +21,13 @@ apps against one backend. Both build `com.ezequielbrrt.domemory` and read the
 same Firebase project.
 
 ```
-ios/        SwiftUI app (shipping, 4.2.0), its screenshots, changelog and plans
+ios/        SwiftUI app (shipping, 4.2.0), its changelog and plans
 android/    Jetpack Compose port (in progress, not yet released)
 firebase/   config, database rules, hosted season art, seed scripts — shared
 metadata/   App Store release copy, by version and locale
-assets/     brand icon source (Domemory.xcf), shared by both platforms
+assets/     shared media: brand/ (icon source Domemory.xcf), images/ (store screenshots,
+            ads, campaigns), videos/, animations/ (Lottie), proposals/, archive/
+scripts/    tooling that builds media: animations/, playable/, store-art/
 ```
 
 iOS is the behavioural source of truth. `android/DOMEMORY_ANDROID_SPEC.md`
@@ -83,9 +94,12 @@ There is **no fastlane**. It was removed because its lane called
 Builds are archived and uploaded from Xcode, and **the build number is set by
 hand** — nothing derives it any more.
 
-Screenshots live in `ios/screenshots/<device>/<locale>/`. The catalog's App Store
-artwork agent owns export and upload; do not reintroduce per-app export or upload
-scripts.
+Screenshots live in `assets/images/store/screenshots/<device>/<locale>/`
+(`iphone`, `ipad`), shared with the Google Play listing by decision (the images
+depict the iOS UI, not Android's Compose UI — a deliberate reuse, not an
+oversight). `upload-4.4.0.md` beside them records the checksums of the live
+sets. The catalog's App Store artwork agent owns export and upload; do not
+reintroduce per-app export or upload scripts.
 
 ## Repository conventions
 

@@ -1353,14 +1353,14 @@ purely a call-site-wiring slice, not an enum change.
 
 **Shared Lottie effects, 2026-09-15.** Cross-platform commit (`1dc9282`, co-authored
 `Claude Fable 5.1`) moving the two hand-authored win-screen clips (confetti burst, staggered
-star pop — already live on both platforms) to a new shared `assets/lottie/` at the repository
+star pop — already live on both platforms) to a new shared `assets/animations/game/` at the repository
 root, reached by iOS through a `SupportingFiles/Lottie` symlink and by Android through an
 extra `assets.srcDir` in `app/build.gradle.kts`, so one JSON file per animation serves both
 apps and the two cannot drift on frame count, colour or timing. Added `lottie-compose` 6.7.1,
 a new `ui/lottie/BundledLottie.kt` wrapper mirroring iOS's `LottieView`, and
 `ui/anim/ReduceMotion.kt` (`rememberReduceMotion`, reading the system animator-duration-scale
 setting) as the Android counterpart of `accessibilityReduceMotion`. Six new clips, generated
-via `assets/lottie/generate_animations.py` and tinted at runtime through a shared `**.tint`
+via `scripts/animations/generate_animations.py` and tinted at runtime through a shared `**.tint`
 keypath so one file serves light and dark: a lose-modal hero (clock-crack on timeout, x-shake
 on a mistake bust; reduce-motion keeps the static face), heart-break/heart-refill on the new
 canonical `ui/components/LivesRow.kt` (fired on both the endless and season map headers, since

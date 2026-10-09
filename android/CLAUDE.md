@@ -105,7 +105,7 @@ graph in the same change.
 | `feature/share` | `ShareResultCard.kt` — the pure `resultGridString`/`resultShareCaption`, the `ShareResultCardView` composable, and `shareResultCard()` (renders it to a `Bitmap` via `GraphicsLayer.toImageBitmap()` and launches an `ACTION_SEND` chooser through a new `FileProvider`) — Phase 8 complete; reached from `GameScreen.kt`'s win overlay only (Levels/Seasons out-of-lives and lose-screen surfaces have no share affordance, matching iOS's own Win-Modal-only placement) |
 | `services/share` | `PlayStoreLinks` — the one place the app builds the Play Store listing URL, used by the share-card caption (the Settings "Rate DoMemory" row opens the listing through ReviewFlow-Android's `openPlayStoreReviewPage()` instead) |
 | `ui/theme` | `Palette` — every token is a light/dark pair resolved from the active appearance; there is no single-value color anywhere in the app; `DoMemoryType` — Nunito (`res/font/nunito.ttf`, one variable font, OFL 1.1 with the licence in `assets/licenses/`) for the display (`ExtraBold`) and handwritten (`SemiBold`) roles and every Material text style via `DoMemoryType.typography`. It stands in for the SF Pro Rounded iOS renders, which cannot ship on Android |
-| `ui/lottie` | `BundledLottie` — plays a bundled Lottie JSON clip, mirroring iOS's `LottieView`; reads from a shared `assets/lottie/` at the repository root (an extra `assets.srcDir` in `app/build.gradle.kts`), the same JSON files iOS reaches through a `SupportingFiles/Lottie` symlink, so an animation cannot drift between platforms |
+| `ui/lottie` | `BundledLottie` — plays a bundled Lottie JSON clip, mirroring iOS's `LottieView`; reads from a shared `assets/animations/game/` at the repository root (an extra `assets.srcDir` in `app/build.gradle.kts`), the same JSON files iOS reaches through a `SupportingFiles/Lottie` symlink, so an animation cannot drift between platforms |
 | `ui/anim` | `ReduceMotion.kt` (`rememberReduceMotion`, the animator-duration-scale-off counterpart of iOS's `accessibilityReduceMotion`), `PressScale.kt`, `NumericTransition.kt` |
 | `ui/components` | `BackButton` (the one back arrow for screens that draw their own header: 28dp icon in a 48dp target, replacing bare "‹" glyphs), `LivesRow` (the canonical hearts row, plays heart-break/heart-refill Lottie effects), `CompactCardLayout` (the shared icon-circle/title/badge layout `DailyChallengeCard` and `SeasonCard` both switch to when sharing the menu's card row, porting iOS's `CompactCardLayout`), `Pill`/capsule treatments |
 
@@ -207,7 +207,7 @@ notes for the full mapping and what was deliberately left as a seam, including t
 animation feel and real TalkBack behavior are compiled/tested only, never seen running.
 As of the 2026-09-15 sessions in `ANDROID_PLAN.md` §7, the win-screen confetti/star-pop
 Lottie clips are joined by six more (lose-modal hero, `LivesRow` heart-break/heart-refill,
-freeze-thaw, star-sparkle) reading from a repository-root `assets/lottie/` shared with iOS,
+freeze-thaw, star-sparkle) reading from a repository-root `assets/animations/game/` shared with iOS,
 and the endless Levels, Daily Challenge and Season Levels screens went through a visual-parity
 pass against the actual SwiftUI source — real vector icons via `material-icons-extended`, a
 restyled `OutOfLivesModal` now reused by Seasons (which previously had no lives gate at all),

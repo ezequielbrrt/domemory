@@ -15,12 +15,12 @@ import Lottie
 /// the animation's name, how it should loop, and — for one-shot moments like
 /// a win celebration — a way to know when it finished.
 ///
-/// The JSON lives once, in `assets/lottie/` at the repository root, reached
+/// The JSON lives once, in `assets/animations/game/` at the repository root, reached
 /// through the `SupportingFiles/Lottie` symlink; Android bundles the very same
 /// files, so a clip that exists here exists there with identical timing.
 ///
 /// `tint` recolours every fill and stroke the clip's author named `tint`
-/// (see `assets/lottie/generate_animations.py`) to the given palette colour,
+/// (see `scripts/animations/generate_animations.py`) to the given palette colour,
 /// resolved for the current appearance. Clips authored in several colours,
 /// like the confetti, simply pass none.
 struct LottieView: UIViewRepresentable {
