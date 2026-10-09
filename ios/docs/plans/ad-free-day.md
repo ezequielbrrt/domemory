@@ -57,7 +57,7 @@ Verified by reading the code, not assumed:
 - Flippo art: five poses exist (`FlippoWin`, `FlippoPause`, `FlippoQuit`,
   `FlippoLoseTime`, `FlippoLoseMistakes`), each 834 × 880 RGBA, generated from
   `assets/images/flippo/flippo-idle.png` with the prompt recipe in
-  `.proposals/app-pet-flippo-pause/README.md`.
+  `assets/proposals/2026-09-app-pet-flippo-pause/README.md`.
 
 ## Decisions
 
@@ -183,7 +183,7 @@ is saved.", "Try again", "Ads are off until %@", "Back to the game",
 
 ## Flippo art recipe
 
-Follow `.proposals/app-pet-flippo-pause/README.md`: use
+Follow `assets/proposals/2026-09-app-pet-flippo-pause/README.md`: use
 `assets/images/flippo/flippo-idle.png` as the identity reference, keep the
 same boilerplate (chibi sticker, cel shading, transparent square canvas, 10%
 padding, no text), frame the result at 834 × 880.

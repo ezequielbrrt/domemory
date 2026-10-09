@@ -1,0 +1,113 @@
+{
+  "_note": "On-screen copy for the Flippo App Store screenshot proposal. Headlines, eyebrows and captions of shots 1, 4, 5 (headline only), 6 are the approved copy from the live localized store set (assets/archive/2026-10/screenshots/6.9/<locale>/). Win-card strings and the Daily Challenge name come from the app's Localizable.strings. Everything else is new and needs native review. The 'NEW' pill stays in English in every locale, as in the live set. 'Mia' and 'Flippo' are names and are never translated.",
+  "en-US": {
+    "s1": { "eyebrow": "MEET FLIPPO", "headline": ["FLIP &", "MATCH."], "caption": "Clear every pair before the timer runs out", "bubble": "Find the pairs!", "stamp": "MATCH!" },
+    "s2": { "eyebrow": "LEVEL CLEARED", "headline": ["CELEBRATE", "EVERY WIN."], "caption": "Flippo cheers every level you clear",
+            "modal": { "title": "Level Cleared!", "level": "Level 12", "pairs": "pairs", "remaining": "remaining", "errors": "errors", "next": "Next Level", "back": "Back to levels" } },
+    "s3": { "eyebrow": "MEET YOUR CARD BUDDY", "headline": ["FLIPPO FEELS", "EVERY FLIP."], "caption": "Your card buddy reacts to every win, slip and pause",
+            "moods": { "win": "Nailed it!", "lose-time": "Out of time!", "lose-mistakes": "Oops, not a pair", "pause": "Quick break" } },
+    "s4": { "eyebrow": "LEVELS", "headline": ["CLIMB", "FOREVER."], "caption": "A fresh board every level, each one a little harder", "bubble": "Level 10 next!" },
+    "s5": { "eyebrow": "MULTIPLAYER", "headline": ["BATTLE", "A FRIEND."], "caption": "Host a room, share the code, play in real time", "chips": ["You ready", "Mia ready"] },
+    "s6": { "eyebrow": "YOUR DECK, YOUR RULES", "headline": ["CREATE", "YOUR OWN."], "caption": "Pick any emoji and build a memorama all your own" },
+    "s7": { "eyebrow": "DAILY CHALLENGE", "headline": ["A NEW BOARD", "EVERY DAY."], "caption": "Keep your streak, then explore dozens of themes" }
+  },
+  "es-MX": {
+    "s1": { "eyebrow": "CONOCE A FLIPPO", "headline": ["VOLTEA", "Y EMPAREJA."], "caption": "Encuentra cada par antes de que se acabe el tiempo", "bubble": "¡Encuentra los pares!", "stamp": "¡PAR!" },
+    "s2": { "eyebrow": "NIVEL SUPERADO", "headline": ["CELEBRA", "CADA VICTORIA."], "caption": "Flippo celebra cada nivel que superas",
+            "modal": { "title": "¡Nivel superado!", "level": "Nivel 12", "pairs": "pares", "remaining": "restantes", "errors": "errores", "next": "Siguiente nivel", "back": "Volver a niveles" } },
+    "s3": { "eyebrow": "CONOCE A TU COMPAÑERO", "headline": ["FLIPPO VIVE", "CADA JUGADA."], "caption": "Tu compañero reacciona a cada triunfo, error y pausa",
+            "moods": { "win": "¡Perfecto!", "lose-time": "¡Se acabó el tiempo!", "lose-mistakes": "¡Uy, no es par!", "pause": "Un respiro" } },
+    "s4": { "eyebrow": "NIVELES", "headline": ["SUBE", "SIN FIN."], "caption": "Un tablero nuevo por nivel, cada uno un poco más difícil", "bubble": "¡Sigue el nivel 10!" },
+    "s5": { "eyebrow": "MULTIJUGADOR", "headline": ["RETA A", "UN AMIGO."], "caption": "Crea una sala, comparte el código y juega en tiempo real", "chips": ["Tú · Listo", "Mia · Lista"] },
+    "s6": { "eyebrow": "TU MAZO, TUS REGLAS", "headline": ["CREA", "EL TUYO."], "caption": "Elige cualquier emoji y crea un memorama totalmente tuyo" },
+    "s7": { "eyebrow": "RETO DIARIO", "headline": ["UN TABLERO NUEVO", "CADA DÍA."], "caption": "Mantén tu racha y explora docenas de temas" }
+  },
+  "pt-BR": {
+    "s1": { "eyebrow": "CONHEÇA O FLIPPO", "headline": ["VIRE", "& COMBINE."], "caption": "Encontre cada par antes do tempo acabar", "bubble": "Encontre os pares!", "stamp": "PAR!" },
+    "s2": { "eyebrow": "NÍVEL CONCLUÍDO", "headline": ["COMEMORE", "CADA VITÓRIA."], "caption": "O Flippo comemora cada nível que você conclui",
+            "modal": { "title": "Nível concluído!", "level": "Nível 12", "pairs": "pares", "remaining": "restantes", "errors": "erros", "next": "Próximo nível", "back": "Voltar aos níveis" } },
+    "s3": { "eyebrow": "CONHEÇA SEU PARCEIRO", "headline": ["O FLIPPO SENTE", "CADA JOGADA."], "caption": "Seu parceiro reage a cada vitória, erro e pausa",
+            "moods": { "win": "Mandou bem!", "lose-time": "Acabou o tempo!", "lose-mistakes": "Ops, não é par!", "pause": "Pausinha" } },
+    "s4": { "eyebrow": "NÍVEIS", "headline": ["SUBA", "SEM FIM."], "caption": "Um tabuleiro novo a cada nível, cada um um pouco mais difícil", "bubble": "Agora o nível 10!" },
+    "s5": { "eyebrow": "MULTIJOGADOR", "headline": ["DESAFIE", "UM AMIGO."], "caption": "Crie uma sala, compartilhe o código e jogue em tempo real", "chips": ["Você · Pronto", "Mia · Pronta"] },
+    "s6": { "eyebrow": "SEU BARALHO, SUAS REGRAS", "headline": ["CRIE", "O SEU."], "caption": "Escolha qualquer emoji e crie um memorama só seu" },
+    "s7": { "eyebrow": "DESAFIO DIÁRIO", "headline": ["UM TABULEIRO NOVO", "TODO DIA."], "caption": "Mantenha sua sequência e explore dezenas de temas" }
+  },
+  "fr-FR": {
+    "s1": { "eyebrow": "DÉCOUVRE FLIPPO", "headline": ["RETOURNE", "& ASSOCIE."], "caption": "Trouve chaque paire avant la fin du chrono", "bubble": "Trouve les paires !", "stamp": "PAIRE !" },
+    "s2": { "eyebrow": "NIVEAU RÉUSSI", "headline": ["FÊTE", "CHAQUE VICTOIRE."], "caption": "Flippo fête chaque niveau que tu réussis",
+            "modal": { "title": "Niveau réussi !", "level": "Niveau 12", "pairs": "paires", "remaining": "restantes", "errors": "erreurs", "next": "Niveau suivant", "back": "Retour aux niveaux" } },
+    "s3": { "eyebrow": "TON COMPAGNON DE JEU", "headline": ["FLIPPO VIT", "CHAQUE CARTE."], "caption": "Ton compagnon réagit à chaque victoire, erreur et pause",
+            "moods": { "win": "Bien joué !", "lose-time": "Temps écoulé !", "lose-mistakes": "Oups, pas une paire", "pause": "Petite pause" } },
+    "s4": { "eyebrow": "NIVEAUX", "headline": ["GRIMPE", "SANS FIN."], "caption": "Un nouveau plateau par niveau, toujours un peu plus dur", "bubble": "En route pour le 10 !" },
+    "s5": { "eyebrow": "MULTIJOUEUR", "headline": ["DÉFIE", "UN AMI."], "caption": "Crée un salon, partage le code, joue en temps réel", "chips": ["Toi · Prêt", "Mia · Prête"] },
+    "s6": { "eyebrow": "TON JEU, TES RÈGLES", "headline": ["CRÉE", "LE TIEN."], "caption": "Choisis n’importe quel emoji et crée ton propre mémorama" },
+    "s7": { "eyebrow": "DÉFI QUOTIDIEN", "headline": ["UN NOUVEAU PLATEAU", "CHAQUE JOUR."], "caption": "Garde ta série et explore des dizaines de thèmes" }
+  },
+  "de-DE": {
+    "s1": { "eyebrow": "LERN FLIPPO KENNEN", "headline": ["DREHEN", "& MERKEN."], "caption": "Finde alle Paare, bevor die Zeit abläuft", "bubble": "Finde die Paare!", "stamp": "PAAR!" },
+    "s2": { "eyebrow": "LEVEL GESCHAFFT", "headline": ["FEIERE", "JEDEN SIEG."], "caption": "Flippo feiert jedes Level, das du schaffst",
+            "modal": { "title": "Level geschafft!", "level": "Level 12", "pairs": "Paare", "remaining": "übrig", "errors": "Fehler", "next": "Nächstes Level", "back": "Zurück zu den Leveln" } },
+    "s3": { "eyebrow": "DEIN KARTENKUMPEL", "headline": ["FLIPPO FÜHLT", "JEDEN ZUG."], "caption": "Dein Kumpel reagiert auf Siege, Fehler und Pausen",
+            "moods": { "win": "Geschafft!", "lose-time": "Zeit ist um!", "lose-mistakes": "Hoppla, kein Paar", "pause": "Kurze Pause" } },
+    "s4": { "eyebrow": "LEVEL", "headline": ["KLETTERE", "ENDLOS."], "caption": "Ein neues Feld pro Level, jedes etwas schwerer", "bubble": "Weiter zu Level 10!" },
+    "s5": { "eyebrow": "MEHRSPIELER", "headline": ["FORDERE", "FREUNDE."], "caption": "Raum erstellen, Code teilen, in Echtzeit spielen", "chips": ["Du · Bereit", "Mia · Bereit"] },
+    "s6": { "eyebrow": "DEIN DECK, DEINE REGELN", "headline": ["ERSTELLE", "DEIN DECK."], "caption": "Wähle beliebige Emojis und baue dein eigenes Memorama" },
+    "s7": { "eyebrow": "TÄGLICHE CHALLENGE", "headline": ["JEDEN TAG", "EIN NEUES FELD."], "caption": "Halte deine Serie und entdecke Dutzende Themen" }
+  },
+  "it": {
+    "s1": { "eyebrow": "ECCO FLIPPO", "headline": ["GIRA", "& ABBINA."], "caption": "Trova ogni coppia prima che scada il tempo", "bubble": "Trova le coppie!", "stamp": "COPPIA!" },
+    "s2": { "eyebrow": "LIVELLO SUPERATO", "headline": ["FESTEGGIA", "OGNI VITTORIA."], "caption": "Flippo festeggia ogni livello che superi",
+            "modal": { "title": "Livello superato!", "level": "Livello 12", "pairs": "coppie", "remaining": "rimanenti", "errors": "errori", "next": "Livello successivo", "back": "Torna ai livelli" } },
+    "s3": { "eyebrow": "IL TUO AMICO DI CARTE", "headline": ["FLIPPO VIVE", "OGNI MOSSA."], "caption": "Il tuo amico reagisce a ogni vittoria, errore e pausa",
+            "moods": { "win": "Fantastico!", "lose-time": "Tempo scaduto!", "lose-mistakes": "Ops, non è una coppia", "pause": "Pausa veloce" } },
+    "s4": { "eyebrow": "LIVELLI", "headline": ["SCALA", "SENZA FINE."], "caption": "Un tabellone nuovo a ogni livello, sempre un po’ più difficile", "bubble": "Ora il livello 10!" },
+    "s5": { "eyebrow": "MULTIGIOCATORE", "headline": ["SFIDA", "UN AMICO."], "caption": "Crea una stanza, condividi il codice, gioca in tempo reale", "chips": ["Tu · Pronto", "Mia · Pronta"] },
+    "s6": { "eyebrow": "IL TUO MAZZO, LE TUE REGOLE", "headline": ["CREA", "IL TUO."], "caption": "Scegli qualsiasi emoji e crea un memorama tutto tuo" },
+    "s7": { "eyebrow": "SFIDA GIORNALIERA", "headline": ["UN TABELLONE NUOVO", "OGNI GIORNO."], "caption": "Mantieni la serie ed esplora decine di temi" }
+  },
+  "ja": {
+    "s1": { "eyebrow": "Flippoと遊ぼう", "headline": ["めくって", "そろえる。"], "caption": "時間切れになる前にすべてのペアをそろえよう", "bubble": "ペアをさがそう！", "stamp": "ペア！" },
+    "s2": { "eyebrow": "レベルクリア", "headline": ["勝つたびに", "お祝いしよう。"], "caption": "クリアするたびにFlippoが大よろこび",
+            "modal": { "title": "レベルクリア!", "level": "レベル 12", "pairs": "ペア", "remaining": "残り", "errors": "ミス", "next": "次のレベル", "back": "レベル一覧に戻る" } },
+    "s3": { "eyebrow": "カードの相棒", "headline": ["めくるたび", "表情が変わる。"], "caption": "勝っても、ミスしても、休んでも、Flippoが反応",
+            "moods": { "win": "やったね！", "lose-time": "時間切れ！", "lose-mistakes": "あっ、ペアじゃない", "pause": "ひと休み" } },
+    "s4": { "eyebrow": "レベル", "headline": ["登る", "永遠に。"], "caption": "レベルごとに新しい盤面、少しずつ難しく", "bubble": "次はレベル10！" },
+    "s5": { "eyebrow": "マルチプレイ", "headline": ["対戦", "友達と。"], "caption": "ルームを作ってコードを共有、リアルタイムで対戦", "chips": ["あなた・準備OK", "Mia・準備OK"] },
+    "s6": { "eyebrow": "あなたのデッキ、あなたのルール", "headline": ["自分だけの", "デッキをつくる。"], "caption": "好きな絵文字を選んで自分だけのメモラマを作ろう" },
+    "s7": { "eyebrow": "デイリーチャレンジ", "headline": ["毎日", "新しい盤面。"], "caption": "連続記録をキープして、たくさんのテーマに挑戦" }
+  },
+  "ko": {
+    "s1": { "eyebrow": "Flippo를 만나요", "headline": ["뒤집고", "맞추기."], "caption": "시간이 끝나기 전에 모든 짝을 맞추세요", "bubble": "짝을 찾아봐요!", "stamp": "짝!" },
+    "s2": { "eyebrow": "레벨 클리어", "headline": ["승리할 때마다", "축하해요."], "caption": "레벨을 깰 때마다 Flippo가 함께 기뻐해요",
+            "modal": { "title": "레벨 클리어!", "level": "레벨 12", "pairs": "쌍", "remaining": "남음", "errors": "오류", "next": "다음 레벨", "back": "레벨로 돌아가기" } },
+    "s3": { "eyebrow": "나의 카드 친구", "headline": ["뒤집을 때마다", "반응하는 Flippo."], "caption": "승리, 실수, 휴식까지 Flippo가 반응해요",
+            "moods": { "win": "해냈어요!", "lose-time": "시간 초과!", "lose-mistakes": "앗, 짝이 아니에요", "pause": "잠깐 휴식" } },
+    "s4": { "eyebrow": "레벨", "headline": ["계속", "올라가."], "caption": "레벨마다 새로운 판, 조금씩 더 어렵게", "bubble": "다음은 레벨 10!" },
+    "s5": { "eyebrow": "멀티플레이", "headline": ["대결", "친구와."], "caption": "방을 만들고 코드를 공유해 실시간으로 대결하세요", "chips": ["나 · 준비 완료", "Mia · 준비 완료"] },
+    "s6": { "eyebrow": "나의 덱, 나의 규칙", "headline": ["만들기", "나만의 것."], "caption": "원하는 이모지를 골라 나만의 메모라마를 만드세요" },
+    "s7": { "eyebrow": "일일 챌린지", "headline": ["매일 새로운", "게임판."], "caption": "연속 기록을 이어가고 다양한 테마를 즐기세요" }
+  },
+  "hi": {
+    "s1": { "eyebrow": "मिलिए Flippo से", "headline": ["पलटें", "और मिलाएँ।"], "caption": "समय खत्म होने से पहले हर जोड़ा ढूँढें", "bubble": "जोड़े ढूँढें!", "stamp": "जोड़ा!" },
+    "s2": { "eyebrow": "स्तर पूरा हुआ", "headline": ["हर जीत का", "जश्न मनाएँ।"], "caption": "हर स्तर पूरा होने पर Flippo खुशी मनाता है",
+            "modal": { "title": "स्तर पूरा हुआ!", "level": "स्तर 12", "pairs": "जोड़े", "remaining": "बाकी", "errors": "गलतियां", "next": "अगला स्तर", "back": "स्तरों पर वापस जाएं" } },
+    "s3": { "eyebrow": "आपका कार्ड साथी", "headline": ["हर चाल पर", "Flippo का नया भाव।"], "caption": "जीत हो, गलती हो या ब्रेक — Flippo हर पल साथ है",
+            "moods": { "win": "शाबाश!", "lose-time": "समय खत्म!", "lose-mistakes": "उफ़, जोड़ा नहीं", "pause": "छोटा ब्रेक" } },
+    "s4": { "eyebrow": "स्तर", "headline": ["चढ़ते", "रहो।"], "caption": "हर स्तर पर नया बोर्ड, हर बार थोड़ा कठिन", "bubble": "अब स्तर 10!" },
+    "s5": { "eyebrow": "मल्टीप्लेयर", "headline": ["मुकाबला", "दोस्त से।"], "caption": "रूम बनाएँ, कोड शेयर करें, रियल-टाइम में खेलें", "chips": ["आप · तैयार", "Mia · तैयार"] },
+    "s6": { "eyebrow": "आपका डेक, आपके नियम", "headline": ["बनाएँ", "अपना खुद का।"], "caption": "कोई भी इमोजी चुनें और अपना खुद का मेमोरामा बनाएँ" },
+    "s7": { "eyebrow": "दैनिक चुनौती", "headline": ["हर दिन", "नया बोर्ड।"], "caption": "अपनी स्ट्रीक बनाए रखें और दर्जनों थीम खोजें" }
+  },
+  "zh-Hans": {
+    "s1": { "eyebrow": "认识 Flippo", "headline": ["翻牌", "配对。"], "caption": "在时间结束前找出每一对", "bubble": "找出配对！", "stamp": "配对！" },
+    "s2": { "eyebrow": "关卡完成", "headline": ["每次胜利", "都值得庆祝。"], "caption": "每过一关，Flippo 都为你欢呼",
+            "modal": { "title": "关卡完成！", "level": "第 12 关", "pairs": "配对", "remaining": "剩余", "errors": "错误", "next": "下一关", "back": "返回关卡" } },
+    "s3": { "eyebrow": "你的卡牌伙伴", "headline": ["每次翻牌", "Flippo 都有反应。"], "caption": "胜利、失误、暂停，Flippo 都会回应",
+            "moods": { "win": "太棒了！", "lose-time": "时间到！", "lose-mistakes": "哎呀，不是一对", "pause": "休息一下" } },
+    "s4": { "eyebrow": "关卡", "headline": ["不断", "攀登。"], "caption": "每关都是新牌面，一关比一关难", "bubble": "下一站：第 10 关！" },
+    "s5": { "eyebrow": "多人游戏", "headline": ["对战", "好友。"], "caption": "创建房间、分享代码、实时对战", "chips": ["你 · 已准备", "Mia · 已准备"] },
+    "s6": { "eyebrow": "你的卡组，你做主", "headline": ["创建", "你的专属。"], "caption": "挑选任意表情，打造专属记忆卡牌" },
+    "s7": { "eyebrow": "每日挑战", "headline": ["每天", "一个新牌面。"], "caption": "保持连胜，畅玩数十种主题" }
+  }
+}

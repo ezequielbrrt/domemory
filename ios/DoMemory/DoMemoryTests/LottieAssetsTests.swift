@@ -3,7 +3,7 @@
 //  DoMemoryTests
 //
 //  The bundled animations are hand-authored JSON (see
-//  `assets/lottie/generate_animations.py`), not exported from After Effects —
+//  `scripts/animations/generate_animations.py`), not exported from After Effects —
 //  nothing checks that Lottie's own parser accepts them until a player
 //  actually reaches the moment that plays one. This exercises Lottie's real
 //  decoder against the shipped files, without needing a UI at all.

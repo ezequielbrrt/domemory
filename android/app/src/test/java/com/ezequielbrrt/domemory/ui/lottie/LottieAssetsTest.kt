@@ -7,7 +7,7 @@ import org.junit.Test
 import java.io.File
 
 /**
- * The shared clips under `assets/lottie/` at the repository root are hand-authored JSON.
+ * The shared clips under `assets/animations/game/` at the repository root are hand-authored JSON.
  * Lottie's own decoder only runs on a device, so this checks the structural contract both
  * apps rely on — canvas, frame rate, a positive length, and a `tint` shape in every clip
  * `BundledLottie(tint = ...)` is handed — the same way iOS's `LottieAssetsTests` does with
@@ -15,7 +15,7 @@ import java.io.File
  */
 class LottieAssetsTest {
 
-    private val root = File("../../assets/lottie")
+    private val root = File("../../assets/animations/game")
 
     private fun clip(name: String): JSONObject {
         val file = File(root, "$name.json")

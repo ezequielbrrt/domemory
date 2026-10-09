@@ -17,13 +17,23 @@ node_modules/
 # the developer's machine for now. Remove these rules when migrating them in;
 # note that ios/artifacts and assets/videos hold large .mp4 renders, and
 # ios/my-video and assets/my-video are Remotion projects, so migrate sources
-# and leave build output behind.
+# and leave build output behind. The loose renders directly under
+# assets/videos/ stay local; the area folders below them are tracked.
 ios/marketing/
 ios/my-video/
 ios/artifacts/
 marketing/
 assets/my-video/
-assets/videos/
+assets/videos/*
+!assets/videos/store/
+!assets/videos/campaigns/
+
+# Raw image-generation drafts behind the 4.4.0 store screenshots: kept on the
+# developer's machine, never committed.
+/assets/proposals/2026-09-store-screenshots-4-4-0-raw/
+
+# App Store Connect CLI (asc) local reports
+/.asc/
 
 # Firebase CLI deploy cache
 firebase/.firebase/

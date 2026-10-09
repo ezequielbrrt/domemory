@@ -19,7 +19,7 @@ import com.airbnb.lottie.compose.rememberLottieDynamicProperty
  * Plays a bundled Lottie animation — the Compose twin of iOS's `LottieView`
  * (`ios/.../Modules/SharedModules/Views/LottieView.swift`).
  *
- * [name] is the file's base name under the shared `assets/lottie/` directory at the
+ * [name] is the file's base name under the shared `assets/animations/game/` directory at the
  * repository root, which `app/build.gradle.kts` adds as an assets root; the same JSON is
  * what iOS bundles, so a name that exists on one platform exists on the other. Call sites
  * only say what to play, whether it loops, and — for one-shot moments like a win
@@ -27,7 +27,7 @@ import com.airbnb.lottie.compose.rememberLottieDynamicProperty
  * two win screens can be read side by side.
  *
  * [tint] recolours every fill and stroke the clip's author named `tint` (see
- * `assets/lottie/generate_animations.py`) to a palette colour, so one file serves light
+ * `scripts/animations/generate_animations.py`) to a palette colour, so one file serves light
  * and dark. Clips authored in several colours, like the confetti, pass none.
  *
  * Reduce motion is the caller's decision, not this composable's: iOS's `WinModal` chooses
@@ -78,5 +78,5 @@ fun BundledLottie(
     )
 }
 
-/** The shape name every tintable clip uses; see `assets/lottie/generate_animations.py`. */
+/** The shape name every tintable clip uses; see `scripts/animations/generate_animations.py`. */
 const val TINT_SHAPE_NAME = "tint"

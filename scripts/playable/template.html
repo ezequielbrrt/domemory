@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="ad.size" content="width=320,height=480">
+<title>DoMemory</title>
+<script src="https://tpc.googlesyndication.com/pagead/gadgets/html5/api/exitapi.js"></script>
+<style>
+  :root {
+    --bg: #F7F3ED;
+    --surface: #FFFFFF;
+    --surface-2: #EFE9E3;
+    --border: #E1DBEB;
+    --primary: #4B3FC8;
+    --accent: #FF6340;
+    --green: #28B67E;
+    --amber: #F5A623;
+    --text: #1C1830;
+    --muted: #7A7291;
+    --shadow: rgba(28, 24, 48, 0.12);
+    --card-back: #C3BEEB;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    user-select: none; -webkit-user-select: none;
+    touch-action: manipulation;
+    display: flex; flex-direction: column;
+  }
+  #stage { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  /* Portrait: header, hint, board, CTA stack top to bottom. */
+  #side { display: contents; }
+  #header { order: 0; } #hint { order: 1; } #boardWrap { order: 2; } #footer { order: 3; }
+
+  /* Header */
+  #header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px 6px;
+  }
+  #logo { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 17px; letter-spacing: -0.2px; }
+  #logo .mark { width: 22px; height: 22px; border-radius: 6px; background: var(--primary); display: grid; place-items: center; color: #fff; font-size: 13px; }
+  #hud { display: flex; gap: 6px; }
+  .chip {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+    padding: 4px 10px; font-size: 13px; font-weight: 700; color: var(--text);
+    box-shadow: 0 1px 2px var(--shadow); min-width: 54px; text-align: center;
+  }
+  .chip.timer.low { color: var(--accent); border-color: var(--accent); }
+
+  #hint { text-align: center; color: var(--muted); font-size: 13px; font-weight: 600; padding: 0 12px 6px; }
+
+  /* Board */
+  #boardWrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; padding: 0 10px; }
+  #board { display: grid; gap: 8px; }
+  .card { position: relative; perspective: 600px; cursor: pointer; }
+  .card .inner {
+    position: absolute; inset: 0; transform-style: preserve-3d;
+    transition: transform 0.32s cubic-bezier(.2,.8,.2,1), opacity 0.25s ease, scale 0.25s ease;
+    transform: rotateY(180deg);
+  }
+  .card.up .inner { transform: rotateY(0deg); }
+  .card.matched .inner { opacity: 0; transform: rotateY(0deg) scale(0.6); pointer-events: none; }
+  .face, .back {
+    position: absolute; inset: 0; border-radius: 12px; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: grid; place-items: center;
+  }
+  .face { background: var(--primary); border: 3px solid rgba(255,255,255,0.35); box-shadow: 0 3px 8px var(--shadow); }
+  .face span { font-size: 1px; line-height: 1; }
+  .back {
+    background: var(--card-back); transform: rotateY(180deg);
+    border: 2px solid rgba(75,63,200,0.25);
+  }
+  .back::after {
+    content: ""; width: 34%; height: 34%; border-radius: 30%;
+    background: rgba(75,63,200,0.35);
+  }
+  .card.shake .inner { animation: shake 0.35s ease; }
+  @keyframes shake { 0%,100%{translate:0} 25%{translate:-4px 0} 75%{translate:4px 0} }
+  .card.pop .inner { animation: pop 0.3s ease; }
+  @keyframes pop { 50% { scale: 1.12; } }
+
+  /* Footer CTA */
+  #footer { padding: 8px 14px 12px; }
+  .cta {
+    width: 100%; border: 0; border-radius: 14px; padding: 12px 16px;
+    background: var(--accent); color: #fff; font-weight: 800; font-size: 16px;
+    box-shadow: 0 4px 12px rgba(255,99,64,0.35); cursor: pointer;
+    font-family: inherit;
+  }
+  .cta:active { transform: translateY(1px); }
+
+  /* End card */
+  #end {
+    position: absolute; inset: 0; background: rgba(247,243,237,0.96);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px; text-align: center; opacity: 0; transition: opacity 0.3s ease;
+  }
+  #end.show { display: flex; opacity: 1; }
+  #end img { width: min(46vw, 40vh); height: auto; }
+  #end h1 { font-size: 24px; font-weight: 900; margin-top: 4px; letter-spacing: -0.3px; }
+  #end p { color: var(--muted); font-weight: 600; font-size: 14px; margin: 6px 0 14px; max-width: 280px; }
+  #end .cta { max-width: 280px; }
+  #end .again { margin-top: 10px; background: transparent; color: var(--primary); box-shadow: none; font-size: 14px; }
+
+  /* Landscape */
+  @media (orientation: landscape) {
+    #stage { flex-direction: row; }
+    #side { display: flex; flex-direction: column; justify-content: space-between; width: 42%; min-width: 170px; }
+    .cta { font-size: 15px; padding: 12px 10px; }
+    #header { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px 14px; }
+    #hint { text-align: left; }
+    #boardWrap { padding: 8px 10px 8px 0; }
+    #end { flex-direction: row; gap: 12px; }
+    #end img { width: min(30vw, 60vh); }
+    #end .text { display: flex; flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="side">
+    <div id="header">
+      <div id="logo"><span class="mark">🧠</span>DoMemory</div>
+      <div id="hud">
+        <div class="chip" id="pairs">0/6</div>
+        <div class="chip timer" id="timer">30</div>
+      </div>
+    </div>
+    <div id="hint">Flip the cards and find every pair!</div>
+    <div id="footer"><button class="cta" id="ctaTop">Play DoMemory</button></div>
+  </div>
+  <div id="boardWrap"><div id="board"></div></div>
+</div>
+<div id="end">
+  <img id="endImg" alt="" src="{{FLIPPO_WIN}}">
+  <div class="text">
+    <h1 id="endTitle">You did it!</h1>
+    <p id="endBody">Hundreds of levels, daily challenges and friends to beat are waiting.</p>
+    <button class="cta" id="ctaEnd">Get DoMemory free</button>
+    <button class="cta again" id="again">Play again</button>
+  </div>
+</div>
+<script>
+(function () {
+  // Same pool and order as the app (EmojiPool.all); keep in sync when appending.
+  var POOL = ["😀","😎","🥳","😍","🤓","😴","🤖","👻","💩","🐶",
+              "🐱","🦊","🐻","🐼","🐸","🐵","🦁","🐯","🦄","🐝",
+              "🐢","🐙","🦋","🌵","🌸","🍄","🍎","🍌","🍉","🍓",
+              "🍕","🍔","🌮","🍦","🎈","⚽️","🚀","⭐️","🌈","🔥",
+              "💎","🎸","🎲","🎯","👑","🎁","❤️","⚡️"];
+  var PAIRS = 6, SECONDS = 30;
+
+  var board = document.getElementById('board');
+  var pairsEl = document.getElementById('pairs');
+  var timerEl = document.getElementById('timer');
+  var end = document.getElementById('end');
+  var endTitle = document.getElementById('endTitle');
+  var endBody = document.getElementById('endBody');
+
+  var cards = [], faceUp = [], matched = 0, locked = false, timeLeft = SECONDS, tick = null, started = false, over = false;
+
+  function exit() {
+    if (window.ExitApi && typeof ExitApi.exit === 'function') { ExitApi.exit(); }
+  }
+  document.getElementById('ctaTop').addEventListener('click', exit);
+  document.getElementById('ctaEnd').addEventListener('click', exit);
+  document.getElementById('again').addEventListener('click', function () { end.className = ''; setup(); });
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  function setup() {
+    clearInterval(tick); tick = null;
+    cards = []; faceUp = []; matched = 0; locked = false; timeLeft = SECONDS; started = false; over = false;
+    timerEl.textContent = timeLeft; timerEl.className = 'chip timer';
+    pairsEl.textContent = '0/' + PAIRS;
+    board.innerHTML = '';
+    var picks = shuffle(POOL.slice()).slice(0, PAIRS);
+    var deck = shuffle(picks.concat(picks));
+    deck.forEach(function (emoji, i) {
+      var el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = '<div class="inner"><div class="face"><span>' + emoji + '</span></div><div class="back"></div></div>';
+      el.addEventListener('click', function () { flip(i); });
+      board.appendChild(el);
+      cards.push({ el: el, emoji: emoji, up: false, matched: false });
+    });
+    layout();
+  }
+
+  function startTimer() {
+    started = true;
+    tick = setInterval(function () {
+      timeLeft--;
+      timerEl.textContent = timeLeft;
+      if (timeLeft <= 10) timerEl.className = 'chip timer low';
+      if (timeLeft <= 0) { clearInterval(tick); finish(false); }
+    }, 1000);
+  }
+
+  function flip(i) {
+    var c = cards[i];
+    if (over || c.matched || c.up) return;
+    if (!started) startTimer();
+    if (faceUp.length === 2) { // flip the mismatched pair down on the next tap, like the app
+      faceUp.forEach(function (k) { cards[k].up = false; cards[k].el.className = 'card'; });
+      faceUp = []; locked = false;
+    }
+    if (locked) return;
+    c.up = true; c.el.className = 'card up';
+    faceUp.push(i);
+    if (faceUp.length < 2) return;
+    var a = cards[faceUp[0]], b = cards[faceUp[1]];
+    if (a.emoji === b.emoji) {
+      a.matched = b.matched = true; matched++;
+      pairsEl.textContent = matched + '/' + PAIRS;
+      a.el.className = b.el.className = 'card up pop';
+      setTimeout(function () { a.el.className = b.el.className = 'card up matched'; }, 260);
+      faceUp = [];
+      if (matched === PAIRS) { clearInterval(tick); setTimeout(function () { finish(true); }, 520); }
+    } else {
+      locked = true;
+      a.el.className = b.el.className = 'card up shake';
+      setTimeout(function () {
+        if (faceUp.length !== 2) return;
+        a.up = b.up = false; a.el.className = b.el.className = 'card';
+        faceUp = []; locked = false;
+      }, 800);
+    }
+  }
+
+  function finish(won) {
+    over = true;
+    endTitle.textContent = won ? 'You did it!' : "Time's up!";
+    endBody.textContent = won
+      ? 'Hundreds of levels, daily challenges and friends to beat are waiting.'
+      : 'Train your memory with hundreds of levels and daily challenges.';
+    end.style.display = 'flex';
+    requestAnimationFrame(function () { end.className = 'show'; });
+  }
+
+  function layout() {
+    var wrap = document.getElementById('boardWrap');
+    var W = wrap.clientWidth - 20, H = wrap.clientHeight - 8;
+    var landscape = window.innerWidth > window.innerHeight;
+    var cols = landscape ? 4 : 3, rows = landscape ? 3 : 4, gap = 8;
+    var size = Math.floor(Math.min((W - gap * (cols - 1)) / cols, (H - gap * (rows - 1)) / rows));
+    size = Math.max(40, Math.min(size, 120));
+    board.style.gridTemplateColumns = 'repeat(' + cols + ', ' + size + 'px)';
+    board.style.gridAutoRows = size + 'px';
+    var fs = Math.round(size * 0.58) + 'px';
+    for (var i = 0; i < cards.length; i++) cards[i].el.querySelector('.face span').style.fontSize = fs;
+  }
+
+  window.addEventListener('resize', layout);
+  window.addEventListener('orientationchange', function () { setTimeout(layout, 60); });
+  setup();
+})();
+</script>
+</body>
+</html>
