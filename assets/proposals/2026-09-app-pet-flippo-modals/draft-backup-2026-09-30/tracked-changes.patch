@@ -1,0 +1,220 @@
+diff --git a/android/app/src/main/java/com/ezequielbrrt/domemory/feature/game/GameScreen.kt b/android/app/src/main/java/com/ezequielbrrt/domemory/feature/game/GameScreen.kt
+index 068c4ac..2c21913 100644
+--- a/android/app/src/main/java/com/ezequielbrrt/domemory/feature/game/GameScreen.kt
++++ b/android/app/src/main/java/com/ezequielbrrt/domemory/feature/game/GameScreen.kt
+@@ -1,5 +1,6 @@
+ package com.ezequielbrrt.domemory.feature.game
+ 
++import androidx.compose.foundation.Image
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.border
+ import androidx.compose.foundation.clickable
+@@ -17,6 +18,9 @@ import androidx.compose.foundation.layout.size
+ import androidx.compose.foundation.layout.width
+ import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.foundation.layout.PaddingValues
++import androidx.compose.ui.draw.clip
++import androidx.compose.ui.layout.ContentScale
++import androidx.compose.ui.res.painterResource
+ import androidx.compose.material.icons.Icons
+ import androidx.compose.material.icons.filled.Cancel
+ import androidx.compose.material.icons.filled.Close
+@@ -243,6 +247,14 @@ fun GameScreen(
+         if (showQuitConfirm) {
+             AlertDialog(
+                 onDismissRequest = { showQuitConfirm = false; onPauseToggle() },
++                // Flippo pleads with the player to stay, as on iOS's QuitModal.
++                icon = {
++                    Image(
++                        painter = painterResource(R.drawable.flippo_quit),
++                        contentDescription = null,
++                        modifier = Modifier.size(width = 120.dp, height = 126.dp),
++                    )
++                },
+                 title = { Text(stringResource(R.string.game_quit_confirmation)) },
+                 confirmButton = {
+                     // Deliberately leaves `showQuitConfirm` true: `onQuitDuringPlay` pops
+@@ -307,7 +319,12 @@ private fun PauseOverlay(
+                 modifier = Modifier.padding(28.dp),
+                 horizontalAlignment = Alignment.CenterHorizontally,
+             ) {
+-                Text("🧐", fontSize = 64.sp)
++                // Flippo holds up a mitten while the board waits, as on iOS's PauseModal.
++                Image(
++                    painter = painterResource(R.drawable.flippo_pause),
++                    contentDescription = null,
++                    modifier = Modifier.size(width = 160.dp, height = 168.dp),
++                )
+                 Spacer(Modifier.size(12.dp))
+                 Text(
+                     text = stringResource(R.string.game_pause_title),
+@@ -717,19 +734,12 @@ private fun OutcomeOverlay(
+                     horizontalAlignment = Alignment.CenterHorizontally,
+                     verticalArrangement = Arrangement.spacedBy(12.dp),
+                 ) {
+-                    // The hero says *why*, as on iOS's LoseModal: a clock rings and cracks
+-                    // on a timeout, a red badge stamps in and shakes its head on a mistake
+-                    // bust. Both end on a still picture. Reduce-motion players get the
+-                    // static face iOS has always shown there.
+-                    if (reduceMotion) {
+-                        Text("😳", fontSize = 56.sp)
+-                    } else {
+-                        BundledLottie(
+-                            name = if (lostToMistakes) "x-shake" else "clock-crack",
+-                            tint = palette.secondary,
+-                            modifier = Modifier.size(72.dp),
+-                        )
+-                    }
++                    // Flippo says *why*: the dizzy pose for a timeout, the sheepish pose for
++                    // a mistake bust (see `.proposals/app-pet-flippo-modals/README.md`). A
++                    // static illustration needs no reduce-motion fallback of its own.
++                    FlippoHero(
++                        drawableRes = if (lostToMistakes) R.drawable.flippo_lose_mistakes else R.drawable.flippo_lose_time,
++                    )
+ 
+                     // Reason pill chip — port of iOS's capsule (icon + "You lose" /
+                     // "Too many mistakes"), tinted `secondary` at ~10% background opacity.
+@@ -908,6 +918,34 @@ private fun OutcomeOverlay(
+     }
+ }
+ 
++/**
++ * Flippo, the living-card mascot, as the win/lose hero visual (see
++ * `.proposals/app-pet-flippo-modals/README.md`). A soft tinted panel echoes the mockups'
++ * lavender hero backdrop using an existing palette token rather than a new one; the three
++ * finished poses (win / lose-time / lose-mistakes) are pre-scaled and positioned
++ * consistently against each other, so this composable only has to place one image per
++ * outcome — no per-pose cropping or offsetting.
++ */
++@Composable
++private fun FlippoHero(@androidx.annotation.DrawableRes drawableRes: Int, modifier: Modifier = Modifier) {
++    val palette = LocalPalette.current
++    Box(
++        modifier = modifier
++            .fillMaxWidth()
++            .height(148.dp)
++            .clip(RoundedCornerShape(20.dp))
++            .background(palette.surfaceSecondary),
++        contentAlignment = Alignment.Center,
++    ) {
++        Image(
++            painter = painterResource(drawableRes),
++            contentDescription = null,
++            contentScale = ContentScale.Fit,
++            modifier = Modifier.fillMaxSize().padding(10.dp),
++        )
++    }
++}
++
+ /** Rewarded-ad rescue on the lose screen (spec 7.7) — port of iOS's `LoseModal.adButton`:
+  * filled `hardAmber`, white bold text, swaps to the loading copy and disables itself while
+  * the ad is in flight. The free path, so it always leads its star-priced alternative. */
+@@ -989,7 +1027,7 @@ private fun WinOutcomeContent(
+         modifier = Modifier.padding(top = 32.dp, start = 28.dp, end = 28.dp, bottom = 28.dp),
+         horizontalAlignment = Alignment.CenterHorizontally,
+     ) {
+-        Text("😎", fontSize = 68.sp)
++        FlippoHero(drawableRes = R.drawable.flippo_win)
+         Spacer(Modifier.size(8.dp))
+         Text(
+             text = stringResource(if (levelNumber != null) R.string.level_cleared else R.string.game_win_title),
+diff --git a/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/LoseModal/LoseModal.swift b/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/LoseModal/LoseModal.swift
+index 8c8570b..17ea071 100644
+--- a/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/LoseModal/LoseModal.swift
++++ b/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/LoseModal/LoseModal.swift
+@@ -10,8 +10,6 @@ import SwiftUI
+ struct LoseModal: View {
+     var listener: LoseModalViewModelListener?
+ 
+-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+-
+     private var isOutOfLives: Bool {
+         (listener?.levelLivesRemaining ?? -1) == 0
+     }
+@@ -31,20 +29,16 @@ struct LoseModal: View {
+                 .background(.ultraThinMaterial)
+ 
+             VStack(spacing: 0) {
+-                // The hero says *why*: a clock rings and cracks on a timeout,
+-                // a red badge stamps in and shakes its head on a mistake
+-                // bust. Both end on a still picture. Reduce-motion players
+-                // keep the face the modal has always shown.
+-                if reduceMotion {
+-                    Text("😳")
+-                        .font(.system(size: 64))
+-                        .padding(.bottom, 12)
+-                } else {
+-                    LottieView(name: lostToMistakes ? "x-shake" : "clock-crack", tint: Color.secundaryColor)
+-                        .frame(width: 72, height: 72)
+-                        .padding(.bottom, 12)
+-                        .accessibilityHidden(true)
+-                }
++                // Flippo says *why*: dizzy from the clock running out, or
++                // sheepish over one too many mistakes. The art is already a
++                // static pose, so it renders identically regardless of the
++                // reduce-motion setting.
++                Image(lostToMistakes ? "FlippoLoseMistakes" : "FlippoLoseTime")
++                    .resizable()
++                    .aspectRatio(contentMode: .fit)
++                    .frame(width: 160, height: 168)
++                    .accessibilityHidden(true)
++                    .padding(.bottom, 12)
+ 
+                 // Reason pill chip
+                 HStack(spacing: 6) {
+diff --git a/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/Pause/PauseModal.swift b/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/Pause/PauseModal.swift
+index 3e8216a..94a4bea 100644
+--- a/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/Pause/PauseModal.swift
++++ b/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/Pause/PauseModal.swift
+@@ -17,8 +17,12 @@ struct PauseModal: View {
+                 .background(.ultraThinMaterial)
+ 
+             VStack(spacing: 0) {
+-                Text("🧐")
+-                    .font(.system(size: 64))
++                // Flippo holds up a mitten while the board waits.
++                Image("FlippoPause")
++                    .resizable()
++                    .aspectRatio(contentMode: .fit)
++                    .frame(width: 160, height: 168)
++                    .accessibilityHidden(true)
+                     .padding(.bottom, 12)
+ 
+                 Text(Strings.pause)
+diff --git a/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/QuitModal/QuitModal.swift b/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/QuitModal/QuitModal.swift
+index 0a9490d..94788fb 100644
+--- a/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/QuitModal/QuitModal.swift
++++ b/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/QuitModal/QuitModal.swift
+@@ -17,8 +17,12 @@ struct QuitModal: View {
+                 .background(.ultraThinMaterial)
+ 
+             VStack(spacing: 0) {
+-                Text("🥺")
+-                    .font(.system(size: 56))
++                // Flippo pleads with the player to stay.
++                Image("FlippoQuit")
++                    .resizable()
++                    .aspectRatio(contentMode: .fit)
++                    .frame(width: 160, height: 168)
++                    .accessibilityHidden(true)
+                     .padding(.bottom, 12)
+ 
+                 Text(Strings.quit)
+diff --git a/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/WinModal/WinModal.swift b/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/WinModal/WinModal.swift
+index 9bf6de9..cbd542c 100644
+--- a/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/WinModal/WinModal.swift
++++ b/ios/DoMemory/DoMemory/Modules/Memorize/MemorizeView/Modals/WinModal/WinModal.swift
+@@ -108,8 +108,11 @@ struct WinModal: View {
+                 .background(.ultraThinMaterial)
+ 
+             VStack(spacing: 6) {
+-                Text("😎")
+-                    .font(.system(size: 68))
++                Image("FlippoWin")
++                    .resizable()
++                    .aspectRatio(contentMode: .fit)
++                    .frame(width: 160, height: 168)
++                    .accessibilityHidden(true)
+                     .padding(.bottom, 8)
+ 
+                 Text(levelNumber != nil ? Strings.levelCleared : Strings.youWin)

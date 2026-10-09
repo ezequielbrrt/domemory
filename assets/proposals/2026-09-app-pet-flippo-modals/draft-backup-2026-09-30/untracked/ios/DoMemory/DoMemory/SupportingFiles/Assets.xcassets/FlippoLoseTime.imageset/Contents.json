@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "flippo-lose-time.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
