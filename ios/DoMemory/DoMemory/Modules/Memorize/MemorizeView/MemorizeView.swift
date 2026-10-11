@@ -28,6 +28,43 @@ struct MemorizeView: View {
         max(1, Int(ceil(sqrt(Double(viewModel.cards.count)))))
     }
 
+    /// Level play shows the meter from the first match, since its pips preview
+    /// what a run earns. Elsewhere it only surfaces once a combo exists.
+    private var showsStreakMeter: Bool {
+        viewModel.canUsePowerUps || viewModel.matchStreak >= 2 || viewModel.streakBanner != nil
+    }
+
+    /// The moves-level twin of the timer chip: attempts left, warning in the
+    /// mistake colour over the last two, styled like the chips beside it.
+    private var movesChip: some View {
+        let moves = max(0, viewModel.movesRemaining ?? 0)
+        let warn = viewModel.isNearMovesLimit
+        return HStack(spacing: 5) {
+            Image(systemName: "hand.tap.fill")
+                .foregroundStyle(warn ? Color.secundaryColor : Color.primaryColor)
+                .font(.system(size: 14))
+            Text("\(moves)")
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundStyle(warn ? Color.secundaryColor : Color.textPrimary)
+                .contentTransition(.numericText())
+                .monospacedDigit()
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(
+            Capsule()
+                .fill(warn ? Color.secundaryColor.opacity(0.12) : Color.surfacePrimary)
+                .overlay(
+                    Capsule()
+                        .stroke(warn ? Color.secundaryColor.opacity(0.5) : Color.surfaceBorder, lineWidth: 1)
+                )
+                .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
+        )
+        .animation(.spring(duration: 0.25), value: moves)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Strings.movesLeftFormat(moves))
+    }
+
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
@@ -85,6 +122,9 @@ struct MemorizeView: View {
                             .shadow(color: Color.shadowColor, radius: 6, x: 0, y: 3)
                     )
 
+                    if viewModel.isMovesMode {
+                        movesChip
+                    } else {
                     // Timer chip — turns frosty while the Freeze power-up holds
                     // the countdown, which otherwise looks like a stalled clock.
                     HStack(spacing: 5) {
@@ -132,6 +172,7 @@ struct MemorizeView: View {
                     .onChange(of: viewModel.isFrozen) { wasFrozen, isFrozen in
                         if wasFrozen && !isFrozen && !reduceMotion { showThaw = true }
                     }
+                    }
 
                     Spacer()
 
@@ -159,8 +200,25 @@ struct MemorizeView: View {
                 .padding(.top, 12)
                 .padding(.bottom, 8)
 
+                // Always laid out, faded in when it has something to say, so
+                // the board below never jumps when a combo starts.
+                StreakMeter(
+                    streak: viewModel.matchStreak,
+                    banner: viewModel.streakBanner,
+                    showsMilestones: viewModel.canUsePowerUps
+                )
+                .opacity(showsStreakMeter ? 1 : 0)
+                .animation(.easeInOut(duration: 0.25), value: showsStreakMeter)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
+
                 if viewModel.canUsePowerUps {
-                    PowerUpBar(balance: viewModel.starBalance, isActive: viewModel.isActive) { powerUp in
+                    PowerUpBar(
+                        balance: viewModel.starBalance,
+                        isActive: viewModel.isActive,
+                        isCharged: viewModel.isCharged,
+                        powerUps: viewModel.availablePowerUps
+                    ) { powerUp in
                         viewModel.use(powerUp)
                     }
                 }
@@ -183,14 +241,45 @@ struct MemorizeView: View {
                                     viewModel.getIfAllAreMatched()
                                 }
                             }
-                            CardView(card: card, shouldShowPie: viewModel.shouldShowPie)
+                            let togglePin = { viewModel.togglePin(on: card) }
+                            CardView(
+                                card: card,
+                                shouldShowPie: viewModel.shouldShowPie,
+                                isRevealed: viewModel.isFlashed(card),
+                                pinSlot: viewModel.pinSlot(card),
+                                effect: viewModel.effect(on: card)
+                            )
                                 .frame(width: layout.cardSize.width, height: layout.cardSize.height)
                                 .onTapGesture(perform: choose)
-                                .cardAccessibility(card, onActivate: choose)
+                                // Hold to pin. A tap still flips; the hold is
+                                // long enough that a slow tap never pins.
+                                .onLongPressGesture(minimumDuration: 0.4, perform: togglePin)
+                                .cardAccessibility(
+                                    card,
+                                    isPinned: viewModel.isPinned(card),
+                                    onActivate: choose,
+                                    onTogglePin: togglePin
+                                )
                         }
                     }
                     .padding(BoardLayout.padding)
                     .frame(width: geo.size.width, height: geo.size.height)
+                    // The cascade needs the grid the cards are actually drawn in.
+                    .onChange(of: layout.columns, initial: true) { _, columns in
+                        viewModel.boardColumns = columns
+                    }
+                    // A bomb rattles the whole board for a quarter second.
+                    .keyframeAnimator(initialValue: CGFloat(0), trigger: reduceMotion ? 0 : viewModel.shakeToken) { content, x in
+                        content.offset(x: x)
+                    } keyframes: { _ in
+                        KeyframeTrack {
+                            CubicKeyframe(-9, duration: 0.05)
+                            CubicKeyframe(8, duration: 0.05)
+                            CubicKeyframe(-6, duration: 0.05)
+                            CubicKeyframe(4, duration: 0.05)
+                            CubicKeyframe(0, duration: 0.05)
+                        }
+                    }
                 }
 
                 if !purchaseService.hasRemovedAds,
@@ -232,6 +321,7 @@ struct MemorizeView: View {
                     streak: viewModel.dailyChallengeStreak,
                     levelNumber: viewModel.levelNumber,
                     starsEarned: viewModel.lastEarnedStars,
+                    movesRemaining: viewModel.movesRemaining,
                     hasNextLevel: viewModel.hasNextLevel
                 )
                     .onAppear {
@@ -338,6 +428,104 @@ struct BoardLayout: Equatable {
     }
 }
 
+/// The combo meter under the HUD: a flame, the run's length, and in level play
+/// one pip per match up to the last streak milestone, so the player can see
+/// how far the next free power-up is. It heats up through the palette as the
+/// run grows and snaps back to grey on a miss — the cliff is the point.
+struct StreakMeter: View {
+    let streak: Int
+    let banner: StreakBanner?
+    /// Draws the milestone pips. Only level play has a power-up bar to charge.
+    let showsMilestones: Bool
+
+    @State private var pulse = false
+
+    private var tint: Color {
+        switch streak {
+        case ..<3: Color.textMuted
+        case 3..<5: Color.hardAmber
+        case 5..<7: Color.secundaryColor
+        default: Color.primaryColor
+        }
+    }
+
+    private var isHot: Bool { streak >= (StreakReward.milestones.first?.streak ?? Int.max) }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: isHot ? "flame.fill" : "flame")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(tint)
+                .symbolEffect(.bounce, value: streak)
+            Text("×\(streak)")
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(streak >= 2 ? tint : Color.textPrimary)
+                .contentTransition(.numericText())
+                .monospacedDigit()
+
+            if showsMilestones, StreakReward.finalMilestone > 0 {
+                HStack(spacing: 4) {
+                    ForEach(1...StreakReward.finalMilestone, id: \.self) { pip in
+                        let isMilestone = StreakReward.powerUp(forStreak: pip) != nil
+                        Capsule()
+                            .fill(pip <= streak ? tint : Color.surfaceBorder)
+                            .frame(width: isMilestone ? 14 : 7, height: 6)
+                    }
+                }
+                .padding(.leading, 2)
+            }
+
+            Spacer(minLength: 4)
+
+            if let banner {
+                Text(banner.text)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundStyle(banner.isPenalty ? Color.secundaryColor : tint)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 7)
+        .background(
+            Capsule()
+                .fill(isHot ? tint.opacity(0.12) : Color.surfacePrimary)
+                .overlay(
+                    Capsule().stroke(isHot ? tint.opacity(0.5) : Color.surfaceBorder, lineWidth: 1)
+                )
+                .shadow(color: isHot ? tint.opacity(0.3) : Color.shadowColor, radius: 6, x: 0, y: 3)
+        )
+        .scaleEffect(pulse ? 1.06 : 1)
+        .animation(.spring(duration: 0.3, bounce: 0.3), value: streak)
+        .animation(.spring(duration: 0.3, bounce: 0.3), value: banner)
+        .onChange(of: streak) { _, newValue in
+            guard newValue > 0 else { return }
+            withAnimation(.spring(duration: 0.18, bounce: 0.6)) { pulse = true }
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(0.18))
+                withAnimation(.spring(duration: 0.25)) { pulse = false }
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Strings.comboFormat(streak))
+        .accessibilityValue(banner?.text ?? "")
+    }
+}
+
 #Preview {
     MemorizeView(viewModel: MemorizeViewModel(memorama: nil))
+}
+
+#Preview("Streak meter") {
+    VStack(spacing: 16) {
+        StreakMeter(streak: 0, banner: nil, showsMilestones: true)
+        StreakMeter(streak: 2, banner: nil, showsMilestones: true)
+        StreakMeter(streak: 3, banner: .charged(.peek), showsMilestones: true)
+        StreakMeter(streak: 5, banner: .charged(.freeze), showsMilestones: true)
+        StreakMeter(streak: 8, banner: nil, showsMilestones: true)
+        StreakMeter(streak: 3, banner: .streak(3), showsMilestones: false)
+    }
+    .padding()
+    .background(Color.appBackground)
 }

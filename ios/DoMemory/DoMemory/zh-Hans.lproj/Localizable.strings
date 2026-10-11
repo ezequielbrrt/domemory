@@ -320,3 +320,24 @@
 "lose_offer_watch_ad" = "观看广告";
 "lose_pay_stars_format" = "支付 %d 颗星星";
 "lose_life_at_stake" = "继续这局游戏，就不会失去生命。";
+
+// Combo meter and frozen cards (gameplay prototype)
+"levels_powerup_free" = "免费";
+"levels_powerup_charged_accessibility_format" = "%@，已充能，可免费使用";
+"game_powerup_charged_format" = "%@ 已充能！";
+"game_combo_format" = "%d 连击";
+"game_combo_milestone_format" = "连续 %d 次！";
+"game_card_frozen" = "冰冻卡牌。点击敲碎冰块。";
+"game_card_bomb" = "炸弹卡牌。配错会扣时间。";
+"game_card_locked_format" = "锁定的卡牌，还需 %d 对";
+"game_card_pinned" = "已标记";
+"game_pin_card" = "标记";
+"game_unpin_card" = "取消标记";
+"game_bomb_boom_seconds_format" = "砰！−%d 秒";
+"game_bomb_boom_move" = "砰！−1 步";
+"game_bomb_defused_seconds_format" = "已拆除！+%d 秒";
+"game_bomb_defused_move" = "已拆除！+1 步";
+"game_moves_label" = "步数";
+"game_moves_left_format" = "剩余 %d 步";
+"levels_lose_out_of_moves" = "步数用完";
+"lose_offer_extra_moves_format" = "再获得 %d 步";

@@ -320,3 +320,24 @@
 "lose_offer_watch_ad" = "Guarda un annuncio";
 "lose_pay_stars_format" = "Paga %d stelle";
 "lose_life_at_stake" = "Continua questa partita e non perderai una vita.";
+
+// Combo meter and frozen cards (gameplay prototype)
+"levels_powerup_free" = "GRATIS";
+"levels_powerup_charged_accessibility_format" = "%@, carico, uso gratuito";
+"game_powerup_charged_format" = "%@ carico!";
+"game_combo_format" = "Combo di %d coppie";
+"game_combo_milestone_format" = "%d di fila!";
+"game_card_frozen" = "Carta ghiacciata. Tocca per rompere il ghiaccio.";
+"game_card_bomb" = "Carta bomba. Un errore con lei costa tempo.";
+"game_card_locked_format" = "Carta incatenata, ancora %d coppie";
+"game_card_pinned" = "Segnata";
+"game_pin_card" = "Segna";
+"game_unpin_card" = "Togli segno";
+"game_bomb_boom_seconds_format" = "Boom! −%d s";
+"game_bomb_boom_move" = "Boom! −1 mossa";
+"game_bomb_defused_seconds_format" = "Disinnescata! +%d s";
+"game_bomb_defused_move" = "Disinnescata! +1 mossa";
+"game_moves_label" = "Mosse";
+"game_moves_left_format" = "%d mosse rimaste";
+"levels_lose_out_of_moves" = "Mosse finite";
+"lose_offer_extra_moves_format" = "Ottieni %d mosse in più";

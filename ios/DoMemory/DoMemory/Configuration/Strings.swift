@@ -130,8 +130,53 @@ enum Strings {
     static func powerUpCostFormat(_ title: String, _ cost: Int) -> String {
         String(format: NSLocalizedString("levels_powerup_cost_format", comment: "Accessibility label, %@ = power-up name, %d = star cost"), title, cost)
     }
+    static let powerUpFree = NSLocalizedString("levels_powerup_free", comment: "Badge on a power-up button with a free use earned by a match streak; very short, uppercase")
+    static func powerUpChargedAccessibilityFormat(_ title: String) -> String {
+        String(format: NSLocalizedString("levels_powerup_charged_accessibility_format", comment: "Accessibility label, %@ = power-up name, when a free use is waiting"), title)
+    }
+    static func powerUpChargedFormat(_ title: String) -> String {
+        String(format: NSLocalizedString("game_powerup_charged_format", comment: "Combo meter caption when a match streak earns a free power-up, %@ = power-up name"), title)
+    }
     static func buyLifeFormat(_ cost: Int) -> String {
         String(format: NSLocalizedString("levels_buy_life_format", comment: "Button to buy one life with stars, %d = star cost"), cost)
+    }
+
+    // Combo meter
+    static func comboFormat(_ streak: Int) -> String {
+        String(format: NSLocalizedString("game_combo_format", comment: "Accessibility label for the combo meter, %d = consecutive matches"), streak)
+    }
+    static func comboMilestoneFormat(_ streak: Int) -> String {
+        String(format: NSLocalizedString("game_combo_milestone_format", comment: "Combo meter caption at a streak milestone outside Levels, %d = consecutive matches"), streak)
+    }
+
+    // Frozen cards
+    static let cardFrozen = NSLocalizedString("game_card_frozen", comment: "Accessibility label for a card under ice; tapping it cracks the ice instead of flipping it")
+
+    // Bombs, chains, pins
+    static let cardBomb = NSLocalizedString("game_card_bomb", comment: "Accessibility label for a face-down bomb card")
+    static func cardLockedFormat(_ matches: Int) -> String {
+        String(format: NSLocalizedString("game_card_locked_format", comment: "Accessibility label for a chained card, %d = pairs still to match before it opens"), matches)
+    }
+    static let cardPinned = NSLocalizedString("game_card_pinned", comment: "Accessibility value for a card the player marked")
+    static let pinCard = NSLocalizedString("game_pin_card", comment: "Accessibility action: mark a face-down card")
+    static let unpinCard = NSLocalizedString("game_unpin_card", comment: "Accessibility action: clear the mark on a card")
+    static func bombBoomSecondsFormat(_ seconds: Int) -> String {
+        String(format: NSLocalizedString("game_bomb_boom_seconds_format", comment: "Caption when a bomb card goes off on a timed board, %d = seconds lost"), seconds)
+    }
+    static let bombBoomMove = NSLocalizedString("game_bomb_boom_move", comment: "Caption when a bomb card goes off on a moves board; one move is lost")
+    static func bombDefusedSecondsFormat(_ seconds: Int) -> String {
+        String(format: NSLocalizedString("game_bomb_defused_seconds_format", comment: "Caption when a bomb's pair is matched on a timed board, %d = seconds gained"), seconds)
+    }
+    static let bombDefusedMove = NSLocalizedString("game_bomb_defused_move", comment: "Caption when a bomb's pair is matched on a moves board; one move is gained")
+
+    // Moves levels
+    static let movesLabel = NSLocalizedString("game_moves_label", comment: "Stat label for the moves left on a moves level")
+    static func movesLeftFormat(_ moves: Int) -> String {
+        String(format: NSLocalizedString("game_moves_left_format", comment: "Accessibility label for the moves chip, %d = attempts left"), moves)
+    }
+    static let loseOutOfMoves = NSLocalizedString("levels_lose_out_of_moves", comment: "Lose modal message when a moves level's budget is spent")
+    static func loseOfferExtraMovesFormat(_ amount: Int) -> String {
+        String(format: NSLocalizedString("lose_offer_extra_moves_format", comment: "Rescue title on a moves level, %d = moves refunded"), amount)
     }
     static func skipLevelFormat(_ cost: Int) -> String {
         String(format: NSLocalizedString("levels_skip_level_format", comment: "Button to skip the current level with stars, %d = star cost"), cost)

@@ -9,6 +9,8 @@ import UIKit
 struct ResultShareData {
     let pairs: Int
     let timeRemaining: Int
+    /// Set on a moves level, where the remaining stat is moves, not seconds.
+    var movesRemaining: Int? = nil
     let failedTries: Int
     let difficultyTitle: String
     let isDailyChallenge: Bool
@@ -50,7 +52,10 @@ struct ShareResultCardView: View {
             VStack(spacing: 6) {
                 row(Strings.difficulty, data.difficultyTitle)
                 row(Strings.pairs, "\(data.pairs)")
-                row(Strings.remaining, "\(data.timeRemaining)s")
+                row(
+                    data.movesRemaining != nil ? Strings.movesLabel : Strings.remaining,
+                    data.movesRemaining.map { "\($0)" } ?? "\(data.timeRemaining)s"
+                )
                 row(Strings.errors, "\(data.failedTries)")
                 if data.isDailyChallenge && data.streak > 0 {
                     row("🔥", "\(data.streak)")

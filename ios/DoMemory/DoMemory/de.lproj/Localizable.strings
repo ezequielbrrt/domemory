@@ -320,3 +320,24 @@
 "lose_offer_watch_ad" = "Anzeige ansehen";
 "lose_pay_stars_format" = "%d Sterne zahlen";
 "lose_life_at_stake" = "Spiel diese Runde weiter und du verlierst kein Leben.";
+
+// Combo meter and frozen cards (gameplay prototype)
+"levels_powerup_free" = "GRATIS";
+"levels_powerup_charged_accessibility_format" = "%@, aufgeladen, kostenlos nutzbar";
+"game_powerup_charged_format" = "%@ aufgeladen!";
+"game_combo_format" = "Combo aus %d Treffern";
+"game_combo_milestone_format" = "%d in Folge!";
+"game_card_frozen" = "Gefrorene Karte. Tippe, um das Eis zu brechen.";
+"game_card_bomb" = "Bombenkarte. Ein Fehlversuch damit kostet Zeit.";
+"game_card_locked_format" = "Verkettete Karte, noch %d Treffer";
+"game_card_pinned" = "Markiert";
+"game_pin_card" = "Markieren";
+"game_unpin_card" = "Markierung entfernen";
+"game_bomb_boom_seconds_format" = "Bumm! −%d s";
+"game_bomb_boom_move" = "Bumm! −1 Zug";
+"game_bomb_defused_seconds_format" = "Entschärft! +%d s";
+"game_bomb_defused_move" = "Entschärft! +1 Zug";
+"game_moves_label" = "Züge";
+"game_moves_left_format" = "Noch %d Züge";
+"levels_lose_out_of_moves" = "Keine Züge mehr";
+"lose_offer_extra_moves_format" = "%d Züge mehr erhalten";

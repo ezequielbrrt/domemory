@@ -43,6 +43,11 @@ enum GameMode: Equatable {
 enum LoseReason: Equatable {
     case outOfTime
     case tooManyMistakes
+    /// A moves level spent its budget of attempts with pairs still down.
+    case outOfMoves
+
+    /// Lost to a budget rather than to the clock, so extra time is no rescue.
+    var isBudget: Bool { self != .outOfTime }
 }
 
 @Observable
@@ -93,7 +98,7 @@ class MemorizeViewModel {
     var hasLost: Bool { loseReason != nil }
     /// Mistake budget for the current level; nil outside of level play.
     var maxFailures: Int? {
-        guard let levelNumber else { return nil }
+        guard let levelNumber, !isMovesMode else { return nil }
         return LevelCurve.maxFailures(for: levelNumber)
     }
     /// True in the last two mistakes of the budget, so the HUD can warn before
@@ -134,6 +139,32 @@ class MemorizeViewModel {
     /// — `timeRemaining` stops ticking — so the view would have no signal to
     /// re-render when the freeze starts or expires.
     private(set) var isFrozen = false
+    /// Free uses of each power-up earned by match streaks (`StreakReward`).
+    /// Spent before stars; carried into the next level, cleared by a retry.
+    private(set) var chargedPowerUps: [LevelPowerUp: Int] = [:]
+    /// The combo meter's caption for the last milestone reached — "3 in a
+    /// row!" or "Peek charged!". Cleared by `streakBannerTask` after a beat.
+    private(set) var streakBanner: StreakBanner?
+    private var streakBannerTask: Task<Void, Never>?
+    /// Cards briefly shown face up by a cascade — the neighbours of a pair
+    /// matched on a hot streak. View-level only: the model never turns them,
+    /// so a tap on one during the flash plays as a normal flip.
+    private(set) var flashedCardIDs: Set<Int> = []
+    private var flashTask: Task<Void, Never>?
+    /// Columns the board is currently drawn with, fed by the view. Adjacency
+    /// for the cascade depends on it, and iPad picks it from the window.
+    var boardColumns: Int = 1
+    /// Player-placed markers on face-down cards, by card id, each with its
+    /// colour slot. The player already does this in their head; making it
+    /// tactile is the mechanic. Capped at `maxPins`.
+    private(set) var pinnedCards: [Int: Int] = [:]
+    static let maxPins = 3
+    private var movesLossTask: Task<Void, Never>?
+    /// Juice in flight: a burst and a floating number on a card that just
+    /// resolved. Each one removes itself after `MatchEffect.lifetime`.
+    private(set) var matchEffects: [MatchEffect] = []
+    /// Bumped when a bomb goes off; the board shakes on every change.
+    private(set) var shakeToken = 0
     private var hasLoggedGameFinished = false
     /// Star power-ups bought during the current attempt, reported on
     /// `levelFinished`. Reset with every start, retry and next level.
@@ -163,6 +194,7 @@ class MemorizeViewModel {
                 return auxMemorama.items[partIndex]
             }
         }
+        applyLevelModifiers()
         self.shouldShowPie = shouldShowPieByDifficulty()
     }
 
@@ -195,6 +227,51 @@ class MemorizeViewModel {
         model.failedTries
     }
 
+    /// Consecutive matches without a miss; the combo meter's number.
+    var matchStreak: Int {
+        model.matchStreak
+    }
+
+    /// True while the board has at least one card still under ice.
+    var hasFrozenCards: Bool {
+        model.cards.contains { $0.isFrozen && !$0.isMatched }
+    }
+
+    /// How this board is won. Free play and the daily board are timed.
+    var objective: LevelObjective {
+        guard let levelNumber else { return .timed }
+        return LevelCurve.objective(for: levelNumber)
+    }
+
+    var isMovesMode: Bool { objective.isMoves }
+
+    /// Attempts the level allows; nil on a timed board.
+    var movesBudget: Int? {
+        if case .moves(let budget) = objective { return budget }
+        return nil
+    }
+
+    /// Attempts left on a moves level; nil on a timed board. Can dip below
+    /// zero for a beat when a bomb charges a move the player did not have.
+    var movesRemaining: Int? {
+        guard let movesBudget else { return nil }
+        return movesBudget - model.attempts
+    }
+
+    /// The last two moves, so the HUD can warn before the budget bites.
+    var isNearMovesLimit: Bool {
+        guard let movesRemaining else { return false }
+        return movesRemaining <= 2
+    }
+
+    /// The power-ups this board can use at all.
+    var availablePowerUps: [LevelPowerUp] { LevelPowerUp.available(for: objective) }
+
+    func isPinned(_ card: MemoryGame<String>.Card) -> Bool { pinnedCards[card.id] != nil }
+    func pinSlot(_ card: MemoryGame<String>.Card) -> Int? { pinnedCards[card.id] }
+    func isFlashed(_ card: MemoryGame<String>.Card) -> Bool { flashedCardIDs.contains(card.id) }
+    func effect(on card: MemoryGame<String>.Card) -> MatchEffect? { matchEffects.last { $0.cardID == card.id } }
+
     var difficultyDisplayTitle: String {
         switch gameDifficulty() {
         case .easy: return Strings.easy
@@ -209,6 +286,7 @@ class MemorizeViewModel {
     }
 
     func getRemainingTime() -> Int {
+        if let movesBudget { return movesBudget }
         if let levelNumber {
             return LevelCurve.seconds(for: levelNumber)
         }
@@ -241,6 +319,22 @@ class MemorizeViewModel {
 
     // MARK: - Intent(s)
     func choose(card: MemoryGame<String>.Card) {
+        // Ice first: cracking turns nothing over, so a mismatched pair waiting
+        // on its flip-back must keep waiting — the cancel below would strand it
+        // face up. The crack is its own moment, felt but never counted as a
+        // flip, a mistake or a tap on a dead card.
+        if card.isFrozen {
+            guard model.crack(card: card) else { return }
+            HapticsService.shared.fire(.crack)
+            HapticsService.shared.prepare(for: .cardFlip)
+            return
+        }
+        // A chain has no tap that opens it; the lock itself is the answer, so
+        // the tap is acknowledged lightly and nothing else moves.
+        if card.isLocked {
+            HapticsService.shared.fire(.tap)
+            return
+        }
         flipBackTask?.cancel()
         flipBackTask = nil
         // MemoryGame.choose is a value-type mutation that reports nothing, so
@@ -255,6 +349,21 @@ class MemorizeViewModel {
             matchedBefore: matchedBefore,
             faceUpBefore: faceUpBefore
         )
+        switch model.lastOutcome {
+        case .match(let involvedBomb):
+            pinnedCards = pinnedCards.filter { id, _ in
+                model.cards.contains { $0.id == id && !$0.isMatched }
+            }
+            if involvedBomb { applyBombDefused() }
+            emitMatchEffects(for: card, defused: involvedBomb)
+            rewardStreakIfMilestone()
+            flashNeighboursIfHot(of: card)
+        case .mismatch(let involvedBomb):
+            if involvedBomb { applyBombPenalty() }
+        case .firstFlip, .ignored:
+            break
+        }
+        scheduleMovesLossIfNeeded()
         if AnalyticsService.shouldSample(AnalyticsService.cardTapSampleRate) {
             AnalyticsService.log(
                 .cardTapped(
@@ -286,7 +395,10 @@ class MemorizeViewModel {
             // pattern from getIfAllAreMatched. A thud in front of it reads as
             // a stutter, so the win is left to speak for itself.
             if matchedNow < model.cards.count {
-                HapticsService.shared.fire(.match)
+                // From the first milestone on, every match in the run lands
+                // harder — the combo is something the thumb feels build.
+                let isHot = model.matchStreak >= (StreakReward.milestones.first?.streak ?? Int.max)
+                HapticsService.shared.fire(isHot ? .streak : .match)
             }
         } else {
             HapticsService.shared.fire(.cardFlip)
@@ -354,11 +466,238 @@ class MemorizeViewModel {
         model = MemoryGame<String>(numbersOfPairsOfCards: auxMemorama.items.count) { partIndex in
             return auxMemorama.items[partIndex]
         }
+        applyLevelModifiers()
+        clearStreakBanner()
+        clearFlash()
+        pinnedCards = [:]
+    }
+
+    /// Lays the level's blockers on a freshly shuffled board. Free play and
+    /// the Daily Challenge never get any: the curve is a Levels concept, and
+    /// the daily board has to be the same plain board for everyone.
+    private func applyLevelModifiers() {
+        guard let levelNumber else { return }
+        model.freezeCards(count: LevelCurve.frozenCards(for: levelNumber))
+        model.placeBombs(count: LevelCurve.bombCards(for: levelNumber))
+        model.lockCards(count: LevelCurve.chainedCards(for: levelNumber), forMatches: LevelCurve.chainLength)
+    }
+
+    // MARK: - Bombs
+
+    /// What a mismatch on a bomb costs: seconds on a timed board, and on a
+    /// moves board the extra attempt the model already charged.
+    static let bombPenaltySeconds = 10
+    /// What defusing one pays back on a timed board.
+    static let bombDefuseBonusSeconds = 5
+
+    private func applyBombPenalty() {
+        HapticsService.shared.fire(.warning)
+        shakeToken += 1
+        if let bomb = model.cards.first(where: { $0.isBomb && $0.isFaceUp }) {
+            addEffect(MatchEffect(cardID: bomb.id, text: isMovesMode ? "−1" : "−\(Self.bombPenaltySeconds) s", tier: 0, isPenalty: true))
+        }
+        if isMovesMode {
+            showStreakBanner(.bombMoves)
+        } else {
+            timeRemaining = max(0, timeRemaining - Self.bombPenaltySeconds)
+            showStreakBanner(.bombSeconds(Self.bombPenaltySeconds))
+            // The tick loop would land the loss a second late; it reads as
+            // the board stalling. Whichever failure comes first still wins.
+            if timeRemaining == 0, loseReason == nil {
+                stopTimer()
+                loseReason = .outOfTime
+            }
+        }
+    }
+
+    private func applyBombDefused() {
+        HapticsService.shared.fire(.reward)
+        if isMovesMode {
+            showStreakBanner(.defusedMoves)
+        } else {
+            timeRemaining += Self.bombDefuseBonusSeconds
+            showStreakBanner(.defusedSeconds(Self.bombDefuseBonusSeconds))
+        }
+    }
+
+    // MARK: - Juice
+
+    /// A match is answered on the board itself, not only in the HUD: both
+    /// cards get a burst sized to the streak, and the card the player tapped
+    /// carries the number — the multiplier on a run, or what a bomb paid.
+    private func emitMatchEffects(for card: MemoryGame<String>.Card, defused: Bool) {
+        let streak = model.matchStreak
+        let tier = MatchEffect.tier(forStreak: streak)
+        let text: String?
+        if defused {
+            text = isMovesMode ? "+1" : "+\(Self.bombDefuseBonusSeconds) s"
+        } else if streak >= 2 {
+            text = "×\(streak)"
+        } else {
+            text = nil
+        }
+        for matched in model.cards where matched.itemId == card.itemId {
+            let carriesText = matched.id == card.id
+            addEffect(MatchEffect(cardID: matched.id, text: carriesText ? text : nil, tier: tier, isPenalty: false))
+        }
+    }
+
+    private func addEffect(_ effect: MatchEffect) {
+        matchEffects.append(effect)
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(MatchEffect.lifetime))
+            self?.matchEffects.removeAll { $0.id == effect.id }
+        }
+    }
+
+    // MARK: - Cascade
+
+    /// How long the neighbours of a hot match stay turned.
+    static let flashDuration: TimeInterval = 0.6
+    /// The streak a match must extend before its neighbours light up.
+    static let flashStreakThreshold = 2
+
+    /// A match on a run shows the four cards around each of the pair for a
+    /// beat: the board rewards momentum with information. Only plain
+    /// face-down cards are shown — ice and chains stay opaque.
+    private func flashNeighboursIfHot(of card: MemoryGame<String>.Card) {
+        guard model.matchStreak >= Self.flashStreakThreshold else { return }
+        let matchedIndices = model.cards.indices.filter { model.cards[$0].itemId == card.itemId }
+        var ids = Set<Int>()
+        for index in matchedIndices {
+            for neighbour in neighbourIndices(of: index) {
+                let candidate = model.cards[neighbour]
+                guard !candidate.isFaceUp, !candidate.isMatched, !candidate.isCovered else { continue }
+                ids.insert(candidate.id)
+            }
+        }
+        guard !ids.isEmpty else { return }
+        flashTask?.cancel()
+        withAnimation(.easeInOut(duration: 0.25)) {
+            flashedCardIDs = ids
+        }
+        flashTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(Self.flashDuration))
+            guard !Task.isCancelled, let self else { return }
+            withAnimation(.easeInOut(duration: 0.3)) {
+                self.flashedCardIDs = []
+            }
+        }
+    }
+
+    /// Up, down, left and right of a card in the grid the view draws.
+    func neighbourIndices(of index: Int) -> [Int] {
+        let columns = max(1, boardColumns)
+        let count = model.cards.count
+        var result: [Int] = []
+        if index % columns > 0 { result.append(index - 1) }
+        if index % columns < columns - 1, index + 1 < count { result.append(index + 1) }
+        if index - columns >= 0 { result.append(index - columns) }
+        if index + columns < count { result.append(index + columns) }
+        return result
+    }
+
+    private func clearFlash() {
+        flashTask?.cancel()
+        flashTask = nil
+        flashedCardIDs = []
+    }
+
+    // MARK: - Pins
+
+    /// Long-press: marks a face-down card, or clears its mark. A fourth pin is
+    /// refused with a warning rather than silently replacing the oldest, so
+    /// the player keeps the ones they chose.
+    func togglePin(on card: MemoryGame<String>.Card) {
+        guard !card.isFaceUp, !card.isMatched else { return }
+        if pinnedCards[card.id] != nil {
+            pinnedCards[card.id] = nil
+            HapticsService.shared.fire(.select)
+            return
+        }
+        guard pinnedCards.count < Self.maxPins else {
+            HapticsService.shared.fire(.warning)
+            return
+        }
+        let usedSlots = Set(pinnedCards.values)
+        let slot = (0..<Self.maxPins).first { !usedSlots.contains($0) } ?? 0
+        pinnedCards[card.id] = slot
+        HapticsService.shared.fire(.select)
+    }
+
+    // MARK: - Moves budget
+
+    /// Ends a moves level once the budget is spent with pairs still down,
+    /// deferred like the mistake loss so the last pair is seen.
+    private func scheduleMovesLossIfNeeded() {
+        guard let movesRemaining, loseReason == nil, movesLossTask == nil else { return }
+        guard movesRemaining <= 0, !model.cards.allSatisfy(\.isMatched) else { return }
+        movesLossTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(0.8))
+            guard !Task.isCancelled, let self else { return }
+            self.movesLossTask = nil
+            guard self.loseReason == nil else { return }
+            self.stopTimer()
+            self.loseReason = .outOfMoves
+        }
+    }
+
+    // MARK: - Streak rewards
+
+    /// Called once per match. At a milestone it charges the matching power-up
+    /// (level play only, where the bar exists to spend it) and raises the
+    /// caption; between milestones the meter's own motion is the feedback.
+    private func rewardStreakIfMilestone() {
+        let streak = model.matchStreak
+        guard let reward = StreakReward.powerUp(forStreak: streak, objective: objective) else { return }
+        if canUsePowerUps {
+            chargedPowerUps[reward, default: 0] += 1
+            HapticsService.shared.fire(.reward)
+            showStreakBanner(.charged(reward))
+            if let levelNumber {
+                AnalyticsService.log(
+                    .levelPowerUpCharged(
+                        powerUp: reward.rawValue,
+                        level: levelNumber,
+                        streak: streak,
+                        seasonID: levelContext?.seasonID
+                    )
+                )
+            }
+        } else {
+            showStreakBanner(.streak(streak))
+        }
+    }
+
+    private func showStreakBanner(_ banner: StreakBanner) {
+        streakBannerTask?.cancel()
+        withAnimation(.spring(duration: 0.35, bounce: 0.4)) {
+            streakBanner = banner
+        }
+        streakBannerTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(1.6))
+            guard !Task.isCancelled, let self else { return }
+            withAnimation(.easeOut(duration: 0.3)) {
+                self.streakBanner = nil
+            }
+        }
+    }
+
+    private func clearStreakBanner() {
+        streakBannerTask?.cancel()
+        streakBannerTask = nil
+        streakBanner = nil
     }
 
     // MARK: - Timer
     func startTimer() {
         stopTimer()
+        // A moves level has no countdown; only the deferred budget loss is
+        // re-armed, so pausing mid-delay can't be used to play on past it.
+        if isMovesMode {
+            scheduleMovesLossIfNeeded()
+            return
+        }
         if let held = heldFreezeRemaining {
             frozenUntil = held > 0 ? Date().addingTimeInterval(held) : nil
             heldFreezeRemaining = nil
@@ -401,6 +740,8 @@ class MemorizeViewModel {
         hideMatchedTask = nil
         mistakeLossTask?.cancel()
         mistakeLossTask = nil
+        movesLossTask?.cancel()
+        movesLossTask = nil
         endPeekIfActive()
     }
 
@@ -498,10 +839,12 @@ class MemorizeViewModel {
             // Endless Levels or a season, whichever owns this level's progress.
             let progressService = context.store
             let alreadyUnlockedNext = progressService.isUnlocked(levelNumber + 1)
+            // A moves level is rated on the moves it had left, in place of
+            // the seconds a timed one did: same thresholds, same stars.
             let earnedStars = progressService.recordCompletion(
                 level: levelNumber,
                 didWin: didWin,
-                timeRemaining: timeRemaining,
+                timeRemaining: movesRemaining ?? timeRemaining,
                 totalTime: getRemainingTime(),
                 failedTries: model.failedTries
             )
@@ -565,6 +908,8 @@ class MemorizeViewModel {
 extension MemorizeViewModel {
     private func restartGame() {
         self.showPauseView = false
+        // A retry is a new attempt; the charges belonged to the run that failed.
+        self.chargedPowerUps = [:]
         self.resetGame()
         self.frozenUntil = nil
         self.loseReason = nil
@@ -587,6 +932,7 @@ extension MemorizeViewModel {
     }
 
     private func shouldShowPieByDifficulty() -> Bool {
+        if isMovesMode { return false }
         if let levelNumber {
             return levelNumber >= 25
         }
@@ -674,8 +1020,14 @@ extension MemorizeViewModel {
     /// spent there too.
     var canUsePowerUps: Bool { levelNumber != nil }
 
+    /// Payable: a streak charge first, stars otherwise.
     func canAfford(_ powerUp: LevelPowerUp) -> Bool {
-        starBalance >= powerUp.cost
+        isCharged(powerUp) || starBalance >= powerUp.cost
+    }
+
+    /// A free use earned by a match streak is waiting on this power-up.
+    func isCharged(_ powerUp: LevelPowerUp) -> Bool {
+        chargedPowerUps[powerUp, default: 0] > 0
     }
 
     /// Peek or Freeze already running. Buying either again restarts it rather
@@ -692,8 +1044,17 @@ extension MemorizeViewModel {
     /// are small and the clock is running, so a modal here would cost more than
     /// a misfire does.
     func use(_ powerUp: LevelPowerUp) {
-        guard let levelNumber, canAfford(powerUp), !isActive(powerUp) else { return }
-        guard StarWalletService.shared.spend(powerUp.cost) else { return }
+        guard let levelNumber, availablePowerUps.contains(powerUp), canAfford(powerUp), !isActive(powerUp) else { return }
+        // A charge is spent before stars: it was earned on this board and
+        // would otherwise outlive the attempt it belongs to.
+        let cost: Int
+        if isCharged(powerUp) {
+            chargedPowerUps[powerUp, default: 1] -= 1
+            cost = 0
+        } else {
+            guard StarWalletService.shared.spend(powerUp.cost) else { return }
+            cost = powerUp.cost
+        }
         HapticsService.shared.fire(.reward)
         starBalance = StarWalletService.shared.balance
 
@@ -713,7 +1074,7 @@ extension MemorizeViewModel {
             .levelPowerUpUsed(
                 powerUp: powerUp.rawValue,
                 level: levelNumber,
-                cost: powerUp.cost,
+                cost: cost,
                 balanceAfter: starBalance,
                 seasonID: levelContext?.seasonID
             )
@@ -736,6 +1097,61 @@ extension MemorizeViewModel {
             withAnimation(.easeInOut(duration: 0.4)) {
                 self.model.flipBackUnmatchedCards()
             }
+        }
+    }
+}
+
+/// One card's share of the juice for a resolved pair: a sparkle burst sized
+/// by `tier`, and an optional number that floats up off the card.
+struct MatchEffect: Identifiable, Equatable {
+    let id = UUID()
+    let cardID: Int
+    let text: String?
+    /// 0 is no burst (a penalty), then small, medium, large.
+    let tier: Int
+    let isPenalty: Bool
+
+    static let lifetime: TimeInterval = 1.0
+
+    /// The burst grows with the run: a single match sparks, a run flares.
+    static func tier(forStreak streak: Int) -> Int {
+        switch streak {
+        case ..<2: 1
+        case 2..<4: 2
+        default: 3
+        }
+    }
+}
+
+/// The combo meter's caption at a streak milestone.
+enum StreakBanner: Equatable {
+    /// A milestone in a mode with no power-up bar: the run is its own reward.
+    case streak(Int)
+    /// A milestone in level play: this power-up now has a free use waiting.
+    case charged(LevelPowerUp)
+    /// A bomb went off in a mismatch, costing the clock or a move.
+    case bombSeconds(Int)
+    case bombMoves
+    /// A bomb's pair was found, paying the clock or a move back.
+    case defusedSeconds(Int)
+    case defusedMoves
+
+    var text: String {
+        switch self {
+        case .streak(let count): Strings.comboMilestoneFormat(count)
+        case .charged(let powerUp): Strings.powerUpChargedFormat(powerUp.title)
+        case .bombSeconds(let seconds): Strings.bombBoomSecondsFormat(seconds)
+        case .bombMoves: Strings.bombBoomMove
+        case .defusedSeconds(let seconds): Strings.bombDefusedSecondsFormat(seconds)
+        case .defusedMoves: Strings.bombDefusedMove
+        }
+    }
+
+    /// Bad news reads in the mistake colour; everything else in the streak's.
+    var isPenalty: Bool {
+        switch self {
+        case .bombSeconds, .bombMoves: true
+        default: false
         }
     }
 }

@@ -320,3 +320,24 @@
 "lose_offer_watch_ad" = "विज्ञापन देखें";
 "lose_pay_stars_format" = "%d सितारे खर्च करें";
 "lose_life_at_stake" = "यह खेल जारी रखें, आपका जीवन नहीं जाएगा।";
+
+// Combo meter and frozen cards (gameplay prototype)
+"levels_powerup_free" = "मुफ़्त";
+"levels_powerup_charged_accessibility_format" = "%@, चार्ज हो गया, मुफ़्त में इस्तेमाल करें";
+"game_powerup_charged_format" = "%@ चार्ज हो गया!";
+"game_combo_format" = "%d जोड़ियों का कॉम्बो";
+"game_combo_milestone_format" = "लगातार %d!";
+"game_card_frozen" = "जमी हुई कार्ड। बर्फ तोड़ने के लिए टैप करें।";
+"game_card_bomb" = "बम कार्ड। इसके साथ गलत जोड़ी से समय कटता है।";
+"game_card_locked_format" = "बंद कार्ड, %d और जोड़ियाँ चाहिए";
+"game_card_pinned" = "पिन किया";
+"game_pin_card" = "पिन करें";
+"game_unpin_card" = "पिन हटाएँ";
+"game_bomb_boom_seconds_format" = "धमाका! −%d से";
+"game_bomb_boom_move" = "धमाका! −1 चाल";
+"game_bomb_defused_seconds_format" = "निष्क्रिय! +%d से";
+"game_bomb_defused_move" = "निष्क्रिय! +1 चाल";
+"game_moves_label" = "चालें";
+"game_moves_left_format" = "%d चालें बाकी";
+"levels_lose_out_of_moves" = "चालें खत्म";
+"lose_offer_extra_moves_format" = "%d और चालें पाएँ";

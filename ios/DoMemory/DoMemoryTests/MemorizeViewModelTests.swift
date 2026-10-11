@@ -305,3 +305,331 @@ final class MemorizeViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.canSkipLevelWithStars)
     }
 }
+
+// MARK: - Streak charges and frozen cards
+
+extension MemorizeViewModelTests {
+    /// Matches `count` pairs in a row on the view model's board, the way a
+    /// player on a hot run would.
+    private func matchPairs(_ count: Int, on viewModel: MemorizeViewModel) {
+        for _ in 0..<count {
+            // Face-down and uncovered: a card already turned, say by a
+            // mismatch whose flip-back is still pending, is not a fresh pick.
+            guard let first = viewModel.cards.first(where: { !$0.isMatched && !$0.isCovered && !$0.isFaceUp }),
+                  let partner = viewModel.cards.first(where: { $0.itemId == first.itemId && $0.id != first.id })
+            else { return XCTFail("ran out of pairs to match") }
+            viewModel.choose(card: first)
+            viewModel.choose(card: partner)
+        }
+    }
+
+    /// A 4-pair free-play board: enough room for a 3-streak.
+    private func makeFreeBoard() -> Memorama {
+        Memorama(
+            id: "test", name: "Test", category: "test", difficulty: "medium", description: "",
+            publishedDate: "", items: ["a", "b", "c", "d"], itemType: "emoji", isDoubleItem: true
+        )
+    }
+
+    /// Level 5 has 4 pairs and no frozen cards: room for a 3-streak without
+    /// clearing the board, and nothing between the taps and the pairs.
+    func testAThreeStreakChargesPeekForFree() {
+        let viewModel = MemorizeViewModel(level: 5)
+        defer { viewModel.stopTimer() }
+        XCTAssertEqual(StarWalletService.shared.balance, 0)
+        XCTAssertFalse(viewModel.canAfford(.peek), "no stars, no charge")
+
+        matchPairs(3, on: viewModel)
+
+        XCTAssertEqual(viewModel.matchStreak, 3)
+        XCTAssertTrue(viewModel.isCharged(.peek))
+        XCTAssertTrue(viewModel.canAfford(.peek), "the charge pays for it")
+        XCTAssertEqual(viewModel.streakBanner, .charged(.peek))
+
+        viewModel.use(.peek)
+        XCTAssertTrue(viewModel.isPeeking, "the charged power-up fires")
+        XCTAssertEqual(StarWalletService.shared.balance, 0, "a charge is spent before stars")
+        XCTAssertFalse(viewModel.isCharged(.peek), "one milestone, one use")
+    }
+
+    func testAChargeIsSpentBeforeStars() {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.peek.cost)
+        let viewModel = MemorizeViewModel(level: 5)
+        defer { viewModel.stopTimer() }
+
+        matchPairs(3, on: viewModel)
+        viewModel.use(.peek)
+
+        XCTAssertEqual(StarWalletService.shared.balance, LevelPowerUp.peek.cost, "stars stay in the wallet while a charge is waiting")
+    }
+
+    func testStreakMilestonesOutsideLevelsChargeNothing() {
+        let board = makeFreeBoard()
+        let viewModel = MemorizeViewModel(memorama: board, mode: .free)
+        defer { viewModel.stopTimer() }
+
+        matchPairs(3, on: viewModel)
+
+        XCTAssertEqual(viewModel.matchStreak, 3)
+        XCTAssertFalse(viewModel.isCharged(.peek), "there is no power-up bar in free play to spend it on")
+        XCTAssertEqual(viewModel.streakBanner, .streak(3), "the run is still celebrated")
+    }
+
+    func testARetryClearsTheCharges() {
+        let viewModel = MemorizeViewModel(level: 5)
+        defer { viewModel.stopTimer() }
+        matchPairs(3, on: viewModel)
+        XCTAssertTrue(viewModel.isCharged(.peek))
+
+        viewModel.tapOnReloadGame()
+
+        XCTAssertFalse(viewModel.isCharged(.peek), "the charge belonged to the run that was abandoned")
+        XCTAssertEqual(viewModel.matchStreak, 0)
+    }
+
+    func testALevelBoardCarriesItsFrozenCards() {
+        let level = 6
+        let viewModel = MemorizeViewModel(level: level)
+        defer { viewModel.stopTimer() }
+        viewModel.resetGame()
+
+        XCTAssertEqual(
+            viewModel.cards.filter(\.isFrozen).count,
+            LevelCurve.frozenCards(for: level),
+            "the board has to match the curve after the onAppear reset too"
+        )
+        XCTAssertTrue(viewModel.hasFrozenCards)
+    }
+
+    func testFreePlayNeverFreezesCards() {
+        let board = makeFreeBoard()
+        let viewModel = MemorizeViewModel(memorama: board, mode: .free)
+        defer { viewModel.stopTimer() }
+        viewModel.resetGame()
+        XCTAssertFalse(viewModel.hasFrozenCards)
+    }
+
+    func testTappingAFrozenCardCracksItWithoutFlippingOrCountingAMistake() {
+        let viewModel = MemorizeViewModel(level: 6)
+        defer { viewModel.stopTimer() }
+        guard let frozen = viewModel.cards.first(where: \.isFrozen) else { return XCTFail("level 6 should ice two cards") }
+
+        viewModel.choose(card: frozen)
+
+        let cracked = viewModel.cards.first { $0.id == frozen.id }!
+        XCTAssertFalse(cracked.isFrozen)
+        XCTAssertFalse(cracked.isFaceUp)
+        XCTAssertEqual(viewModel.failedTries, 0)
+        XCTAssertEqual(viewModel.matchStreak, 0)
+    }
+}
+
+// MARK: - Moves mode, bombs, cascade and pins
+
+extension MemorizeViewModelTests {
+    private func mismatchOnce(on viewModel: MemorizeViewModel, using first: MemoryGame<String>.Card? = nil) {
+        let card = first ?? viewModel.cards.first { !$0.isMatched && !$0.isCovered && !$0.isFaceUp }!
+        let other = viewModel.cards.first { $0.itemId != card.itemId && !$0.isMatched && !$0.isCovered && !$0.isFaceUp && !$0.isBomb }!
+        viewModel.choose(card: card)
+        viewModel.choose(card: other)
+    }
+
+    /// Level 4 is the first moves level: 4 pairs, no blockers yet.
+    func testLevelFourIsAMovesLevelWithNoClockAndNoMistakeBudget() {
+        let viewModel = MemorizeViewModel(level: 4)
+        defer { viewModel.stopTimer() }
+
+        XCTAssertTrue(viewModel.isMovesMode)
+        XCTAssertNil(viewModel.maxFailures, "a moves level has no mistake budget; the moves are the budget")
+        XCTAssertEqual(viewModel.movesBudget, LevelCurve.movesBudget(for: 4))
+        XCTAssertEqual(viewModel.movesRemaining, viewModel.movesBudget)
+        XCTAssertEqual(viewModel.getRemainingTime(), viewModel.movesBudget, "the view seeds the clock from this; it must not tick")
+        XCTAssertEqual(viewModel.availablePowerUps, [.peek, .revealPair])
+        XCTAssertFalse(viewModel.shouldShowPie)
+    }
+
+    func testEveryAttemptSpendsAMove() {
+        let viewModel = MemorizeViewModel(level: 4)
+        defer { viewModel.stopTimer() }
+        let budget = viewModel.movesBudget!
+
+        mismatchOnce(on: viewModel)
+        XCTAssertEqual(viewModel.movesRemaining, budget - 1)
+        matchPairs(1, on: viewModel)
+        XCTAssertEqual(viewModel.movesRemaining, budget - 2, "a match is an attempt too")
+    }
+
+    func testAClockPowerUpIsRefusedOnAMovesLevel() {
+        _ = LevelProgressService.shared.totalStars
+        StarWalletService.shared.credit(LevelPowerUp.freeze.cost)
+        let viewModel = MemorizeViewModel(level: 4)
+        defer { viewModel.stopTimer() }
+
+        viewModel.use(.freeze)
+
+        XCTAssertFalse(viewModel.isFrozen)
+        XCTAssertEqual(StarWalletService.shared.balance, LevelPowerUp.freeze.cost, "nothing was sold")
+    }
+
+    func testABombMismatchCostsTheClockOnATimedLevel() {
+        let viewModel = MemorizeViewModel(level: 10)
+        defer { viewModel.stopTimer() }
+        viewModel.timeRemaining = 60
+        guard let bomb = viewModel.cards.first(where: \.isBomb) else { return XCTFail("level 10 should arm one bomb") }
+
+        mismatchOnce(on: viewModel, using: bomb)
+
+        XCTAssertEqual(viewModel.timeRemaining, 60 - MemorizeViewModel.bombPenaltySeconds)
+        XCTAssertEqual(viewModel.streakBanner, .bombSeconds(MemorizeViewModel.bombPenaltySeconds))
+        XCTAssertNil(viewModel.loseReason)
+    }
+
+    func testABombMismatchThatEmptiesTheClockLosesAtOnce() {
+        let viewModel = MemorizeViewModel(level: 10)
+        defer { viewModel.stopTimer() }
+        viewModel.timeRemaining = 4
+        guard let bomb = viewModel.cards.first(where: \.isBomb) else { return XCTFail("level 10 should arm one bomb") }
+
+        mismatchOnce(on: viewModel, using: bomb)
+
+        XCTAssertEqual(viewModel.timeRemaining, 0, "never below zero")
+        XCTAssertEqual(viewModel.loseReason, .outOfTime)
+    }
+
+    func testDefusingABombPaysTheClockBack() {
+        let viewModel = MemorizeViewModel(level: 10)
+        defer { viewModel.stopTimer() }
+        viewModel.timeRemaining = 60
+        guard let bomb = viewModel.cards.first(where: \.isBomb) else { return XCTFail("level 10 should arm one bomb") }
+        let partner = viewModel.cards.first { $0.itemId == bomb.itemId && $0.id != bomb.id }!
+        if partner.isFrozen { viewModel.choose(card: partner) }
+
+        viewModel.choose(card: partner)
+        viewModel.choose(card: bomb)
+
+        XCTAssertEqual(viewModel.timeRemaining, 60 + MemorizeViewModel.bombDefuseBonusSeconds)
+        XCTAssertEqual(viewModel.streakBanner, .defusedSeconds(MemorizeViewModel.bombDefuseBonusSeconds))
+    }
+
+    func testNeighbourIndicesFollowTheDrawnGrid() {
+        let viewModel = MemorizeViewModel(level: 10) // 12 cards
+        defer { viewModel.stopTimer() }
+        viewModel.boardColumns = 4
+
+        XCTAssertEqual(Set(viewModel.neighbourIndices(of: 0)), [1, 4])
+        XCTAssertEqual(Set(viewModel.neighbourIndices(of: 5)), [4, 6, 1, 9])
+        XCTAssertEqual(Set(viewModel.neighbourIndices(of: 3)), [2, 7], "no wrap from the end of a row")
+        XCTAssertEqual(Set(viewModel.neighbourIndices(of: 11)), [10, 7])
+    }
+
+    func testTheCascadeOnlyFlashesPlainFaceDownCardsOnARun() {
+        let viewModel = MemorizeViewModel(memorama: makeFreeBoard(), mode: .free)
+        defer { viewModel.stopTimer() }
+        viewModel.boardColumns = 3
+
+        matchPairs(1, on: viewModel)
+        XCTAssertTrue(viewModel.flashedCardIDs.isEmpty, "the first match of a run flashes nothing")
+
+        matchPairs(1, on: viewModel)
+        for id in viewModel.flashedCardIDs {
+            let card = viewModel.cards.first { $0.id == id }!
+            XCTAssertFalse(card.isMatched)
+            XCTAssertFalse(card.isFaceUp, "the model never turns a flashed card")
+            XCTAssertFalse(card.isCovered)
+        }
+    }
+
+    func testPinsAreCappedAndClearedByAMatch() {
+        let viewModel = MemorizeViewModel(memorama: makeFreeBoard(), mode: .free)
+        defer { viewModel.stopTimer() }
+        let cards = viewModel.cards
+
+        for card in cards.prefix(3) { viewModel.togglePin(on: card) }
+        XCTAssertEqual(viewModel.pinnedCards.count, 3)
+        XCTAssertEqual(Set(viewModel.pinnedCards.values), [0, 1, 2], "each pin gets its own colour slot")
+
+        viewModel.togglePin(on: cards[3])
+        XCTAssertEqual(viewModel.pinnedCards.count, 3, "a fourth pin is refused")
+
+        viewModel.togglePin(on: cards[1])
+        XCTAssertNil(viewModel.pinSlot(cards[1]), "holding a pinned card clears it")
+        viewModel.togglePin(on: cards[3])
+        XCTAssertEqual(viewModel.pinSlot(cards[3]), 1, "the freed slot is reused")
+
+        let pinned = cards[0]
+        let partner = cards.first { $0.itemId == pinned.itemId && $0.id != pinned.id }!
+        viewModel.choose(card: pinned)
+        viewModel.choose(card: partner)
+        XCTAssertFalse(viewModel.isPinned(pinned), "a matched card has nothing left to mark")
+    }
+
+    func testAFaceUpCardCannotBePinned() {
+        let viewModel = MemorizeViewModel(memorama: makeFreeBoard(), mode: .free)
+        defer { viewModel.stopTimer() }
+        let card = viewModel.cards[0]
+        viewModel.choose(card: card)
+        viewModel.togglePin(on: viewModel.cards[0])
+        XCTAssertTrue(viewModel.pinnedCards.isEmpty)
+    }
+}
+
+// MARK: - Juice
+
+extension MemorizeViewModelTests {
+    func testAMatchOnARunFloatsTheMultiplierOffTheTappedCard() {
+        let viewModel = MemorizeViewModel(memorama: makeFreeBoard(), mode: .free)
+        defer { viewModel.stopTimer() }
+
+        matchPairs(1, on: viewModel)
+        let firstMatch = viewModel.cards.filter(\.isMatched)
+        XCTAssertEqual(firstMatch.count, 2)
+        XCTAssertTrue(firstMatch.allSatisfy { viewModel.effect(on: $0) != nil }, "both cards of the pair burst")
+        XCTAssertTrue(firstMatch.allSatisfy { viewModel.effect(on: $0)?.text == nil }, "a single match carries no multiplier")
+        XCTAssertEqual(viewModel.effect(on: firstMatch[0])?.tier, 1)
+
+        let second = viewModel.cards.first { !$0.isMatched && !$0.isFaceUp }!
+        let partner = viewModel.cards.first { $0.itemId == second.itemId && $0.id != second.id }!
+        viewModel.choose(card: second)
+        viewModel.choose(card: partner)
+
+        XCTAssertEqual(viewModel.effect(on: partner)?.text, "×2", "the card the player tapped carries the number")
+        XCTAssertNil(viewModel.effect(on: second)?.text)
+        XCTAssertEqual(viewModel.effect(on: partner)?.tier, 2)
+        XCTAssertFalse(viewModel.effect(on: partner)!.isPenalty)
+    }
+
+    func testABombGoingOffShakesTheBoardAndFloatsThePenalty() {
+        let viewModel = MemorizeViewModel(level: 10)
+        defer { viewModel.stopTimer() }
+        viewModel.timeRemaining = 60
+        guard let bomb = viewModel.cards.first(where: \.isBomb) else { return XCTFail("level 10 should arm one bomb") }
+        XCTAssertEqual(viewModel.shakeToken, 0)
+
+        mismatchOnce(on: viewModel, using: bomb)
+
+        XCTAssertEqual(viewModel.shakeToken, 1)
+        let effect = viewModel.effect(on: bomb)
+        XCTAssertEqual(effect?.text, "−\(MemorizeViewModel.bombPenaltySeconds) s")
+        XCTAssertEqual(effect?.isPenalty, true)
+        XCTAssertEqual(effect?.tier, 0, "a penalty gets the number, not a celebration burst")
+    }
+
+    func testEffectsExpireOnTheirOwn() async {
+        let viewModel = MemorizeViewModel(memorama: makeFreeBoard(), mode: .free)
+        defer { viewModel.stopTimer() }
+        matchPairs(1, on: viewModel)
+        XCTAssertFalse(viewModel.matchEffects.isEmpty)
+
+        try? await Task.sleep(for: .seconds(MatchEffect.lifetime + 0.3))
+        XCTAssertTrue(viewModel.matchEffects.isEmpty, "a burst must not stay on a card")
+    }
+
+    func testBurstTiersGrowWithTheRun() {
+        XCTAssertEqual(MatchEffect.tier(forStreak: 1), 1)
+        XCTAssertEqual(MatchEffect.tier(forStreak: 2), 2)
+        XCTAssertEqual(MatchEffect.tier(forStreak: 3), 2)
+        XCTAssertEqual(MatchEffect.tier(forStreak: 4), 3)
+        XCTAssertEqual(MatchEffect.tier(forStreak: 9), 3)
+    }
+}
