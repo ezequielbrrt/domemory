@@ -9,6 +9,7 @@ import Foundation
 import GoogleMobileAds
 import SwiftUI
 import UIKit
+import UserMessagingPlatform
 
 enum AdPlacement: String {
     case homeBanner = "home_banner"
@@ -154,11 +155,35 @@ final class AdsService: NSObject {
         PurchaseService.shared.hasRemovedAds
     }
 
+    /// Every ad request, rewarded included, waits for `ConsentService`. Reading
+    /// it from the `is…Configured` checks makes the views that call them
+    /// re-render when consent arrives.
+    private var canRequestAds: Bool {
+        ConsentService.shared.canRequestAds
+    }
+
+    private var hasStartedMobileAds = false
+
+    /// Starts the Mobile Ads SDK once consent allows it. Called after the
+    /// launch sequence's consent and ATT steps, and again after the privacy
+    /// options form, which can be where a first choice is made.
+    func startIfAllowed() async {
+        guard canRequestAds, !hasStartedMobileAds else { return }
+        hasStartedMobileAds = true
+        await MobileAds.shared.start()
+        log("Mobile Ads started.")
+    }
+
     func isBannerConfigured(for placement: AdPlacement) -> Bool {
-        !suppressesInvoluntaryAds && AdUnitConfiguration.bannerUnitID(for: placement) != nil
+        canRequestAds && !suppressesInvoluntaryAds && AdUnitConfiguration.bannerUnitID(for: placement) != nil
     }
 
     func makeBannerView(for placement: AdPlacement, rootViewController: UIViewController?) -> BannerView? {
+        guard canRequestAds else {
+            log("Banner skipped. Consent has not been gathered.")
+            return nil
+        }
+
         guard !suppressesInvoluntaryAds else {
             log("Banner skipped. Remove Ads is active.")
             return nil
@@ -178,10 +203,15 @@ final class AdsService: NSObject {
     }
 
     func isNativeConfigured(for placement: AdPlacement) -> Bool {
-        !suppressesInvoluntaryAds && AdUnitConfiguration.nativeUnitID(for: placement) != nil
+        canRequestAds && !suppressesInvoluntaryAds && AdUnitConfiguration.nativeUnitID(for: placement) != nil
     }
 
     func loadInterstitial(for placement: AdPlacement) {
+        guard canRequestAds else {
+            log("Interstitial skipped. Consent has not been gathered.")
+            return
+        }
+
         guard !suppressesInvoluntaryAds else {
             log("Interstitial skipped. Remove Ads is active.")
             return
@@ -218,7 +248,7 @@ final class AdsService: NSObject {
 
     /// Deliberately not gated on Remove Ads — see `suppressesInvoluntaryAds`.
     func isRewardedConfigured(for placement: AdPlacement) -> Bool {
-        AdUnitConfiguration.rewardedUnitID(for: placement) != nil
+        canRequestAds && AdUnitConfiguration.rewardedUnitID(for: placement) != nil
     }
 
     /// Loads the next rewarded ad for `placement` unless one is already
@@ -231,6 +261,12 @@ final class AdsService: NSObject {
     func loadRewardedAd(for placement: AdPlacement, completion: ((Bool) -> Void)? = nil) {
         guard rewardedAds[placement] == nil else {
             completion?(true)
+            return
+        }
+
+        guard canRequestAds else {
+            log("Rewarded skipped. Consent has not been gathered.")
+            completion?(false)
             return
         }
 
@@ -342,6 +378,11 @@ final class AdsService: NSObject {
             return
         }
 
+        guard !ConsentService.shared.isPresentingForm else {
+            log("App open skipped. The consent form is on screen.")
+            return
+        }
+
         guard !isPresentingFullScreenAd else {
             log("App open skipped. Another full-screen ad is presenting.")
             return
@@ -434,7 +475,7 @@ final class AdsService: NSObject {
     }
 
     private func loadAppOpenAdIfNeeded() {
-        guard !suppressesInvoluntaryAds else { return }
+        guard canRequestAds, !suppressesInvoluntaryAds else { return }
         guard !isLoadingAppOpenAd else { return }
         guard appOpenAd == nil || !isAppOpenAdFresh else { return }
 
@@ -465,6 +506,95 @@ final class AdsService: NSObject {
     private func log(_ message: String) {
         #if DEBUG
         print("[AdsService] \(message)")
+        #endif
+    }
+}
+
+/// Google's consent message for regulated markets. Only the "European
+/// regulations" message is published in AdMob, so the SDK shows a form only in
+/// the EEA, the UK and Switzerland; everywhere else `gatherConsent()` returns
+/// with nothing on screen and `canRequestAds` becomes true. The region decision
+/// is the SDK's — the app never checks the player's country itself.
+///
+/// No ad may be requested while `canRequestAds` is false, which is the case on
+/// a first launch until the update returns. It is observable, so the menu's
+/// banner and the rewarded buttons appear once consent arrives.
+@MainActor
+@Observable
+final class ConsentService {
+    static let shared = ConsentService()
+
+    private(set) var canRequestAds: Bool
+    /// True only where regulation lets the player change their choice later —
+    /// it gates the Settings "Privacy options" row.
+    private(set) var isPrivacyOptionsRequired: Bool
+    private(set) var isPresentingForm = false
+
+    private init() {
+        canRequestAds = ConsentInformation.shared.canRequestAds
+        isPrivacyOptionsRequired = ConsentInformation.shared.privacyOptionsRequirementStatus == .required
+    }
+
+    /// Refreshes the consent status and shows the form when the player's region
+    /// requires one and no valid choice is stored. A network failure keeps the
+    /// last stored status, so a returning player who already chose still gets ads.
+    func gatherConsent() async {
+        let parameters = RequestParameters()
+        parameters.debugSettings = Self.debugSettings
+        do {
+            try await ConsentInformation.shared.requestConsentInfoUpdate(with: parameters)
+            isPresentingForm = true
+            defer { isPresentingForm = false }
+            try await ConsentForm.loadAndPresentIfRequired(from: UIApplication.shared.topMostViewController())
+        } catch {
+            log("Consent gathering failed: \(error.localizedDescription)")
+        }
+        refresh()
+    }
+
+    func presentPrivacyOptions() async {
+        isPresentingForm = true
+        defer { isPresentingForm = false }
+        do {
+            try await ConsentForm.presentPrivacyOptionsForm(from: UIApplication.shared.topMostViewController())
+        } catch {
+            log("Privacy options failed: \(error.localizedDescription)")
+        }
+        refresh()
+    }
+
+    private func refresh() {
+        canRequestAds = ConsentInformation.shared.canRequestAds
+        isPrivacyOptionsRequired = ConsentInformation.shared.privacyOptionsRequirementStatus == .required
+    }
+
+    /// Debug builds can pretend to be in a region: launch with
+    /// `-UMPDebugGeography EEA` (or `Other`), plus `-UMPTestDeviceID <id>` on a
+    /// physical device — the SDK logs the id to the console on first request.
+    /// A stored choice outlives a change of region, so test on a fresh install.
+    private static var debugSettings: DebugSettings? {
+        #if DEBUG
+        let defaults = UserDefaults.standard
+        let geography: DebugGeography
+        switch defaults.string(forKey: "UMPDebugGeography") {
+        case "EEA": geography = .EEA
+        case "Other": geography = .other
+        default: return nil
+        }
+        let settings = DebugSettings()
+        settings.geography = geography
+        if let deviceID = defaults.string(forKey: "UMPTestDeviceID") {
+            settings.testDeviceIdentifiers = [deviceID]
+        }
+        return settings
+        #else
+        return nil
+        #endif
+    }
+
+    private func log(_ message: String) {
+        #if DEBUG
+        print("[ConsentService] \(message)")
         #endif
     }
 }

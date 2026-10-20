@@ -1042,12 +1042,22 @@ This is the single most fiddly part of the app and is worth porting deliberately
 On first menu appearance the app must sequence:
 
 1. Wait until the app is actually **active** (not launching in the background).
-2. Tracking authorization prompt (ATT on iOS; on Android this is the UMP/consent
-   dialog if you use one — otherwise skip).
-3. Start the ads SDK — **only after** tracking is resolved, or requests get marked
+2. Ad consent (Google UMP): refresh the consent status and show the form if
+   required. Only AdMob's "European regulations" message is published, so the
+   form appears only in the EEA, the UK and Switzerland; everywhere else this
+   step returns with nothing on screen. No ad request of any kind (banner,
+   native, interstitial, rewarded, app-open) may be made while
+   `canRequestAds` is false. A network failure keeps the last stored status.
+3. iOS only: the ATT prompt, requested only while its status is
+   `.notDetermined`. Android has no equivalent step.
+4. Start the ads SDK, **only after** the steps above and only if
+   `canRequestAds`. On iOS, starting before ATT resolves marks requests
    non-personalized even when the user later grants permission.
-4. Notification permission primer, if due.
-5. Only then mark the launch sequence finished, which unblocks the Levels intro.
+5. Notification permission primer, if due.
+6. Only then mark the launch sequence finished, which unblocks the Levels intro.
+
+Settings shows a **Privacy options** row that reopens the consent form, only
+while the SDK reports `privacyOptionsRequirementStatus == REQUIRED`.
 
 Meanwhile: the **What's New sheet** and the **notification primer** each suppress
 full-screen ads while they are on screen, because the app-open ad rides

@@ -51,8 +51,11 @@ extension AppDelegate: UIApplicationDelegate {
 }
 
 extension AppDelegate: MessagingDelegate {
+    // The token addresses this device for push; release builds must not log it.
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("Firebase registration token: \(fcmToken)")
+        #if DEBUG
+        print("Firebase registration token: \(String(describing: fcmToken))")
+        #endif
     }
 }
 
@@ -65,14 +68,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         // With swizzling disabled you must let Messaging know about the message, for Analytics
         // Messaging.messaging().appDidReceiveMessage(userInfo)
         
-        // Print message ID.
-        
-        if let messageID = userInfo[gcmMessageIDKey] {
-            print("Message ID: \(messageID)")
-        }
-        
-        // Print full message.
-        print(userInfo)
+        logNotification(userInfo)
         
         completionHandler([.banner, .badge, .sound])
     }
@@ -81,16 +77,19 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
-        // Print message ID.
-        
-        if let messageID = userInfo[gcmMessageIDKey] {
-            print("Message ID: \(messageID)")
-        }
-        
-        // Print full message.
-        print(userInfo)
+        logNotification(userInfo)
         
         completionHandler()
     }
     
+    // Payloads can carry personal content; release builds must not log them.
+    private func logNotification(_ userInfo: [AnyHashable: Any]) {
+        #if DEBUG
+        if let messageID = userInfo[gcmMessageIDKey] {
+            print("Message ID: \(messageID)")
+        }
+        print(userInfo)
+        #endif
+    }
+
 }

@@ -210,6 +210,24 @@ struct SettingsView: View {
                                 )
                                 showWhatsNew = true
                             }
+
+                            // Only where regulation requires a way back to the
+                            // consent choice (EEA, UK, Switzerland).
+                            if ConsentService.shared.isPrivacyOptionsRequired {
+                                SettingsRowSeparator()
+
+                                SettingsNavigationRow(
+                                    title: Strings.settingsPrivacyOptionsTitle,
+                                    subtitle: Strings.settingsPrivacyOptionsDescription,
+                                    systemImage: "hand.raised.fill"
+                                ) {
+                                    HapticsService.shared.fire(.tap)
+                                    Task {
+                                        await ConsentService.shared.presentPrivacyOptions()
+                                        await AdsService.shared.startIfAllowed()
+                                    }
+                                }
+                            }
                         }
                     }
                     .padding(.horizontal, 20)

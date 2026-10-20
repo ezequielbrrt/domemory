@@ -316,6 +316,8 @@ enum Strings {
     static let settingsReviewDescription = NSLocalizedString("settings_review_description", comment: "Write a review setting description")
     static let settingsWhatsNewTitle = NSLocalizedString("settings_whats_new_title", comment: "What's New setting title")
     static let settingsWhatsNewDescription = NSLocalizedString("settings_whats_new_description", comment: "What's New setting description")
+    static let settingsPrivacyOptionsTitle = NSLocalizedString("settings_privacy_options_title", comment: "Privacy options setting title, shown only where ad consent applies")
+    static let settingsPrivacyOptionsDescription = NSLocalizedString("settings_privacy_options_description", comment: "Privacy options setting description")
 
     // What's New sheet (v3.0.0)
     static let whatsNewTitle = NSLocalizedString("whats_new_title", comment: "What's New sheet headline")

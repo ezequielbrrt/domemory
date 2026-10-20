@@ -275,6 +275,8 @@
 "settings_review_description" = "리뷰는 다른 플레이어가 게임을 찾는 데 도움이 됩니다";
 "settings_whats_new_title" = "새로운 기능";
 "settings_whats_new_description" = "최신 업데이트에서 바뀐 점 보기";
+"settings_privacy_options_title" = "개인정보 보호 옵션";
+"settings_privacy_options_description" = "광고가 데이터를 사용하는 방식 확인";
 
 /* Settings sections */
 "settings_section_game" = "게임";

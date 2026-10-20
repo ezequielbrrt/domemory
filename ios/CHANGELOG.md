@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+[Unreleased]
+
+### Added
+- Added Google's consent form for ads (UMP SDK 3.1.0, already bundled with Google Mobile Ads), shown only to players in the EEA, the UK and Switzerland. Only AdMob's "European regulations" message is published, so the SDK decides by region: everywhere else the check returns with nothing on screen and ads behave as before. `ConsentService` (`AdsService.swift`) refreshes the status on every launch and shows the form when one is required and no valid choice is stored. No ad is requested until `canRequestAds` is true: banner, native, interstitial, rewarded and app-open loads all check it, and Mobile Ads starts only then (`AdsService.startIfAllowed()`). On a first launch the menu's banner and the rewarded buttons therefore appear once consent arrives instead of at once. An app-open ad is never presented over the form. Settings gains a "Privacy options" row, visible only where regulation requires a way to change the choice, with two new `settings_privacy_options_*` strings in all ten locales. Debug builds take `-UMPDebugGeography EEA|Other` and `-UMPTestDeviceID <id>` launch arguments to test either region; a stored choice survives a region change, so test each on a fresh install.
+
+### Changed
+- The menu's launch sequence is now consent form, then ATT, then Mobile Ads, which is Google's order. ATT is requested only while its status is `.notDetermined`; it used to be requested on every menu launch.
+- Bumped the version to 4.5.1.
+
+### Fixed
+- Release builds no longer print the Firebase Cloud Messaging token or notification payloads to the device log. Both are now logged in debug builds only (`AppDelegate.swift`).
+
 [4.5.0] 06-10-2026
 
 ### Added

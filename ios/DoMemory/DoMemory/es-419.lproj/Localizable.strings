@@ -275,6 +275,8 @@
 "settings_review_description" = "Las reseñas ayudan a otros jugadores a encontrar el juego";
 "settings_whats_new_title" = "Novedades";
 "settings_whats_new_description" = "Mira qué cambió en la última actualización";
+"settings_privacy_options_title" = "Opciones de privacidad";
+"settings_privacy_options_description" = "Revisa cómo los anuncios usan tus datos";
 
 /* Settings sections */
 "settings_section_game" = "Juego";

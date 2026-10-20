@@ -275,6 +275,8 @@
 "settings_review_description" = "समीक्षाएँ दूसरे खिलाड़ियों को गेम खोजने में मदद करती हैं";
 "settings_whats_new_title" = "नया क्या है";
 "settings_whats_new_description" = "देखें कि नए अपडेट में क्या बदला";
+"settings_privacy_options_title" = "निजता विकल्प";
+"settings_privacy_options_description" = "देखें कि विज्ञापन आपके डेटा का उपयोग कैसे करते हैं";
 
 /* Settings sections */
 "settings_section_game" = "गेम";
