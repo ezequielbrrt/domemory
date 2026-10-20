@@ -143,9 +143,12 @@ Sheets (`CreateMemoramaView`, the join and game-picker sheets, What's New, the n
 `MenuView`'s `.task` sequences first-run surfaces, and the ordering is load-bearing:
 
 1. Wait for the app to actually be active (it may have launched in the background).
-2. ATT prompt.
-3. Start `MobileAds` — **only after** ATT resolves, or Google marks requests non-personalized even when the user later grants permission.
-4. Notification permission primer, if due.
+2. `ConsentService.gatherConsent()`: Google's UMP consent form, which appears only in the EEA, the UK and Switzerland, because only AdMob's "European regulations" message is published. Everywhere else it returns with nothing on screen. Don't add a country check of our own; the SDK decides.
+3. ATT prompt, only while `trackingAuthorizationStatus == .notDetermined`.
+4. `AdsService.startIfAllowed()`: start `MobileAds` **only after** ATT resolves, or Google marks requests non-personalized even when the user later grants permission, and only once `ConsentService.canRequestAds` is true.
+5. Notification permission primer, if due.
+
+**No ad request may bypass `canRequestAds`.** Every load path in `AdsService` checks it, and the `is…Configured` checks read it, so the views that call them re-render when consent arrives. A new placement must go through the same checks. The Settings "Privacy options" row reopens the form and shows only while `isPrivacyOptionsRequired`.
 
 Separately, the What's New sheet, the notification primer and the Levels intro each call `AdsService.setFullScreenAdsSuppressed(_:)` while on screen: the app-open ad rides `didBecomeActive`, which fires **again** when a system dialog is dismissed, landing the ad on top of whatever the player was meant to read. The Levels intro only opens from the info ("?") button in the Levels map header — it is no longer shown automatically on a player's first visit, so it does not need to wait on this sequence.
 

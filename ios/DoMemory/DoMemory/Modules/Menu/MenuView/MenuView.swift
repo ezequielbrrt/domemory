@@ -8,7 +8,6 @@
 import SwiftUI
 import WaterfallGrid
 import AppTrackingTransparency
-import GoogleMobileAds
 import UserNotifications
 
 /// The raw value is the `tab` parameter of `menu_tab_selected`.
@@ -318,8 +317,14 @@ struct MenuView: View {
                     .notifications(named: UIApplication.didBecomeActiveNotification)
                     .prefix(1) {}
             }
-            await ATTrackingManager.requestTrackingAuthorization()
-            await MobileAds.shared.start()
+            // Consent form first (EEA, UK and Switzerland only), then ATT, as
+            // Google orders them. Mobile Ads starts after both, and only once
+            // consent allows ad requests.
+            await ConsentService.shared.gatherConsent()
+            if ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
+                await ATTrackingManager.requestTrackingAuthorization()
+            }
+            await AdsService.shared.startIfAllowed()
             await presentNotificationPrimerIfNeeded()
         }
         .sheet(isPresented: $showNotificationPrimer) {
