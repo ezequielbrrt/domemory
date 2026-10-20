@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Bumped the version to 4.5.1.
 
 ### Fixed
+- The App Store privacy policy URL now points at DoMemory's own policy, in each listing's language (`https://zoratek.dev/domemory/<lang>/privacy-policy/` for en, es, pt, fr, de, it, ja, ko, hi and zh), in all ten `ios/.asc-localizations/app-info/*.strings`. It pointed at another app's PDF (`ezequielbrrt.github.io/spacegram/export.pdf`). The live field still has to be changed in App Store Connect.
 - Release builds no longer print the Firebase Cloud Messaging token or notification payloads to the device log. Both are now logged in debug builds only (`AppDelegate.swift`).
 
 [4.5.0] 06-10-2026
