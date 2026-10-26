@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,8 @@ import com.ezequielbrrt.domemory.feature.adfree.logAdFreeDayEntryTapped
 import com.ezequielbrrt.domemory.services.ads.AdFreeDayService
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
+import com.ezequielbrrt.domemory.services.ads.ConsentService
+import com.ezequielbrrt.domemory.services.ads.findActivity
 import com.ezequielbrrt.domemory.core.model.Difficulty
 import com.ezequielbrrt.domemory.feature.debug.debugMenuTapTrigger
 import com.ezequielbrrt.domemory.feature.notifications.NotificationPrimerHost
@@ -52,6 +55,7 @@ import com.ezequielbrrt.domemory.ui.theme.LocalPalette
 import com.ezequielbrrt.domemory.ui.theme.ThemePreference
 import com.ezequielbrrt.reviewflow.openPlayStoreReviewPage
 import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 @Composable
@@ -71,6 +75,8 @@ fun SettingsScreen(
     BackHandler(onBack = onBack)
     val p = LocalPalette.current
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
+    val scope = rememberCoroutineScope()
     // Spec 11.3's "reused by the Settings toggle", the way iOS's `handleEnableNotifications`
     // does it: already authorized → enable straight away; otherwise the same primer the menu
     // shows (feature/notifications/NotificationPrimer.kt), which asks the OS with context
@@ -168,6 +174,30 @@ fun SettingsScreen(
                     onWhatsNew()
                 },
             )
+            // Only where regulation requires a way back to the consent choice (EEA, UK,
+            // Switzerland) — spec 11.4. The form can be where a first choice is made, so the
+            // SDK is offered a start afterwards, as on iOS.
+            if (ConsentService.isPrivacyOptionsRequired) {
+                SettingRow(
+                    title = stringResource(R.string.settings_privacy_options_title),
+                    description = stringResource(R.string.settings_privacy_options_description),
+                    onClick = {
+                        HapticsService.fire(HapticIntent.TAP)
+                        val activity = context.findActivity() ?: return@SettingRow
+                        scope.launch {
+                            ConsentService.showPrivacyOptions(activity)
+                            AdsService.startIfAllowed(activity.applicationContext)
+                        }
+                    },
+                )
+            }
+            SettingRow(
+                title = stringResource(R.string.settings_privacy_policy_title),
+                onClick = {
+                    HapticsService.fire(HapticIntent.TAP)
+                    uriHandler.openUri(PrivacyPolicyUrl.forLanguage(Locale.getDefault().language))
+                },
+            )
         }
     }
 }
@@ -224,10 +254,10 @@ private fun ThemePreference.labelRes(): Int = when (this) {
     if (showOffer) AdFreeDayOfferSheet(source = "settings", service = service, onDismiss = { showOffer = false })
 }
 
-@Composable private fun SettingRow(title: String, description: String, onClick: () -> Unit) {
+@Composable private fun SettingRow(title: String, description: String? = null, onClick: () -> Unit) {
     val p = LocalPalette.current
     Column(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp)) {
         Text(title, fontWeight = FontWeight.SemiBold, color = p.textPrimary)
-        Text(description, color = p.textSecondary, fontSize = 13.sp)
+        description?.let { Text(it, color = p.textSecondary, fontSize = 13.sp) }
     }
 }

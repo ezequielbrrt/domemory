@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * onboarding, a share-sheet tap) — mirroring [HapticsService.fire]'s own direct call sites in
  * `NavGraph.kt` for "purely navigational taps [that] have no state change to hang this off."
  * [initialize] is called once from `DoMemoryApplication.onCreate`, the same shape as
- * `AdsService.initialize`.
+ * `ConsentService.install`.
  *
  * **Why a `Context`-taking `FirebaseAnalytics.getInstance(context)` and not the `Firebase.analytics`
  * Kotlin-extension property:** every other Firebase call site in this codebase

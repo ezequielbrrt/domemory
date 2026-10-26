@@ -204,6 +204,9 @@
     <string name="review_invitation_dismiss">暂不</string>
     <string name="settings_whats_new_title">新功能</string>
     <string name="settings_whats_new_description">看看最新版本有哪些变化</string>
+    <string name="settings_privacy_options_title">隐私选项</string>
+    <string name="settings_privacy_options_description">管理广告如何使用你的数据</string>
+    <string name="settings_privacy_policy_title">隐私政策</string>
 
     <!-- Achievements -->
     <string name="achievements_title">成就</string>

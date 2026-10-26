@@ -8,7 +8,7 @@ import coil3.disk.DiskCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.ezequielbrrt.domemory.widget.DailyChallengeWidgetScheduler
 import com.ezequielbrrt.domemory.services.ads.AdFreeGate
-import com.ezequielbrrt.domemory.services.ads.AdsService
+import com.ezequielbrrt.domemory.services.ads.ConsentService
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
 import okio.Path.Companion.toOkioPath
@@ -20,7 +20,9 @@ class DoMemoryApplication : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(context = this)
-        AdsService.initialize(this)
+        // The stored consent status only. The Mobile Ads SDK starts later, from the launch
+        // sequence, once this launch's consent step allows it (spec 11.4).
+        ConsentService.install(this)
         // Before any screen composes, so no banner loads for a player who has ads turned off.
         AdFreeGate.install(container.adFreeDay.expiryMillis)
         AnalyticsService.initialize(this)

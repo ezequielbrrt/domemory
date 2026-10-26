@@ -84,9 +84,12 @@ object AdUnitConfiguration {
  * (one per placement), and the in-memory [AdFrequencyState] cadence counter.
  *
  * **App-open is deliberately not implemented.** [AdPlacement.APP_OPEN] and its unit id exist
- * (Phase 7 foundation), but there is no launch-sequence state machine on Android yet for it to
- * hook into (see `ANDROID_PLAN.md` O5, and `LevelsIntroGate`'s own note about the same missing
- * sequence) — wiring it now would mean inventing that sequence, not just ad presentation.
+ * (Phase 7 foundation), but nothing presents it yet (see `ANDROID_PLAN.md` O5). Whoever wires
+ * it must go through [canLoad] like every other placement and skip presentation while
+ * [ConsentService.isPresentingForm] is true.
+ *
+ * **Consent gates everything.** No placement loads, and no `is…Configured` check passes,
+ * while [ConsentService.canRequestAds] is false — rewarded included (spec 11.4).
  *
  * **`AdFrequencyState` is in-memory only, not persisted.** iOS persists its interstitial
  * qualifying-completion counter in `UserDefaults` so it survives a relaunch mid-cadence; this
@@ -115,25 +118,39 @@ object AdsService {
     /** The single cadence counter every full-screen ad decision reads and writes. */
     private var frequencyState = AdFrequencyState()
 
-    /** SDK initialization is idempotent and deliberately happens before any placement load. */
-    fun initialize(context: Context) {
+    /**
+     * Starts the Mobile Ads SDK once consent allows it (spec 11.4). Called by the launch
+     * sequence after its consent step, and again after the privacy options form, which can be
+     * where a first choice is made. Idempotent.
+     */
+    fun startIfAllowed(context: Context) {
+        if (!ConsentService.canRequestAds) return
         if (initialized.compareAndSet(false, true)) {
             Thread { MobileAds.initialize(context.applicationContext) {} }.start()
         }
     }
 
+    /**
+     * Whether [placement] may make an ad request at all: consent allows it and a unit id is
+     * configured. Every load below and every `is…Configured` check goes through it, so no
+     * request of any kind is made while [ConsentService.canRequestAds] is false. Reading
+     * consent here makes a composable that calls these checks recompose when it arrives.
+     */
+    fun canLoad(placement: AdPlacement): Boolean =
+        ConsentService.canRequestAds && AdUnitConfiguration.isConfigured(placement)
+
     fun isRewardedConfigured(placement: AdPlacement): Boolean =
-        placement.type == AdPlacement.Type.REWARDED && AdUnitConfiguration.isConfigured(placement)
+        placement.type == AdPlacement.Type.REWARDED && canLoad(placement)
 
     fun isNativeConfigured(placement: AdPlacement): Boolean =
-        placement.type == AdPlacement.Type.NATIVE && AdUnitConfiguration.isConfigured(placement)
+        placement.type == AdPlacement.Type.NATIVE && canLoad(placement)
 
     // --- Interstitial (spec: game_finished_interstitial) ------------------------------
 
     /** Loads the next interstitial for [placement]. A no-op while one is already cached. */
     fun loadInterstitial(context: Context, placement: AdPlacement = AdPlacement.GAME_FINISHED_INTERSTITIAL) {
         require(placement.type == AdPlacement.Type.INTERSTITIAL) { "$placement is not an interstitial placement" }
-        if (!AdUnitConfiguration.isConfigured(placement)) return
+        if (!canLoad(placement)) return
         if (interstitialPlacement == placement && interstitialAd != null) return
 
         InterstitialAd.load(
@@ -222,7 +239,7 @@ object AdsService {
      */
     fun loadRewarded(context: Context, placement: AdPlacement, onReady: ((Boolean) -> Unit)? = null) {
         require(placement.type == AdPlacement.Type.REWARDED) { "$placement is not a rewarded placement" }
-        if (!AdUnitConfiguration.isConfigured(placement)) {
+        if (!canLoad(placement)) {
             onReady?.invoke(false)
             return
         }

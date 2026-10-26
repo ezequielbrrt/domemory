@@ -28,7 +28,6 @@ Target: feature parity with iOS 4.2.0.
 |---|---|---|
 | O7 | Register a second Firebase Android client for `com.ezequielbrrt.domemory.debug`? Without one, debug and release cannot be installed side by side (see §2). | any time |
 | O1 | Register `domemory.app`, deploy `assetlinks.json` plus iOS's `apple-app-site-association`, then verify the shared-link join flow. | deferred Phase 6 follow-up |
-| O5 | Consent/UMP dialog on Android in place of ATT? (Affects the launch sequence, §11.4.) | Phase 7 |
 
 ---
 
@@ -351,7 +350,7 @@ that read `LevelProgressService` directly with no gating and no header at all.
 | Phase 4 | complete — emulator-verified against a live Firebase season, including day-boundary expiry | `1f17bb7` / PR #44 (re-landed after accidental revert) | none; season-specific out-of-lives presentation is tracked as deferred polish. |
 | Phase 5 | complete — Daily Challenge/deep links, Glance widget and local reminders all build- and emulator-verified, including streak rollover across a day boundary | `feature/android-phase5-widget-notifications` / PR #49 | none; carry its architecture forward when Phase 8 adds launch-sequence gating. |
 | Phase 6 | complete — a live Android↔iOS manual-code match, rematch and reconnect-grace forfeit all passed on 2026-09-15 | PR #53; production room-read-rule fix PR #58 (`beabbbe`) | O1 App Links remains an optional domain-dependent follow-up; manual-code joining is fully supported and verified. |
-| Phase 7 | in progress — configured placements, banners, completion interstitial, both Levels rewarded rescues, `game_rewarded_hint` (now wired from a new pause sheet in every mode) and multiplayer-finished native ad are emulator-verified | PRs #51–#54; verification record PR #60 | `game_rewarded_extra_time` still needs a decision and UI before it can be wired; build launch sequence + decide UMP (O5) before enabling app-open. Billing and temporary rewarded ad-free day remain deferred. |
+| Phase 7 | in progress — configured placements, banners, completion interstitial, both Levels rewarded rescues, `game_rewarded_hint` (now wired from a new pause sheet in every mode) and multiplayer-finished native ad are emulator-verified | PRs #51–#54; verification record PR #60 | `game_rewarded_extra_time` still needs a decision and UI before it can be wired; launch sequence and UMP consent done (#167); app-open still to wire. Billing and temporary rewarded ad-free day remain deferred. |
 | Phase 8 | complete — What's New, review, achievements, share card, animations, accessibility, all translations and app-wide haptics are implemented; localization parity is green | PRs #55–#57, #59 and #61 | real-device haptic feel, TalkBack and animation-feel checks are follow-ups, not exit blockers. |
 
 **Emulator verification session, 2026-09-14.** First time the app has been seen running (`Pixel_10` AVD, API 37, `google_apis_playstore_ps16k/arm64-v8a`, already provisioned on this machine). Exercised: the menu (all three tabs), a live Firebase season ("Spooky Season", 30 levels, real `/seasons` data — not a fixture), a full season-level play-through (win modal, star award, progress persisted back to the map), an endless level play-through, the Daily Challenge board, and Settings. Two real bugs were found and fixed in this session (both build- and test-clean, `245` tests still green):
@@ -1707,8 +1706,11 @@ multiplayer-finished native while ads are off, and any physical device.
 2. ~~Build the Season-specific out-of-lives prompt~~ — done, 2026-09-15 (see above).
 3. `game_rewarded_hint` is now wired from a pause sheet available in every mode (this change).
    Decide whether `game_rewarded_extra_time` warrants its own UI, then wire it if approved.
-4. Decide UMP consent behavior (O5), build the launch-sequence state machine, and only then
-   enable the configured app-open placement.
+4. ~~Decide UMP consent behavior (O5), build the launch-sequence state machine~~ — done,
+   2026-10-26 (#167): UMP form only where AdMob's European regulations message applies,
+   `LaunchSequence` runs consent → ads → primer. Still open: enable the app-open placement
+   (gate it on `AdsService.canLoad` and `ConsentService.isPresentingForm`) and make
+   `LevelsIntroGate` wait for `LaunchSequence.Stage.FINISHED`.
 5. Run real-device follow-ups: haptic feel, TalkBack announcements, animation feel for the new
    Lottie effects, the out-of-lives modal's on-screen appearance, and RTL/dark-mode rendering
    of the new Levels/Daily/Seasons components.

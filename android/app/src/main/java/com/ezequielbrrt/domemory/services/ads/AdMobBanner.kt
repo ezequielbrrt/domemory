@@ -19,7 +19,8 @@ import com.google.android.gms.ads.AdView
 @Composable
 fun AdMobBanner(placement: AdPlacement, modifier: Modifier = Modifier) {
     require(placement.type == AdPlacement.Type.BANNER) { "$placement is not a banner placement" }
-    if (!AdUnitConfiguration.isConfigured(placement)) return
+    // No request before consent allows one; recomposes when it arrives (ConsentService).
+    if (!AdsService.canLoad(placement)) return
     // An ad-free day hides banners outright, and brings them back when it ends.
     if (rememberInvoluntaryAdsSuppressed()) return
     val context = LocalContext.current

@@ -16,6 +16,7 @@ coil = "3.5.0"
 glance = "1.2.0"
 workRuntime = "2.11.2"
 googleMobileAds = "25.4.0"
+userMessagingPlatform = "4.0.0"
 googleCodeScanner = "16.1.0"
 zxing = "3.5.4"
 playReview = "2.0.2"
@@ -55,6 +56,7 @@ coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp"
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntime" }
 google-mobile-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "googleMobileAds" }
+google-ump = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "userMessagingPlatform" }
 google-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "googleCodeScanner" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 # Referenced by the vendored :reviewflow module (android/ReviewFlow-Android), which exposes it

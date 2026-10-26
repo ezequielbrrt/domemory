@@ -204,6 +204,9 @@
     <string name="review_invitation_dismiss">Pas maintenant</string>
     <string name="settings_whats_new_title">Nouveautés</string>
     <string name="settings_whats_new_description">Découvrez ce qui a changé dans la dernière mise à jour</string>
+    <string name="settings_privacy_options_title">Options de confidentialité</string>
+    <string name="settings_privacy_options_description">Gérez l\'utilisation de vos données par les publicités</string>
+    <string name="settings_privacy_policy_title">Politique de confidentialité</string>
 
     <!-- Achievements -->
     <string name="achievements_title">Succès</string>

@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.google.mobile.ads)
+    implementation(libs.google.ump)
     implementation(libs.google.code.scanner)
     implementation(libs.zxing.core)
     // Review policy, Play In-App Review bridge and the full-screen review invitation — the

@@ -10,12 +10,11 @@ import kotlinx.coroutines.flow.first
  *
  * iOS additionally waits on the launch sequence (§11.4: the tracking prompt, the What's
  * New sheet and the notification primer must all finish first, since Levels is the
- * landing tab and would otherwise race their covers). Android has no launch-sequence
- * state machine yet — there is no ATT prompt, no ads SDK bring-up and no notification
- * primer wired up on this platform (those land in Phases 5 and 7). [shouldPresent] is
- * therefore only the one-shot half of the rule today; call sites take a `canPresent`
- * flag the same shape as iOS's `LevelsView.canPresentIntro` so wiring in the real
- * launch-sequence flag later is a one-line change at the call site, not a new gate.
+ * landing tab and would otherwise race their covers). Android now has that sequence
+ * (`services/launch/LaunchSequence`: consent, ads, primer), but this gate does not wait on
+ * it yet. [shouldPresent] is only the one-shot half of the rule; call sites take a
+ * `canPresent` flag the same shape as iOS's `LevelsView.canPresentIntro`, so waiting for
+ * `LaunchSequence.Stage.FINISHED` is a one-line change at the call site, not a new gate.
  */
 class LevelsIntroGate(private val prefs: UserPreferences) {
 
