@@ -32,13 +32,15 @@ import com.google.android.gms.ads.nativead.NativeAdView
  * Compose lifecycle wrapper for the multiplayer-finished native placement — a manually-built
  * [NativeAdView] hierarchy, the same reason iOS's `AdMobNativeAdView` builds its native ad
  * view in plain UIKit rather than SwiftUI: neither toolkit has first-class native-ad support.
- * A placement with no configured ad unit id renders nothing (see the caller's own
- * [AdsService.isNativeConfigured] gate — this view does not re-check it, matching how
- * [AdMobBanner] owns its own gate rather than trusting every call site to remember one).
+ * A placement with no configured ad unit id, or no consent yet, renders nothing: the caller
+ * checks [AdsService.isNativeConfigured], and this view re-checks [AdsService.canLoad], the
+ * way [AdMobBanner] owns its own gate rather than trusting every call site to remember one.
  */
 @Composable
 fun AdMobNativeAdView(placement: AdPlacement, modifier: Modifier = Modifier) {
     require(placement.type == AdPlacement.Type.NATIVE) { "$placement is not a native placement" }
+    // No request before consent allows one, like banners.
+    if (!AdsService.canLoad(placement)) return
     // An ad-free day hides natives outright, like banners.
     if (rememberInvoluntaryAdsSuppressed()) return
     val context = LocalContext.current

@@ -29,6 +29,7 @@ import com.ezequielbrrt.domemory.services.seasons.SeasonCatalogSource
 import com.ezequielbrrt.domemory.services.seasons.SeasonLevelProgressStore
 import com.ezequielbrrt.domemory.services.seasons.SeasonProgressService
 import com.ezequielbrrt.domemory.services.stats.ProfileStatsService
+import com.ezequielbrrt.domemory.services.launch.LaunchSequence
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -88,6 +89,9 @@ class AppContainer(
     val deepLinkRouter = DeepLinkRouter()
     val multiplayer = MultiplayerService()
     val whatsNew = WhatsNewManager(prefs, BuildConfig.VERSION_NAME)
+
+    /** Spec 11.4's consent → ads → primer ordering, run once per process from the menu. */
+    val launchSequence = LaunchSequence()
 
     /**
      * Spec 15.2's review policy, the counterpart of iOS's `AppReviews.manager`. One instance

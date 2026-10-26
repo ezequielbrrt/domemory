@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * callback, e.g. `GameViewModel.onHaptic`) *and* directly from a composable's own click
  * handler ("view-only taps" — see `GameViewModel`'s class doc for that split). [initialize]
  * is called once from `DoMemoryApplication.onCreate`, the same shape as
- * `AdsService.initialize`.
+ * `ConsentService.install`.
  *
  * **Why `Vibrator`/`VibrationEffect` and not Compose's `LocalHapticFeedback`/
  * `HapticFeedbackType`:** Compose's haptic API only exists inside composition (it reads

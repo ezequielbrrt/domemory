@@ -50,16 +50,21 @@ import com.ezequielbrrt.domemory.feature.settings.SettingsScreen
 import com.ezequielbrrt.domemory.feature.settings.SettingsViewModel
 import com.ezequielbrrt.domemory.services.ads.AdPlacement
 import com.ezequielbrrt.domemory.services.ads.AdsService
+import com.ezequielbrrt.domemory.services.ads.ConsentService
 import com.ezequielbrrt.domemory.services.ads.findActivity
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsEvent
 import com.ezequielbrrt.domemory.services.analytics.AnalyticsService
 import com.ezequielbrrt.domemory.services.haptics.HapticIntent
 import com.ezequielbrrt.domemory.services.haptics.HapticsService
+import com.ezequielbrrt.domemory.services.launch.LaunchSequence
 import com.ezequielbrrt.domemory.services.levels.LevelLivesService
 import com.ezequielbrrt.domemory.services.stats.UserPreferencesProfileStatsRecorder
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.withResumed
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Replaces `Phase1Root` (spec 2): Menu -> Game -> back, plus Menu -> create memorama ->
@@ -188,10 +193,24 @@ fun NavGraph(
             val dailyStreak by container.prefs.dailyStreakCurrent.collectAsState(initial = 0)
             val dailyLastAttemptDay by container.prefs.dailyLastAttemptDay.collectAsState(initial = null)
             val isDailyCompletedToday = dailyLastAttemptDay == container.todayKey()
-            // Default true so the primer never flashes on screen for one frame before
-            // DataStore's real value (almost always "already shown", after the first
-            // install) arrives — spec 11.3 shows it once per install, not once per launch.
-            val notificationPrimerShown by container.prefs.notificationPrimerShown.collectAsState(initial = true)
+            // Null until DataStore's real value arrives, so the primer never flashes on screen
+            // for one frame and the launch sequence never finishes on a placeholder — spec
+            // 11.3 shows it once per install, not once per launch.
+            val notificationPrimerShown by container.prefs.notificationPrimerShown.collectAsState(initial = null)
+            // Spec 11.4: consent → Mobile Ads → primer → finished, once per process. Waits
+            // for the menu to be resumed (iOS waits for the app to be active) and runs on the
+            // application scope, so leaving the menu cannot cancel it half way.
+            val launchStage by container.launchSequence.stage.collectAsState()
+            val menuLifecycle = LocalLifecycleOwner.current.lifecycle
+            LaunchedEffect(Unit) {
+                val host = activity ?: return@LaunchedEffect
+                menuLifecycle.withResumed {}
+                container.launchSequence.start(
+                    scope = container.applicationScope,
+                    gatherConsent = { withContext(Dispatchers.Main) { ConsentService.gatherConsent(host) } },
+                    startAdsIfAllowed = { AdsService.startIfAllowed(host.applicationContext) },
+                )
+            }
 
             Box(Modifier.fillMaxSize()) {
                 MenuScreen(
@@ -251,11 +270,20 @@ fun NavGraph(
                 // as iOS's `guard authorizationStatus == .notDetermined` skips it, when the OS
                 // already delivers this app's notifications — nothing to ask for.
                 val context = LocalContext.current
+                val primerDue = notificationPrimerShown?.let { shown -> !shown && !isNotificationAuthorized(context) }
+                LaunchedEffect(launchStage, primerDue) {
+                    if (launchStage == LaunchSequence.Stage.PRIMER && primerDue == false) {
+                        container.launchSequence.primerFinished()
+                    }
+                }
                 NotificationPrimerHost(
-                    visible = !notificationPrimerShown && !isNotificationAuthorized(context),
+                    visible = launchStage == LaunchSequence.Stage.PRIMER && primerDue == true,
                     source = "menu",
                     onAuthorized = { container.applicationScope.launch { container.notifications.activateReminders() } },
-                    onFinished = { container.applicationScope.launch { container.prefs.setNotificationPrimerShown(true) } },
+                    onFinished = {
+                        container.applicationScope.launch { container.prefs.setNotificationPrimerShown(true) }
+                        container.launchSequence.primerFinished()
+                    },
                 )
             }
         }

@@ -204,6 +204,9 @@
     <string name="review_invitation_dismiss">今はしない</string>
     <string name="settings_whats_new_title">新機能</string>
     <string name="settings_whats_new_description">最新アップデートの変更点を見る</string>
+    <string name="settings_privacy_options_title">プライバシー設定</string>
+    <string name="settings_privacy_options_description">広告によるデータの利用方法を確認する</string>
+    <string name="settings_privacy_policy_title">プライバシーポリシー</string>
 
     <!-- Achievements -->
     <string name="achievements_title">実績</string>
