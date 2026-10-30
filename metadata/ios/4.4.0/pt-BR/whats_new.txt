@@ -1,0 +1,6 @@
+O DoMemory agora se sente em casa no iPad, e os novos jogadores ganham boas-vindas calorosas do Flippo, nosso novo mascote em forma de carta.
+
+• Feito para iPad: os tabuleiros agora se ajustam à sua tela em qualquer orientação e no Split View, com cartas no formato certo em vez de peças esticadas.
+• Mais espaço no iPad: o mapa de Níveis mostra mais níveis por linha, o menu mostra mais tabuleiros de uma vez, e Configurações, Conquistas e as janelas do jogo ficam num tamanho confortável.
+• Resultados do multijogador mais claros: cada partida agora termina com um grande aviso de vitória, derrota ou empate acima do placar final.
+• Novas boas-vindas: as telas da primeira abertura foram redesenhadas com o Flippo e uma carta amiga.
