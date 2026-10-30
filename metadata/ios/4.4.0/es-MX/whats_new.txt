@@ -1,0 +1,6 @@
+DoMemory ahora se siente como en casa en el iPad, y los nuevos jugadores reciben una cálida bienvenida de Flippo, nuestra nueva mascota con forma de carta.
+
+• Hecho para iPad: los tableros ahora se ajustan a tu pantalla en cualquier orientación y en Split View, con cartas de proporciones reales en vez de fichas estiradas.
+• Más espacio en iPad: el mapa de Niveles muestra más niveles por fila, el menú muestra más tableros a la vez, y Configuración, Logros y las ventanas del juego mantienen un tamaño cómodo.
+• Resultados multijugador más claros: cada partida ahora termina con un gran aviso de victoria, derrota o empate sobre el marcador final.
+• Una nueva bienvenida: redibujamos las pantallas que ves al abrir la app por primera vez, ahora con Flippo y una carta amiga.

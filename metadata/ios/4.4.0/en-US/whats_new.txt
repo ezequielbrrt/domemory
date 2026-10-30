@@ -1,0 +1,6 @@
+DoMemory now feels right at home on iPad, and new players get a warm welcome from Flippo, our new card mascot.
+
+• Made for iPad: game boards now fit your screen in any orientation and in Split View, with real card-shaped cards instead of stretched tiles.
+• More room on iPad: the Levels map shows more levels per row, the menu shows more boards at once, and Settings, Achievements and game pop-ups stay a comfortable size.
+• Clearer multiplayer results: every match now ends with a big win, lose or draw banner above the final score.
+• A fresh welcome: the first-launch screens have been redrawn around Flippo and a card friend.

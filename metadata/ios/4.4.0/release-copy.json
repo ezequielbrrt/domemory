@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "app": {
+    "name": "DoMemory",
+    "version": "4.4.0",
+    "first_version": false
+  },
+  "base_locale": "en-US",
+  "protected_terms": [
+    "DoMemory",
+    "Flippo",
+    "Levels",
+    "Seasons",
+    "Achievements",
+    "Split View"
+  ],
+  "english_approved": true,
+  "localizations": {
+    "en-US": {
+      "whats_new": "DoMemory now feels right at home on iPad, and new players get a warm welcome from Flippo, our new card mascot.\n\n• Made for iPad: game boards now fit your screen in any orientation and in Split View, with real card-shaped cards instead of stretched tiles.\n• More room on iPad: the Levels map shows more levels per row, the menu shows more boards at once, and Settings, Achievements and game pop-ups stay a comfortable size.\n• Clearer multiplayer results: every match now ends with a big win, lose or draw banner above the final score.\n• A fresh welcome: the first-launch screens have been redrawn around Flippo and a card friend.",
+      "promotional_text": "Meet Flippo, DoMemory's new card mascot, and play on iPad with boards that fit your screen. Flip, match and climb the Levels, or challenge a friend in real time.",
+      "status": "approved"
+    },
+    "es-MX": {
+      "whats_new": "DoMemory ahora se siente como en casa en el iPad, y los nuevos jugadores reciben una cálida bienvenida de Flippo, nuestra nueva mascota con forma de carta.\n\n• Hecho para iPad: los tableros ahora se ajustan a tu pantalla en cualquier orientación y en Split View, con cartas de proporciones reales en vez de fichas estiradas.\n• Más espacio en iPad: el mapa de Niveles muestra más niveles por fila, el menú muestra más tableros a la vez, y Configuración, Logros y las ventanas del juego mantienen un tamaño cómodo.\n• Resultados multijugador más claros: cada partida ahora termina con un gran aviso de victoria, derrota o empate sobre el marcador final.\n• Una nueva bienvenida: redibujamos las pantallas que ves al abrir la app por primera vez, ahora con Flippo y una carta amiga.",
+      "promotional_text": "Conoce a Flippo, la nueva mascota de DoMemory, y juega en iPad con tableros que se ajustan a tu pantalla. Voltea, empareja, avanza en Niveles o reta a un amigo en vivo.",
+      "status": "reviewed"
+    },
+    "pt-BR": {
+      "whats_new": "O DoMemory agora se sente em casa no iPad, e os novos jogadores ganham boas-vindas calorosas do Flippo, nosso novo mascote em forma de carta.\n\n• Feito para iPad: os tabuleiros agora se ajustam à sua tela em qualquer orientação e no Split View, com cartas no formato certo em vez de peças esticadas.\n• Mais espaço no iPad: o mapa de Níveis mostra mais níveis por linha, o menu mostra mais tabuleiros de uma vez, e Configurações, Conquistas e as janelas do jogo ficam num tamanho confortável.\n• Resultados do multijogador mais claros: cada partida agora termina com um grande aviso de vitória, derrota ou empate acima do placar final.\n• Novas boas-vindas: as telas da primeira abertura foram redesenhadas com o Flippo e uma carta amiga.",
+      "promotional_text": "Conheça o Flippo, o novo mascote do DoMemory, e jogue no iPad com tabuleiros que se ajustam à sua tela. Vire, combine, suba nos Níveis ou desafie um amigo ao vivo.",
+      "status": "reviewed"
+    },
+    "fr-FR": {
+      "whats_new": "DoMemory est désormais comme chez lui sur iPad, et les nouveaux joueurs sont accueillis chaleureusement par Flippo, notre nouvelle mascotte en forme de carte.\n\n• Pensé pour l'iPad : les plateaux s'adaptent désormais à votre écran dans toutes les orientations et en Split View, avec de vraies cartes aux bonnes proportions au lieu de tuiles étirées.\n• Plus d'espace sur iPad : l'écran des Niveaux affiche plus de niveaux par ligne, le menu affiche plus de plateaux à la fois, et les Réglages, les Succès et les fenêtres de jeu gardent une taille confortable.\n• Résultats multijoueur plus clairs : chaque partie se termine désormais par une grande bannière de victoire, de défaite ou d'égalité au-dessus du score final.\n• Un nouvel accueil : les écrans du premier lancement ont été redessinés autour de Flippo et d'une carte amie.",
+      "promotional_text": "Voici Flippo, la nouvelle mascotte de DoMemory ! Sur iPad, les plateaux s'adaptent à votre écran. Retournez, associez, grimpez les Niveaux ou défiez un ami en direct.",
+      "status": "reviewed"
+    },
+    "de-DE": {
+      "whats_new": "DoMemory ist jetzt auf dem iPad richtig zu Hause, und neue Spieler werden von Flippo, unserem neuen Karten-Maskottchen, herzlich begrüßt.\n\n• Fürs iPad gemacht: Spielfelder passen sich jetzt in jeder Ausrichtung und in Split View an deinen Bildschirm an – mit Karten in echter Kartenform statt gestreckter Kacheln.\n• Mehr Platz auf dem iPad: Die Level-Übersicht zeigt mehr Level pro Reihe, das Menü zeigt mehr Spielfelder auf einmal, und Einstellungen, Erfolge und Spielfenster behalten eine angenehme Größe.\n• Klarere Mehrspieler-Ergebnisse: Jedes Match endet jetzt mit einem großen Banner für Sieg, Niederlage oder Unentschieden über dem Endstand.\n• Ein neuer Empfang: Die Bildschirme beim ersten Start wurden rund um Flippo und einen Kartenfreund neu gezeichnet.",
+      "promotional_text": "Das ist Flippo, das neue Maskottchen von DoMemory! Auf dem iPad passen die Spielfelder zum Bildschirm. Paare finden, Level erklimmen oder Freunde live herausfordern.",
+      "status": "reviewed"
+    },
+    "it": {
+      "whats_new": "DoMemory ora si sente davvero a casa su iPad, e i nuovi giocatori ricevono un caloroso benvenuto da Flippo, la nostra nuova mascotte a forma di carta.\n\n• Pensato per iPad: i tabelloni ora si adattano al tuo schermo in qualsiasi orientamento e in Split View, con vere carte dalle giuste proporzioni invece di tessere allungate.\n• Più spazio su iPad: la mappa dei Livelli mostra più livelli per riga, il menu mostra più tabelloni alla volta, e Impostazioni, Obiettivi e finestre di gioco mantengono una dimensione comoda.\n• Risultati multiplayer più chiari: ogni partita ora termina con un grande banner di vittoria, sconfitta o pareggio sopra il punteggio finale.\n• Un nuovo benvenuto: le schermate del primo avvio sono state ridisegnate attorno a Flippo e a una carta amica.",
+      "promotional_text": "Scopri Flippo, la nuova mascotte di DoMemory, e gioca su iPad con tabelloni adatti al tuo schermo. Gira, abbina e scala i Livelli o sfida un amico in tempo reale.",
+      "status": "reviewed"
+    },
+    "hi": {
+      "whats_new": "DoMemory अब iPad पर बिल्कुल घर जैसा लगता है, और नए खिलाड़ियों का गर्मजोशी से स्वागत करता है Flippo, हमारा नया कार्ड मैस्कट।\n\n• iPad के लिए बनाया गया: गेम बोर्ड अब किसी भी ओरिएंटेशन में और Split View में आपकी स्क्रीन पर फ़िट होते हैं, और खिंची हुई टाइलों की जगह असली कार्ड के आकार वाले कार्ड दिखते हैं।\n• iPad पर ज़्यादा जगह: स्तर मैप की हर पंक्ति में ज़्यादा स्तर दिखते हैं, मेनू में एक साथ ज़्यादा बोर्ड दिखते हैं, और सेटिंग्स, उपलब्धियाँ और गेम पॉप-अप आरामदायक आकार में रहते हैं।\n• मल्टीप्लेयर के साफ़ नतीजे: अब हर मैच अंतिम स्कोर के ऊपर जीत, हार या ड्रॉ के बड़े बैनर के साथ खत्म होता है।\n• नया स्वागत: पहली बार खोलने पर दिखने वाली स्क्रीनों को Flippo और एक कार्ड दोस्त के साथ नए सिरे से बनाया गया है।",
+      "promotional_text": "मिलिए DoMemory के नए मैस्कट Flippo से! iPad पर बोर्ड अब आपकी स्क्रीन पर फ़िट होते हैं। कार्ड पलटें, जोड़े मिलाएँ, स्तर पार करें या दोस्त से रियल-टाइम में मुकाबला करें।",
+      "status": "reviewed"
+    },
+    "ko": {
+      "whats_new": "이제 iPad에서도 DoMemory를 더욱 편안하게 즐길 수 있습니다. 새로운 플레이어는 새 카드 마스코트 Flippo가 반갑게 맞이합니다.\n\n• iPad에 맞춘 디자인: 이제 게임판이 어떤 방향에서도, Split View에서도 화면에 맞게 표시되며, 늘어난 타일 대신 진짜 카드 모양으로 보입니다.\n• iPad에서 더 넓게: 레벨 지도에서 한 줄에 더 많은 레벨이 보이고, 메뉴에서 더 많은 게임판을 한 번에 볼 수 있으며, 설정, 업적, 게임 팝업은 보기 편한 크기를 유지합니다.\n• 더 명확한 멀티플레이어 결과: 이제 매치가 끝나면 최종 점수 위에 승리, 패배 또는 무승부를 크게 알려 주는 배너가 표시됩니다.\n• 새로워진 첫 화면: 처음 실행할 때 보이는 화면을 Flippo와 카드 친구를 중심으로 새로 그렸습니다.",
+      "promotional_text": "DoMemory의 새 마스코트 Flippo를 만나 보세요. iPad에서는 화면에 꼭 맞는 게임판으로 즐길 수 있습니다. 카드를 뒤집어 짝을 맞추고 레벨을 올리거나 친구와 실시간으로 대결하세요.",
+      "status": "reviewed"
+    },
+    "ja": {
+      "whats_new": "DoMemoryがiPadにぴったりになりました。新しいプレイヤーは、カードの新マスコット「Flippo」があたたかくお出迎えします。\n\n• iPadに最適化：盤面がどの向きでもSplit Viewでも画面に合わせて表示され、引き伸ばされたタイルではなく、本物のカードらしい形で並びます。\n• iPadでゆったり：レベルマップの1行に並ぶレベルが増え、メニューには一度に多くの盤面が表示されます。設定、実績、ゲーム内のポップアップも見やすいサイズに収まります。\n• マルチプレイヤーの結果がわかりやすく：対戦の終わりに、勝ち・負け・引き分けを大きく知らせるバナーが最終スコアの上に表示されます。\n• 新しいウェルカム画面：初回起動時の画面を、Flippoとカードの仲間を中心に描き直しました。",
+      "promotional_text": "DoMemoryの新しいマスコット、Flippoが登場！iPadでは画面にぴったり合う盤面で遊べます。めくって、そろえて、レベルを進めよう。フレンドとのリアルタイム対戦も楽しめます。",
+      "status": "reviewed"
+    },
+    "zh-Hans": {
+      "whats_new": "DoMemory 现已更好地适配 iPad，新玩家还会受到全新卡牌吉祥物 Flippo 的热情欢迎。\n\n• 专为 iPad 打造：无论横屏、竖屏还是分屏浏览，牌面都会贴合你的屏幕，卡牌保持真正的卡牌形状，不再被拉伸成宽方块。\n• iPad 上空间更充裕：关卡地图每行显示更多关卡，菜单一次展示更多牌面，设置、成就和游戏弹窗也保持舒适的大小。\n• 多人对战结果更清晰：每场比赛结束时，最终得分上方都会显示醒目的胜利、失败或平局横幅。\n• 全新欢迎界面：首次启动时的画面已围绕 Flippo 和一位卡牌伙伴重新绘制。",
+      "promotional_text": "认识 DoMemory 的新吉祥物 Flippo！在 iPad 上，牌面会贴合你的屏幕。翻牌、配对、闯关卡，或与好友实时对战。",
+      "status": "reviewed"
+    }
+  }
+}
